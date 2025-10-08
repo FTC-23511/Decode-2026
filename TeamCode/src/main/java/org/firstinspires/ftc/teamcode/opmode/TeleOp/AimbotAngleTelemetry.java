@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Disabled
-@TeleOp(name = "ExampleTeleOp")
+@TeleOp
 public class AimbotAngleTelemetry extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
