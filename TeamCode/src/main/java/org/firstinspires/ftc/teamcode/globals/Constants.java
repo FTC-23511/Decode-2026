@@ -47,5 +47,7 @@ public class Constants {
     public static double MIN_DISTANCE_THRESHOLD = 0.00;
     public static double MAX_DISTANCE_THRESHOLD = 0.00;
 
+    public static double TURRET_SET_POSITION_TUNER = 0.00;
+
     // Launcher
 }
