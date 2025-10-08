@@ -2,129 +2,51 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.controller.PIDFController;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    public enum Motif {
-        NOT_FOUND,
-        GPP,
-        PGP,
-        PPG
+    public enum MotorState {
+        REVERSE,
+        STOP,
+        FORWARD,
+        HOLD
     }
 
-    private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
-    public static Motif motifState = Motif.NOT_FOUND;
-    public static boolean motifStateSet = false;
-    private boolean activeControl = false;
-
-
-    public Launcher() {
-        flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
-    }
+    public static MotorState motorState = MotorState.STOP;
 
     public void init() {
-        setRamp(OP_MODE_TYPE == OpModeType.AUTO);
-        setHood(MIN_HOOD_ANGLE);
-        setFlywheel(0, false);
+
     }
 
-    public void setFlywheel(double vel, boolean setActiveControl) {
-        flywheelController.setSetPoint(vel * M_S_TO_TICKS);
-        activeControl = setActiveControl;
-    }
-
-    public void setActiveControl(boolean state) {
-        activeControl = state;
-    }
-
-    public double getFlywheelTarget() {
-        return flywheelController.getSetPoint();
-    }
-
-    private void updateFlywheel() {
-        robot.profiler.start("Launcher Update");
-        if (activeControl) {
-            flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f / (robot.getVoltage() / 12));
-            robot.launchMotors.set(
-                    flywheelController.calculate(robot.launchEncoder.getCorrectedVelocity())
-            );
+    public void setLauncher(MotorState motorState) {
+        if (motorState.equals(MotorState.HOLD)) {
+            robot.intakeMotor.set(INTAKE_HOLD_SPEED);
         } else {
-            if (getFlywheelTarget() == 0) {
-                robot.launchMotors.set(0);
-            } else {
-                robot.launchMotors.set(LAUNCHER_DEFAULT_ON_SPEED);
+            switch (motorState) {
+                case FORWARD:
+                    robot.launchMotors.set(INTAKE_FORWARD_SPEED);
+                    break;
+                case REVERSE:
+                    robot.launchMotors.set(INTAKE_REVERSE_SPEED);
+                    break;
+                case STOP:
+                    robot.launchMotors.set(0);
+                    break;
             }
         }
-        robot.profiler.end("Launcher Update");
+        Launcher.motorState = motorState;
     }
 
-    public void setRamp(boolean engaged) {
-        robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
-    }
-
-    public void setHood(double angle) {
-        // Solved from proportion (targetServo - minServo) / servoRange = (targetAngle - minAngle) / angleRange
-        robot.hoodServo.set(
-                (angle - MIN_HOOD_ANGLE) / (MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * (MAX_HOOD_SERVO_POS - MIN_HOOD_SERVO_POS) + MIN_HOOD_SERVO_POS
-        );
-    }
-
-    public boolean flywheelReady() {
-        return activeControl && flywheelController.atSetPoint();
-    }
-
-    public LLStatus getLimelightStatus() {
-        return robot.limelight.getStatus();
-    }
-
-    public double[] getTargetDegrees() {
-        double[] targetDegrees = new double[2];
-        LLResult result = robot.limelight.getLatestResult();
-
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-
-                targetDegrees[0] = fiducial.getTargetYDegrees();
-                targetDegrees[1] = fiducial.getTargetXDegrees();
-            }
-        }
-
-        return targetDegrees;
-    }
-
-    public boolean setMotifState() {
-        LLResult result = robot.limelight.getLatestResult();
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-
-                if (id == 21) {
-                    motifState = Motif.PPG;
-                    return true;
-                } else if (id == 22) {
-                    motifState = Motif.PGP;
-                    return true;
-                } else if (id == 23) {
-                    motifState = Motif.GPP;
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    public void updateLauncher() {
+        // TODO: Add this
     }
 
     @Override
     public void periodic() {
-        updateFlywheel();
+        updateLauncher();
     }
 }
