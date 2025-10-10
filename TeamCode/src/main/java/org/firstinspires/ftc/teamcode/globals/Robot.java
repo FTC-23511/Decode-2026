@@ -44,7 +44,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public CRServoEx turretServo;
 
-    public CRServoEx hoodServo;
+    public ServoEx hoodServo;
 
     public ServoEx leftIntakePivot;
     public ServoEx rightIntakePivot;
@@ -92,9 +92,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.01);
 
-        hoodServo = new CRServoEx(hwMap, "hoodServo", new AbsoluteAnalogEncoder(hwMap, "BR")
-                .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+        hoodServo = new ServoEx(hwMap, "hoodServo");
+
+
+
+
+
 
         leftIntakePivot = new ServoEx(hwMap, "leftIntakePivot").setCachingTolerance(0.01);
         rightIntakePivot = new ServoEx(hwMap, "rightIntakePivot").setCachingTolerance(0.01);
