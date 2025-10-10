@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
+import static org.firstinspires.ftc.teamcode.globals.Constants.HOOD_SET_POSITION_TUNER;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -26,10 +29,6 @@ public class AutoAimPIDTest extends OpMode {
     public ElapsedTime timer;
 
     TelemetryData telemetryData = new TelemetryData(telemetry);
-
-
-
-
 
 
     @Override
@@ -72,30 +71,45 @@ public class AutoAimPIDTest extends OpMode {
 
         LLResult result = limelight.getLatestResult();
         if (result != null && result.isValid()) {
-            double tx = result.getTx(); // How far left or right the target is (degrees)
-            double ty = result.getTy(); // How far up or down the target is (degrees)
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
 
-            if (tx > 5) {
-                robot.turretServo.set(0.1);
-            } else if (tx < -5) {
-                robot.turretServo.set(-0.1);
-            } else {
-                robot.turretServo.set(0);
+
+                double txDegrees = fiducial.getTargetXDegrees();
+                double tyDegrees = fiducial.getTargetYDegrees();
+                double tyPixels = fiducial.getTargetYPixels();
+                double txPixels = fiducial.getTargetXPixels();
+
+                // Blue ID = 20
+                // Obelisk PPG ID = 21
+                // Obelisk PGP ID = 22
+                // Obelisk PPG ID = 23
+                // Red ID = 24
+
+                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
+                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+
+                    if (txDegrees > 5) {
+                        robot.turretServo.set(0.1);
+                    } else if (txDegrees < -5) {
+                        robot.turretServo.set(-0.1);
+                    } else {
+                        robot.turretServo.set(0);
+                    }
+
+
+                    if ((tyDegrees > 5) || (tyDegrees < -5)) {
+                        robot.hoodServo.set(0.5+(tyDegrees*HOOD_SET_POSITION_TUNER));
+                    }
+
+
+                    telemetryData.addData("txPixels", txPixels);
+                    telemetryData.addData("tyPixels", tyPixels);
+                    telemetryData.addData("txDegrees", txDegrees);
+                    telemetryData.addData("tyDegrees", tyDegrees);
+                }
             }
-
-            if (ty > 5) {
-                robot.hoodServo.set(0.1);
-            } else if (ty < -5) {
-                robot.hoodServo.set(-0.1);
-            } else {
-                robot.hoodServo.set(0);
-            }
-
-            telemetry.addData("Target X", tx);
-            telemetry.addData("Target Y", ty);
-        } else {
-            telemetry.addData("Limelight", "No Targets");
         }
-
     }
 }
+

@@ -68,7 +68,7 @@ public class Constants {
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
 
-    public static double TURRET_SET_POSITION_TUNER = 0.00;
+    public static double HOOD_SET_POSITION_TUNER = -1;
 
     // Launcher
     public static double RAMP_ENGAGED = 0.3;
