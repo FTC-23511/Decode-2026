@@ -49,5 +49,22 @@ public class Constants {
 
     public static double HOOD_SET_POSITION_TUNER = -1;
 
+    public static final double SHOOTER_DX = 0.00;
+    public static final double SHOOTER_DY = 0.00;
+
+    // blue goal coordinates
+    public static final double BLUE_TARGET_X = 0.00;
+    public static final double BLUE_TARGET_Y =  0.00;
+
+    // red goal coordinates
+    public static final double RED_TARGET_X = 0.00;
+    public static final double RED_TARGET_Y =  0.00;
+
+    public static final double SHOOTER_RELEASE_HEIGHT  = 0.00;
+    public static final double H_TARGET = 0.98425;
+
+    public static final double G = 9.81;
+    public  static double EXIT_VELO = 0.00;
+
     // Launcher
 }
