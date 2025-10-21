@@ -9,33 +9,36 @@
             <goBILDA5202SeriesMotor name="FR" port="2"/>-->
             <goBILDA5202SeriesMotor name="FL" port="3"/>-->
 
+            <Servo name="intakePivotServo" port="0"/>
+
             <AnalogInput name="BL" port="0"/>
             <AnalogInput name="FL" port="1"/>
             <AnalogInput name="BR" port="2"/>
             <AnalogInput name="FR" port="3"/>
 
             <ControlHubImuBHI260AP name="imu" port="0" bus="0"/>
-            <RevColorSensorV3 name="colorSensor" port="0" bus="1"/>
             <goBILDAPinpoint name="pinpoint" port="0" bus="2"/>
         </LynxModule>
 
         <ServoHub name="Servo Hub 3" port="3">
             <ContinuousRotationServo name="FL" port="0"/>
+            <ContinuousRotationServo name="rightTurretServo" port="1"/>
             <ContinuousRotationServo name="BR" port="2"/>
             <ContinuousRotationServo name="BL" port="3"/>
+            <ContinuousRotationServo name="leftTurretServo" port="4"/>
             <ContinuousRotationServo name="FR" port="5"/>
         </ServoHub>
-    </LynxUsbDevice>
 
-    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ81DA4Y" parentModuleAddress="2">
         <LynxModule name="Expansion Hub 2" port="2">
-            <goBILDA5202SeriesMotor name="intakeMotor" port="0"/>
-            <goBILDA5202SeriesMotor name="launchMotorTop" port="1"/>
-            <goBILDA5202SeriesMotor name="launchMotorBottom" port="2"/>
+            <goBILDA5202SeriesMotor name="topLaunchMotor" port="0"/>
+            <goBILDA5202SeriesMotor name="bottomLaunchMotor" port="1"/>
+            <goBILDA5202SeriesMotor name="intakeMotor" port="3"/>
 
-            <Servo name="leftIntakePivot" port="0"/>
-            <Servo name="rightIntakePivot" port="1"/>
-            <Servo name="depositPivot" port="2"/>
+            <AnalogInput name="turretEncoder" port="0"/>
+            <AnalogInput name="distanceSensor" port="1"/>
+
+            <Servo name="hoodServo" port="0"/>
+            <Servo name="rampServo" port="5"/>
         </LynxModule>
     </LynxUsbDevice>
 </Robot>
