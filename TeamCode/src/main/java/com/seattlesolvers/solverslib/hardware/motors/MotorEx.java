@@ -58,19 +58,16 @@ public class MotorEx extends Motor {
 
     @Override
     public void set(double output) {
-        double power;
         if (runmode == RunMode.VelocityControl) {
             double speed = bufferFraction * output * ACHIEVABLE_MAX_TICKS_PER_SECOND;
             double velocity = veloController.calculate(getCorrectedVelocity(), speed) + feedforward.calculate(speed, getAcceleration());
-            power = (velocity / ACHIEVABLE_MAX_TICKS_PER_SECOND);
+            setPower(velocity / ACHIEVABLE_MAX_TICKS_PER_SECOND);
         } else if (runmode == RunMode.PositionControl) {
             double error = positionController.calculate(encoder.getPosition());
-            power = output * error;
+            setPower(output * error);
         } else {
-            power = output;
+            setPower(output);
         }
-        setPower(power);
-        lastPower = power;
     }
 
     /**
@@ -131,6 +128,7 @@ public class MotorEx extends Motor {
      */
     private void setPower(double power) {
         if ((Math.abs(power - motorEx.getPower()) > cachingTolerance) || (power == 0 && motorEx.getPower() != 0)) {
+            lastPower = power;
             motorEx.setPower(power);
         }
     }
