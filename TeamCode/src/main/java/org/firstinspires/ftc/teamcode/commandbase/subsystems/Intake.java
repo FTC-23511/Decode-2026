@@ -29,7 +29,7 @@ public class Intake extends SubsystemBase {
 
     public void init() {
         setPivot(PivotState.INTAKE);
-        robot.colorSensor.enableLed(true);
+//        robot.colorSensor.enableLed(true);
     }
 
     public void setPivot(PivotState pivotState) {
@@ -131,10 +131,12 @@ public class Intake extends SubsystemBase {
         }
          */
 
-        double distance = robot.colorSensor.getDistance(DistanceUnit.CM);
-
-        return distance > MIN_DISTANCE_THRESHOLD && distance < MAX_DISTANCE_THRESHOLD;
+//        double distance = robot.colorSensor.getDistance(DistanceUnit.CM);
+//
+//        return distance > MIN_DISTANCE_THRESHOLD && distance < MAX_DISTANCE_THRESHOLD;
+        return false;
     }
+
 
     @Override
     public void periodic() {

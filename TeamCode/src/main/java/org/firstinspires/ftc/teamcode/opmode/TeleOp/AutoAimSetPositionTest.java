@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Disabled
-@TeleOp(name="AprilTag Test Limelight", group="Vision")
+@TeleOp(name="AprilTag Test Limelight dont use this", group="Vision")
 public class AutoAimSetPositionTest extends OpMode {
 
     private Limelight3A limelight;
@@ -74,13 +74,13 @@ public class AutoAimSetPositionTest extends OpMode {
             double tx = result.getTx(); // How far left or right the target is (degrees)
             double ty = result.getTy(); // How far up or down the target is (degrees)
 
-            if (tx > 5) {
-                robot.turretServo.set(0.1);
-            } else if (tx < -5) {
-                robot.turretServo.set(-0.1);
-            } else {
-                robot.turretServo.set(0);
-            }
+//            if (tx > 5) {
+//                robot.turretServo.set(0.1);
+//            } else if (tx < -5) {
+//                robot.turretServo.set(-0.1);
+//            } else {
+//                robot.turretServo.set(0);
+//            }
 
             if (ty > 5) {
                 robot.hoodServo.set(0.1);

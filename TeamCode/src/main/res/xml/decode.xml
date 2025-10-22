@@ -38,7 +38,6 @@
             <AnalogInput name="distanceSensor" port="1"/>
 
             <Servo name="hoodServo" port="0"/>
-            <Servo name="rampServo" port="5"/>
         </LynxModule>
     </LynxUsbDevice>
 </Robot>

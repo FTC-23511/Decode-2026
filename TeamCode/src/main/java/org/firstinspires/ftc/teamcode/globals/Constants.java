@@ -65,6 +65,8 @@ public class Constants {
 
     public static final double G = 9.81;
     public  static double EXIT_VELO = 0.00;
+    public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
+
 
     // Launcher
 }

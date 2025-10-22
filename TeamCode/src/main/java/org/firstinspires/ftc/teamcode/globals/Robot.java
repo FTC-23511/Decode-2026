@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.globals;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
@@ -32,8 +35,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public MotorEx BRmotor;
 
     public MotorEx intakeMotor;
-    private MotorEx launchMotorTop;
-    private MotorEx launchMotorBottom;
+    public MotorEx launchMotorTop;
+    public MotorEx launchMotorBottom;
+    public MotorEx.Encoder launchEncoder;
+
 
     public MotorGroup launchMotors;
 
@@ -42,15 +47,25 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx BLswervo;
     public CRServoEx BRswervo;
 
-    public CRServoEx turretServo;
+    public CRServoEx leftTurretServo;
+    public CRServoEx rightTurretServo;
+    public AbsoluteAnalogEncoder turretEncoder;
+
+
 
     public ServoEx hoodServo;
+    public ServoEx intakePivotServo;
+
+
 
     public ServoEx leftIntakePivot;
     public ServoEx rightIntakePivot;
     public ServoEx depositPivot;
+    public Limelight3A limelight;
 
-    public RevColorSensorV3 colorSensor;
+//    public RevColorSensorV3 colorSensor;
+//    public AnalogInput distanceSensor;
+
 //    public Limelight3A limelight;
 
     public GoBildaPinpointDriver pinpoint;
@@ -68,12 +83,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BRmotor = new MotorEx(hwMap, "BR").setCachingTolerance(0.01);
 
         intakeMotor = new MotorEx(hwMap, "intakeMotor").setCachingTolerance(0.01);
-        launchMotorTop = new MotorEx(hwMap, "launchMotorTop").setCachingTolerance(0.01);
-        launchMotorBottom = new MotorEx(hwMap, "launchMotorBottom").setCachingTolerance(0.01);
+        launchMotorTop = new MotorEx(hwMap, "topLaunchMotor").setCachingTolerance(0.01);
+        launchMotorBottom = new MotorEx(hwMap, "bottomLaunchMotor").setCachingTolerance(0.01);
 
         launchMotorBottom.setInverted(true);
 
         launchMotors = new MotorGroup(launchMotorTop, launchMotorBottom);
+        launchEncoder = new MotorEx(hwMap, "topLaunchMotor").encoder;
+
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
@@ -88,22 +105,30 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.01);
 
-        turretServo = new CRServoEx(hwMap, "turretServo", new AbsoluteAnalogEncoder(hwMap, "BR")
+        leftTurretServo = new CRServoEx(hwMap, "leftTurretServo", new AbsoluteAnalogEncoder(hwMap, "BR")
+                .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
+                .setCachingTolerance(0.01);
+
+        rightTurretServo = new CRServoEx(hwMap, "rightTurretServo", new AbsoluteAnalogEncoder(hwMap, "BR")
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.01);
 
         hoodServo = new ServoEx(hwMap, "hoodServo");
+        turretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
+                .zero(TURRET_ENCODER_OFFSET)
+                .setReversed(true);
+        intakePivotServo = new ServoEx(hwMap, "intakePivotServo");
 
 
 
 
 
 
-        leftIntakePivot = new ServoEx(hwMap, "leftIntakePivot").setCachingTolerance(0.01);
-        rightIntakePivot = new ServoEx(hwMap, "rightIntakePivot").setCachingTolerance(0.01);
-        depositPivot = new ServoEx(hwMap, "depositPivot").setCachingTolerance(0.01);
+//        leftIntakePivot = new ServoEx(hwMap, "leftIntakePivot").setCachingTolerance(0.01);
+//        rightIntakePivot = new ServoEx(hwMap, "rightIntakePivot").setCachingTolerance(0.01);
+//        depositPivot = new ServoEx(hwMap, "depositPivot").setCachingTolerance(0.01);
 
-        rightIntakePivot.setInverted(true);
+//        rightIntakePivot.setInverted(true);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pinpoint.setOffsets(-75.96, 152.62, DistanceUnit.MM);
@@ -111,11 +136,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.resetPosAndIMU();
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
 
-        colorSensor = (RevColorSensorV3) hwMap.colorSensor.get("colorSensor");
-        colorSensor.enableLed(true);
+//        colorSensor = (RevColorSensorV3) hwMap.colorSensor.get("colorSensor");
+//        colorSensor.enableLed(true);
+//
+//        distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 
-//        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-
+        limelight = hwMap.get(Limelight3A.class, "limelight");
         // Subsystems
         drive = new Drive();
         intake = new Intake();
