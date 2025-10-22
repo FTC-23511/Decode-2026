@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
+    public boolean activeControl = false;
     public static PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
 
     public Turret() {
@@ -20,11 +21,16 @@ public class Turret extends SubsystemBase {
     }
 
     public void init() {
-        setTarget(0);
+        setTarget(0, false);
     }
 
-    public void setTarget(double target) {
+    public void setTarget(double target, boolean setActiveControl) {
         turretController.setSetPoint(target);
+        activeControl = setActiveControl;
+    }
+
+    public void setActiveControl(boolean state) {
+        activeControl = state;
     }
 
     public double getTarget() {
@@ -36,15 +42,23 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
-        robot.turretServos.set(
-                turretController.calculate(
-                        getPosition()
-                )
-        );
+        if (activeControl) {
+            robot.profiler.start("Turret Read/Calc");
+            double power = turretController.calculate(getPosition());
+            robot.profiler.end("Turret Read/Calc");
+
+            robot.profiler.start("Turret Write");
+            robot.turretServos.set(power);
+            robot.profiler.end("Turret Write");
+        } else {
+            robot.profiler.start("Turret Write");
+            robot.turretServos.set(0);
+            robot.profiler.end("Turret Write");
+        }
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint();
+        return turretController.atSetPoint() && activeControl;
     }
 
     @Override

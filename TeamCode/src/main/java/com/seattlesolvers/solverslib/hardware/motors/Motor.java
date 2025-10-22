@@ -234,6 +234,7 @@ public class Motor implements HardwareDevice {
     private boolean targetIsSet = false;
 
     protected double bufferFraction = 0.9;
+    protected double lastPower = 0;
 
     public Motor() {
     }
@@ -291,16 +292,19 @@ public class Motor implements HardwareDevice {
      * @param output The percentage of power to set. Value should be between -1.0 and 1.0.
      */
     public void set(double output) {
+        double power;
         if (runmode == RunMode.VelocityControl) {
             double speed = bufferFraction * output * ACHIEVABLE_MAX_TICKS_PER_SECOND;
             double velocity = veloController.calculate(getVelocity(), speed) + feedforward.calculate(speed, encoder.getAcceleration());
-            motor.setPower(velocity / ACHIEVABLE_MAX_TICKS_PER_SECOND);
+            power = velocity / ACHIEVABLE_MAX_TICKS_PER_SECOND;
         } else if (runmode == RunMode.PositionControl) {
             double error = positionController.calculate(getDistance());
-            motor.setPower(output * error);
+            power = output * error;
         } else {
-            motor.setPower(output);
+            power = output;
         }
+        motor.setPower(power);
+        lastPower = power;
     }
 
     /**
@@ -442,9 +446,18 @@ public class Motor implements HardwareDevice {
     /**
      * Common method for getting the current set speed of a motor.
      *
-     * @return The current set speed. Value is between -1.0 and 1.0.
+     * @return The current set speed. Value is between -1.0 and 1.0. Based on last power set to the SolversLib Motor object.
      */
     public double get() {
+        return lastPower;
+    }
+
+    /**
+     * Method for getting the current set speed of a motor.
+     *
+     * @return The current set speed. Value is between -1.0 and 1.0. Based on last power set to the internal SDK Motor object.
+     */
+    public double getRawPower() {
         return motor.getPower();
     }
 

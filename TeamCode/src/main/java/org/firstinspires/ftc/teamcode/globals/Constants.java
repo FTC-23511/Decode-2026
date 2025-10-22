@@ -34,7 +34,8 @@ public class Constants {
     public static double AUTO_MAX_VELOCITY = 50; // Inches/second
     public static double MAX_ANGULAR_VELOCITY = MAX_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
     public static double AUTO_MAX_ANGULAR_VELOCITY = AUTO_MAX_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
-    public static double PINPOINT_TELEOP_POLLING_RATE = 20; // Hertz
+    public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
+    public static double PINPOINT_AUTO_POLLING_RATE = 150; // Hertz // TODO: needs to be tuned
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 3.602; // Radians
@@ -53,9 +54,9 @@ public class Constants {
     public static double INTAKE_PIVOT_INTAKE = 0.62;
     public static double INTAKE_PIVOT_HIGH = 0.85;
     public static double INTAKE_PIVOT_HOLD = 0.58;
-    public static double INTAKE_PIVOT_TRANSFER = 0.55;
+    public static double INTAKE_PIVOT_TRANSFER = 0.58;
 
-    public static double INTAKE_FORWARD_SPEED = 0.7;
+    public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -0.75;
     public static double INTAKE_TRANSFER_SPEED = 1.0; // TODO: needs to be tuned
 
@@ -67,17 +68,18 @@ public class Constants {
     public static double RAMP_DISENGAGED = 0.06;
 
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.004, 0, 0, 0.00055); // Coefficients for ticks
+    public static double FLYWHEEL_VEL_TOLERANCE = 40; // Ticks // TODO: needs to be tuned
     public static double M_S_TO_TICKS = 275; // Conversion factor for ball velocity in meters/second to launcher encoder ticks // TODO: needs to be tuned
+    public static double LAUNCHER_DEFAULT_ON_SPEED = 1.0; // Power
 
-    public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second // TODO: needs to be tuned
-    public static double LAUNCHER_CLOSE_VELOCITY = 6.0; // Meters/second // TODO: needs to be tuned
+    public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second
+    public static double LAUNCHER_CLOSE_VELOCITY = 6.0; // Meters/second
 
     public static double MIN_HOOD_ANGLE = 16; // Degrees from horizontal // TODO: needs to be checked off CAD
-    public static double MIN_HOOD_SERVO_POS = 0.07; // MUST MATCH WITH VALUE ABOVE // TODO: needs to be tuned
-    public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal
-    public static double MAX_HOOD_SERVO_POS = 1.0; // MUST MATCH WITH VALUE ABOVE // TODO: needs to be tuned
-
-    public static double AUTONOMOUS_HOOD_ANGLE = 0.5; // Servo Position // TODO: needs to be tuned
+    public static double MIN_HOOD_SERVO_POS = 0.07; // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal // TODO: needs to be checked off CAD
+    public static double MAX_HOOD_SERVO_POS = 1.0; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_LL_HOOD_ANGLE = 16; // Degrees from horizontal // Minimum hood angle for Limelight to be able to see AprilTags from anywhere on the field// TODO: needs to be tuned
 
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD

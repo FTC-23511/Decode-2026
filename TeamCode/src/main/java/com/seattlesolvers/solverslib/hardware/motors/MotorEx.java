@@ -128,6 +128,7 @@ public class MotorEx extends Motor {
      */
     private void setPower(double power) {
         if ((Math.abs(power - motorEx.getPower()) > cachingTolerance) || (power == 0 && motorEx.getPower() != 0)) {
+            lastPower = power;
             motorEx.setPower(power);
         }
     }

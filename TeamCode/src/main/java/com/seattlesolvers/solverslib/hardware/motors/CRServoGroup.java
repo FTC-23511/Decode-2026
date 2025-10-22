@@ -53,6 +53,14 @@ public class CRServoGroup extends CRServo implements Iterable<CRServo> {
     }
 
     /**
+     * @return The raw power as a percentage of output
+     */
+    @Override
+    public double getRawPower() {
+        return group[0].getRawPower();
+    }
+
+    /**
      * @return All CRServo target speeds as a percentage of output
      */
     public List<Double> getSpeeds() {
@@ -61,6 +69,14 @@ public class CRServoGroup extends CRServo implements Iterable<CRServo> {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @return All CRServo target powers as a percentage of output
+     */
+    public List<Double> getRawPowers() {
+        return Arrays.stream(group)
+                .map(CRServo::getRawPower)
+                .collect(Collectors.toList());
+    }
 
     @NonNull
     @Override

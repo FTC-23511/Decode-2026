@@ -24,6 +24,8 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void initialize() {
+        robot.turret.setActiveControl(true);
+        robot.launcher.setActiveControl(true);
         robot.intake.setIntake(Intake.MotorState.TRANSFER);
         robot.intake.setPivot(Intake.PivotState.TRANSFER);
         timer.reset();
@@ -34,6 +36,8 @@ public class ClearLaunch extends CommandBase {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
         }
+        robot.turret.setActiveControl(false);
+        robot.launcher.setActiveControl(false);
     }
 
     @Override

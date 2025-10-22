@@ -57,8 +57,7 @@ public class Drive extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        if (OP_MODE_TYPE.equals(Constants.OpModeType.AUTO)
-            || timer.milliseconds() > (1000 / Constants.PINPOINT_TELEOP_POLLING_RATE)
+        if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : Constants.PINPOINT_TELEOP_POLLING_RATE))
             || lastPose == null) {
 
             timer.reset();

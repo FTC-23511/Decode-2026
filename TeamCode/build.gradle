@@ -31,6 +31,11 @@ android {
 repositories {
     maven {
         url = 'https://maven.brott.dev/'
+
+    }
+
+    maven {
+        url = 'https://mymaven.bylazar.com/releases'
     }
 
     maven {
@@ -42,6 +47,10 @@ repositories {
         url "https://repo.dairy.foundation/snapshots"
     }
 
+    maven {
+        name "nullftcReleases"
+        url "https://maven.nullftc.dev/releases"
+    }
 }
 
 dependencies {
@@ -49,16 +58,23 @@ dependencies {
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
     // SolversLib
-//    implementation "org.solverslib:core:SNAPSHOT-7cdcc66" // core
-//    implementation "org.solverslib:pedroPathing:SNAPSHOT-7cdcc66" // pedroPathing
+//    implementation "org.solverslib:core:0.3.3" // core
+//    implementation "org.solverslib:pedroPathing:0.3.3" // pedroPathing
 
+    implementation "dev.nullftc:Profiler:SNAPSHOT-8e16b25"
     implementation "com.acmerobotics.dashboard:dashboard:0.4.17" // FTC Dashboard
 
     // Panels Dashboard
     implementation "com.bylazar:fullpanels:1.0.5"
 
+    // Loop Time Profiler
+    implementation "dev.nullftc:Profiler:SNAPSHOT-daa44e3"
+
     //noinspection GradleDependency, could be 0.43 but haven't tested it out yet
     implementation('org.ejml:ejml-simple:0.39') {
         exclude group: 'org.ejml', module: 'ejml-all'
     }
+
+    // Panels Dashboard
+    implementation "com.bylazar:fullpanels:1.0.5"
 }

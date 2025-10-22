@@ -91,11 +91,13 @@ public class SwerveTeleOp extends CommandOpMode {
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();
         telemetryData.update();
+        robot.controlHub.clearBulkCache();
     }
 
     @Override
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
+        robot.exportProfiler(robot.file);
+        telemetryData.update();
     }
-
 }

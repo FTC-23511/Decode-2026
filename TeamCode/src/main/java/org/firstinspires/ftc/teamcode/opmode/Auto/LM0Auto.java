@@ -73,7 +73,7 @@ public class LM0Auto extends CommandOpMode {
                 new SequentialCommandGroup(
                         new WaitCommand(2000),
                         new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE)),
-                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY)),
+                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true)),
                         new WaitCommand(3000),
                         new InstantCommand(() -> robot.launcher.setRamp(true)),
                         new WaitCommand(500),

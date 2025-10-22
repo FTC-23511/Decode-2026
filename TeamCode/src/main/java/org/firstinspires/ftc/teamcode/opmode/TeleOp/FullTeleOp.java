@@ -1,6 +1,11 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_SERVO_POS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -24,8 +29,8 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LM0TeleOp")
-public class LM0TeleOp extends CommandOpMode {
+@TeleOp(name = "FullTeleOp")
+public class FullTeleOp extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -38,7 +43,7 @@ public class LM0TeleOp extends CommandOpMode {
     @Override
     public void initialize() {
         // Must have for all opModes
-        Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        Constants.OP_MODE_TYPE = OpModeType.TELEOP;
 
         // Resets the command scheduler
         super.reset();
@@ -56,7 +61,7 @@ public class LM0TeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(0, true))
+                new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
@@ -87,13 +92,13 @@ public class LM0TeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true)).alongWith(
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
                         new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true)).alongWith(
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
                         new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
                 )
         );
@@ -111,7 +116,7 @@ public class LM0TeleOp extends CommandOpMode {
 
         robot.profiler.start("Swerve Drive");
         // Drive the robot
-        if (gamepad1.start) {
+        if (driver.isDown(GamepadKeys.Button.START)) {
             robot.drive.swerve.updateWithXLock();
         } else {
             double minSpeed = 0.3; // As a fraction of the max speed of the robot

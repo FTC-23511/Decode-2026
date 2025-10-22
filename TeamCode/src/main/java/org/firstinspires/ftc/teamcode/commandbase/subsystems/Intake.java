@@ -88,6 +88,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void updateIntake() {
+        robot.profiler.start("Intake Update");
         if (pivotState.equals(PivotState.INTAKE)) {
             switch (motorState) {
                 case FORWARD:
@@ -104,6 +105,7 @@ public class Intake extends SubsystemBase {
         } else if (pivotState.equals(PivotState.HOLD)) {
             setIntake(MotorState.STOP);
         }
+        robot.profiler.end("Intake Update");
     }
 
     public boolean transferFull() {

@@ -84,8 +84,11 @@ public class ServoEx implements HardwareDevice {
         }
     }
 
+    /**
+     * @return the position of the servo based on the last call to the ServoEx object
+     */
     public double get() {
-        return getRawPosition() * (max - min) + min;
+        return lastPos * (max - min) + min;
     }
 
     /**

@@ -51,6 +51,14 @@ public class MotorGroup extends Motor implements Iterable<Motor> {
     }
 
     /**
+     * @return The speed of the group from the SDK object
+     */
+    @Override
+    public double getRawPower() {
+        return group[0].getRawPower();
+    }
+
+    /**
      * @return All motor target speeds as a percentage of output
      */
     public List<Double> getSpeeds() {

@@ -22,14 +22,16 @@ public class ReadyToLaunch extends CommandBase {
 
     @Override
     public void initialize() {
+        robot.turret.setActiveControl(true);
+        robot.launcher.setActiveControl(true);
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.launcher.setRamp(true);
-        robot.launcher.setHood(MIN_HOOD_ANGLE); // Put hood down to be able to see the AprilTags
+        robot.launcher.setHood(MIN_LL_HOOD_ANGLE); // Put hood down to be able to see the AprilTags
 
         // Preliminary estimates of where drivetrain and turret should face
         double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.angleToGoal(robot.drive.getPose()));
         robot.drive.follower.setTarget(robot.drive.getPose().rotate(errorsDriveTurret[0]));
-        robot.turret.setTarget(errorsDriveTurret[1]);
+        robot.turret.setTarget(errorsDriveTurret[1], true);
     }
 
     @Override
@@ -44,6 +46,6 @@ public class ReadyToLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return targetStateSolved && robot.launcher.readyToLaunch() && robot.turret.readyToLaunch();
+        return targetStateSolved && robot.launcher.flywheelReady() && robot.turret.readyToLaunch();
     }
 }

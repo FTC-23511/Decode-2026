@@ -9,23 +9,23 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
+    public boolean activeControl = false;
 
-    public static PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
+    private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
 
     public void init() {
-        if (OP_MODE_TYPE == OpModeType.AUTO) {
-            setRamp(true);
-            setHood(AUTONOMOUS_HOOD_ANGLE);
-        } else {
-            setRamp(false);
-            setHood(MIN_HOOD_ANGLE);
-        }
-
-        setFlywheel(0);
+        setRamp(OP_MODE_TYPE == OpModeType.AUTO);
+        setHood(MIN_HOOD_ANGLE);
+        setFlywheel(0, false);
     }
 
-    public void setFlywheel(double vel) {
+    public void setFlywheel(double vel, boolean setActiveControl) {
         flywheelController.setSetPoint(vel * M_S_TO_TICKS);
+        activeControl = setActiveControl;
+    }
+
+    public void setActiveControl(boolean state) {
+        activeControl = state;
     }
 
     public double getFlywheelTarget() {
@@ -33,14 +33,20 @@ public class Launcher extends SubsystemBase {
     }
 
     private void updateFlywheel() {
-        if (getFlywheelTarget() == 0) { // Don't unnecessarily decelerate to a stop (just causes current spike)
-            robot.launchMotors.set(0);
-        } else {
+        robot.profiler.start("Launcher Update");
+        if (activeControl) {
             flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f / (robot.getVoltage() / 12));
             robot.launchMotors.set(
                     flywheelController.calculate(robot.launchEncoder.getCorrectedVelocity())
             );
+        } else {
+            if (getFlywheelTarget() == 0) {
+                robot.launchMotors.set(0);
+            } else {
+                robot.launchMotors.set(LAUNCHER_DEFAULT_ON_SPEED);
+            }
         }
+        robot.profiler.end("Launcher Update");
     }
 
     public void setRamp(boolean engaged) {
@@ -54,8 +60,8 @@ public class Launcher extends SubsystemBase {
         );
     }
 
-    public boolean readyToLaunch() {
-        return flywheelController.atSetPoint();
+    public boolean flywheelReady() {
+        return activeControl && flywheelController.atSetPoint();
     }
 
     @Override
