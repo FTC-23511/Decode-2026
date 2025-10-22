@@ -11,6 +11,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.SHOOTER_DX;
 import static org.firstinspires.ftc.teamcode.globals.Constants.SHOOTER_DY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.SHOOTER_RELEASE_HEIGHT;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -32,6 +33,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Config
 @TeleOp(name="AprilTag Test Limelight", group="Vision")
 public class AutoAimPIDTest extends OpMode {
 
@@ -41,6 +43,8 @@ public class AutoAimPIDTest extends OpMode {
     public GamepadEx operator;
 
     public ElapsedTime timer;
+    public static double TUNER_POWER = 0.2;
+
 
 
     TelemetryData telemetryData = new TelemetryData(telemetry);
@@ -48,7 +52,7 @@ public class AutoAimPIDTest extends OpMode {
 
     @Override
     public void init() {
-        limelight = hardwareMap.get(Limelight3A.class, "Limelight");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
@@ -112,24 +116,12 @@ public class AutoAimPIDTest extends OpMode {
             hoodLowRad  = Math.atan(tanLow);
         }
 
-        telemetryData.addData("TurretYaw (rad)", turretYawRad);
-        if (hoodLowRad != null) {
-            telemetryData.addData("HoodLow (rad)", hoodLowRad);
-            telemetryData.addData("HoodHigh (rad)", hoodHighRad);
-        } else {
-            telemetryData.addData("Hood", "No Solution");
-        }
-        telemetryData.update();
+
 
 
         LLStatus status = limelight.getStatus();
-        telemetry.addData("Name", "%s",
-                status.getName());
-        telemetry.addData("LL", "Temp: %.1fC, CPU: %.1f%%, FPS: %d",
-                status.getTemp(), status.getCpu(), (int) status.getFps());
-        telemetry.addData("Pipeline", "Index: %d, Type: %s",
-                status.getPipelineIndex(), status.getPipelineType());
-        telemetryData.update();
+
+
 
         LLResult result = limelight.getLatestResult();
         if (result != null && result.isValid()) {
@@ -137,10 +129,10 @@ public class AutoAimPIDTest extends OpMode {
                 int id = fiducial.getFiducialId();
 
 
-                double txDegrees = fiducial.getTargetXDegrees();
-                double tyDegrees = fiducial.getTargetYDegrees();
-                double tyPixels = fiducial.getTargetYPixels();
-                double txPixels = fiducial.getTargetXPixels();
+                double txDegrees = fiducial.getTargetYDegrees();
+                double tyDegrees = fiducial.getTargetXDegrees();
+                double tyPixels = fiducial.getTargetXPixels();
+                double txPixels = fiducial.getTargetYPixels();
 
 
 
@@ -154,11 +146,21 @@ public class AutoAimPIDTest extends OpMode {
                         || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
 
                     if (txDegrees > 5) {
-                        robot.turretServo.set(0.1);
+                        robot.rightTurretServo.set(TUNER_POWER);
+                        robot.leftTurretServo.set(TUNER_POWER);
+                        telemetryData.addData("Pos Tuner", TUNER_POWER);
                     } else if (txDegrees < -5) {
-                        robot.turretServo.set(-0.1);
+                        robot.rightTurretServo.set(-TUNER_POWER);
+                        robot.leftTurretServo.set(-TUNER_POWER);
+                        telemetryData.addData("Neg Tuner", TUNER_POWER);
+
+
                     } else {
-                        robot.turretServo.set(0);
+                        robot.rightTurretServo.set(0);
+                        robot.leftTurretServo.set(0);
+                        telemetryData.addData("0 Tuner", TUNER_POWER);
+
+
                     }
 
 
@@ -173,6 +175,13 @@ public class AutoAimPIDTest extends OpMode {
                     telemetryData.addData("tyPixels", tyPixels);
                     telemetryData.addData("txDegrees", txDegrees);
                     telemetryData.addData("tyDegrees", tyDegrees);
+                    telemetryData.addData("TurretYaw (rad)", turretYawRad);
+                    if (hoodLowRad != null) {
+                        telemetryData.addData("HoodLow (rad)", hoodLowRad);
+                        telemetryData.addData("HoodHigh (rad)", hoodHighRad);
+                    } else {
+                        telemetryData.addData("Hood", "No Solution");
+                    }
                     telemetryData.update();
                 }
             }
