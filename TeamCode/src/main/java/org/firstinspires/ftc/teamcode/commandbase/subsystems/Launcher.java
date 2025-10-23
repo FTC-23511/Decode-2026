@@ -13,6 +13,10 @@ public class Launcher extends SubsystemBase {
 
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
 
+    public Launcher() {
+        flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
+    }
+
     public void init() {
         setRamp(OP_MODE_TYPE == OpModeType.AUTO);
         setHood(MIN_HOOD_ANGLE);

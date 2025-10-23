@@ -19,8 +19,7 @@ public class Intake extends SubsystemBase {
     public enum PivotState {
         INTAKE,
         TRANSFER,
-        HOLD,
-        HIGH
+        HOLD
     }
 
     public enum DistanceState {
@@ -48,9 +47,6 @@ public class Intake extends SubsystemBase {
                 break;
             case TRANSFER:
                 robot.intakePivotServo.set(INTAKE_PIVOT_TRANSFER);
-                break;
-            case HIGH:
-                robot.intakePivotServo.set(INTAKE_PIVOT_HIGH);
                 break;
             case INTAKE:
                 robot.intakePivotServo.set(INTAKE_PIVOT_INTAKE);
