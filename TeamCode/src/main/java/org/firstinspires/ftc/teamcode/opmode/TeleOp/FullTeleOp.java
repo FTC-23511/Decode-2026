@@ -31,6 +31,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -113,6 +114,14 @@ public class FullTeleOp extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
                 )
         );
+    }
+
+    @Override
+    public void initialize_loop() {
+        robot.launcher.setMotifState(); // TODO: Make limelight update not every loop
+
+        telemetryData.addData("Launcher Motif State", Launcher.motifState);
+        telemetryData.update();
     }
 
     @Override

@@ -169,6 +169,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
 
         // Subsystems
         drive = new Drive();

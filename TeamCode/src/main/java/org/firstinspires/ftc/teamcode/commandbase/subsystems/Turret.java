@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
-    public boolean activeControl = false;
+    private boolean activeControl = false;
     public static PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
 
     public Turret() {
@@ -61,11 +61,6 @@ public class Turret extends SubsystemBase {
         return turretController.atSetPoint() && activeControl;
     }
 
-    @Override
-    public void periodic() {
-        update();
-    }
-
     /**
      * @param pose what the goal pose is being compared to
      * @return angle in radians, field-centric, normalized to 0-2pi
@@ -93,5 +88,10 @@ public class Turret extends SubsystemBase {
         } else {
             return new double[]{robotAngle + (Math.abs(error) - MAX_USABLE_TURRET_ANGLE) * Math.signum(error), MAX_USABLE_TURRET_ANGLE * Math.signum(error)};
         }
+    }
+
+    @Override
+    public void periodic() {
+        update();
     }
 }
