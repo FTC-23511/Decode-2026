@@ -81,10 +81,19 @@ public class Constants {
     public static final double RED_TARGET_X = 0.00;
     public static final double RED_TARGET_Y =  0.00;
 
-    public static final double SHOOTER_RELEASE_HEIGHT  = 0.00;
-    public static final double H_TARGET = 0.98425;
+//    public static final double SHOOTER_RELEASE_HEIGHT  = 0.00;
+//    public static final double H_TARGET = 0.98425;
 
-    public static final double G = 9.81;
+    public static final double GRAVITY = 9.81;
+    public static final double BASKET_RIM_HEIGHT = 0.9652; //38 inches
+    public static final double BASKET_TOP_HEIGHT = 1.3589; //53.5 inches
+    public static final double SHOOTER_HEIGHT = 0.3302; //13 inches
+    public static final double BASKET_WIDTH = 0.7874; //31 inches
+
+    public static final double TARGET_HEIGHT = (BASKET_RIM_HEIGHT + BASKET_TOP_HEIGHT) / 2.0;
+    public static final double MIN_ANGLE = 20.0;
+    public static final double MAX_ANGLE = 45.0;
+
     public  static double EXIT_VELO = 0.00;
     public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
 
@@ -113,7 +122,6 @@ public class Constants {
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.5, 0, 0.015, 0); // Coefficients for radians
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
     public static double TURRET_POS_TOLERANCE = 0.03; // Radians
-    public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
     public static double MAX_TURRET_ANGLE = (110 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static Pose2d GOAL_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 72 : -72), 72, 0); } // Inches
 }

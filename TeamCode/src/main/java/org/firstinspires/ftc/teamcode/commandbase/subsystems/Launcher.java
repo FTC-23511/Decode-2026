@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -25,7 +24,7 @@ public class Launcher extends SubsystemBase {
 
     public void setLauncher(MotorState motorState) {
         if (motorState.equals(MotorState.HOLD)) {
-            robot.intakeMotor.set(INTAKE_HOLD_SPEED);
+            robot.intakeMotor.set(0);
         } else {
             switch (motorState) {
                 case FORWARD:
@@ -40,11 +39,6 @@ public class Launcher extends SubsystemBase {
             }
         }
         Launcher.motorState = motorState;
-    }
-
-    public double autoAim(Pose2d limelightHeading){
-        double robotHeading = robot.drive.getPose().getHeading();
-        return 0.0;
     }
 
     public void updateLauncher() {
