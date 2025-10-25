@@ -107,7 +107,6 @@ public class CoaxialSwerveDrivetrain extends RobotDrive {
     /**
      * Updates the modules/drivetrain to create an X (useful for preventing being pushed on the field)
      */
-    // TODO: Actually test this to make sure it works
     public void updateWithXLock() {
         for (int i = 0; i < modules.length; i++) {
             double angle = (-Math.PI / 4) + (Math.PI/2 * i);

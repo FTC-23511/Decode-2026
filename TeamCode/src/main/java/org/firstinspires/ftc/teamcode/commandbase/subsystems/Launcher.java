@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 
@@ -9,9 +12,23 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
-    public boolean activeControl = false;
+
+    public enum Motif {
+        NOT_FOUND,
+        GPP,
+        PGP,
+        PPG
+    }
 
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
+    public static Motif motifState = Motif.NOT_FOUND;
+    public static boolean motifStateSet = false;
+    private boolean activeControl = false;
+
+
+    public Launcher() {
+        flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
+    }
 
     public void init() {
         setRamp(OP_MODE_TYPE == OpModeType.AUTO);
@@ -62,6 +79,48 @@ public class Launcher extends SubsystemBase {
 
     public boolean flywheelReady() {
         return activeControl && flywheelController.atSetPoint();
+    }
+
+    public LLStatus getLimelightStatus() {
+        return robot.limelight.getStatus();
+    }
+
+    public double[] getTargetDegrees() {
+        double[] targetDegrees = new double[2];
+        LLResult result = robot.limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                targetDegrees[0] = fiducial.getTargetYDegrees();
+                targetDegrees[1] = fiducial.getTargetXDegrees();
+            }
+        }
+
+        return targetDegrees;
+    }
+
+    public boolean setMotifState() {
+        LLResult result = robot.limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if (id == 21) {
+                    motifState = Motif.PPG;
+                    return true;
+                } else if (id == 22) {
+                    motifState = Motif.PGP;
+                    return true;
+                } else if (id == 23) {
+                    motifState = Motif.GPP;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

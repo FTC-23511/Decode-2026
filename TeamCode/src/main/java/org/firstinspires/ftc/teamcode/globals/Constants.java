@@ -37,28 +37,33 @@ public class Constants {
     public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 150; // Hertz // TODO: needs to be tuned
 
+    public static double STRAFING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
+    public static double TURNING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
+    public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
+    public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
+
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 3.602; // Radians
     public static double FL_ENCODER_OFFSET = 3.753; // Radians
-    public static double BL_ENCODER_OFFSET = 0.619; // Radians
-    public static double BR_ENCODER_OFFSET = 2.149; // Radians
+    public static double BL_ENCODER_OFFSET = 0.65; // Radians
+    public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(6, 0, 0.2, 0); // Coefficients for inches
     public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(4.2, 0, 0.23, 0); // Coefficients for radians
+    public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.25; // Inches
     public static double HEADING_TOLERANCE = 0.05; // Radians
     public static double XY_MIN_OUTPUT = 8; // Inches/second
     public static double HEADING_MIN_OUTPUT = 0.15; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_INTAKE = 0.62;
-    public static double INTAKE_PIVOT_HIGH = 0.85;
-    public static double INTAKE_PIVOT_HOLD = 0.58;
-    public static double INTAKE_PIVOT_TRANSFER = 0.58;
+    public static double INTAKE_PIVOT_INTAKE = 0.567;
+    public static double INTAKE_PIVOT_HOLD = 0.5;
+    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_HOLD; // honestly just delete this
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -0.75;
-    public static double INTAKE_TRANSFER_SPEED = 1.0; // TODO: needs to be tuned
+    public static double INTAKE_TRANSFER_SPEED = 1.0;
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
@@ -70,7 +75,7 @@ public class Constants {
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.004, 0, 0, 0.00055); // Coefficients for ticks
     public static double FLYWHEEL_VEL_TOLERANCE = 40; // Ticks // TODO: needs to be tuned
     public static double M_S_TO_TICKS = 275; // Conversion factor for ball velocity in meters/second to launcher encoder ticks // TODO: needs to be tuned
-    public static double LAUNCHER_DEFAULT_ON_SPEED = 1.0; // Power
+    public static double LAUNCHER_DEFAULT_ON_SPEED = 0.9; // Power
 
     public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 6.0; // Meters/second

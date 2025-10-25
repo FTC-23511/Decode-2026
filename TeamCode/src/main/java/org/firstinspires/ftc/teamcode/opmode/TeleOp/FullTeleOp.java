@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_SERVO_POS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -18,13 +22,16 @@ import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -51,7 +58,12 @@ public class FullTeleOp extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        driver = new GamepadEx(gamepad1);
+        driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
+                new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(TURNING_SLEW_RATE_LIMIT),
+                null
+        );
         operator = new GamepadEx(gamepad2);
 
         // Driver controls
@@ -105,6 +117,14 @@ public class FullTeleOp extends CommandOpMode {
     }
 
     @Override
+    public void initialize_loop() {
+        robot.launcher.setMotifState(); // TODO: Make limelight update not every loop
+
+        telemetryData.addData("Launcher Motif State", Launcher.motifState);
+        telemetryData.update();
+    }
+
+    @Override
     public void run() {
         robot.profiler.start("Full Loop");
         // Keep all the has movement init for until when TeleOp starts
@@ -121,12 +141,31 @@ public class FullTeleOp extends CommandOpMode {
         } else {
             double minSpeed = 0.3; // As a fraction of the max speed of the robot
             double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+            Rotation2d robotAngle = robot.drive.getPose().getRotation();
+            double headingCorrection = 0;
+
+            if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                robot.drive.headingLock = true;
+                robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+            } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+                robot.drive.headingLock = false;
+            } else if (robot.drive.headingLock) {
+                headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
+                if (robot.drive.follower.atTarget()) {
+                    headingCorrection = 0;
+                } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                    robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                    headingCorrection = 0;
+                }
+            }
+
             robot.drive.swerve.updateWithTargetVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                             driver.getLeftY() * Constants.MAX_VELOCITY * speedMultiplier,
                             -driver.getLeftX() * Constants.MAX_VELOCITY * speedMultiplier,
-                            -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
-                            robot.drive.getPose().getRotation()
+                            robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                            robotAngle
                     )
             );
         }
