@@ -11,6 +11,7 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.p2p.P2PController;
+import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -65,7 +66,11 @@ public class Drive extends SubsystemBase {
             lastPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
         }
 
-        return lastPose;
+        return new Pose2d(
+                lastPose.getX(),
+                lastPose.getY(),
+                MathUtils.normalizeRadians(lastPose.getHeading(), false)
+        );
     }
 
     public void setPose(Pose2d pose) {

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -52,7 +53,7 @@ public class LimeLightTest extends CommandOpMode {
     @Override
     public void initialize_loop() {
         LLResult result = robot.limelight.getLatestResult();
-        double heading = robot.drive.getPose().getHeading();
+        double heading = Math.toDegrees(robot.drive.getPose().getHeading() + MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false));
 
         robot.limelight.updateRobotOrientation(heading);
 

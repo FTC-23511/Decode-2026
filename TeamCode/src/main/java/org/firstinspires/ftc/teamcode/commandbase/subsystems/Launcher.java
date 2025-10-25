@@ -7,7 +7,10 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Launcher extends SubsystemBase {
@@ -101,8 +104,37 @@ public class Launcher extends SubsystemBase {
         return targetDegrees;
     }
 
+    public Pose2d getLimelightPose() {
+        LLResult result = robot.limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
+                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+
+                    robot.limelight.updateRobotOrientation(robot.drive.getPose().getHeading());
+                    Pose3D botPose = result.getBotpose_MT2();
+
+                    if (botPose != null) {
+                        double x = botPose.getPosition().x;
+                        double y = botPose.getPosition().y;
+
+//                        if (x > ) {
+
+//                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public boolean setMotifState() {
         LLResult result = robot.limelight.getLatestResult();
+
         if (result != null && result.isValid()) {
             for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
                 int id = fiducial.getFiducialId();
