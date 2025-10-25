@@ -118,7 +118,7 @@ public class FullTeleOp extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
-        robot.launcher.setMotifState(); // TODO: Make limelight update not every loop
+//        robot.launcher.setMotifState(); // TODO: Make limelight update not every loop
 
         telemetryData.addData("Launcher Motif State", Launcher.motifState);
         telemetryData.update();
