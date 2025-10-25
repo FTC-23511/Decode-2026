@@ -29,7 +29,7 @@ public class Intake extends SubsystemBase {
 
     public void init() {
         setPivot(PivotState.INTAKE);
-        robot.colorSensor.enableLed(true);
+//        robot.colorSensor.enableLed(true);
     }
 
     public void setPivot(PivotState pivotState) {
