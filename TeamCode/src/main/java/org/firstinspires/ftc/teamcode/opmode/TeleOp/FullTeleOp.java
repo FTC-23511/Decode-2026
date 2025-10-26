@@ -31,6 +31,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -89,11 +90,11 @@ public class FullTeleOp extends CommandOpMode {
                 new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whileActiveContinuous(
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenReleased(
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenReleased(
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
@@ -102,6 +103,10 @@ public class FullTeleOp extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setRamp(true)).andThen(new WaitCommand(200)),
                         new ClearLaunch()
                 )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
+                new StationaryAimbotFullLaunch()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(

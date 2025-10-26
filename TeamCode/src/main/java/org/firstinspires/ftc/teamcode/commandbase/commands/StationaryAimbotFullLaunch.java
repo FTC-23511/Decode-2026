@@ -8,7 +8,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class
 StationaryAimbotFullLaunch extends SequentialCommandGroup {
-    public StationaryAimbotFullLaunch(Robot robot) {
+    public StationaryAimbotFullLaunch() {
+        Robot robot = Robot.getInstance();
         addCommands(
                 new FullAim(),
                 new ClearLaunch().alongWith(
