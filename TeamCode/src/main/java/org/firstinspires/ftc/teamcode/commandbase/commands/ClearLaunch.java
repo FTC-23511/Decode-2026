@@ -46,6 +46,7 @@ public class ClearLaunch extends CommandBase {
 
         robot.launcher.setRamp(false);
         robot.turret.setTurret(Turret.TurretState.OFF, 0);
+        robot.launcher.setActiveControl(false);
     }
 
     @Override
