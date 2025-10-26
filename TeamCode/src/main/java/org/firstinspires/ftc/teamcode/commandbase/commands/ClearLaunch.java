@@ -13,7 +13,7 @@ public class ClearLaunch extends CommandBase {
     private boolean targetStateSolved = false;
 
     /**
-     * Assumes {@link ReadyToLaunch} has already been performed
+     * Assumes {@link FullAim} has already been performed
      * Command to clear out current balls inside the robot
      */
     public ClearLaunch() {
@@ -24,11 +24,17 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void initialize() {
-        robot.turret.setActiveControl(true);
+        robot.turret.setTarget(robot.turretEncoder.getCurrentPosition(), true);
         robot.launcher.setActiveControl(true);
+        robot.launcher.setRamp(true);
         robot.intake.setIntake(Intake.MotorState.TRANSFER);
         robot.intake.setPivot(Intake.PivotState.TRANSFER);
         timer.reset();
+    }
+
+    @Override
+    public void execute() {
+        // TODO: Add code to auto launch third ball that sometimes gets stuck
     }
 
     @Override
@@ -36,6 +42,7 @@ public class ClearLaunch extends CommandBase {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
         }
+        robot.launcher.setRamp(false);
         robot.turret.setActiveControl(false);
         robot.launcher.setActiveControl(false);
     }

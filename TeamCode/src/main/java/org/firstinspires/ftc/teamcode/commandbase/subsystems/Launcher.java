@@ -13,6 +13,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
@@ -23,11 +26,11 @@ public class Launcher extends SubsystemBase {
         PPG
     }
 
-    private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
     public static Motif motifState = Motif.NOT_FOUND;
-    public static boolean motifStateSet = false;
+    private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
     private boolean activeControl = false;
-
+    private double targetHoodAngle = MIN_HOOD_ANGLE;
+    private double targetFlywheelVelocity = 0.0;
 
     public Launcher() {
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
@@ -84,36 +87,90 @@ public class Launcher extends SubsystemBase {
         return activeControl && flywheelController.atSetPoint();
     }
 
-    private double targetHoodAngle = 0.0;
-    private double targetFlywheelVelocity = 0.0;
+    /**
+     * Calculates the required launch parameters (velocity and angle) that
+     * use the lowest possible velocity while respecting ALL constraints.
+     *
+     * @param distance The horizontal distance to the target (x) in meters.
+     * @return A 2-item List<Double> containing:
+     * - Index 0: required velocity (m/s)
+     * - Index 1: used launch angle (degrees) measured FROM THE VERTICAL.
+     * Returns [Double.NaN, Double.NaN] if the shot is impossible.
+     */
+    public static double[] distanceToLauncherValues(double distance) {
+        double g = GRAVITY;
+        double x = distance;
+        double deltaY = TARGET_HEIGHT - LAUNCHER_HEIGHT;
 
-    public void distanceToLauncher(double distance) {
-        double heightDifference = TARGET_HEIGHT - SHOOTER_HEIGHT;
+        // --- 1. Calculate the theoretical minimum velocity shot ---
 
-        double term = distance * distance + heightDifference * heightDifference;
-        double optimalAngleRad = Math.atan2(
-                distance * distance + heightDifference * Math.sqrt(term),
-                distance * Math.sqrt(term)
-        );
+        // v²_min = g * (Δy + sqrt(Δy² + x²))
+        double minVelocitySquared = g * (deltaY + Math.sqrt(Math.pow(deltaY, 2) + Math.pow(x, 2)));
+        double minVelocity = Math.sqrt(minVelocitySquared);
 
-        double optimalAngleDeg = Math.toDegrees(optimalAngleRad);
-        targetHoodAngle = Math.max(MIN_ANGLE, Math.min(MAX_ANGLE, optimalAngleDeg));
+        // Calculate the angle required for this absolute minimum velocity (FROM HORIZONTAL)
+        double tanThetaMin = minVelocitySquared / (g * x);
+        double optimalAngleHoriz = Math.toDegrees(Math.atan(tanThetaMin));
 
-        double angleRad = Math.toRadians(targetHoodAngle);
-        double cosAngle = Math.cos(angleRad);
-        double tanAngle = Math.tan(angleRad);
-
-        double denominator = 2 * cosAngle * cosAngle * (distance * tanAngle - heightDifference);
-
-        if (denominator > 0) {
-            double velocitySquared = (GRAVITY * distance * distance) / denominator;
-            targetFlywheelVelocity = Math.sqrt(Math.max(0, velocitySquared));
-        } else {
-            // Fallback: target is unreachable with current constraints
-            targetFlywheelVelocity = 0;
+        // Convert optimal angle to the vertical system for checking constraints
+        double optimalAngleVert = 90.0 - optimalAngleHoriz;
 
 
+        // --- 2. Determine the Final Angle (Vertical) for the solution ---
+
+        double finalAngleVert; // The angle we will use and return (FROM VERTICAL)
+        double finalAngleHoriz; // The angle used in the physics calculation (FROM HORIZONTAL)
+
+        if (optimalAngleVert >= MIN_HOOD_ANGLE && optimalAngleVert <= MAX_HOOD_ANGLE) {
+            // Case A: Optimal shot is within vertical angle limits. Use it.
+            finalAngleVert = optimalAngleVert;
+            finalAngleHoriz = optimalAngleHoriz;
+
+            // Check velocity limit for this optimal shot
+            if (minVelocity > MAX_VELOCITY) {
+                // Even the most efficient shot is too fast. IMPOSSIBLE.
+                return new double[]{Double.NaN, Double.NaN};
+            }
+
+            // Return the optimal, efficient solution
+            return new double[]{minVelocity, finalAngleVert};
+
+        } else if (optimalAngleVert < MIN_HOOD_ANGLE) {
+            // Case B: Optimal angle is too close to vertical. FORCED to MIN_ANGLE_VERT (16°).
+            finalAngleVert = MIN_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MIN_HOOD_ANGLE; // Convert to horizontal system (90-16=74 deg)
+
+        } else { // optimalAngleVert > MAX_ANGLE_VERT
+            // Case C: Optimal angle is too close to horizontal. FORCED to MAX_ANGLE_VERT (50°).
+            finalAngleVert = MAX_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MAX_HOOD_ANGLE; // Convert to horizontal system (90-50=40 deg)
         }
+
+        // --- 3. Recalculate Velocity for the Forced Angle (Cases B and C) ---
+
+        double angleToUseRad = Math.toRadians(finalAngleHoriz);
+        double tanTheta = Math.tan(angleToUseRad);
+        double cosTheta = Math.cos(angleToUseRad);
+
+        // v₀² = (g * x²) / (2 * cos²(θ) * (x * tan(θ) - Δy))
+        double denominator = 2 * (cosTheta * cosTheta) * (x * tanTheta - deltaY);
+
+        // Check for physical impossibility (denominator <= 0)
+        if (denominator <= 0) {
+            return new double[]{Double.NaN, Double.NaN};
+        }
+
+        double requiredVelocity = Math.sqrt((g * x * x) / denominator);
+
+        // --- 4. Final Velocity Constraint Check and Return ---
+
+        if (requiredVelocity > MAX_VELOCITY) {
+            // The required velocity for the forced angle is too high. IMPOSSIBLE.
+            return new double[]{Double.NaN, Double.NaN};
+        }
+
+        // Return the valid, constrained solution
+        return new double[]{requiredVelocity, finalAngleVert};
     }
 
     public double getTargetHoodAngle(){

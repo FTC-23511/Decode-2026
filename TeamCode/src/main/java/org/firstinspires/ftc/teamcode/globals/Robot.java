@@ -153,7 +153,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intakePivotServo = new ServoEx(hwMap, "intakePivotServo")
                 .setInverted(true)
                 .setCachingTolerance(0.01);
-        hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(-0.01)
+        hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(-0.01)
                 .setInverted(false);;

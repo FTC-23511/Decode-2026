@@ -68,28 +68,11 @@ public class Constants {
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
 
-    // blue goal coordinates
-    public static final double BLUE_TARGET_X = 0.00;
-    public static final double BLUE_TARGET_Y =  0.00;
-
-    // red goal coordinates
-    public static final double RED_TARGET_X = 0.00;
-    public static final double RED_TARGET_Y =  0.00;
-
-    public static final double SHOOTER_RELEASE_HEIGHT  = 0.00;
-    public static final double H_TARGET = 0.98425;
 
     public static final double GRAVITY = 9.81;
-    public static final double BASKET_RIM_HEIGHT = 0.9652; //38 inches
-    public static final double BASKET_TOP_HEIGHT = 1.3589; //53.5 inches
-    public static final double SHOOTER_HEIGHT = 0.3302; //13 inches
-    public static final double BASKET_WIDTH = 0.7874; //31 inches
+    public static final double LAUNCHER_HEIGHT = 0.3302; //13 inches
+    public static final double TARGET_HEIGHT = 1.0;
 
-    public static final double TARGET_HEIGHT = (BASKET_RIM_HEIGHT + BASKET_TOP_HEIGHT) / 2.0;
-    public static final double MIN_ANGLE = 20.0;
-    public static final double MAX_ANGLE = 45.0;
-
-    public  static double EXIT_VELO = 0.00;
 
     // Launcher
     public static double RAMP_ENGAGED = 0.3;
