@@ -38,7 +38,6 @@ public class Turret extends SubsystemBase {
     public static Motif motifState = Motif.NOT_FOUND;
     public static TurretState turretState = ANGLE_CONTROL;
     public static PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
-    public static PIDFController limelightController = new PIDFController(LIMELIGHT_PIDF_COEFFICIENTS);
 
     public Turret() {
         turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
@@ -83,22 +82,31 @@ public class Turret extends SubsystemBase {
 
     public void update() {
         if (turretState.equals(ANGLE_CONTROL)) {
-            robot.profiler.start("Turret Read/Calc");
+            robot.profiler.start("Turret Read");
             double power = turretController.calculate(getPosition());
-            robot.profiler.end("Turret Read/Calc");
+            robot.profiler.end("Turret Read");
 
             robot.profiler.start("Turret Write");
             robot.turretServos.set(power);
             robot.profiler.end("Turret Write");
 
         } else if (turretState.equals(LIMELIGHT_CONTROL)) {
-            robot.profiler.start("Turret LimeLight Read/Calc");
-            double power = turretController.calculate(getLimeLightTargetDegrees()[0]);
-            robot.profiler.end("Turret LimeLight Read/Calc");
+            robot.profiler.start("Turret Read");
+            double[] targetDegrees = getLimeLightTargetDegrees();
+            robot.profiler.end("Turret Read");
 
-            robot.profiler.start("Turret LimeLight Write");
-            robot.turretServos.set(power);
-            robot.profiler.end("Turret LimeLight Write");
+            if (targetDegrees != null) {
+                double power = turretController.calculate(targetDegrees[0]);
+
+                robot.profiler.start("Turret Write");
+                robot.turretServos.set(power);
+                robot.profiler.end("Turret Write");
+
+            } else {
+                robot.profiler.start("Turret Write");
+                robot.turretServos.set(0);
+                robot.profiler.end("Turret Write");
+            }
         } else {
             robot.profiler.start("Turret Write");
             robot.turretServos.set(0);
@@ -134,17 +142,6 @@ public class Turret extends SubsystemBase {
         }
 
         return null;
-    }
-
-    public boolean autoAimTurret() {
-        double[] targetDegrees = getLimeLightTargetDegrees();
-        if (targetDegrees != null) {
-            double tx = targetDegrees[0];
-            limelightController.setSetPoint(0);
-            return true;
-        }
-
-        return false;
     }
 
     public Pose2d getLimelightPose() {

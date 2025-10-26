@@ -53,8 +53,10 @@ public class FullAim extends CommandBase {
             robot.drive.swerve.updateWithXLock();
         }
 
+        robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0);
+
         // TODO: Add code to set targets for turret and condition to set final hood / shooter RPM values
-        if (true && !secondaryAim) {
+        if (robot.turret.readyToLaunch() && Turret.turretState.equals(Turret.TurretState.LIMELIGHT_CONTROL    ) && !secondaryAim) {
             secondaryAim = true;
             errorsAngleVelocity = Launcher.distanceToLauncherValues(Constants.GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
             if (Double.isNaN(errorsAngleVelocity[0])) {
