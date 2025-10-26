@@ -110,6 +110,18 @@ public abstract class Controller {
     }
 
     /**
+     * Returns true if the error is within the percentage of the total input range, determined by
+     * {@link #setTolerance}.
+     *
+     * @return Whether the error is within the acceptable bounds.
+     */
+    public boolean atSetPoint(double pv) {
+
+        return Math.abs(errorVal_p) < errorTolerance_p
+                && Math.abs(errorVal_v) < errorTolerance_v;
+    }
+
+    /**
      * @return the positional error e(t)
      */
     public double getPositionError() {

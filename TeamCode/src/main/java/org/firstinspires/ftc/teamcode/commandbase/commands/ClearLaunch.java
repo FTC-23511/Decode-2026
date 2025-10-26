@@ -25,7 +25,7 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void initialize() {
-        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turretEncoder.getCurrentPosition());
+        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
         robot.launcher.setActiveControl(true);
         robot.launcher.setRamp(true);
         robot.intake.setIntake(Intake.MotorState.TRANSFER);

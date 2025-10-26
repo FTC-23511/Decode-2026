@@ -111,6 +111,12 @@ public class FullTeleOp extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
                 )
         );
+        
+        // TODO: Remove after tuning Limelight PID
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenReleased(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
+        );
+
     }
 
     @Override
@@ -132,39 +138,41 @@ public class FullTeleOp extends CommandOpMode {
         }
 
         robot.profiler.start("Swerve Drive");
-        // Drive the robot
-        if (driver.isDown(GamepadKeys.Button.START)) {
-            robot.drive.swerve.updateWithXLock();
-        } else {
-            double minSpeed = 0.3; // As a fraction of the max speed of the robot
-            double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
+            // Drive the robot
+            if (driver.isDown(GamepadKeys.Button.START)) {
+                robot.drive.swerve.updateWithXLock();
+            } else {
+                double minSpeed = 0.3; // As a fraction of the max speed of the robot
+                double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-            Rotation2d robotAngle = robot.drive.getPose().getRotation();
-            double headingCorrection = 0;
+                Rotation2d robotAngle = robot.drive.getPose().getRotation();
+                double headingCorrection = 0;
 
-            if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
-                robot.drive.headingLock = true;
-                robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
-            } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
-                robot.drive.headingLock = false;
-            } else if (robot.drive.headingLock) {
-                headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
-                if (robot.drive.follower.atTarget()) {
-                    headingCorrection = 0;
-                } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                    robot.drive.headingLock = true;
                     robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
-                    headingCorrection = 0;
+                } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+                    robot.drive.headingLock = false;
+                } else if (robot.drive.headingLock) {
+                    headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
+                    if (robot.drive.follower.atTarget()) {
+                        headingCorrection = 0;
+                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                        robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                        headingCorrection = 0;
+                    }
                 }
-            }
 
-            robot.drive.swerve.updateWithTargetVelocity(
-                    ChassisSpeeds.fromFieldRelativeSpeeds(
-                            driver.getLeftY() * Constants.MAX_VELOCITY * speedMultiplier,
-                            -driver.getLeftX() * Constants.MAX_VELOCITY * speedMultiplier,
-                            robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
-                            robotAngle
-                    )
-            );
+                robot.drive.swerve.updateWithTargetVelocity(
+                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                driver.getLeftY() * Constants.MAX_VELOCITY * speedMultiplier,
+                                -driver.getLeftX() * Constants.MAX_VELOCITY * speedMultiplier,
+                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                                robotAngle
+                        )
+                );
+            }
         }
         robot.profiler.end("Swerve Drive");
 
@@ -172,12 +180,15 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("MIN_HOOD_SERVO_POS", MIN_HOOD_SERVO_POS);
-
         telemetryData.addData("Heading", robot.drive.getPose().getHeading());
         telemetryData.addData("Robot Pose", robot.drive.getPose());
+        telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
+        telemetryData.addData("atTarget", robot.drive.follower.atTarget());
 
         telemetryData.addData("Turret Target", robot.turret.getTarget());
+        telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
+        telemetryData.addData("ATagVisible", robot.turret.ATagVisible);
+        telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Position", robot.turret.getPosition());
 
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());

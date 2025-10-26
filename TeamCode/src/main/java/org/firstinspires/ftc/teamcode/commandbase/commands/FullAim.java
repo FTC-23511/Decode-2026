@@ -47,17 +47,14 @@ public class FullAim extends CommandBase {
 
     @Override
     public void execute() {
-        if (!robot.drive.follower.atTarget()) {
-            robot.drive.swerve.updateWithTargetVelocity(robot.drive.follower.calculate(robot.drive.getPose()));
-        } else {
-            robot.drive.swerve.updateWithXLock();
+        robot.drive.swerve.updateWithTargetVelocity(robot.drive.follower.calculate(robot.drive.getPose()));
+
+        if (robot.turret.readyToLaunch() && Turret.turretState.equals(Turret.TurretState.ANGLE_CONTROL) && !secondaryAim) {
+            robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0);
         }
 
-        robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0);
-
         // TODO: Add code to set targets for turret and condition to set final hood / shooter RPM values
-        if (robot.turret.readyToLaunch() && Turret.turretState.equals(Turret.TurretState.LIMELIGHT_CONTROL    ) && !secondaryAim) {
-            secondaryAim = true;
+        if (robot.turret.readyToLaunch() && Turret.turretState.equals(Turret.TurretState.LIMELIGHT_CONTROL) && !secondaryAim) {
             errorsAngleVelocity = Launcher.distanceToLauncherValues(Constants.GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
             if (Double.isNaN(errorsAngleVelocity[0])) {
                 impossible = true;
@@ -66,12 +63,15 @@ public class FullAim extends CommandBase {
                 hoodServoMoveTimer.reset();
                 robot.launcher.setHood(errorsAngleVelocity[1]);
             }
+            secondaryAim = true;
+            robot.turret.setTurret(Turret.TurretState.OFF, 0);
         }
     }
 
     @Override
     public void end(boolean interrupted) {
         if (impossible) {
+//            throw new RuntimeException("Can't see ATags");
             // TODO: Come up with a better way to deal with this
             robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
             robot.launcher.setHood(MIN_HOOD_ANGLE);

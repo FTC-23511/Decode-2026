@@ -37,6 +37,7 @@ public class Turret extends SubsystemBase {
 
     public static Motif motifState = Motif.NOT_FOUND;
     public static TurretState turretState = ANGLE_CONTROL;
+    public boolean ATagVisible = false;
     public static PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
 
     public Turret() {
@@ -58,8 +59,9 @@ public class Turret extends SubsystemBase {
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case LIMELIGHT_CONTROL:
+                ATagVisible = false;
                 turretController.setMinimumOutput(0);
-                turretController.setTolerance(TURRET_TX_TOLERANCE);
+                turretController.setTolerance(TURRET_TY_TOLERANCE);
                 turretController.setCoefficients(LIMELIGHT_PIDF_COEFFICIENTS);
 
                 turretController.setSetPoint(0);
@@ -96,13 +98,14 @@ public class Turret extends SubsystemBase {
             robot.profiler.end("Turret Read");
 
             if (targetDegrees != null) {
-                double power = turretController.calculate(targetDegrees[0]);
+                ATagVisible = true;
+                double power = turretController.calculate(targetDegrees[1]);
 
                 robot.profiler.start("Turret Write");
                 robot.turretServos.set(power);
                 robot.profiler.end("Turret Write");
-
             } else {
+                ATagVisible = false;
                 robot.profiler.start("Turret Write");
                 robot.turretServos.set(0);
                 robot.profiler.end("Turret Write");
@@ -115,7 +118,8 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return (turretController.atSetPoint());
+        return (turretController.atSetPoint() && turretState.equals(ANGLE_CONTROL))
+                || (turretController.atSetPoint() && ATagVisible && turretState.equals(LIMELIGHT_CONTROL));
     }
 
     public LLStatus getLimelightStatus() {

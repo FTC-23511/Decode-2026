@@ -65,7 +65,7 @@ public class LimeLightTest extends CommandOpMode {
         }
 
         LLResult result = robot.limelight.getLatestResult();
-        double heading = Math.toDegrees(robot.drive.getPose().getHeading() + MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false));
+        double heading = Math.toDegrees(robot.drive.getPose().getHeading() + robot.turret.getPosition());
 
         if (result != null && result.isValid()) {
             for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {

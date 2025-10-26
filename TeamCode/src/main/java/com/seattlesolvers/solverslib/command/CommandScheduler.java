@@ -428,6 +428,15 @@ public final class CommandScheduler {
     }
 
     /**
+     * Returns if a subsystem is not being used by any command currently.
+     * @param subsystem the subsystem to be inquired about
+     * @return if the subsystem is currently not being used by any command
+     */
+    public boolean isAvailable(Subsystem subsystem) {
+        return requiring(subsystem) == null;
+    }
+
+    /**
      * Disables the command scheduler.
      */
     public void disable() {
