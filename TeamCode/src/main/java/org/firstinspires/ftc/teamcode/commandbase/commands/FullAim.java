@@ -37,7 +37,7 @@ public class FullAim extends CommandBase {
         // Preliminary estimates of where drivetrain and turret should face
         double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.angleToGoal(robot.drive.getPose()));
         robot.drive.follower.setTarget(robot.drive.getPose().rotate(errorsDriveTurret[0]));
-        robot.turret.setTarget(errorsDriveTurret[1], true);
+        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, errorsDriveTurret[1]);
 
         // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
         errorsAngleVelocity = Launcher.distanceToLauncherValues(Constants.GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());

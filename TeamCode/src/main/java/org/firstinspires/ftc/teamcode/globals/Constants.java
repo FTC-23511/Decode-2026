@@ -95,9 +95,12 @@ public class Constants {
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.5, 0, 0.015, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_PIDF_COEFFICIENTS = new PIDFCoefficients(1.35, 0, 0, 0); // Coefficients for radians
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
     public static double TURRET_POS_TOLERANCE = 0.03; // Radians
+    public static double TURRET_TX_TOLERANCE = 5; // Degrees
     public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
     public static double MAX_TURRET_ANGLE = (110 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static Pose2d GOAL_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -72 : 72), 72, 0); } // Inches
+    public static double TURRET_BUFFER = (5 / 360.0) * 2 * Math.PI;
 }

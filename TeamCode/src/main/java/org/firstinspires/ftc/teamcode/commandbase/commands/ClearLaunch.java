@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -24,7 +25,7 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void initialize() {
-        robot.turret.setTarget(robot.turretEncoder.getCurrentPosition(), true);
+        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turretEncoder.getCurrentPosition());
         robot.launcher.setActiveControl(true);
         robot.launcher.setRamp(true);
         robot.intake.setIntake(Intake.MotorState.TRANSFER);
@@ -42,9 +43,9 @@ public class ClearLaunch extends CommandBase {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
         }
+
         robot.launcher.setRamp(false);
-        robot.turret.setActiveControl(false);
-        robot.launcher.setActiveControl(false);
+        robot.turret.setTurret(Turret.TurretState.OFF, 0);
     }
 
     @Override

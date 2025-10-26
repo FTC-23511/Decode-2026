@@ -1,15 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_SERVO_POS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -33,7 +24,7 @@ import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -126,7 +117,7 @@ public class FullTeleOp extends CommandOpMode {
     public void initialize_loop() {
 //        robot.launcher.setMotifState(); // TODO: Make limelight update not every loop
 
-        telemetryData.addData("Launcher Motif State", Launcher.motifState);
+        telemetryData.addData("Launcher Motif State", Turret.motifState);
         telemetryData.update();
     }
 

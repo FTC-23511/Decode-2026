@@ -1,19 +1,44 @@
 package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.LIMELIGHT_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
-    private boolean activeControl = false;
+
+    public enum Motif {
+        NOT_FOUND,
+        GPP,
+        PGP,
+        PPG
+    }
+
+    public enum TurretState {
+        LIMELIGHT_CONTROL,
+        ANGLE_CONTROL,
+        OFF
+    }
+
+    public static Motif motifState = Motif.NOT_FOUND;
+    public static TurretState turretState = ANGLE_CONTROL;
     public static PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public static PIDFController limelightController = new PIDFController(LIMELIGHT_PIDF_COEFFICIENTS);
 
     public Turret() {
         turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
@@ -21,16 +46,31 @@ public class Turret extends SubsystemBase {
     }
 
     public void init() {
-        setTarget(0, false);
+        setTurret(TurretState.OFF, 0);
     }
 
-    public void setTarget(double target, boolean setActiveControl) {
-        turretController.setSetPoint(target);
-        activeControl = setActiveControl;
-    }
+    public void setTurret(TurretState turretState, double value) {
+        switch (turretState) {
+            case ANGLE_CONTROL:
+                turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
+                turretController.setTolerance(TURRET_POS_TOLERANCE);
+                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
 
-    public void setActiveControl(boolean state) {
-        activeControl = state;
+                turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                break;
+            case LIMELIGHT_CONTROL:
+                turretController.setMinimumOutput(0);
+                turretController.setTolerance(TURRET_TX_TOLERANCE);
+                turretController.setCoefficients(LIMELIGHT_PIDF_COEFFICIENTS);
+
+                turretController.setSetPoint(0);
+                break;
+            case OFF:
+                robot.turretServos.set(0);
+                break;
+        }
+
+        Turret.turretState = turretState;
     }
 
     public double getTarget() {
@@ -42,7 +82,7 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
-        if (activeControl) {
+        if (turretState.equals(ANGLE_CONTROL)) {
             robot.profiler.start("Turret Read/Calc");
             double power = turretController.calculate(getPosition());
             robot.profiler.end("Turret Read/Calc");
@@ -50,6 +90,15 @@ public class Turret extends SubsystemBase {
             robot.profiler.start("Turret Write");
             robot.turretServos.set(power);
             robot.profiler.end("Turret Write");
+
+        } else if (turretState.equals(LIMELIGHT_CONTROL)) {
+            robot.profiler.start("Turret LimeLight Read/Calc");
+            double power = turretController.calculate(getLimeLightTargetDegrees()[0]);
+            robot.profiler.end("Turret LimeLight Read/Calc");
+
+            robot.profiler.start("Turret LimeLight Write");
+            robot.turretServos.set(power);
+            robot.profiler.end("Turret LimeLight Write");
         } else {
             robot.profiler.start("Turret Write");
             robot.turretServos.set(0);
@@ -58,7 +107,100 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint() && activeControl;
+        return (turretController.atSetPoint());
+    }
+
+    public LLStatus getLimelightStatus() {
+        return robot.limelight.getStatus();
+    }
+
+    public double[] getLimeLightTargetDegrees() {
+        double[] targetDegrees = new double[2];
+        LLResult result = robot.limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
+                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+
+                    targetDegrees[0] = fiducial.getTargetXDegrees();
+                    targetDegrees[1] = fiducial.getTargetYDegrees();
+
+                    return targetDegrees;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public boolean autoAimTurret() {
+        double[] targetDegrees = getLimeLightTargetDegrees();
+        if (targetDegrees != null) {
+            double tx = targetDegrees[0];
+            limelightController.setSetPoint(0);
+            return true;
+        }
+
+        return false;
+    }
+
+    public Pose2d getLimelightPose() {
+        LLResult result = robot.limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
+                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+
+                    robot.limelight.updateRobotOrientation(robot.drive.getPose().getHeading());
+                    Pose3D botPose = result.getBotpose_MT2();
+
+                    if (botPose != null) {
+                        double x = botPose.getPosition().x;
+                        double y = botPose.getPosition().y;
+                        double z = botPose.getPosition().z;
+
+                        x = DistanceUnit.INCH.fromMeters(x);
+                        y = DistanceUnit.INCH.fromMeters(y);
+                        z = DistanceUnit.INCH.fromMeters(z);
+
+                        if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(z)) {
+                            return new Pose2d(x, y, z);
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public boolean setMotifState() {
+        LLResult result = robot.limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if (id == 21) {
+                    motifState = Motif.PPG;
+                    return true;
+                } else if (id == 22) {
+                    motifState = Motif.PGP;
+                    return true;
+                } else if (id == 23) {
+                    motifState = Motif.GPP;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

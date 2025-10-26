@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -23,6 +24,10 @@ public class LimeLightTest extends CommandOpMode {
     public GamepadEx operator;
 
     public ElapsedTime timer;
+
+    public static double ROBOT_HEADING = 0;
+
+    public static boolean USE_PINPOINT_HEADING = false;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -51,64 +56,6 @@ public class LimeLightTest extends CommandOpMode {
     }
 
     @Override
-    public void initialize_loop() {
-        LLResult result = robot.limelight.getLatestResult();
-        double heading = Math.toDegrees(robot.drive.getPose().getHeading() + MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false));
-
-        robot.limelight.updateRobotOrientation(heading);
-
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-
-                // Blue ID = 20
-                // Obelisk PPG ID = 21
-                // Obelisk PGP ID = 22
-                // Obelisk PPG ID = 23
-                // Red ID = 24
-
-                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
-                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
-
-                    Pose3D botpose = result.getBotpose();
-                    if (botpose != null) {
-                        double x = botpose.getPosition().x;
-                        double y = botpose.getPosition().y;
-                        telemetry.addData("MT1 Location", "(" + x + ", " + y + ")");
-                    } else {
-                        telemetry.addData("MT1 Location", (Object) null);
-                    }
-
-                    Pose3D botpose_mt2 = result.getBotpose_MT2();
-                    if (botpose_mt2 != null) {
-                        double x = botpose_mt2.getPosition().x;
-                        double y = botpose_mt2.getPosition().y;
-                        telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
-                    } else {
-                        telemetry.addData("MT2 Location", (Object) null);
-                    }
-
-                    telemetryData.addData("txPixels", fiducial.getTargetXPixels());
-                    telemetryData.addData("tyPixels", fiducial.getTargetYPixels());
-                    telemetryData.addData("txDegrees", fiducial.getTargetXDegrees());
-                    telemetryData.addData("tyDegrees", fiducial.getTargetYDegrees());
-                }
-                else if (id == 21) {
-                    telemetry.addData("Obelisk location:", "GPP");
-                }
-                else if (id == 22) {
-                    telemetry.addData("Obelisk location:", "PGP");
-                }
-                else if (id == 23) {
-                    telemetry.addData("Obelisk location:", "PPG");
-                }
-            }
-        }
-
-        telemetryData.addData("Heading", heading);
-    }
-
-    @Override
     public void run() {
         // Keep all the has movement init for until when TeleOp starts
         // This is like the init but when the program is actually started
@@ -118,9 +65,7 @@ public class LimeLightTest extends CommandOpMode {
         }
 
         LLResult result = robot.limelight.getLatestResult();
-        double heading = robot.drive.getPose().getHeading();
-
-        robot.limelight.updateRobotOrientation(heading);
+        double heading = Math.toDegrees(robot.drive.getPose().getHeading() + MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false));
 
         if (result != null && result.isValid()) {
             for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
@@ -132,20 +77,63 @@ public class LimeLightTest extends CommandOpMode {
                 // Obelisk PPG ID = 23
                 // Red ID = 24
 
+                telemetryData.addData("Tag ID", id);
+
                 if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
-                 || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+
+                    if (USE_PINPOINT_HEADING) {
+                        robot.limelight.updateRobotOrientation(heading);
+                    } else {
+                        robot.limelight.updateRobotOrientation(ROBOT_HEADING);
+                    }
+
+                    Pose3D botpose = result.getBotpose();
+                    if (botpose != null) {
+                        double x = botpose.getPosition().x;
+                        double y = botpose.getPosition().y;
+                        double z = botpose.getPosition().z;
+
+                        x = DistanceUnit.INCH.fromMeters(x);
+                        y = DistanceUnit.INCH.fromMeters(y);
+                        z = DistanceUnit.INCH.fromMeters(z);
+
+                        telemetry.addData("MT1 Location", "(" + x + ", " + y + ", " + z + ")");
+                    } else {
+                        telemetry.addData("MT1 Location", (Object) null);
+                    }
+
                     Pose3D botpose_mt2 = result.getBotpose_MT2();
                     if (botpose_mt2 != null) {
                         double x = botpose_mt2.getPosition().x;
                         double y = botpose_mt2.getPosition().y;
-                        telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
+                        double z = botpose_mt2.getPosition().z;
+
+                        x = DistanceUnit.INCH.fromMeters(x);
+                        y = DistanceUnit.INCH.fromMeters(y);
+                        z = DistanceUnit.INCH.fromMeters(z);
+
+                        telemetry.addData("MT1 Location", "(" + x + ", " + y + ", " + z + ")");
+                    } else {
+                        telemetry.addData("MT2 Location", (Object) null);
                     }
+
+                    telemetryData.addData("txPixels", fiducial.getTargetXPixels());
+                    telemetryData.addData("tyPixels", fiducial.getTargetYPixels());
+                    telemetryData.addData("txDegrees", fiducial.getTargetXDegrees());
+                    telemetryData.addData("tyDegrees", fiducial.getTargetYDegrees());
+
+                    telemetryData.addData("robotPoseTargetSpace", fiducial.getRobotPoseTargetSpace()); // Robot pose relative it the AprilTag Coordinate System (Most Useful)
+                    telemetryData.addData("cameraPoseTargetSpace", fiducial.getCameraPoseTargetSpace()); // Camera pose relative to the AprilTag (useful)
+                    telemetryData.addData("robotPoseFieldSpace", fiducial.getRobotPoseFieldSpace()); // Robot pose in the field coordinate system based on this tag alone (useful)
+                    telemetryData.addData("targetPoseCameraSpace", fiducial.getTargetPoseCameraSpace()); // AprilTag pose in the camera's coordinate system (not very useful)
+                    telemetryData.addData("targetPoseRobotSpace", fiducial.getTargetPoseRobotSpace()); // AprilTag pose in the robot's coordinate system (not very useful)
                 }
                 else if (id == 21) {
                     telemetry.addData("Obelisk location:", "GPP");
                 }
                 else if (id == 22) {
-                    telemetry.addData("Obelisk location:", "PPG");
+                    telemetry.addData("Obelisk location:", "PGP");
                 }
                 else if (id == 23) {
                     telemetry.addData("Obelisk location:", "PPG");

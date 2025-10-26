@@ -9,6 +9,7 @@ import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -45,6 +46,14 @@ public class Launcher extends SubsystemBase {
     public void setFlywheel(double vel, boolean setActiveControl) {
         flywheelController.setSetPoint(vel * M_S_TO_TICKS);
         activeControl = setActiveControl;
+    }
+
+    public double getTargetHoodAngle(){
+        return targetHoodAngle;
+    }
+
+    public double getTargetFlywheelVelocity(){
+        return targetFlywheelVelocity;
     }
 
     public void setActiveControl(boolean state) {
@@ -171,85 +180,6 @@ public class Launcher extends SubsystemBase {
 
         // Return the valid, constrained solution
         return new double[]{requiredVelocity, finalAngleVert};
-    }
-
-    public double getTargetHoodAngle(){
-        return targetHoodAngle;
-    }
-
-    public double getTargetFlywheelVelocity(){
-        return targetFlywheelVelocity;
-    }
-
-    public LLStatus getLimelightStatus() {
-        return robot.limelight.getStatus();
-    }
-
-    public double[] getTargetDegrees() {
-        double[] targetDegrees = new double[2];
-        LLResult result = robot.limelight.getLatestResult();
-
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-
-                targetDegrees[0] = fiducial.getTargetYDegrees();
-                targetDegrees[1] = fiducial.getTargetXDegrees();
-            }
-        }
-
-        return targetDegrees;
-    }
-
-    public Pose2d getLimelightPose() {
-        LLResult result = robot.limelight.getLatestResult();
-
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-
-                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
-                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
-
-                    robot.limelight.updateRobotOrientation(robot.drive.getPose().getHeading());
-                    Pose3D botPose = result.getBotpose_MT2();
-
-                    if (botPose != null) {
-                        double x = botPose.getPosition().x;
-                        double y = botPose.getPosition().y;
-
-//                        if (x > ) {
-
-//                        }
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public boolean setMotifState() {
-        LLResult result = robot.limelight.getLatestResult();
-
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
-
-                if (id == 21) {
-                    motifState = Motif.PPG;
-                    return true;
-                } else if (id == 22) {
-                    motifState = Motif.PGP;
-                    return true;
-                } else if (id == 23) {
-                    motifState = Motif.GPP;
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     @Override
