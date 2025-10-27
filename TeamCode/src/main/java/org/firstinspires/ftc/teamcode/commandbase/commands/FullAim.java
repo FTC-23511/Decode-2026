@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.command.FunctionalCommand;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
@@ -31,6 +32,8 @@ public class FullAim extends CommandBase {
 
     @Override
     public void initialize() {
+        ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
+
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
@@ -64,7 +67,6 @@ public class FullAim extends CommandBase {
                 robot.launcher.setHood(errorsAngleVelocity[1]);
             }
             secondaryAim = true;
-            robot.turret.setTurret(Turret.TurretState.OFF, 0);
         }
     }
 
@@ -76,6 +78,12 @@ public class FullAim extends CommandBase {
             robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
             robot.launcher.setHood(MIN_HOOD_ANGLE);
         }
+
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
+        }
+
+        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
     }
 
     @Override

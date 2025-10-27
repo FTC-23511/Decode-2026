@@ -2,20 +2,13 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.util.InterpLUT;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
@@ -33,7 +26,13 @@ public class Launcher extends SubsystemBase {
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
 
+    private InterpLUT launcherVel = new InterpLUT(
+            Arrays.asList(-0.01, 500.0, LAUNCHER_MAX_VELOCITY), // input: velocity (m/s)
+            Arrays.asList(0.0, 0.0, 0.0) // output:
+    );
+
     public Launcher() {
+        launcherVel.createLUT();
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
     }
 
@@ -44,7 +43,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setFlywheel(double vel, boolean setActiveControl) {
-        flywheelController.setSetPoint(vel * M_S_TO_TICKS);
+//        flywheelController.setSetPoint(launcherVel.get(vel)); Previously: flywheelController.setSetPoint(vel * M_S_TO_TICKS);
         activeControl = setActiveControl;
     }
 
@@ -136,7 +135,7 @@ public class Launcher extends SubsystemBase {
             finalAngleHoriz = optimalAngleHoriz;
 
             // Check velocity limit for this optimal shot
-            if (minVelocity > MAX_VELOCITY) {
+            if (minVelocity > MAX_DRIVE_VELOCITY) {
                 // Even the most efficient shot is too fast. IMPOSSIBLE.
                 return new double[]{Double.NaN, Double.NaN};
             }
@@ -173,7 +172,7 @@ public class Launcher extends SubsystemBase {
 
         // --- 4. Final Velocity Constraint Check and Return ---
 
-        if (requiredVelocity > MAX_VELOCITY) {
+        if (requiredVelocity > MAX_DRIVE_VELOCITY) {
             // The required velocity for the forced angle is too high. IMPOSSIBLE.
             return new double[]{Double.NaN, Double.NaN};
         }

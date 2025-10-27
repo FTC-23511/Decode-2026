@@ -62,7 +62,7 @@ public class LM0TeleOp extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.INTAKE)),
+                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
                         new InstantCommand(() -> robot.intake.toggleIntake())
                 )
         );
@@ -118,8 +118,8 @@ public class LM0TeleOp extends CommandOpMode {
             double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
             robot.drive.swerve.updateWithTargetVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
-                            driver.getLeftY() * Constants.MAX_VELOCITY * speedMultiplier,
-                            -driver.getLeftX() * Constants.MAX_VELOCITY * speedMultiplier,
+                            driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                            -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
                             -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
                             robot.drive.getPose().getRotation()
                     )

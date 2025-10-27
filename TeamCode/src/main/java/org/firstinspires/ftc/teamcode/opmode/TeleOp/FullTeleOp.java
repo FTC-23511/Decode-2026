@@ -65,6 +65,10 @@ public class FullTeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d())))
         );
 
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenReleased(
+                new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0)))
+        );
+
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
         );
@@ -72,7 +76,7 @@ public class FullTeleOp extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.INTAKE)),
+                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
                         new InstantCommand(() -> robot.intake.toggleIntake())
                 )
         );
@@ -91,7 +95,10 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(true)).andThen(new WaitCommand(200)),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)).alongWith(
+                                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
+                        ),
+                        new WaitCommand(200),
                         new ClearLaunch()
                 )
         );
@@ -166,8 +173,8 @@ public class FullTeleOp extends CommandOpMode {
 
                 robot.drive.swerve.updateWithTargetVelocity(
                         ChassisSpeeds.fromFieldRelativeSpeeds(
-                                driver.getLeftY() * Constants.MAX_VELOCITY * speedMultiplier,
-                                -driver.getLeftX() * Constants.MAX_VELOCITY * speedMultiplier,
+                                driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                                -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
                                 robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
                                 robotAngle
                         )
@@ -193,6 +200,8 @@ public class FullTeleOp extends CommandOpMode {
 
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
         telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
+
+        telemetryData.addData("Intake overCurrent", robot.intakeMotor.isOverCurrent());
 
         robot.profiler.end("High TelemetryData");
         robot.profiler.start("Low TelemetryData");

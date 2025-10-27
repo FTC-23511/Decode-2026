@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -26,7 +25,7 @@ public class FullLaunchTuner extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    public static double INTAKE_SERVO_POS = INTAKE_PIVOT_INTAKE;
+    public static double INTAKE_SERVO_POS = INTAKE_PIVOT_FORWARD;
     public static double HOOD_SERVO_POS = MAX_HOOD_SERVO_POS;
     public static double RAMP_SERVO_POS = RAMP_ENGAGED;
     public static double INTAKE_MOTOR_POWER = 0;

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
 public class AlliancePoseSelector extends LinearOpMode {
-    private ElapsedTime buttonTimer;
+//    private ElapsedTime buttonTimer;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -19,7 +19,7 @@ public class AlliancePoseSelector extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
-        buttonTimer = new ElapsedTime();
+//        buttonTimer = new ElapsedTime();
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {

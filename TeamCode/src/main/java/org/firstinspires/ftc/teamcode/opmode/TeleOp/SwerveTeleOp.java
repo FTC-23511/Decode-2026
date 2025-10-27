@@ -69,8 +69,8 @@ public class SwerveTeleOp extends CommandOpMode {
         double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         robot.drive.swerve.updateWithTargetVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
-                        driver.getLeftY() * Constants.MAX_VELOCITY * speedMultiplier,
-                        -driver.getLeftX() * Constants.MAX_VELOCITY * speedMultiplier,
+                        driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                        -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
                         -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
                         robot.drive.getPose().getRotation()
                 )

@@ -81,6 +81,8 @@ public class TurretServosEncoder extends CommandOpMode {
         super.run();
         robot.pinpoint.update();
         telemetryData.update();
+        robot.controlHub.clearBulkCache();
+        robot.expansionHub.clearBulkCache();
     }
 
     @Override

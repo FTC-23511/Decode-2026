@@ -12,6 +12,7 @@ public class ClearLaunch extends CommandBase {
     private final Robot robot;
     private ElapsedTime timer;
     private boolean targetStateSolved = false;
+    private int index = 0;
 
     /**
      * Assumes {@link FullAim} has already been performed
@@ -26,7 +27,6 @@ public class ClearLaunch extends CommandBase {
     @Override
     public void initialize() {
         robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
-        robot.launcher.setActiveControl(true);
         robot.launcher.setRamp(true);
         robot.intake.setIntake(Intake.MotorState.TRANSFER);
         robot.intake.setPivot(Intake.PivotState.TRANSFER);
@@ -36,12 +36,33 @@ public class ClearLaunch extends CommandBase {
     @Override
     public void execute() {
         // TODO: Add code to auto launch third ball that sometimes gets stuck
+        if (index == 0 && timer.milliseconds() > 1000) {
+//            robot.intake.setIntake(Intake.PivotState.);
+            robot.intake.setIntake(Intake.MotorState.REVERSE);
+            robot.launcher.setRamp(false);
+            index = 1;
+            timer.reset();
+        }
+
+        if (index == 1 && timer.milliseconds() > 200) {
+            robot.intake.setIntake(Intake.MotorState.TRANSFER);
+            index = 2;
+            timer.reset();
+        }
+
+        if (index == 2  && timer.milliseconds() > 500) {
+            robot.launcher.setRamp(true);
+            index = 3;
+            timer.reset();
+        }
     }
 
     @Override
     public void end(boolean interrupted) {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
+        } else {
+            // TODO: Add distance sensor checking
         }
 
         robot.launcher.setRamp(false);
@@ -51,6 +72,6 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return timer.milliseconds() > 2000; // TODO: replace with real end condition of the command
+        return index == 3 && timer.milliseconds() > 2000; // TODO: replace with real end condition of the command
     }
 }

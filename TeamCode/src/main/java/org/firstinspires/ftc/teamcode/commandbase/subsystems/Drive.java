@@ -27,7 +27,7 @@ public class Drive extends SubsystemBase {
         swerve = new CoaxialSwerveDrivetrain(
                 TRACK_WIDTH,
                 WHEEL_BASE,
-                OP_MODE_TYPE.equals(OpModeType.AUTO) ? AUTO_MAX_VELOCITY : MAX_VELOCITY,
+                OP_MODE_TYPE.equals(OpModeType.AUTO) ? AUTO_MAX_DRIVE_VELOCITY : MAX_DRIVE_VELOCITY,
                 SWERVO_PIDF_COEFFICIENTS,
                 new MotorEx[]{
                         robot.FRmotor,

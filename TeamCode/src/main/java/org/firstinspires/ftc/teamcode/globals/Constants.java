@@ -30,10 +30,10 @@ public class Constants {
 
     public static double TRACK_WIDTH = 11.27362; // Inches
     public static double WHEEL_BASE = 11.50976; // Inches
-    public static double MAX_VELOCITY = 7.75 * 12; // Inches/second
-    public static double AUTO_MAX_VELOCITY = 50; // Inches/second
-    public static double MAX_ANGULAR_VELOCITY = MAX_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
-    public static double AUTO_MAX_ANGULAR_VELOCITY = AUTO_MAX_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
+    public static double MAX_DRIVE_VELOCITY = 7.75 * 12; // Inches/second
+    public static double AUTO_MAX_DRIVE_VELOCITY = 50; // Inches/second
+    public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
+    public static double AUTO_MAX_ANGULAR_VELOCITY = AUTO_MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
     public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 150; // Hertz // TODO: needs to be tuned
 
@@ -57,22 +57,22 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 0.15; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_INTAKE = 0.567;
+    public static double INTAKE_PIVOT_FORWARD = 0.567;
     public static double INTAKE_PIVOT_HOLD = 0.5;
-    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_HOLD; // honestly just delete this
+    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
-    public static double INTAKE_REVERSE_SPEED = -0.75;
+    public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
+
+    public static double INTAKE_CURRENT_THRESHOLD = 1000.0;
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
 
-
     public static final double GRAVITY = 9.81;
     public static final double LAUNCHER_HEIGHT = 0.3302; //13 inches
     public static final double TARGET_HEIGHT = 1.0;
-
 
     // Launcher
     public static double RAMP_ENGAGED = 0.3;
@@ -86,8 +86,10 @@ public class Constants {
     public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 6.0; // Meters/second
 
+    public static double LAUNCHER_MAX_VELOCITY = 275*7.8; // Meters/second
+
     public static double MIN_HOOD_ANGLE = 16; // Degrees from horizontal // TODO: needs to be checked off CAD
-    public static double MIN_HOOD_SERVO_POS = 0.07; // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_HOOD_SERVO_POS = 0.00; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal // TODO: needs to be checked off CAD
     public static double MAX_HOOD_SERVO_POS = 1.0; // Position // MUST MATCH WITH VALUE ABOVE
     public static double MIN_LL_HOOD_ANGLE = 16; // Degrees from horizontal // Minimum hood angle for Limelight to be able to see AprilTags from anywhere on the field// TODO: needs to be tuned

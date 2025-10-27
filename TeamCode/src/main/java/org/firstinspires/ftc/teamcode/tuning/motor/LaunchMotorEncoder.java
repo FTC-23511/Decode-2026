@@ -65,11 +65,16 @@ public class LaunchMotorEncoder extends CommandOpMode {
         timer.reset();
 
         telemetryData.addData("Launch Motor Position", robot.launchEncoder.getPosition());
+        telemetryData.addData("Launch Raw Motor Velocity", robot.launchEncoder.getRawVelocity());
+        telemetryData.addData("Launch Corrected Motor Velocity", robot.launchEncoder.getCorrectedVelocity());
+        telemetryData.addData("Direct Motor Corrected Velocity", robot.launchMotors.getVelocities());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();
         robot.pinpoint.update();
         telemetryData.update();
+        robot.controlHub.clearBulkCache();
+        robot.expansionHub.clearBulkCache();
     }
 
     @Override

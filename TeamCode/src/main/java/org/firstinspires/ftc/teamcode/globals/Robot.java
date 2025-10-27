@@ -21,6 +21,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
@@ -110,7 +111,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BLmotor.setRunMode(Motor.RunMode.RawPower);
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
-        intakeMotor = new MotorEx(hwMap, "intakeMotor").setCachingTolerance(0.01);
+        intakeMotor = new MotorEx(hwMap, "intakeMotor")
+                .setCachingTolerance(0.01)
+                .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS);
         intakeMotor.setRunMode(Motor.RunMode.RawPower);
         intakeMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
@@ -209,7 +212,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         if (voltageTimer == null) {
             voltageTimer = new ElapsedTime();
             cachedVoltage = controlHub.getInputVoltage(VoltageUnit.VOLTS);
-        } else if (voltageTimer.milliseconds() > (1 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
+        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
             cachedVoltage = controlHub.getInputVoltage(VoltageUnit.VOLTS);
         }
         return cachedVoltage;

@@ -156,8 +156,10 @@ public class MotorEx extends Motor {
      * @param current the current alert to set
      * @param unit the unit to set the current alert in
      */
-    public void setCurrentAlert(double current, CurrentUnit unit) {
+    public MotorEx setCurrentAlert(double current, CurrentUnit unit) {
         motorEx.setCurrentAlert(current, unit);
+
+        return this;
     }
 
     /**

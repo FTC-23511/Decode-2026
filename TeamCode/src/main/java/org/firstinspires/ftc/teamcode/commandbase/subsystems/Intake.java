@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Intake extends SubsystemBase {
@@ -17,7 +19,7 @@ public class Intake extends SubsystemBase {
     }
 
     public enum PivotState {
-        INTAKE,
+        FORWARD,
         TRANSFER,
         HOLD
     }
@@ -28,15 +30,22 @@ public class Intake extends SubsystemBase {
         FOV_27
     }
 
+    private boolean intakeJammed = false;
+    private final ElapsedTime intakeTimer;
     public static MotorState motorState = MotorState.STOP;
     public static PivotState pivotState = PivotState.HOLD;
     public static DistanceState distanceState = DistanceState.FOV_15;
+
+    public Intake() {
+        intakeTimer = new ElapsedTime();
+        intakeTimer.reset();
+    }
 
     public void init() {
         if (OP_MODE_TYPE == OpModeType.AUTO) {
             setPivot(PivotState.HOLD);
         } else {
-            setPivot(PivotState.INTAKE);
+            setPivot(PivotState.FORWARD);
         }
     }
 
@@ -48,8 +57,8 @@ public class Intake extends SubsystemBase {
             case TRANSFER:
                 robot.intakePivotServo.set(INTAKE_PIVOT_TRANSFER);
                 break;
-            case INTAKE:
-                robot.intakePivotServo.set(INTAKE_PIVOT_INTAKE);
+            case FORWARD:
+                robot.intakePivotServo.set(INTAKE_PIVOT_FORWARD);
                 break;
         }
 
@@ -74,7 +83,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void toggleIntake() {
-        if (pivotState.equals(PivotState.INTAKE)) {
+        if (pivotState.equals(PivotState.FORWARD)) {
             if (motorState.equals(MotorState.FORWARD)) {
                 setIntake(MotorState.STOP);
             } else if (motorState.equals(MotorState.STOP)) {
@@ -85,18 +94,30 @@ public class Intake extends SubsystemBase {
 
     public void updateIntake() {
         robot.profiler.start("Intake Update");
-        if (pivotState.equals(PivotState.INTAKE)) {
+        if (pivotState.equals(PivotState.FORWARD)) {
             switch (motorState) {
                 case FORWARD:
                     if (transferFull()) {
                         setPivot(PivotState.HOLD);
                         setIntake(MotorState.STOP);
                     }
+
+                    if (robot.intakeMotor.isOverCurrent()) {
+                        intakeJammed = true;
+                        intakeTimer.reset();
+                        setIntake(MotorState.REVERSE);
+                    }
                     break;
                 case REVERSE:
-                    // ..
+                    if (intakeJammed && intakeTimer.milliseconds() >= 500) {
+                        setIntake(MotorState.FORWARD);
+                        intakeJammed = false;
+                        intakeTimer.reset();
+                    }
                     break;
-                // No point of setting intakeMotor to 0 again
+                case STOP:
+                    // No point of setting intakeMotor to 0 again
+                    break;
             }
         } else if (pivotState.equals(PivotState.HOLD)) {
             setIntake(MotorState.STOP);
