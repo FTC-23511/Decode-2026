@@ -62,8 +62,6 @@ public class LaunchMotorTuner extends CommandOpMode {
         double motorVel = robot.launchEncoder.getCorrectedVelocity();
         double voltage = robot.getVoltage();
 
-        TARGET_VEL = Math.max(0, TARGET_VEL);
-
         launcherPIDF.setPIDF(P, I, D, F / (voltage / 12.0));
 
         launcherPIDF.setTolerance(POS_TOLERANCE, 0);

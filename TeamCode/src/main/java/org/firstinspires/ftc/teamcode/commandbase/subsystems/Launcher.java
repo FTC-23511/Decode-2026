@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -30,6 +31,7 @@ public class Launcher extends SubsystemBase {
             Arrays.asList(-0.01, 500.0, LAUNCHER_MAX_VELOCITY), // input: velocity (m/s)
             Arrays.asList(0.0, 0.0, 0.0) // output:
     );
+    // 4.76 m/s -> 1500 tick/s
 
     public Launcher() {
         launcherVel.createLUT();
@@ -45,6 +47,15 @@ public class Launcher extends SubsystemBase {
     public void setFlywheel(double vel, boolean setActiveControl) {
 //        flywheelController.setSetPoint(launcherVel.get(vel)); Previously: flywheelController.setSetPoint(vel * M_S_TO_TICKS);
         activeControl = setActiveControl;
+    }
+
+    /**
+     * Used for INTERNAL TESTING OPMODES ONLY
+     * @param vel velocity in ticks/second
+     */
+    public void setFlywheelTicks(double vel) {
+        flywheelController.setSetPoint(vel);
+        activeControl = true;
     }
 
     public double getTargetHoodAngle(){
@@ -85,9 +96,10 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setHood(double angle) {
+        double angle2 = Range.clip(angle, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE);
         // Solved from proportion (targetServo - minServo) / servoRange = (targetAngle - minAngle) / angleRange
         robot.hoodServo.set(
-                (angle - MIN_HOOD_ANGLE) / (MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * (MAX_HOOD_SERVO_POS - MIN_HOOD_SERVO_POS) + MIN_HOOD_SERVO_POS
+                (angle2 - MIN_HOOD_ANGLE) / (MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * (MAX_HOOD_SERVO_POS - MIN_HOOD_SERVO_POS) + MIN_HOOD_SERVO_POS
         );
     }
 

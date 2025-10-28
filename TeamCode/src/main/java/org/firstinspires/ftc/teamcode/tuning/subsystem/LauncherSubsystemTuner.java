@@ -7,12 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -24,8 +22,10 @@ public class LauncherSubsystemTuner extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    public static double SERVO_POS = 0.0;
-    public static double MOTOR_POWER = 0.0;
+    public static boolean USE_RAW_SERVO_POS = false;
+    public static double SERVO_OUTPUT = 0.0; // either raw servo pos or hood angle
+    public static double TARGET_VEL = 0.0; // ticks/sec
+    public static double DISTANCE = 1.5; // meters
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -44,12 +44,6 @@ public class LauncherSubsystemTuner extends CommandOpMode {
 
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
-
-        // Driver controls
-        // Reset heading
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
-        );
     }
 
     @Override
@@ -61,17 +55,27 @@ public class LauncherSubsystemTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
-        robot.intakePivotServo.set(SERVO_POS);
+        robot.launcher.setRamp(true);
 
-        MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotor.set(MOTOR_POWER);
+        if (USE_RAW_SERVO_POS) {
+            SERVO_OUTPUT = Range.clip(SERVO_OUTPUT, 0.0, 1.0);
+            robot.hoodServo.set(SERVO_OUTPUT);
+        } else {
+            robot.launcher.setHood(SERVO_OUTPUT);
+        }
+
+        robot.launcher.setFlywheelTicks(TARGET_VEL);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("SERVO_POS", SERVO_POS);
-        telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
+        telemetryData.addData("Math Output Required Ball Vel", Launcher.distanceToLauncherValues(DISTANCE)[0]);
+        telemetryData.addData("Math Output Required Hood Angle", Launcher.distanceToLauncherValues(DISTANCE)[1]);
+        telemetryData.addData("SERVO_OUTPUT", SERVO_OUTPUT);
+        telemetryData.addData("Hood Pos", robot.hoodServo.get());
+        telemetryData.addData("Motor Power", robot.launchMotors.get());
+        telemetryData.addData("Motor Velocity", robot.launchEncoder.getCorrectedVelocity());
+        telemetryData.addData("TARGET_VEL", TARGET_VEL);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();

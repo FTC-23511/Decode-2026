@@ -65,14 +65,10 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 1000.0;
+    public static double INTAKE_CURRENT_THRESHOLD = 1000.0; // Milliamps
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
-
-    public static final double GRAVITY = 9.81;
-    public static final double LAUNCHER_HEIGHT = 0.3302; //13 inches
-    public static final double TARGET_HEIGHT = 1.0;
 
     // Launcher
     public static double RAMP_ENGAGED = 0.3;
@@ -83,12 +79,16 @@ public class Constants {
     public static double M_S_TO_TICKS = 275; // Conversion factor for ball velocity in meters/second to launcher encoder ticks // TODO: needs to be tuned
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.9; // Power
 
+    public static final double GRAVITY = 9.81; // meters/second
+    public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
+    public static final double TARGET_HEIGHT = 1.0; // meters
+
     public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 6.0; // Meters/second
 
-    public static double LAUNCHER_MAX_VELOCITY = 275*7.8; // Meters/second
+    public static double LAUNCHER_MAX_VELOCITY = 1800; // Ticks/second
 
-    public static double MIN_HOOD_ANGLE = 16; // Degrees from horizontal // TODO: needs to be checked off CAD
+    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be checked off CAD
     public static double MIN_HOOD_SERVO_POS = 0.00; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal // TODO: needs to be checked off CAD
     public static double MAX_HOOD_SERVO_POS = 1.0; // Position // MUST MATCH WITH VALUE ABOVE
