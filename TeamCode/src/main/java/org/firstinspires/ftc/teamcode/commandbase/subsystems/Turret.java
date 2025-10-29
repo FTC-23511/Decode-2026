@@ -52,7 +52,6 @@ public class Turret extends SubsystemBase {
     public void setTurret(TurretState turretState, double value) {
         switch (turretState) {
             case ANGLE_CONTROL:
-                turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
                 turretController.setTolerance(TURRET_POS_TOLERANCE);
                 turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
 
@@ -60,9 +59,8 @@ public class Turret extends SubsystemBase {
                 break;
             case LIMELIGHT_CONTROL:
                 ATagVisible = false;
-                turretController.setMinimumOutput(0);
                 turretController.setTolerance(TURRET_TY_TOLERANCE);
-                turretController.setCoefficients(LIMELIGHT_PIDF_COEFFICIENTS);
+                turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
 
                 turretController.setSetPoint(0);
                 break;
@@ -98,8 +96,16 @@ public class Turret extends SubsystemBase {
             robot.profiler.end("Turret Read");
 
             if (targetDegrees != null) {
+                double ty = targetDegrees[1];
                 ATagVisible = true;
-                double power = turretController.calculate(targetDegrees[1]);
+
+                if (Math.abs(ty) > LIMELIGHT_PID_THRESHOLD) {
+                    turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
+                } else {
+                    turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
+                }
+
+                double power = turretController.calculate(ty);
 
                 robot.profiler.start("Turret Write");
                 robot.turretServos.set(power);
@@ -148,7 +154,8 @@ public class Turret extends SubsystemBase {
         return null;
     }
 
-    public Pose2d getLimelightPose() {
+    /*
+    public Pose2d getLimelightPoseMT2() {
         LLResult result = robot.limelight.getLatestResult();
 
         if (result != null && result.isValid()) {
@@ -179,6 +186,51 @@ public class Turret extends SubsystemBase {
         }
 
         return null;
+    }
+
+     */
+
+    public Pose2d getLimelightPose() {
+        LLResult result = robot.limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : result.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
+                        || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
+
+                    Pose3D botPose = result.getBotpose();
+
+                    if (botPose != null) {
+                        double x = botPose.getPosition().x;
+                        double y = botPose.getPosition().y;
+                        double z = botPose.getPosition().z;
+
+                        x = DistanceUnit.INCH.fromMeters(x);
+                        y = DistanceUnit.INCH.fromMeters(y);
+                        z = DistanceUnit.INCH.fromMeters(z);
+
+                        if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(z)) {
+                            return new Pose2d(x, y, z);
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Pose2d getLimeLightPose(int n) {
+        Pose2d pose2d = null;
+        int m = n;
+
+        while (pose2d == null && m > 0) {
+            pose2d = getLimelightPose();
+            m--;
+        }
+        return pose2d;
     }
 
     public boolean setMotifState() {

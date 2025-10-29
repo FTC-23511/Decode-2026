@@ -4,8 +4,8 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
-import com.seattlesolvers.solverslib.command.FunctionalCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
@@ -58,7 +58,13 @@ public class FullAim extends CommandBase {
 
         // TODO: Add code to set targets for turret and condition to set final hood / shooter RPM values
         if (robot.turret.readyToLaunch() && Turret.turretState.equals(Turret.TurretState.LIMELIGHT_CONTROL) && !secondaryAim) {
-            errorsAngleVelocity = Launcher.distanceToLauncherValues(Constants.GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+            Pose2d robotPose = robot.turret.getLimeLightPose(5);
+
+            if (robotPose == null) {
+                robotPose = robot.drive.getPose();
+            }
+
+            errorsAngleVelocity = Launcher.distanceToLauncherValues(Constants.GOAL_POSE().minus(robotPose).getTranslation().getNorm());
             if (Double.isNaN(errorsAngleVelocity[0])) {
                 impossible = true;
             } else {

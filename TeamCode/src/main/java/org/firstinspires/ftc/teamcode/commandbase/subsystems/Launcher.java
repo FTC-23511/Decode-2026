@@ -28,8 +28,8 @@ public class Launcher extends SubsystemBase {
     private double targetFlywheelVelocity = 0.0;
 
     private InterpLUT launcherVel = new InterpLUT(
-            Arrays.asList(-0.01,4.28, 4.76, 5.22, 5.65, 6.06, 10.0), // input: velocity (m/s)
-            Arrays.asList(0.0, 1350.0, 1550.0, 1650.0, 1750.0, 1967.0, 2000.0) // output:
+            Arrays.asList(-0.01, 4.28,   4.76,   5.22,   5.65,   6.06,   10.0), // input: velocity (m/s)
+            Arrays.asList(0.0,   1350.0, 1550.0, 1650.0, 1750.0, 1967.0, 2000.0) // output:
     );
     // 4.76 m/s -> 1500 tick/s
 

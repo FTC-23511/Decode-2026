@@ -97,7 +97,9 @@ public class Constants {
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.5, 0, 0.015, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_PIDF_COEFFICIENTS = new PIDFCoefficients(1.35, 0, 0, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.0441, 0, 0.008, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.06, 0, 0.0023, 0); // Coefficients for radians
+    public static double LIMELIGHT_PID_THRESHOLD = 1.967;
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
     public static double TURRET_POS_TOLERANCE = 0.03; // Radians
     public static double TURRET_TY_TOLERANCE = 3; // Degrees
