@@ -38,7 +38,7 @@ public class Turret extends SubsystemBase {
     public static Motif motifState = Motif.NOT_FOUND;
     public static TurretState turretState = ANGLE_CONTROL;
     public boolean ATagVisible = false;
-    public static PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
 
     public Turret() {
         turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
@@ -116,10 +116,6 @@ public class Turret extends SubsystemBase {
                 robot.turretServos.set(0);
                 robot.profiler.end("Turret Write");
             }
-        } else {
-            robot.profiler.start("Turret Write");
-            robot.turretServos.set(0);
-            robot.profiler.end("Turret Write");
         }
     }
 

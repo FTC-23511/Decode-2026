@@ -5,6 +5,7 @@ import android.util.Log;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -12,6 +13,7 @@ import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -27,8 +29,6 @@ public class TurretServosTuner extends CommandOpMode {
     public static double TARGET_POS = 0.0;
     public static double POS_TOLERANCE = 0.03;
 
-    private static final PIDFController turretPIDF = new PIDFController(P, I, D, F);
-
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public ElapsedTime timer;
     private final Robot robot = Robot.getInstance();
@@ -37,8 +37,7 @@ public class TurretServosTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
-
-        turretPIDF.setTolerance(POS_TOLERANCE, 0);
+        Turret.turretState = Turret.TurretState.OFF;
 
         // Resets the command scheduler
         super.reset();
@@ -50,17 +49,17 @@ public class TurretServosTuner extends CommandOpMode {
     @Override
     public void run() {
         if (timer == null) {
+            Turret.turretState = Turret.TurretState.OFF;
             timer = new ElapsedTime();
         }
-
+        Turret.turretState = Turret.TurretState.OFF;
         double servoPos = robot.turret.getPosition();
 
-        turretPIDF.setPIDF(P, I, D, F);
-        turretPIDF.setTolerance(POS_TOLERANCE);
-        turretPIDF.setMinimumOutput(MIN_OUTPUT);
-        turretPIDF.setSetPoint(TARGET_POS);
+        robot.turret.turretController.setPIDF(P, I, D, F);
+        robot.turret.turretController.setTolerance(POS_TOLERANCE);
+        robot.turret.turretController.setMinimumOutput(MIN_OUTPUT);
 
-        double power = turretPIDF.calculate(servoPos, TARGET_POS);
+        double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);
 
         robot.turretServos.set(power);
 
@@ -77,8 +76,6 @@ public class TurretServosTuner extends CommandOpMode {
         super.run();
         robot.pinpoint.update();
         telemetryData.update();
-        robot.controlHub.clearBulkCache();
-        robot.expansionHub.clearBulkCache();
     }
     
     @Override

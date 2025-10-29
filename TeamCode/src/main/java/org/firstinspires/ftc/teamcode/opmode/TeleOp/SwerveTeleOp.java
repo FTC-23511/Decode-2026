@@ -91,7 +91,7 @@ public class SwerveTeleOp extends CommandOpMode {
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();
         telemetryData.update();
-        robot.controlHub.clearBulkCache();
+//        robot.controlHub.clearBulkCache();
     }
 
     @Override

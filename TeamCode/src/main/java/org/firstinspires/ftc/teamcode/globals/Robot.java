@@ -4,10 +4,13 @@ import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.EXPANS
 import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.SERVO_HUB_PRODUCT_NUMBER;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import android.util.Log;
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -31,6 +34,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import dev.nullftc.profiler.Profiler;
 import dev.nullftc.profiler.entry.BasicProfilerEntryFactory;
@@ -43,9 +47,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         return instance;
     }
 
-    public LynxModule controlHub;
-    public LynxModule expansionHub;
-    public LynxModule servoHub;
+//    public LynxModule controlHub;
+//    public LynxModule expansionHub;
+//    public LynxModule servoHub;
+//    public ArrayList<LynxModule> hubs;
+    public VoltageSensor voltageSensor;
     private double cachedVoltage;
     private ElapsedTime voltageTimer;
 
@@ -101,6 +107,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .build();
 
         // Hardware
+        voltageSensor = hwMap.voltageSensor.iterator().next();
+
         FRmotor = new MotorEx(hwMap, "FR").setCachingTolerance(0.01);
         FLmotor = new MotorEx(hwMap, "FL").setCachingTolerance(0.01);
         BLmotor = new MotorEx(hwMap, "BL").setCachingTolerance(0.01);
@@ -181,18 +189,18 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turret = new Turret();
 
         // Robot/CommandScheduler configurations
-//        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
+        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
 
-        for (LynxModule hub : hwMap.getAll(LynxModule.class)) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-            if (hub.isParent() && LynxConstants.isEmbeddedSerialNumber(hub.getSerialNumber())) {
-                controlHub = hub;
-            } else if (!hub.isParent() && hub.getRevProductNumber() == (EXPANSION_HUB_PRODUCT_NUMBER)) {
-                expansionHub = hub;
-            } else if (!hub.isParent() && hub.getRevProductNumber() == (SERVO_HUB_PRODUCT_NUMBER)) {
-                servoHub = hub;
-            }
-        }
+//        for (LynxModule hub : hwMap.getAll(LynxModule.class)) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//            if (hub.isParent() && LynxConstants.isEmbeddedSerialNumber(hub.getSerialNumber())) {
+//                controlHub = hub;
+//            } else if (!hub.isParent() && hub.getRevProductNumber() == (EXPANSION_HUB_PRODUCT_NUMBER)) {
+//                expansionHub = hub;
+//            } else if (!hub.isParent() && hub.getRevProductNumber() == (SERVO_HUB_PRODUCT_NUMBER)) {
+//                servoHub = hub;
+//            }
+//        }
 
         register(drive, intake, launcher, turret);
 
@@ -211,9 +219,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public double getVoltage() {
         if (voltageTimer == null) {
             voltageTimer = new ElapsedTime();
-            cachedVoltage = controlHub.getInputVoltage(VoltageUnit.VOLTS);
+            cachedVoltage = voltageSensor.getVoltage();
         } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
-            cachedVoltage = controlHub.getInputVoltage(VoltageUnit.VOLTS);
+            cachedVoltage = voltageSensor.getVoltage();
         }
         return cachedVoltage;
     }
@@ -226,6 +234,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 profiler.export();
                 profiler.shutdown();
             } catch (Exception e) {
+                Log.e("An error occurred", e.toString());
                 e.printStackTrace();
             }
         });

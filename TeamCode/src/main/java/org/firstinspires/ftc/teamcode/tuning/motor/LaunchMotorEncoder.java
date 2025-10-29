@@ -73,8 +73,8 @@ public class LaunchMotorEncoder extends CommandOpMode {
         super.run();
         robot.pinpoint.update();
         telemetryData.update();
-        robot.controlHub.clearBulkCache();
-        robot.expansionHub.clearBulkCache();
+//        robot.controlHub.clearBulkCache();
+//        robot.expansionHub.clearBulkCache();
     }
 
     @Override

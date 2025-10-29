@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.tuning.servo;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -12,6 +13,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -62,6 +64,8 @@ public class TurretServosEncoder extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
+        Turret.turretState = Turret.TurretState.OFF;
+
         if (usePower) {
             robot.turretServos.set(servoPower);
         } else {
@@ -81,8 +85,6 @@ public class TurretServosEncoder extends CommandOpMode {
         super.run();
         robot.pinpoint.update();
         telemetryData.update();
-        robot.controlHub.clearBulkCache();
-        robot.expansionHub.clearBulkCache();
     }
 
     @Override

@@ -86,8 +86,6 @@ public class LM1Auto extends CommandOpMode {
         // DO NOT REMOVE
         super.run();
         telemetryData.update();
-        robot.controlHub.clearBulkCache();
-        robot.expansionHub.clearBulkCache();
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
