@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import dev.nullftc.profiler.Profiler;
 import dev.nullftc.profiler.entry.BasicProfilerEntryFactory;
@@ -236,7 +237,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 profiler.shutdown();
             } catch (Exception e) {
                 Log.e("An error occurred", e.toString());
-                e.printStackTrace();
+                Log.e(e.toString(), Arrays.toString(e.getStackTrace()));
             }
         });
 
