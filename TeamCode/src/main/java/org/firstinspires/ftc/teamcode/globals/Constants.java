@@ -49,7 +49,7 @@ public class Constants {
     public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(6, 0, 0.2, 0); // Coefficients for inches
-    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(4.2, 0, 0.23, 0); // Coefficients for radians
+    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(10, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.25; // Inches
     public static double HEADING_TOLERANCE = 0.05; // Radians
@@ -65,7 +65,7 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 1000.0; // Milliamps
+    public static double INTAKE_CURRENT_THRESHOLD = 5000.0; // Milliamps
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
@@ -75,18 +75,16 @@ public class Constants {
     public static double RAMP_DISENGAGED = 0.06;
 
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.004, 0, 0, 0.00055); // Coefficients for ticks
-    public static double FLYWHEEL_VEL_TOLERANCE = 40; // Ticks // TODO: needs to be tuned
-    public static double M_S_TO_TICKS = 275; // Conversion factor for ball velocity in meters/second to launcher encoder ticks // TODO: needs to be tuned
-    public static double LAUNCHER_DEFAULT_ON_SPEED = 0.9; // Power
+    public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
+    public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
     public static final double GRAVITY = 9.81; // meters/second
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
     public static final double TARGET_HEIGHT = 1.0; // meters
 
     public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second
-    public static double LAUNCHER_CLOSE_VELOCITY = 6.0; // Meters/second
-
-    public static double LAUNCHER_MAX_VELOCITY = 1800; // Ticks/second
+    public static double LAUNCHER_CLOSE_VELOCITY = 4.5; // Meters/second
+    public static double LAUNCHER_MAX_VELOCITY = 2000; // Ticks/second
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be checked off CAD
     public static double MIN_HOOD_SERVO_POS = 0.00; // MUST MATCH WITH VALUE ABOVE
@@ -96,15 +94,15 @@ public class Constants {
 
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.5, 0, 0.015, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.0395, 0, 0.008, 0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.4, 0, 0.023, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.06, 0, 0.0023, 0); // Coefficients for radians
-    public static double LIMELIGHT_PID_THRESHOLD = 3;
-    public static double TURRET_TY_TOLERANCE = 1.967; // Degree
-    public static double TURRET_POS_TOLERANCE = 0.03; // Radians// s
+    public static double LIMELIGHT_PID_THRESHOLD = 4; // LL TY Degrees
+    public static double TURRET_TY_TOLERANCE = 1.967; // LL TY Degrees
+    public static double TURRET_POS_TOLERANCE = 0.03; // Radians
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
     public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
-    public static double MAX_TURRET_ANGLE = (110 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
+    public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static Pose2d GOAL_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -72 : 72), 72, 0); } // Inches
-    public static double TURRET_BUFFER = (5 / 360.0) * 2 * Math.PI;
+    public static double TURRET_BUFFER = (16.7 / 360.0) * 2 * Math.PI; // Radians // used for calculating drivetrain rotation in aimbot
 }

@@ -11,6 +11,7 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
 import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
@@ -20,6 +21,7 @@ import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
@@ -85,26 +87,21 @@ public class FullTeleOp extends CommandOpMode {
                 new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whileActiveContinuous(
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenReleased(
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenReleased(
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(true)).alongWith(
-                                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
-                        ),
+                        new InstantCommand(() -> robot.readyToLaunch = true),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)),
                         new WaitCommand(200),
-                        new ClearLaunch()
+                        new ClearLaunch(true)
                 )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
-                new StationaryAimbotFullLaunch()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
@@ -118,20 +115,35 @@ public class FullTeleOp extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
                 )
         );
-        
-        // TODO: Remove after tuning Limelight PID
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenReleased(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
+
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
+                new StationaryAimbotFullLaunch()
         );
 
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                new UninterruptibleCommand(new CancelCommand())
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, -1))
+        );
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 1))
+        );
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
+        );
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition()))
+        );
+        operator.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
+        );
     }
 
     @Override
     public void initialize_loop() {
-//        robot.launcher.setMotifState(); // TODO: Make limelight update not every loop
 
-        telemetryData.addData("Launcher Motif State", Turret.motifState);
-        telemetryData.update();
     }
 
     @Override
@@ -192,16 +204,20 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());
 
-        telemetryData.addData("Turret Target", robot.turret.getTarget());
-        telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("ATagVisible", robot.turret.ATagVisible);
         telemetryData.addData("Turret State", Turret.turretState);
+        telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret Position", robot.turret.getPosition());
+        telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
+        telemetryData.addData("LLResult Null", robot.turret.llResult == null);
 
+        telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
+        telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
         telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 
         telemetryData.addData("Intake overCurrent", robot.intakeMotor.isOverCurrent());
+        telemetryData.addData("Intake Motor State", Intake.motorState);
+        telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 
         robot.profiler.end("High TelemetryData");
         robot.profiler.start("Low TelemetryData");

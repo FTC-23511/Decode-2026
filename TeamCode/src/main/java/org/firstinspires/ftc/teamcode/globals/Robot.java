@@ -47,6 +47,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         return instance;
     }
 
+    public Profiler profiler;
+    public File file;
+
 //    public LynxModule controlHub;
 //    public LynxModule expansionHub;
 //    public LynxModule servoHub;
@@ -55,7 +58,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     private double cachedVoltage;
     private ElapsedTime voltageTimer;
 
-    public Profiler profiler;
+    public boolean readyToLaunch = false;
 
     public MotorEx FRmotor;
     public MotorEx FLmotor;
@@ -90,8 +93,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Turret turret;
 
     public AnalogInput distanceSensor;
-
-    public File file;
 
     public void init(HardwareMap hwMap) {
         File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
@@ -166,7 +167,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setCachingTolerance(0.01);
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
-        rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(-0.01)
+        rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
                 .setInverted(false);;
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint");

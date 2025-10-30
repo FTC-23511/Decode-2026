@@ -67,8 +67,8 @@ public class SwervePathingOpMode extends CommandOpMode {
         schedule(
                 new ConditionalCommand(
                         new SequentialCommandGroup(
-                                new DriveTo(pathPoses.get(1)),
-                                new DriveTo(pathPoses.get(2))
+//                                new DriveTo(pathPoses.get(1)),
+//                                new DriveTo(pathPoses.get(2))
                         ),
                         new RunCommand(
                                 () -> schedule(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))))

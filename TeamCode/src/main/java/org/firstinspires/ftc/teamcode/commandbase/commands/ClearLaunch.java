@@ -10,50 +10,51 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class ClearLaunch extends CommandBase {
     private final Robot robot;
-    private ElapsedTime timer;
-    private boolean targetStateSolved = false;
+    private final ElapsedTime timer;
+    private final boolean preciseShots;
     private int index = 0;
 
     /**
-     * Assumes {@link FullAim} has already been performed
+     * Assumes {@link FullAim} has already been performed or the robot is already aimed
      * Command to clear out current balls inside the robot
      */
     public ClearLaunch() {
+        this(false);
+    }
+
+    /**
+     * Assumes {@link FullAim} has already been performed or the robot is already aimed
+     * Command to clear out current balls inside the robot
+     * @param preciseShots whether the feeder should wait until flywheel is at target velocity for precise shots or just rapid fire
+     */
+    public ClearLaunch(boolean preciseShots) {
         robot = Robot.getInstance();
-        addRequirements(robot.intake, robot.launcher, robot.turret);
         timer = new ElapsedTime();
+        this.preciseShots = preciseShots;
+        addRequirements(robot.intake, robot.launcher, robot.turret);
     }
 
     @Override
     public void initialize() {
-        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
-        robot.launcher.setRamp(true);
-        robot.intake.setIntake(Intake.MotorState.TRANSFER);
-        robot.intake.setPivot(Intake.PivotState.TRANSFER);
+        if (robot.readyToLaunch) {
+//            robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
+            robot.launcher.setRamp(true);
+            robot.launcher.setActiveControl(true);
+            robot.intake.setIntake(Intake.MotorState.TRANSFER);
+            robot.intake.setPivot(Intake.PivotState.TRANSFER);
+        }
         timer.reset();
     }
 
     @Override
     public void execute() {
         // TODO: Add code to auto launch third ball that sometimes gets stuck
-        if (index == 0 && timer.milliseconds() > 1000) {
-//            robot.intake.setIntake(Intake.PivotState.);
-            robot.intake.setIntake(Intake.MotorState.REVERSE);
-            robot.launcher.setRamp(false);
-            index = 1;
-            timer.reset();
-        }
-
-        if (index == 1 && timer.milliseconds() > 200) {
+        if (preciseShots && !robot.launcher.flywheelReady()) {
+            robot.intake.setIntake(Intake.MotorState.STOP);
+        } else if (robot.intake.intakeJammed || robot.intakeMotor.isOverCurrent()) {
+            // do nothing and let intake auto unjam
+        } else {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
-            index = 2;
-            timer.reset();
-        }
-
-        if (index == 2  && timer.milliseconds() > 500) {
-            robot.launcher.setRamp(true);
-            index = 3;
-            timer.reset();
         }
     }
 
@@ -62,16 +63,17 @@ public class ClearLaunch extends CommandBase {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
         } else {
-            // TODO: Add distance sensor checking
+            // TODO: Add distance sensor checking for auto retry command
         }
 
         robot.launcher.setRamp(false);
         robot.turret.setTurret(Turret.TurretState.OFF, 0);
         robot.launcher.setActiveControl(false);
+        robot.readyToLaunch = false;
     }
 
     @Override
     public boolean isFinished() {
-        return index == 3 && timer.milliseconds() > 2000; // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 2000); // TODO: replace with real end condition of the command
     }
 }

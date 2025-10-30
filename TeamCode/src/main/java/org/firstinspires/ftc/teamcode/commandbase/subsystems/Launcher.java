@@ -27,9 +27,9 @@ public class Launcher extends SubsystemBase {
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
 
-    private InterpLUT launcherVel = new InterpLUT(
-            Arrays.asList(-0.01, 4.28,   4.76,   5.22,   5.65,   6.06,   10.0), // input: velocity (m/s)
-            Arrays.asList(0.0,   1350.0, 1550.0, 1650.0, 1750.0, 1967.0, 2000.0) // output:
+    private final InterpLUT launcherVel = new InterpLUT(
+            Arrays.asList(-0.01, 0.0, 4.28,   4.76,   5.22,   5.65,   6.06,   10.0), // input: velocity (m/s)
+            Arrays.asList(0.0,   0.0, 1350.0, 1550.0, 1650.0, 1750.0, 1967.0, 2000.0) // output:
     );
     // 4.76 m/s -> 1500 tick/s
 
@@ -45,7 +45,8 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setFlywheel(double vel, boolean setActiveControl) {
-//        flywheelController.setSetPoint(launcherVel.get(vel)); Previously: flywheelController.setSetPoint(vel * M_S_TO_TICKS);
+        flywheelController.setSetPoint(Math.min(launcherVel.get(vel), LAUNCHER_MAX_VELOCITY));
+        targetFlywheelVelocity = vel;
         activeControl = setActiveControl;
     }
 
@@ -58,16 +59,20 @@ public class Launcher extends SubsystemBase {
         activeControl = true;
     }
 
-    public double getTargetHoodAngle(){
+    public double getTargetHoodAngle() {
         return targetHoodAngle;
     }
 
-    public double getTargetFlywheelVelocity(){
+    public double getTargetFlywheelVelocity() {
         return targetFlywheelVelocity;
     }
 
     public void setActiveControl(boolean state) {
         activeControl = state;
+    }
+
+    public boolean getActiveControl() {
+        return activeControl;
     }
 
     public double getFlywheelTarget() {
@@ -97,6 +102,7 @@ public class Launcher extends SubsystemBase {
 
     public void setHood(double angle) {
         double angle2 = Range.clip(angle, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE);
+        targetHoodAngle = angle2;
         // Solved from proportion (targetServo - minServo) / servoRange = (targetAngle - minAngle) / angleRange
         robot.hoodServo.set(
                 (angle2 - MIN_HOOD_ANGLE) / (MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * (MAX_HOOD_SERVO_POS - MIN_HOOD_SERVO_POS) + MIN_HOOD_SERVO_POS

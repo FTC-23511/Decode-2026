@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
         FOV_27
     }
 
-    private boolean intakeJammed = false;
+    public boolean intakeJammed = false;
     private final ElapsedTime intakeTimer;
     public static MotorState motorState = MotorState.STOP;
     public static PivotState pivotState = PivotState.HOLD;
@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
                     }
                     break;
                 case REVERSE:
-                    if (intakeJammed && intakeTimer.milliseconds() >= 500) {
+                    if (intakeJammed && intakeTimer.milliseconds() >= 300) {
                         setIntake(MotorState.FORWARD);
                         intakeJammed = false;
                         intakeTimer.reset();
@@ -127,11 +127,11 @@ public class Intake extends SubsystemBase {
 
     public boolean transferFull() {
         // TODO: Fix logic
-
-        return (getDistance(distanceState) < MAX_DISTANCE_THRESHOLD)
-            && (getDistance(distanceState) > MIN_DISTANCE_THRESHOLD);
+        return false;
+//        return (getDistance(distanceState) < MAX_DISTANCE_THRESHOLD) && (getDistance(distanceState) > MIN_DISTANCE_THRESHOLD);
     }
 
+    /*
     public double getDistance(DistanceState distanceState){
         double distance = 0;
 
@@ -150,6 +150,7 @@ public class Intake extends SubsystemBase {
         Intake.distanceState = distanceState;
         return distance;
     }
+     */
 
     @Override
     public void periodic() {

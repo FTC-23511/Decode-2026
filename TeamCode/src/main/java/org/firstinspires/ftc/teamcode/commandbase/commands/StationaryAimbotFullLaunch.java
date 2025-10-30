@@ -12,7 +12,7 @@ StationaryAimbotFullLaunch extends SequentialCommandGroup {
         Robot robot = Robot.getInstance();
         addCommands(
                 new FullAim(),
-                new ClearLaunch().alongWith(
+                new ClearLaunch(true).alongWith(
                         new InstantCommand(
                                 () -> robot.drive.swerve.updateWithXLock() // Lock the drivetrain wheel to an X shape reduce how much we can be pushed)
                         )
