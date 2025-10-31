@@ -43,11 +43,11 @@ public class Mystery extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(24.592591688368056, 130.3111111111111, 144)); // Starting Pose
-        pathPoses.add(new Pose2d(33.66085578446909, 124.37400950871633, 154)); // Line 1
-        pathPoses.add(new Pose2d(42.789223454833596, 83.7527733755943, 0)); // Line 2
-        pathPoses.add(new Pose2d(15.404120443740094, 83.7527733755943, 0)); // Line 3
-        pathPoses.add(new Pose2d(33.66085578446909, 124.37400950871633, 154)); // Line 4
+        pathPoses.add(new Pose2d(-47.407408311631944, 58.3111111111111, 144)); // Starting Pose
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, 154)); // Line 1
+        pathPoses.add(new Pose2d(-29.210776545166404, 11.7527733755943, 0)); // Line 2
+        pathPoses.add(new Pose2d(-56.595879556259906, 11.7527733755943, 0)); // Line 3
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, 154)); // Line 4
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
