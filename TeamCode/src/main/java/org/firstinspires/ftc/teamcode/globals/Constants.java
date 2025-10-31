@@ -86,6 +86,7 @@ public class Constants {
     public static double LAUNCHER_CLOSE_VELOCITY = 4.5; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2000; // Ticks/second
 
+    public static double AUTO_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be tuned
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be checked off CAD
     public static double MIN_HOOD_SERVO_POS = 0.00; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal // TODO: needs to be checked off CAD

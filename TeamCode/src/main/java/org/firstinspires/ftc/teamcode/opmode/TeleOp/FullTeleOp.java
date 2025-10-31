@@ -67,8 +67,8 @@ public class FullTeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d())))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenReleased(
-                new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0)))
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(

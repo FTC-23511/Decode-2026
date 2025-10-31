@@ -1,15 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.ANGLE_UNIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.DISTANCE_UNIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.HEADING_COEFFICIENTS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.SWERVO_PIDF_COEFFICIENTS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.XY_COEFFICIENTS;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -33,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
@@ -52,9 +45,12 @@ public class LM1Auto extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(25.90174326465927, 129.16640253565768, Math.toRadians(144.046))); // Starting Pose
-        pathPoses.add(new Pose2d(-27.8415213946, 116.38668779714739, Math.toRadians(157))); // Line 1
-        pathPoses.add(new Pose2d(53.743264659271, 60.06022187004756, Math.toRadians(90))); // Line 2
+        pathPoses = new ArrayList<>();
+        pathPoses.add(new Pose2d(24.592591688368056, 130.3111111111111, 90)); // Starting Pose
+        pathPoses.add(new Pose2d(53.743264659271, 116.38668779714739, 157)); // Line 1
+        pathPoses.add(new Pose2d(44.85925835503472, 84.44444444444443, 0)); // Line 2
+        pathPoses.add(new Pose2d(15.52592502170139, 84.44444444444443, 0)); // Line 3
+        pathPoses.add(new Pose2d(53.743264659271, 116.38668779714739, 157)); // Line 4
     }
 
     @Override
@@ -70,13 +66,28 @@ public class LM1Auto extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
+        robot.launcher.setHood(AUTO_HOOD_ANGLE);
+        robot.launcher.setRamp(true);
+        robot.intake.setPivot(Intake.PivotState.TRANSFER);
+        robot.turret.setTurret(ANGLE_CONTROL, 0);
+
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
         schedule(
                 new SequentialCommandGroup(
+                        new InstantCommand(),
+                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
                         new InstantCommand(() -> generatePath()),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
-                        new DriveTo(pathPoses.get(1))
+
+                        new DriveTo(pathPoses.get(1)).alongWith(
+                                new InstantCommand(() -> robot.launcher.setActiveControl(true))
+                        ),
+                        new ClearLaunch(),
+
+                        new DriveTo(pathPoses.get(2)),
+                        new DriveTo(pathPoses.get(3)),
+                        new DriveTo(pathPoses.get(4))
                 )
         );
     }
