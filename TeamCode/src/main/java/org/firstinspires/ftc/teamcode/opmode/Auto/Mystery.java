@@ -48,6 +48,12 @@ public class Mystery extends CommandOpMode {
         pathPoses.add(new Pose2d(42.789223454833596, 83.7527733755943, 0)); // Line 2
         pathPoses.add(new Pose2d(15.404120443740094, 83.7527733755943, 0)); // Line 3
         pathPoses.add(new Pose2d(33.66085578446909, 124.37400950871633, 154)); // Line 4
+
+        if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
+            for (Pose2d pose : pathPoses) {
+                pose.mirror();
+            }
+        }
     }
 
     @Override
