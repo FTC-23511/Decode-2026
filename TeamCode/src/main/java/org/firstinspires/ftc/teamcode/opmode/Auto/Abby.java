@@ -1,7 +1,16 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.HEADING_COEFFICIENTS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_SERVO_POS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.SWERVO_PIDF_COEFFICIENTS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.XY_COEFFICIENTS;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -28,8 +37,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Mystery (close 6 ball)")
-public class Mystery extends CommandOpMode {
+@Autonomous(name = "Abby (close 9 ball)")
+public class Abby extends CommandOpMode {
     public ElapsedTime timer;
 
     TelemetryData telemetryData = new TelemetryData(
@@ -48,6 +57,9 @@ public class Mystery extends CommandOpMode {
         pathPoses.add(new Pose2d(-20.210776545166404, 11.5, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-50.595879556259906, 11.5, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(159))); // Line 4
+        pathPoses.add(new Pose2d(-20.210776545166404, -11.296354992076065, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-54.999, -11.296354992076065, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(159))); // Line 7
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
