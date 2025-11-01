@@ -17,7 +17,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -37,8 +36,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Abby (close auto)", preselectTeleOp = "AAAFullTeleOp")
-public class Abby extends CommandOpMode {
+@Autonomous(name = "Mystery (far auto)", preselectTeleOp = "AAAFullTeleOp")
+public class Mystery extends CommandOpMode {
     public ElapsedTime timer;
 
     TelemetryData telemetryData = new TelemetryData(
@@ -51,17 +50,17 @@ public class Abby extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(144))); // Starting Pose
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 1
+        pathPoses = new ArrayList<>();
+        pathPoses.add(new Pose2d(-47.407408311631944, 58.3111111111111, Math.toRadians(144))); // Starting Pose
+        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(120))); // Line 1
         pathPoses.add(new Pose2d(-12.67, 11.5, Math.toRadians(10))); // Line 2
         pathPoses.add(new Pose2d(-51.41, 11.5, Math.toRadians(10))); // Line 3
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 4
-        pathPoses.add(new Pose2d(-16.0, 24.0, Math.toRadians(60))); // Line 5
-        pathPoses.add(new Pose2d(-12.67, -11.29, Math.toRadians(10))); // Line 6
-        pathPoses.add(new Pose2d(-56, -11.29, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-40, -11.29, Math.toRadians(10))); // Line 8
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(119))); // Line 9
-        pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(120))); // Line 4
+        pathPoses.add(new Pose2d(-12.67, -11.296354992076065, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-55, -11.296354992076065, Math.toRadians(10))); // Line 6
+        pathPoses.add(new Pose2d(-40, -11.296354992076065, Math.toRadians(10))); // Line 7
+        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(120))); // Line 8
+        pathPoses.add(new Pose2d(-30.0, 52.37400950871633, Math.toRadians(0))); // Line 9
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -106,13 +105,12 @@ public class Abby extends CommandOpMode {
                         pathShoot(4),
 
                         // spike 2
-                        new DriveTo(pathPoses.get(5)).withTimeout(750),
-                        pathIntake(6),
-                        new DriveTo(pathPoses.get(8)).withTimeout(750),
-                        pathShoot(9),
+                        pathIntake(5),
+                        new DriveTo(pathPoses.get(7)).withTimeout(1000),
+                        pathShoot(8),
                         new ClearLaunch(true),
                         
-                        new DriveTo(pathPoses.get(10)).withTimeout(3000) // park
+                        new DriveTo(pathPoses.get(9)).withTimeout(3000) // park
                 )
         );
     }
@@ -175,7 +173,7 @@ public class Abby extends CommandOpMode {
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(2250).alongWith(new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))),
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(3500).alongWith(new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))),
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true)
@@ -184,11 +182,12 @@ public class Abby extends CommandOpMode {
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(3000),
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(3500),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(1000),
+                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(3500),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD)
+
         );
     }
 }
