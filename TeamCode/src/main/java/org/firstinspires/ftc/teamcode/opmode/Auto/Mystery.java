@@ -44,10 +44,10 @@ public class Mystery extends CommandOpMode {
 
         pathPoses = new ArrayList<>();
         pathPoses.add(new Pose2d(-47.407408311631944, 58.3111111111111, Math.toRadians(144))); // Starting Pose
-        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(154))); // Line 1
-        pathPoses.add(new Pose2d(-29.210776545166404, 11.7527733755943, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-56.595879556259906, 11.7527733755943, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(154))); // Line 4
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(159))); // Line 1
+        pathPoses.add(new Pose2d(-20.210776545166404, 11.5, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-50.595879556259906, 11.5, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(159))); // Line 4
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -90,7 +90,8 @@ public class Mystery extends CommandOpMode {
 
                         new DriveTo(pathPoses.get(3)).withTimeout(3000),
 
-                        pathShoot(pathPoses.get(4))
+                        pathShoot(pathPoses.get(4)),
+                        new ClearLaunch(true)
                 )
         );
     }
@@ -141,7 +142,7 @@ public class Mystery extends CommandOpMode {
                 new DriveTo(pose2d).withTimeout(5000).alongWith(new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))),
                 new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 0)),
                 new InstantCommand(() -> robot.readyToLaunch = true),
-                new ClearLaunch()
+                new ClearLaunch(true)
         );
     }
 }

@@ -48,13 +48,13 @@ public class Constants {
     public static double BL_ENCODER_OFFSET = 0.65; // Radians
     public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
-    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(7, 0, 0.2, 0); // Coefficients for inches
-    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(10, 0, 0, 0); // Coefficients for radians
+    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(8, 0, 0.25, 0); // Coefficients for inches
+    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(10, 0, 0.67, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
-    public static double XY_TOLERANCE = 0.25; // Inches
-    public static double HEADING_TOLERANCE = 0.05; // Radians
-    public static double XY_MIN_OUTPUT = 8; // Inches/second
-    public static double HEADING_MIN_OUTPUT = 0.15; // Radians/second
+    public static double XY_TOLERANCE = 0.41; // Inches
+    public static double HEADING_TOLERANCE = 0.067; // Radians
+    public static double XY_MIN_OUTPUT = 12; // Inches/second
+    public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
 
     // Intake
     public static double INTAKE_PIVOT_FORWARD = 0.567;
@@ -65,7 +65,8 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 5000.0; // Milliamps
+    public static double INTAKE_CURRENT_THRESHOLD = 2000.0; // Milliamps
+    public static double INTAKE_UNJAM_TIME = 500.0; // Milliseconds
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
@@ -99,7 +100,7 @@ public class Constants {
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.06, 0, 0.0023, 0); // Coefficients for radians
     public static double LIMELIGHT_PID_THRESHOLD = 4; // LL TY Degrees
     public static double TURRET_TY_TOLERANCE = 1.967; // LL TY Degrees
-    public static double TURRET_POS_TOLERANCE = 0.03; // Radians
+    public static double TURRET_POS_TOLERANCE = 0.067; // Radians
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
     public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)

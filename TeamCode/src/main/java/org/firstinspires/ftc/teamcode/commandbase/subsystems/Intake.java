@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
                     }
                     break;
                 case REVERSE:
-                    if (intakeJammed && intakeTimer.milliseconds() >= 300) {
+                    if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
                         setIntake(MotorState.FORWARD);
                         intakeJammed = false;
                         intakeTimer.reset();
