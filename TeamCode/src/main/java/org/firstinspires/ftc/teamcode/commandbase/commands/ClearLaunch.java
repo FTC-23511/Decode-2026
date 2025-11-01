@@ -51,7 +51,7 @@ public class ClearLaunch extends CommandBase {
         // TODO: Add code to auto launch third ball that sometimes gets stuck
         if (preciseShots && !robot.launcher.flywheelReady()) {
             robot.intake.setIntake(Intake.MotorState.STOP);
-        } else if (robot.intake.intakeJammed || robot.intakeMotor.isOverCurrent()) {
+        } else if (robot.intake.intakeJammed) {
             // do nothing and let intake auto unjam
         } else {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
@@ -74,6 +74,6 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 2000); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 2500); // TODO: replace with real end condition of the command
     }
 }

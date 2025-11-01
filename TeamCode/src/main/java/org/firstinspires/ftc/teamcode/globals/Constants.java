@@ -52,7 +52,7 @@ public class Constants {
     public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(10, 0, 0.67, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.41; // Inches
-    public static double HEADING_TOLERANCE = 0.067; // Radians
+    public static double HEADING_TOLERANCE = 0.041; // Radians
     public static double XY_MIN_OUTPUT = 12; // Inches/second
     public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
 
@@ -65,8 +65,8 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 2000.0; // Milliamps
-    public static double INTAKE_UNJAM_TIME = 500.0; // Milliseconds
+    public static double INTAKE_CURRENT_THRESHOLD = 3267.67; // Milliamps
+    public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
     public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
