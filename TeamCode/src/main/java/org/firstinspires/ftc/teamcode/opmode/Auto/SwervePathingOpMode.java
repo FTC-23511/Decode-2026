@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
+import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -65,6 +66,7 @@ public class SwervePathingOpMode extends CommandOpMode {
         robot.drive.setPose(pathPoses.get(0));
 
         schedule(
+                new InstantCommand(),
                 new ConditionalCommand(
                         new SequentialCommandGroup(
 //                                new DriveTo(pathPoses.get(1)),

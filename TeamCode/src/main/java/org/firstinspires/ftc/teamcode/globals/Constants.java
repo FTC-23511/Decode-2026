@@ -48,7 +48,7 @@ public class Constants {
     public static double BL_ENCODER_OFFSET = 0.65; // Radians
     public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
-    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(6, 0, 0.2, 0); // Coefficients for inches
+    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(7, 0, 0.2, 0); // Coefficients for inches
     public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(10, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.25; // Inches
@@ -82,7 +82,7 @@ public class Constants {
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
     public static final double TARGET_HEIGHT = 1.0; // meters
 
-    public static double LAUNCHER_FAR_VELOCITY = 7.8; // Meters/second
+    public static double LAUNCHER_FAR_VELOCITY = 6.0; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.5; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2000; // Ticks/second
 

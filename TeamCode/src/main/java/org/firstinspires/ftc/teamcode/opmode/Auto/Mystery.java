@@ -28,7 +28,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "LM1Auto")
+@Autonomous(name = "Mystery (6 ball)")
 public class Mystery extends CommandOpMode {
     public ElapsedTime timer;
 
@@ -43,11 +43,11 @@ public class Mystery extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(-47.407408311631944, 58.3111111111111, 144)); // Starting Pose
-        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, 154)); // Line 1
-        pathPoses.add(new Pose2d(-29.210776545166404, 11.7527733755943, 0)); // Line 2
-        pathPoses.add(new Pose2d(-56.595879556259906, 11.7527733755943, 0)); // Line 3
-        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, 154)); // Line 4
+        pathPoses.add(new Pose2d(-47.407408311631944, 58.3111111111111, Math.toRadians(144))); // Starting Pose
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(154))); // Line 1
+        pathPoses.add(new Pose2d(-29.210776545166404, 11.7527733755943, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-56.595879556259906, 11.7527733755943, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-38.33914421553091, 52.37400950871633, Math.toRadians(154))); // Line 4
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -58,6 +58,7 @@ public class Mystery extends CommandOpMode {
 
     @Override
     public void initialize() {
+        generatePath();
         timer = new ElapsedTime();
 
         // Must have for all opModes
@@ -80,15 +81,14 @@ public class Mystery extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(),
                         new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
-                        new InstantCommand(() -> generatePath()),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         pathShoot(pathPoses.get(1)),
 
-                        new DriveTo(pathPoses.get(2)),
+                        new DriveTo(pathPoses.get(2)).withTimeout(5000),
                         new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                        new DriveTo(pathPoses.get(3)),
+                        new DriveTo(pathPoses.get(3)).withTimeout(3000),
 
                         pathShoot(pathPoses.get(4))
                 )
@@ -138,9 +138,9 @@ public class Mystery extends CommandOpMode {
 
     public Command pathShoot(Pose2d pose2d) {
         return new SequentialCommandGroup(
-                new DriveTo(pose2d).alongWith(
-                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
-                ),
+                new DriveTo(pose2d).withTimeout(5000).alongWith(new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))),
+                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 0)),
+                new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch()
         );
     }
