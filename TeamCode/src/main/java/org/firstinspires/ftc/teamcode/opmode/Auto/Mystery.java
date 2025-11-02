@@ -95,17 +95,15 @@ public class Mystery extends CommandOpMode {
                         pathShoot(1, 2500),
 
                         // spike 1
-                        new DriveTo(pathPoses.get(2)).withTimeout(670),
-                        pathIntake(3, 1867),
-                        pathShoot(5, 2250),
+                        pathIntake(2, 1867),
+                        pathShoot(4, 2250),
 
                         // spike 2
-                        pathIntake(6, 2267),
-                        new DriveTo(pathPoses.get(8)).withTimeout(670),
-                        pathShoot(9, 3000),
-                        new ClearLaunch(true),
+                        pathIntake(5, 2267),
+                        new DriveTo(pathPoses.get(7)).withTimeout(670),
+                        pathShoot(8, 3000),
 
-                        new DriveTo(pathPoses.get(10)) // park
+                        new DriveTo(pathPoses.get(9)) // park
                 )
         );
     }
