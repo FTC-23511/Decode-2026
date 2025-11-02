@@ -83,7 +83,7 @@ public class Constants {
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
     public static final double TARGET_HEIGHT = 1.0; // meters
 
-    public static double LAUNCHER_FAR_VELOCITY = 6.0; // Meters/second
+    public static double LAUNCHER_FAR_VELOCITY = 5.4; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2000; // Ticks/second
 
@@ -91,15 +91,16 @@ public class Constants {
     public static double MIN_HOOD_SERVO_POS = 0.00; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal // TODO: needs to be checked off CAD
     public static double MAX_HOOD_SERVO_POS = 1.0; // Position // MUST MATCH WITH VALUE ABOVE
-    public static double MIN_LL_HOOD_ANGLE = 16; // Degrees from horizontal // Minimum hood angle for Limelight to be able to see AprilTags from anywhere on the field// TODO: needs to be tuned
+    public static double MIN_LL_HOOD_ANGLE = 45; // Degrees from horizontal // Minimum hood angle for Limelight to be able to see AprilTags from anywhere on the field// TODO: needs to be tuned
+    public static double FAR_HOOD_ANGLE = 45; // Degrees from horizontal
 
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.4, 0, 0.023, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.06, 0, 0.0023, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.018, 0, 0, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.0467, 0, 0.00141, 0); // Coefficients for radians
     public static double LIMELIGHT_PID_THRESHOLD = 4; // LL TY Degrees
-    public static double TURRET_TY_TOLERANCE = 1.967; // LL TY Degrees
+    public static double TURRET_TY_TOLERANCE = 1.67; // LL TY Degrees
     public static double TURRET_POS_TOLERANCE = 0.067; // Radians
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
     public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
