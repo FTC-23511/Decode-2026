@@ -20,7 +20,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -52,15 +55,15 @@ public class Abby extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(144))); // Starting Pose
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 1
-        pathPoses.add(new Pose2d(-12.67, 11.5, Math.toRadians(10))); // Line 2
-        pathPoses.add(new Pose2d(-51.41, 11.5, Math.toRadians(10))); // Line 3
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 4
-        pathPoses.add(new Pose2d(-16.0, 24.0, Math.toRadians(60))); // Line 5
-        pathPoses.add(new Pose2d(-12.67, -11.29, Math.toRadians(10))); // Line 6
-        pathPoses.add(new Pose2d(-56, -11.29, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-40, -11.29, Math.toRadians(10))); // Line 8
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(119))); // Line 9
+        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(122.67))); // Line 1
+        pathPoses.add(new Pose2d(-16.0, 24.0, Math.toRadians(60))); // Line 2
+        pathPoses.add(new Pose2d(-16.7, 11.0, Math.toRadians(10))); // Line 3
+        pathPoses.add(new Pose2d(-49.67, 11.0, Math.toRadians(10))); // Line 4
+        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 5
+        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(10))); // Line 6
+        pathPoses.add(new Pose2d(-55.0, -12.0, Math.toRadians(10))); // Line 7
+        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(10))); // Line 8
+        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 9
         pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 10
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -86,7 +89,7 @@ public class Abby extends CommandOpMode {
 
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.TRANSFER);
+        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
@@ -99,20 +102,20 @@ public class Abby extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1),
+                        pathShoot(1, 1500),
 
                         // spike 1
-                        pathIntake(2),
-                        pathShoot(4),
+                        new DriveTo(pathPoses.get(2)).withTimeout(670),
+                        pathIntake(3, 1867),
+                        pathShoot(5, 2250),
 
                         // spike 2
-                        new DriveTo(pathPoses.get(5)).withTimeout(750),
-                        pathIntake(6),
-                        new DriveTo(pathPoses.get(8)).withTimeout(750),
-                        pathShoot(9),
+                        pathIntake(6, 2267),
+                        new DriveTo(pathPoses.get(8)).withTimeout(670),
+                        pathShoot(9, 3000),
                         new ClearLaunch(true),
                         
-                        new DriveTo(pathPoses.get(10)).withTimeout(3000) // park
+                        new DriveTo(pathPoses.get(10)) // park
                 )
         );
     }
@@ -173,22 +176,26 @@ public class Abby extends CommandOpMode {
         END_POSE = robot.drive.getPose();
     }
 
-    public SequentialCommandGroup pathShoot(int pathStartingIndex) {
+    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(2250).alongWith(new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))),
+                new ParallelCommandGroup(
+                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
+                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
+                ),
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
+                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true)
         );
     }
 
-    public SequentialCommandGroup pathIntake(int pathStartingIndex) {
+    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(3000),
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(1000),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD)
+                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );
     }
 }

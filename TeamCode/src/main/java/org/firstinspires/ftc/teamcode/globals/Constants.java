@@ -57,7 +57,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.567;
+    public static double INTAKE_PIVOT_FORWARD = 0.5841;
     public static double INTAKE_PIVOT_HOLD = 0.5;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD;
 
@@ -65,7 +65,7 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 3267.67; // Milliamps
+    public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
     public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
@@ -84,7 +84,7 @@ public class Constants {
     public static final double TARGET_HEIGHT = 1.0; // meters
 
     public static double LAUNCHER_FAR_VELOCITY = 6.0; // Meters/second
-    public static double LAUNCHER_CLOSE_VELOCITY = 4.5; // Meters/second
+    public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2000; // Ticks/second
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be checked off CAD

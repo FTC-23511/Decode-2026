@@ -101,8 +101,9 @@ public class Turret extends SubsystemBase {
 
             if (targetDegrees != null) {
                 double ty = targetDegrees[1];
+                double error = ty - turretController.getSetPoint();
 
-                if (Math.abs(ty) > LIMELIGHT_PID_THRESHOLD) {
+                if (Math.abs(error) > LIMELIGHT_PID_THRESHOLD) {
                     turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
                 } else {
                     turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
