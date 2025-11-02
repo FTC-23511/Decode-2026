@@ -1,25 +1,20 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.HEADING_COEFFICIENTS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_SERVO_POS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.SWERVO_PIDF_COEFFICIENTS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.XY_COEFFICIENTS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -50,17 +45,16 @@ public class Mystery extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(-47.407408311631944, 58.3111111111111, Math.toRadians(144))); // Starting Pose
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(120))); // Line 1
-        pathPoses.add(new Pose2d(-12.67, 11.5, Math.toRadians(10))); // Line 2
-        pathPoses.add(new Pose2d(-51.41, 11.5, Math.toRadians(10))); // Line 3
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(120))); // Line 4
-        pathPoses.add(new Pose2d(-12.67, -11.296354992076065, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-55, -11.296354992076065, Math.toRadians(10))); // Line 6
-        pathPoses.add(new Pose2d(-40, -11.296354992076065, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(120))); // Line 8
-        pathPoses.add(new Pose2d(-30.0, 52.37400950871633, Math.toRadians(0))); // Line 9
+        pathPoses.add(new Pose2d(-17.11568938193344, -64.93, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-16.204, 27.038, Math.toRadians(143))); // Line 1
+        pathPoses.add(new Pose2d(-26, 11.5, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-50.59587955625991, 11.5, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-16.202, 27.038, Math.toRadians(143.001))); // Line 4
+        pathPoses.add(new Pose2d(-24.190174326465925, -11.296354992076065, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-54.997, -11.296354992076065, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-31.492868462757528, -11.296354992076065, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-16.202852614896994, 27.042, Math.toRadians(143))); // Line 8
+        pathPoses.add(new Pose2d(-31.492868462757528, -11.296354992076065, Math.toRadians(0))); // Line 9
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -85,7 +79,7 @@ public class Mystery extends CommandOpMode {
 
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.TRANSFER);
+        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
@@ -98,19 +92,20 @@ public class Mystery extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1),
+                        pathShoot(1, 2500),
 
                         // spike 1
-                        pathIntake(2),
-                        pathShoot(4),
+                        new DriveTo(pathPoses.get(2)).withTimeout(670),
+                        pathIntake(3, 1867),
+                        pathShoot(5, 2250),
 
                         // spike 2
-                        pathIntake(5),
-                        new DriveTo(pathPoses.get(7)).withTimeout(1000),
-                        pathShoot(8),
+                        pathIntake(6, 2267),
+                        new DriveTo(pathPoses.get(8)).withTimeout(670),
+                        pathShoot(9, 3000),
                         new ClearLaunch(true),
-                        
-                        new DriveTo(pathPoses.get(9)).withTimeout(3000) // park
+
+                        new DriveTo(pathPoses.get(10)) // park
                 )
         );
     }
@@ -161,7 +156,7 @@ public class Mystery extends CommandOpMode {
         telemetryData.addData("Intake overCurrent", robot.intakeMotor.isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
-        
+
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         telemetryData.update();
     }
@@ -171,23 +166,26 @@ public class Mystery extends CommandOpMode {
         END_POSE = robot.drive.getPose();
     }
 
-    public SequentialCommandGroup pathShoot(int pathStartingIndex) {
+    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(3500).alongWith(new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))),
+                new ParallelCommandGroup(
+                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
+                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
+                ),
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
+                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true)
         );
     }
 
-    public SequentialCommandGroup pathIntake(int pathStartingIndex) {
+    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(3500),
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(3500),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD)
-
+                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );
     }
 }
