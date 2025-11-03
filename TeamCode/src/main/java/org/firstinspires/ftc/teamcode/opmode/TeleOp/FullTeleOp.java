@@ -229,7 +229,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
         telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
 
-        telemetryData.addData("Sigma", "Polar");
+        telemetryData.addData("Sigma", "Abigail");
         robot.profiler.end("Low TelemetryData");
 
         robot.profiler.start("Run + Update");

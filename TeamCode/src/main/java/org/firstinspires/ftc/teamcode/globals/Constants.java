@@ -56,9 +56,9 @@ public class Constants {
     public static double XY_MIN_OUTPUT = 12; // Inches/second
     public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
 
-    // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.5841;
-    public static double INTAKE_PIVOT_HOLD = 0.5;
+    // Intake5r
+    public static double INTAKE_PIVOT_FORWARD = 0.555;
+    public static double INTAKE_PIVOT_HOLD = 0.470;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
