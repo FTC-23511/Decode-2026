@@ -70,6 +70,12 @@ dependencies {
     // Loop Time Profiler
     implementation "dev.nullftc:Profiler:SNAPSHOT-daa44e3"
 
+    // AdvantageScope Lite
+    implementation "page.j5155.AdvantageScope:lite:v26.0.0"
+
+    // FateWeaver
+    implementation "gay.zharel.fateweaver:ftc:0.3.3"
+
     //noinspection GradleDependency, could be 0.43 but haven't tested it out yet
     implementation('org.ejml:ejml-simple:0.39') {
         exclude group: 'org.ejml', module: 'ejml-all'

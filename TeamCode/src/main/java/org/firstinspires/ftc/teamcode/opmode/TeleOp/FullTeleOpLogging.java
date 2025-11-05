@@ -47,8 +47,8 @@ import java.util.logging.SimpleFormatter;
 
 @Config
 @TeleOp(name = "AAAFullTeleOp and logger")
-public class FullTeleOpLogg extends CommandOpMode {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(FullTeleOpLogg.class);
+public class FullTeleOpLogging extends CommandOpMode {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(FullTeleOpLogging.class);
     private FileHandler logFileHandler;
     private Logger logger;
     public GamepadEx driver;
@@ -179,7 +179,7 @@ public class FullTeleOpLogg extends CommandOpMode {
             SimpleFormatter formatter = new SimpleFormatter();
             logFileHandler.setFormatter(formatter);
 
-            logger = Logger.getLogger(FullTeleOpLogg.class.getName());
+            logger = Logger.getLogger(FullTeleOpLogging.class.getName());
             // Add the FileHandler to the logger.
             logger.addHandler(logFileHandler);
 
