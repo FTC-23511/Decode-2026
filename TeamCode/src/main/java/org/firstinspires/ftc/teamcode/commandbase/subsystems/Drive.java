@@ -74,6 +74,10 @@ public class Drive extends SubsystemBase {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
     }
 
+    public void setMaxSpeed(double maxSpeed) {
+        swerve.setMaxSpeed(maxSpeed);
+    }
+
     @Override
     public void periodic() {
 //        swerve.update(); // Not needed as we are using updateWithTargetVelocity() in the opModes
@@ -81,6 +85,10 @@ public class Drive extends SubsystemBase {
     }
 
     public void init() {
-        follower.setTarget(new Pose2d());
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && END_POSE != null) {
+            setPose(END_POSE);
+        } else {
+            follower.setTarget(new Pose2d());
+        }
     }
 }

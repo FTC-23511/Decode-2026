@@ -45,15 +45,15 @@ public class Abby extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(144))); // Starting Pose
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(122.67))); // Line 1
+        pathPoses.add(new Pose2d(-48.67, 40.41, Math.toRadians(123.67))); // Line 1
         pathPoses.add(new Pose2d(-16.0, 24.0, Math.toRadians(60))); // Line 2
-        pathPoses.add(new Pose2d(-16.7, 11.0, Math.toRadians(10))); // Line 3
-        pathPoses.add(new Pose2d(-49.67, 11.0, Math.toRadians(10))); // Line 4
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 5
-        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(10))); // Line 6
-        pathPoses.add(new Pose2d(-55.0, -12.0, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(10))); // Line 8
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 9
+        pathPoses.add(new Pose2d(-16.7, 11.41, Math.toRadians(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 5 : 0))); // Line 3
+        pathPoses.add(new Pose2d(-49.67, 11.41, Math.toRadians(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 5 : 0))); // Line 4
+        pathPoses.add(new Pose2d(-48.67, 40.41, Math.toRadians(121))); // Line 5
+        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 5 : 0))); // Line 6
+        pathPoses.add(new Pose2d(-55.0, -12.0, Math.toRadians(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 5 : 0))); // Line 7
+        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 5 : 0))); // Line 8
+        pathPoses.add(new Pose2d(-48.67, 40.41, Math.toRadians(121))); // Line 9
         pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 10
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -77,7 +77,7 @@ public class Abby extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        robot.launcher.setHood(MIN_HOOD_SERVO_POS);
+        robot.launcher.setHood(MIN_HOOD_ANGLE);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
@@ -182,7 +182,7 @@ public class Abby extends CommandOpMode {
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new DriveTo(pathPoses.get(pathStartingIndex), (AUTO_MAX_DRIVE_VELOCITY * 0.67)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)

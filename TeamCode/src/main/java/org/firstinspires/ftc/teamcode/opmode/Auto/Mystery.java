@@ -77,7 +77,7 @@ public class Mystery extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        robot.launcher.setHood(MIN_HOOD_SERVO_POS);
+        robot.launcher.setHood(FAR_HOOD_ANGLE);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
@@ -92,7 +92,7 @@ public class Mystery extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1, 2500),
+                        pathShoot(1, 3500),
 
                         // spike 1
                         pathIntake(2, 1867),
@@ -172,7 +172,6 @@ public class Mystery extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
                 ),
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
-                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true)
         );
