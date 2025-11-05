@@ -79,7 +79,7 @@ public class FullTeleOp extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+                        new InstantCommand(() -> robot.intake.toggleIntake())
                 )
         );
 
@@ -112,12 +112,12 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(FAR_HOOD_ANGLE))
+                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 3.67 : -3.67))
+                new StationaryAimbotFullLaunch()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
@@ -207,7 +207,6 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret Position", robot.turret.getPosition());
-        telemetryData.addData("Turret TY", robot.turret.getLimeLightTargetDegrees() == null ? 67 : robot.turret.getLimeLightTargetDegrees()[1]);
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
 
@@ -229,7 +228,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
         telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
 
-        telemetryData.addData("Sigma", "Abigail");
+        telemetryData.addData("Sigma", "Polar");
         robot.profiler.end("Low TelemetryData");
 
         robot.profiler.start("Run + Update");

@@ -66,7 +66,7 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP) && Intake.pivotState.equals(Intake.PivotState.TRANSFER)) {
+        if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
         } else {
             // TODO: Add distance sensor checking for auto retry command
