@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+
+import gay.zharel.fateweaver.flight.FlightLogChannel;
+import gay.zharel.fateweaver.flight.FlightRecorder;
+//import gay.zharel.fateweaver.flight.;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -54,6 +50,9 @@ public class FullTeleOpLogging extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
+    FlightLogChannel<Long> timestamps;
+    FlightLogChannel<Pose2d> poses;
+
     public ElapsedTime timer;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
@@ -72,6 +71,9 @@ public class FullTeleOpLogging extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        timestamps = FlightRecorder.createChannel("TIMESTAMP", Long.class);
+        poses = FlightRecorder.createChannel("Robot/Pose", Pose2d.class);
 
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
                 new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),

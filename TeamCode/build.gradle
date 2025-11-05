@@ -62,7 +62,7 @@ dependencies {
 //    implementation "org.solverslib:pedroPathing:0.3.3" // pedroPathing
 
 //    implementation "dev.nullftc:Profiler:SNAPSHOT-8e16b25"
-    implementation "com.acmerobotics.dashboard:dashboard:0.4.17" // FTC Dashboard
+    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashboard
 
     // Panels Dashboard
     implementation "com.bylazar:fullpanels:1.0.5"
