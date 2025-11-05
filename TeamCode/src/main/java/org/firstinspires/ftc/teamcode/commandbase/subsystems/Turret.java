@@ -13,6 +13,7 @@ import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
+import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -21,8 +22,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+import java.util.Arrays;
+
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
+    public final InterpLUT limelightInterplut = new InterpLUT(
+            Arrays.asList(Math.PI, 0.1), // input: angle
+            Arrays.asList(0.0, 0.1) // output: offset from april tag
+    );
+
 
     public enum Motif {
         NOT_FOUND,
