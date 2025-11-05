@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<!-- Config for Taro, FTC 14343 Escape Velocity's Powerplay Robot-->
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Expansion Hub 1" port="1">
+            <goBILDA5202SeriesMotor name="slide" port="0" />
+            <goBILDA5202SeriesMotor name="lift" port="1" />
+            <goBILDA5202SeriesMotor name="xcode" port="2" />
+            <goBILDA5202SeriesMotor name="ycode" port="3" />
+            <Servo name="claw" port="0" />
+            <Servo name="vfb" port="1" />
+            <Servo name="swing" port="2" />
+            <Servo name="intake" port="3" />
+            <Servo name="brace" port="4" />
+            <Servo name="turn" port="5" />
+            <AnalogInput name="rus" port="0" />
+            <Led name="rled" port="0" />
+            <Led name="grled" port="1" />
+            <Led name="lled" port="2" />
+            <Led name="glled" port="3" />
+            <DigitalDevice name="echo" port="4" />
+            <DigitalDevice name="trig" port="5" />
+            <REV_VL53L0X_RANGE_SENSOR name="sensor_range" port="0" bus="0" />
+        </LynxModule>
+        <LynxModule name="Control Hub" port="173">
+            <goBILDA5202SeriesMotor name="lf" port="0" />
+            <goBILDA5202SeriesMotor name="rf" port="1" />
+            <goBILDA5202SeriesMotor name="lb" port="2" />
+            <goBILDA5202SeriesMotor name="rb" port="3" />
+            <Servo name="rodo" port="0" />
+            <Servo name="" port="1" />
+            <Servo name="" port="2" />
+            <Servo name="" port="3" />
+            <AnalogInput name="lus" port="0" />
+            <AnalogInput name="fus" port="2" />
+            <DigitalDevice name="bs" port="0" />
+            <DigitalDevice name="fs" port="2" />
+            <DigitalDevice name="backSwitch" port="4" />
+            <LynxEmbeddedIMU name="imu" port="0" bus="0" />
+        </LynxModule>
+    </LynxUsbDevice>
+    <Webcam name="rcam" serialNumber="835F0D40" />
+</Robot>

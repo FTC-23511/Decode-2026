@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.globals;
 
 import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.EXPANSION_HUB_PRODUCT_NUMBER;
 import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.SERVO_HUB_PRODUCT_NUMBER;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import android.util.Log;
@@ -93,7 +94,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Launcher launcher;
     public Turret turret;
 
-    public AnalogInput distanceSensor;
+    public DigitalChannel distanceSensor;
 
     public void init(HardwareMap hwMap) {
         File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
@@ -178,7 +179,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.resetPosAndIMU();
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
 
-        distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
+        distanceSensor = hwMap.get(DigitalChannel.class, "distanceSensor");
+        distanceSensor.setMode(DigitalChannel.Mode.INPUT);
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
