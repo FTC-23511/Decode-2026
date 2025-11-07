@@ -139,6 +139,9 @@ public class FullTeleOp extends CommandOpMode {
         operator.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
         );
+        operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
+                new StationaryAimbotFullLaunch()
+        );
     }
 
     @Override

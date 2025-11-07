@@ -47,10 +47,10 @@ repositories {
         url "https://repo.dairy.foundation/snapshots"
     }
 
-    maven {
-        name "nullftcReleases"
-        url "https://maven.nullftc.dev/releases"
-    }
+//    maven {
+//        name "nullftcReleases"
+//        url "https://maven.nullftc.dev/releases"
+//    }
 }
 
 dependencies {
@@ -61,14 +61,20 @@ dependencies {
 //    implementation "org.solverslib:core:0.3.3" // core
 //    implementation "org.solverslib:pedroPathing:0.3.3" // pedroPathing
 
-    implementation "dev.nullftc:Profiler:SNAPSHOT-8e16b25"
-    implementation "com.acmerobotics.dashboard:dashboard:0.4.17" // FTC Dashboard
+//    implementation "dev.nullftc:Profiler:SNAPSHOT-8e16b25"
+    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashboard
 
     // Panels Dashboard
     implementation "com.bylazar:fullpanels:1.0.5"
 
     // Loop Time Profiler
-    implementation "dev.nullftc:Profiler:SNAPSHOT-daa44e3"
+//    implementation "dev.nullftc:Profiler:SNAPSHOT-daa44e3"
+
+    // AdvantageScope Lite
+    implementation "page.j5155.AdvantageScope:lite:v26.0.0"
+
+    // FateWeaver
+    implementation "gay.zharel.fateweaver:ftc:0.3.3"
 
     //noinspection GradleDependency, could be 0.43 but haven't tested it out yet
     implementation('org.ejml:ejml-simple:0.39') {
