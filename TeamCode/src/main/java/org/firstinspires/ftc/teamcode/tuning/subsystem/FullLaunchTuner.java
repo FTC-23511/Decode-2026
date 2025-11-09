@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp
+@TeleOp(name = "FullLaunchTuner", group = "Subsystem")
 public class FullLaunchTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;

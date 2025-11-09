@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.BACK_DISTANCE_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.globals.Constants.FRONT_DISTANCE_THRESHOLD;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -13,11 +16,12 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp
+@TeleOp(name = "IntakeSubsystemTuner", group = "Subsystem")
 public class IntakeSubsystemTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
@@ -72,6 +76,16 @@ public class IntakeSubsystemTuner extends CommandOpMode {
 
         telemetryData.addData("SERVO_POS", SERVO_POS);
         telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
+
+        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
+        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
+
+        telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
+        telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
+
+        telemetryData.addData("Robot Current", robot.getVoltage());
+        telemetryData.addData("Intake Current", robot.intakeMotor.getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryData.addData("Intake Over Current", robot.intakeMotor.isOverCurrent());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();

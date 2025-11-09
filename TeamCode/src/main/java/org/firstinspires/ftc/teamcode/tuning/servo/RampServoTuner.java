@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp
+@TeleOp(name = "RampServoTuner", group = "Servo")
 public class RampServoTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;

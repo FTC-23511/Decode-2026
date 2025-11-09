@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LaunchMotorTuner")
+@TeleOp(name = "LaunchMotorTuner", group = "Motor")
 public class LaunchMotorTuner extends CommandOpMode {
     public static double P = 0.004;
     public static double I = 0;

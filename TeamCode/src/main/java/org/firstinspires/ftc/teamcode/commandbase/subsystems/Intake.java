@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Intake extends SubsystemBase {
@@ -24,17 +23,18 @@ public class Intake extends SubsystemBase {
         HOLD
     }
 
+    /* Used for normal distance mode on distance sensor
     public enum DistanceState {
         FOV_15,
         FOV_20,
         FOV_27
     }
+     */
 
     public boolean intakeJammed = false;
     private final ElapsedTime intakeTimer;
     public static MotorState motorState = MotorState.STOP;
     public static PivotState pivotState = PivotState.HOLD;
-    public static DistanceState distanceState = DistanceState.FOV_15;
 
     public Intake() {
         intakeTimer = new ElapsedTime();
@@ -125,10 +125,14 @@ public class Intake extends SubsystemBase {
         robot.profiler.end("Intake Update");
     }
 
+    public void updateDistanceSensors() {
+        robot.frontDistanceSensor.update();
+        robot.backDistanceSensor.update();
+    }
+
     public boolean transferFull() {
-        // TODO: Fix logic
-        return false;
-//        return (getDistance(distanceState) < MAX_DISTANCE_THRESHOLD) && (getDistance(distanceState) > MIN_DISTANCE_THRESHOLD);
+        return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
+               && !intakeJammed;
     }
 
     /*
@@ -154,6 +158,7 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
+        updateDistanceSensors();
         updateIntake();
     }
 }

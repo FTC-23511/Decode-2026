@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.globals;
 
-import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.EXPANSION_HUB_PRODUCT_NUMBER;
-import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.SERVO_HUB_PRODUCT_NUMBER;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
@@ -9,14 +7,13 @@ import android.util.Log;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
+import com.seattlesolvers.solverslib.hardware.SensorDigitalDevice;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
@@ -27,7 +24,6 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -35,7 +31,6 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import dev.nullftc.profiler.Profiler;
@@ -94,7 +89,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Launcher launcher;
     public Turret turret;
 
-    public DigitalChannel distanceSensor;
+    public SensorDigitalDevice frontDistanceSensor;
+    public SensorDigitalDevice backDistanceSensor;
 
     public void init(HardwareMap hwMap) {
         File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
@@ -179,8 +175,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.resetPosAndIMU();
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
 
-        distanceSensor = hwMap.get(DigitalChannel.class, "distanceSensor");
-        distanceSensor.setMode(DigitalChannel.Mode.INPUT);
+        frontDistanceSensor = new SensorDigitalDevice(hwMap, "fromDistanceSensor", FRONT_DISTANCE_THRESHOLD);
+        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);

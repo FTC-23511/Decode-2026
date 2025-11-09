@@ -18,6 +18,9 @@
 
             <ControlHubImuBHI260AP name="imu" port="0" bus="0"/>
             <goBILDAPinpoint name="pinpoint" port="0" bus="2"/>
+
+            <DigitalDevice name="backDistanceSensor" port="0"/>
+            <DigitalDevice name="frontDistanceSensor" port="2"/>
         </LynxModule>
 
         <ServoHub name="Servo Hub 3" port="3">
@@ -28,7 +31,9 @@
             <ContinuousRotationServo name="leftTurretServo" port="4"/>
             <ContinuousRotationServo name="FR" port="5"/>
         </ServoHub>
+    </LynxUsbDevice>
 
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2F3UGC" parentModuleAddress="2">
         <LynxModule name="Expansion Hub 2" port="2">
             <goBILDA5202SeriesMotor name="topLaunchMotor" port="0"/>
             <goBILDA5202SeriesMotor name="bottomLaunchMotor" port="1"/>

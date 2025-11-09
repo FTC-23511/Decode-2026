@@ -18,8 +18,9 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Disabled
+@Deprecated
 @Config
-@TeleOp
+@TeleOp(name = "IntakeMotorTuner", group = "Motor")
 public class IntakeMotorTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
