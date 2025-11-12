@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.globals;
 
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import android.util.Log;
@@ -62,7 +61,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public MotorEx BLmotor;
     public MotorEx BRmotor;
 
-    public MotorEx intakeMotor;
+    public MotorGroup intakeMotors;
 
     public MotorGroup launchMotors;
     public MotorEx.Encoder launchEncoder;
@@ -118,15 +117,22 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BLmotor.setRunMode(Motor.RunMode.RawPower);
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
-        intakeMotor = new MotorEx(hwMap, "intakeMotor")
-                .setCachingTolerance(0.01)
-                .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS);
-        intakeMotor.setRunMode(Motor.RunMode.RawPower);
-        intakeMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        intakeMotors = new MotorGroup(
+                new MotorEx(hwMap, "intakeMotor")
+                        .setCachingTolerance(0.01)
+                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
+                        .setRunMode(Motor.RunMode.RawPower)
+                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+        );
+
+
 
         launchMotors = new MotorGroup(
-                new MotorEx(hwMap, "topLaunchMotor").setCachingTolerance(0.01).setInverted(true),
-                new MotorEx(hwMap, "bottomLaunchMotor").setCachingTolerance(0.01)
+                new MotorEx(hwMap, "topLaunchMotor")
+                        .setCachingTolerance(0.01)
+                        .setInverted(true),
+                new MotorEx(hwMap, "bottomLaunchMotor")
+                        .setCachingTolerance(0.01)
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);

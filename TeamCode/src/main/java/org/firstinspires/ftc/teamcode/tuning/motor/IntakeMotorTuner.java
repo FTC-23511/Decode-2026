@@ -64,7 +64,7 @@ public class IntakeMotorTuner extends CommandOpMode {
         }
 
         MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotor.set(MOTOR_POWER);
+        robot.intakeMotors.set(MOTOR_POWER);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();

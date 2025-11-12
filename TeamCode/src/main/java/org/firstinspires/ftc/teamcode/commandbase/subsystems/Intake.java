@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -68,16 +69,16 @@ public class Intake extends SubsystemBase {
     public void setIntake(MotorState motorState) {
         switch (motorState) {
             case STOP:
-                robot.intakeMotor.set(0);
+                robot.intakeMotors.set(0);
                 break;
             case TRANSFER:
-                robot.intakeMotor.set(INTAKE_TRANSFER_SPEED);
+                robot.intakeMotors.set(INTAKE_TRANSFER_SPEED);
                 break;
             case FORWARD:
-                robot.intakeMotor.set(INTAKE_FORWARD_SPEED);
+                robot.intakeMotors.set(INTAKE_FORWARD_SPEED);
                 break;
             case REVERSE:
-                robot.intakeMotor.set(INTAKE_REVERSE_SPEED);
+                robot.intakeMotors.set(INTAKE_REVERSE_SPEED);
                 break;
         }
     }
@@ -102,7 +103,7 @@ public class Intake extends SubsystemBase {
                         setIntake(MotorState.STOP);
                     }
 
-                    if (robot.intakeMotor.isOverCurrent()) {
+                    if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
                         intakeJammed = true;
                         intakeTimer.reset();
                         setIntake(MotorState.REVERSE);

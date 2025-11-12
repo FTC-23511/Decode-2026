@@ -69,7 +69,7 @@ public class FullLaunchTuner extends CommandOpMode {
         robot.hoodServo.set(HOOD_SERVO_POS);
         robot.rampServo.set(RAMP_SERVO_POS);
 
-        robot.intakeMotor.set(INTAKE_MOTOR_POWER);
+        robot.intakeMotors.set(INTAKE_MOTOR_POWER);
         robot.launchMotors.set(LAUNCHER_MOTOR_POWER);
 
         telemetryData.addData("Loop Time", timer.milliseconds());

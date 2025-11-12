@@ -14,6 +14,7 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -69,7 +70,7 @@ public class IntakeSubsystemTuner extends CommandOpMode {
         robot.intakePivotServo.set(SERVO_POS);
 
         MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotor.set(MOTOR_POWER);
+        robot.intakeMotors.set(MOTOR_POWER);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
@@ -84,8 +85,8 @@ public class IntakeSubsystemTuner extends CommandOpMode {
         telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
 
         telemetryData.addData("Robot Current", robot.getVoltage());
-        telemetryData.addData("Intake Current", robot.intakeMotor.getCurrent(CurrentUnit.MILLIAMPS));
-        telemetryData.addData("Intake Over Current", robot.intakeMotor.isOverCurrent());
+        telemetryData.addData("Intake Current", ((MotorEx) robot.intakeMotors.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryData.addData("Intake Over Current", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();
