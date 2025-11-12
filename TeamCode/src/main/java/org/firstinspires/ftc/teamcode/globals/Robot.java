@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.globals;
 
 import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.EXPANSION_HUB_PRODUCT_NUMBER;
 import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.SERVO_HUB_PRODUCT_NUMBER;
+
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
@@ -140,16 +142,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
         FLswervo = new CRServoEx(hwMap, "FL", new AbsoluteAnalogEncoder(hwMap, "FL")
                 .zero(FL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
         BLswervo = new CRServoEx(hwMap, "BL", new AbsoluteAnalogEncoder(hwMap, "BL")
                 .zero(BL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
         BRswervo = new CRServoEx(hwMap, "BR", new AbsoluteAnalogEncoder(hwMap, "BR")
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
 
         turretServos = new CRServoGroup(
                 new CRServoEx(hwMap, "leftTurretServo")
@@ -193,7 +195,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turret = new Turret();
 
         // Robot/CommandScheduler configurations
-        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
+//        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
 
 //        for (LynxModule hub : hwMap.getAll(LynxModule.class)) {
 //            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
@@ -205,6 +207,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //                servoHub = hub;
 //            }
 //        }
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.experimental.setMaximumParallelCommands(8);
 
         register(drive, intake, launcher, turret);
 
@@ -223,9 +228,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public double getVoltage() {
         if (voltageTimer == null) {
             voltageTimer = new ElapsedTime();
-            cachedVoltage = voltageSensor.getVoltage();
+            cachedVoltage = PhotonCore.CONTROL_HUB.getInputVoltage(VoltageUnit.VOLTS);;
         } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
-            cachedVoltage = voltageSensor.getVoltage();
+            cachedVoltage = PhotonCore.CONTROL_HUB.getInputVoltage(VoltageUnit.VOLTS);;
         }
         return cachedVoltage;
     }

@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -202,23 +203,23 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-        telemetryData.addData("Robot Pose", robot.drive.getPose());
+//        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
+//        telemetryData.addData("Robot Pose", robot.drive.getPose());
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());
 
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
-        telemetryData.addData("Turret Position", robot.turret.getPosition());
+//        telemetryData.addData("Turret Position", robot.turret.getPosition());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-        telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
+//        telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 
-        telemetryData.addData("Intake overCurrent", robot.intakeMotor.isOverCurrent());
+//        telemetryData.addData("Intake overCurrent", robot.intakeMotor.isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 
@@ -226,10 +227,10 @@ public class FullTeleOp extends CommandOpMode {
         robot.profiler.start("Low TelemetryData");
 
         telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-        telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-        telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-        telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-        telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
+//        telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
+//        telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
+//        telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
+//        telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
 
         telemetryData.addData("Sigma", "Polar");
         robot.profiler.end("Low TelemetryData");
@@ -238,8 +239,8 @@ public class FullTeleOp extends CommandOpMode {
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();
         telemetryData.update();
-//        robot.controlHub.clearBulkCache();
-//        robot.expansionHub.clearBulkCache();
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
         robot.profiler.end("Run + Update");
         robot.profiler.end("Full Loop");
     }

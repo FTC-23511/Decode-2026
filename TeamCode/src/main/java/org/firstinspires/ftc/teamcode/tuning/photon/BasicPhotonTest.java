@@ -21,6 +21,8 @@ public class BasicPhotonTest extends LinearOpMode {
     private ElapsedTime timer = new ElapsedTime();
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public static boolean ENABLE_PHOTON = true;
+    public static boolean MOTOR = true;
+    public static boolean SWERVO = true;
     public static double INTAKE_MOTOR_CACHE_TOL = -0.01;
     public static double SWERVO_CACHE_TOL = -0.01;
     public static double WRITES = 1;
@@ -51,8 +53,13 @@ public class BasicPhotonTest extends LinearOpMode {
                 if (power > 1) {
                     power = -1;
                 }
-                intakeMotor.set(power);
-                swervo.set(power);
+
+                if (MOTOR) {
+                    intakeMotor.set(power);
+                }
+                if (SWERVO) {
+                    swervo.set(power);
+                }
             }
 
             telemetryData.addData("Swervo getPower", swervo.get());

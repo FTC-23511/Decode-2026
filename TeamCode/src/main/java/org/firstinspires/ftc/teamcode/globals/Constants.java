@@ -21,7 +21,7 @@ public class Constants {
 
     public static OpModeType OP_MODE_TYPE;
     public static AllianceColor ALLIANCE_COLOR = AllianceColor.BLUE;
-    public static double VOLTAGE_SENSOR_POLLING_RATE = 10; // Hertz
+    public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
 
     // Drive
     public static Pose2d END_POSE = new Pose2d();
