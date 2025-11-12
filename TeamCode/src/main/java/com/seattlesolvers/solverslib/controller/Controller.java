@@ -176,4 +176,13 @@ public abstract class Controller {
         this.minOutput = Math.abs(minOutput);
         return this;
     }
+
+    /**
+     * Gets the minimum output (0 by default)
+     *
+     * @return the minimum output
+     */
+    public double getMinimumOutput() {
+        return minOutput;
+    }
 }

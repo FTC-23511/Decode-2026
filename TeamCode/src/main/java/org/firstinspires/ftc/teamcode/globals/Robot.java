@@ -125,20 +125,18 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                         .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
         );
 
-
-
         launchMotors = new MotorGroup(
-                new MotorEx(hwMap, "topLaunchMotor")
+                new MotorEx(hwMap, "leftLaunchMotor")
                         .setCachingTolerance(0.01)
                         .setInverted(true),
-                new MotorEx(hwMap, "bottomLaunchMotor")
+                new MotorEx(hwMap, "rightLaunchMotor")
                         .setCachingTolerance(0.01)
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new MotorEx(hwMap, "topLaunchMotor").encoder;
+        launchEncoder = new MotorEx(hwMap, "leftLaunchMotor").encoder;
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
@@ -181,7 +179,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.resetPosAndIMU();
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
 
-        frontDistanceSensor = new SensorDigitalDevice(hwMap, "fromDistanceSensor", FRONT_DISTANCE_THRESHOLD);
+        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
         backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
