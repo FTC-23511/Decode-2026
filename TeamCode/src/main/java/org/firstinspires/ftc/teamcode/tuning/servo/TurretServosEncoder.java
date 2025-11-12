@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "TurretServosEncoder")
+@TeleOp(name = "TurretServosEncoder", group = "Servo")
 public class TurretServosEncoder extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;

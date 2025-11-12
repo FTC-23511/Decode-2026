@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.BACK_DISTANCE_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.globals.Constants.FRONT_DISTANCE_THRESHOLD;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -11,13 +14,15 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp
+@TeleOp(name = "IntakeSubsystemTuner", group = "Subsystem")
 public class IntakeSubsystemTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
@@ -65,13 +70,23 @@ public class IntakeSubsystemTuner extends CommandOpMode {
         robot.intakePivotServo.set(SERVO_POS);
 
         MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotor.set(MOTOR_POWER);
+        robot.intakeMotors.set(MOTOR_POWER);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
         telemetryData.addData("SERVO_POS", SERVO_POS);
         telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
+
+        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
+        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
+
+        telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
+        telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
+
+        telemetryData.addData("Robot Current", robot.getVoltage());
+        telemetryData.addData("Intake Current", ((MotorEx) robot.intakeMotors.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryData.addData("Intake Over Current", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();

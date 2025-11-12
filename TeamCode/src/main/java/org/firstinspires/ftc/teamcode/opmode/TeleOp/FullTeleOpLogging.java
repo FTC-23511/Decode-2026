@@ -22,6 +22,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -278,7 +279,7 @@ public class FullTeleOpLogging extends CommandOpMode {
         logger.info("Flywheel Target: " + robot.launcher.getFlywheelTarget());
         logger.info("Flywheel Velocity: " + robot.launchEncoder.getCorrectedVelocity());
 
-        logger.info("Intake overCurrent: " + robot.intakeMotor.isOverCurrent());
+        logger.info("Intake overCurrent: " + ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
         logger.info("Intake Motor State: " + Intake.motorState);
         logger.info("Intake Jammed: " + robot.intake.intakeJammed);
 
@@ -311,7 +312,7 @@ public class FullTeleOpLogging extends CommandOpMode {
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
         telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 
-        telemetryData.addData("Intake overCurrent", robot.intakeMotor.isOverCurrent());
+        telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 

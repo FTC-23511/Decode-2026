@@ -95,8 +95,10 @@ public class CRServoGroup extends CRServo implements Iterable<CRServo> {
     }
 
     @Override
-    public void setRunMode(CRServo.RunMode runmode) {
+    public CRServoGroup setRunMode(CRServo.RunMode runmode) {
         group[0].setRunMode(runmode);
+
+        return this;
     }
 
     /**

@@ -68,8 +68,8 @@ public class Constants {
     public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
-    public static double MIN_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
-    public static double MAX_DISTANCE_THRESHOLD = 1.00; // TODO: needs to be tuned
+    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
+    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
     // Launcher
     public static double RAMP_ENGAGED = 0.3;
@@ -102,7 +102,7 @@ public class Constants {
     public static double TURRET_TY_TOLERANCE = 1.967; // LL TY Degrees
     public static double TURRET_POS_TOLERANCE = 0.067; // Radians
     public static double TURRET_MIN_OUTPUT = 0.15; // Power
-    public static double TURRET_ENCODER_OFFSET = 0.735; // Radians
+    public static double TURRET_ENCODER_OFFSET = 3.877; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static Pose2d GOAL_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -72 : 72), 72, 0); } // Inches
     public static double TURRET_BUFFER = (16.7 / 360.0) * 2 * Math.PI; // Radians // used for calculating drivetrain rotation in aimbot

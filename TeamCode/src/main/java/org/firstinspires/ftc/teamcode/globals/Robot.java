@@ -11,14 +11,13 @@ import android.util.Log;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
+import com.seattlesolvers.solverslib.hardware.SensorDigitalDevice;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
@@ -29,7 +28,6 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -37,7 +35,6 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import dev.nullftc.profiler.Profiler;
@@ -69,7 +66,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public MotorEx BLmotor;
     public MotorEx BRmotor;
 
-    public MotorEx intakeMotor;
+    public MotorGroup intakeMotors;
 
     public MotorGroup launchMotors;
     public MotorEx.Encoder launchEncoder;
@@ -96,7 +93,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Launcher launcher;
     public Turret turret;
 
-    public DigitalChannel distanceSensor;
+    public SensorDigitalDevice frontDistanceSensor;
+    public SensorDigitalDevice backDistanceSensor;
 
     public void init(HardwareMap hwMap) {
         File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
@@ -124,21 +122,26 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BLmotor.setRunMode(Motor.RunMode.RawPower);
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
-        intakeMotor = new MotorEx(hwMap, "intakeMotor")
-                .setCachingTolerance(0.01)
-                .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS);
-        intakeMotor.setRunMode(Motor.RunMode.RawPower);
-        intakeMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        intakeMotors = new MotorGroup(
+                new MotorEx(hwMap, "intakeMotor")
+                        .setCachingTolerance(0.01)
+                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
+                        .setRunMode(Motor.RunMode.RawPower)
+                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+        );
 
         launchMotors = new MotorGroup(
-                new MotorEx(hwMap, "topLaunchMotor").setCachingTolerance(0.01).setInverted(true),
-                new MotorEx(hwMap, "bottomLaunchMotor").setCachingTolerance(0.01)
+                new MotorEx(hwMap, "leftLaunchMotor")
+                        .setCachingTolerance(0.01)
+                        .setInverted(true),
+                new MotorEx(hwMap, "rightLaunchMotor")
+                        .setCachingTolerance(0.01)
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new MotorEx(hwMap, "topLaunchMotor").encoder;
+        launchEncoder = new MotorEx(hwMap, "leftLaunchMotor").encoder;
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
@@ -181,8 +184,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.resetPosAndIMU();
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
 
-        distanceSensor = hwMap.get(DigitalChannel.class, "distanceSensor");
-        distanceSensor.setMode(DigitalChannel.Mode.INPUT);
+        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
+        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);

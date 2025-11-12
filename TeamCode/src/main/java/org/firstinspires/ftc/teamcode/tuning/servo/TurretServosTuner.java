@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "TurretServosTuner")
+@TeleOp(name = "TurretServosTuner", group = "Servo")
 public class TurretServosTuner extends CommandOpMode {
     public static double P = 0.00;
     public static double I = 0;

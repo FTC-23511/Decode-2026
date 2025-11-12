@@ -380,8 +380,10 @@ public class Motor implements HardwareDevice {
      *
      * @param behavior the behavior desired
      */
-    public void setZeroPowerBehavior(ZeroPowerBehavior behavior) {
+    public Motor setZeroPowerBehavior(ZeroPowerBehavior behavior) {
         motor.setZeroPowerBehavior(behavior.getBehavior());
+
+        return this;
     }
 
     /**
@@ -429,7 +431,7 @@ public class Motor implements HardwareDevice {
      *
      * @param runmode the desired runmode
      */
-    public void setRunMode(RunMode runmode) {
+    public Motor setRunMode(RunMode runmode) {
         this.runmode = runmode;
         veloController.reset();
         positionController.reset();
@@ -437,6 +439,8 @@ public class Motor implements HardwareDevice {
             setTargetPosition(getCurrentPosition());
             targetIsSet = false;
         }
+
+        return this;
     }
 
     protected double getVelocity() {
@@ -575,5 +579,7 @@ public class Motor implements HardwareDevice {
     public void stopMotor() {
         motor.setPower(0);
     }
+
+
 
 }

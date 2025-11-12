@@ -1,44 +1,60 @@
 package org.firstinspires.ftc.teamcode.tuning.sensor;
 
-import android.annotation.SuppressLint;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.seattlesolvers.solverslib.hardware.SensorDistanceEx;
-import com.seattlesolvers.solverslib.hardware.SensorRevTOFDistance;
+import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Disabled
+@Deprecated
 @Config
-@TeleOp(name = "Distance Sensor", group = "Sensor")
-public class DistanceSensorTest extends LinearOpMode {
-    public static double MIN_THRESHOLD = 2.0;
-    public static double MAX_THRESHOLD = 4.0;
+@TeleOp(name = "DistanceSensorTest", group = "Sensor")
+public class DistanceSensorTest extends CommandOpMode {
+    public GamepadEx driver;
+
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
-    @SuppressLint("DefaultLocale")
+    private final Robot robot = Robot.getInstance();
+
     @Override
-    public void runOpMode() {
-        SensorDistanceEx.DistanceTarget distanceTarget = new SensorDistanceEx.DistanceTarget(DistanceUnit.CM, MIN_THRESHOLD, MAX_THRESHOLD);
-        SensorRevTOFDistance sensorDistance = new SensorRevTOFDistance(hardwareMap, "distance");
+    public void initialize() {
+        // Must have for all opModes
+        Constants.OP_MODE_TYPE = OpModeType.TELEOP;
 
-        sensorDistance.addTarget(distanceTarget);
+        // Resets the command scheduler
+        super.reset();
 
-        waitForStart();
+        // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
+        robot.init(hardwareMap);
+    }
 
-        while(opModeIsActive()) {
-            telemetryData.addData("Distance (CM)", sensorDistance.getDistance(DistanceUnit.CM));
-            telemetryData.addData("At Target", sensorDistance.targetReached(distanceTarget));
-            telemetryData.addData("Minimum Threshold", MIN_THRESHOLD);
-            telemetryData.addData("Maximum Threshold", MAX_THRESHOLD);
+    @Override
+    public void initialize_loop() {
+        update();
+    }
 
-            telemetryData.update();
-        }
+    @Override
+    public void run() {
+        update();
+    }
+
+    public void update() {
+        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
+        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
+
+        telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
+        telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
+
+        telemetryData.update();
     }
 }
