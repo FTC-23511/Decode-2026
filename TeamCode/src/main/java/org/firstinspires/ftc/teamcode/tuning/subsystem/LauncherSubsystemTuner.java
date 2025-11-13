@@ -78,9 +78,6 @@ public class LauncherSubsystemTuner extends CommandOpMode {
         telemetryData.addData("TARGET_VEL", TARGET_VEL);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        telemetryData.update();
-//        robot.controlHub.clearBulkCache();
-//        robot.expansionHub.clearBulkCache();
+        robot.updateLoop(telemetryData);
     }
 }

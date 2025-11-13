@@ -424,4 +424,8 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
         enabled.set(false);
         threadEnabled.set(false);
     }
+
+    public static AtomicBoolean isEnabled() {
+        return instance.enabled;
+    }
 }

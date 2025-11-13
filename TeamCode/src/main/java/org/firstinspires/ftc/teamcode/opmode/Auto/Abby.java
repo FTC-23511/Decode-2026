@@ -114,8 +114,7 @@ public class Abby extends CommandOpMode {
     @Override
     public void run() {
         // DO NOT REMOVE
-        super.run();
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
@@ -157,7 +156,7 @@ public class Abby extends CommandOpMode {
         telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
-        
+
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         telemetryData.update();
     }

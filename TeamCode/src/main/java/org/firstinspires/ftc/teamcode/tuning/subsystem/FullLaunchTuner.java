@@ -85,7 +85,6 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Launch Velocity", robot.launchMotors.getVelocity());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
     }
 }

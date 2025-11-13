@@ -73,9 +73,7 @@ public class TurretServosTuner extends CommandOpMode {
         telemetryData.addData("Get Power", robot.turretServos.getSpeeds().toString());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        robot.pinpoint.update();
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
     }
     
     @Override

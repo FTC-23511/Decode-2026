@@ -220,7 +220,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
 //        telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 
-        telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+//        telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 
@@ -238,10 +238,7 @@ public class FullTeleOp extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        telemetryData.update();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+        robot.updateLoop(telemetryData);
         robot.profiler.end("Run + Update");
         robot.profiler.end("Full Loop");
     }
