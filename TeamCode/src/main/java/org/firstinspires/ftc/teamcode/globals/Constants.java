@@ -105,5 +105,6 @@ public class Constants {
     public static double TURRET_ENCODER_OFFSET = 3.877; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static Pose2d GOAL_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -72 : 72), 72, 0); } // Inches
+    public static Pose2d APRILTAG_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -55.630 : 55.630), 58.346, 0); } // Feet
     public static double TURRET_BUFFER = (16.7 / 360.0) * 2 * Math.PI; // Radians // used for calculating drivetrain rotation in aimbot
 }

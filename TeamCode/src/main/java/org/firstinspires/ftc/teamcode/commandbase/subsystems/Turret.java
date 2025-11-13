@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.LIMELIGHT_CONTROL;
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.OFF;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
+
+import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -226,13 +228,11 @@ public class Turret extends SubsystemBase {
                     Pose3D botPose = llResult.getBotpose();
 
                     if (botPose != null) {
-                        double x = botPose.getPosition().x;
-                        double y = botPose.getPosition().y;
+                        double x = DistanceUnit.INCH.fromMeters(botPose.getPosition().y);
+                        double y = -DistanceUnit.INCH.fromMeters(botPose.getPosition().x);
                         double heading = botPose.getOrientation().getYaw(AngleUnit.RADIANS);
 
-                        x = DistanceUnit.INCH.fromMeters(x);
-                        y = DistanceUnit.INCH.fromMeters(y);
-                        heading = MathUtils.normalizeRadians(heading - Math.PI/2, true); // TODO: Figure out angle difference between our coordinate system and LL's
+                        heading = MathUtils.normalizeRadians(heading + Math.PI/2, true); // TODO: Figure out angle difference between our coordinate system and LL's
 
                         if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(heading)) {
                             return new Pose2d(x, y, heading);
@@ -243,6 +243,13 @@ public class Turret extends SubsystemBase {
         }
 
         return null;
+    }
+
+    public double tyOffset(@NonNull Pose2d robotPose) {
+        double angleToGoal = angleToPose(robotPose, GOAL_POSE());
+        double angleToATag = angleToPose(robotPose, APRILTAG_POSE());
+
+        return angleToATag - angleToGoal;
     }
 
     public boolean setMotifState() {
@@ -267,12 +274,13 @@ public class Turret extends SubsystemBase {
     }
 
     /**
-     * @param pose what the goal pose is being compared to
+     * @param robotPose what the targetPose is being compared to
+     * @param targetPose what the robotPose is being compared to
      * @return angle in radians, field-centric, normalized to 0-2pi
      */
-    public static double angleToGoal(Pose2d pose) {
+    public static double angleToPose(Pose2d robotPose, Pose2d targetPose) {
         return MathUtils.normalizeRadians(
-                new Vector2d(GOAL_POSE()).minus(new Vector2d(pose)).angle(),
+                new Vector2d(targetPose).minus(new Vector2d(robotPose)).angle(),
                 true
         );
     }

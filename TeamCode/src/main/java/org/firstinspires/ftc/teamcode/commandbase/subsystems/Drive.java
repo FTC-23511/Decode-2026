@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.p2p.P2PController;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -72,6 +73,10 @@ public class Drive extends SubsystemBase {
 
     public void setPose(Pose2d pose) {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
+    }
+
+    public double getAngleToGoal(Pose2d robotPose) {
+        return Constants.GOAL_POSE().minus(robotPose).getRotation().getAngle(AngleUnit.RADIANS);
     }
 
     @Override

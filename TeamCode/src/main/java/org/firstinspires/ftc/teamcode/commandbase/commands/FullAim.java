@@ -6,9 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.util.InterpLUT;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
@@ -48,7 +46,7 @@ public class FullAim extends CommandBase {
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
         // Preliminary estimates of where drivetrain and turret should face
-        double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.angleToGoal(robot.drive.getPose()));
+        double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.angleToPose(robot.drive.getPose(), GOAL_POSE()));
         robot.drive.follower.setTarget(robot.drive.getPose().rotate(errorsDriveTurret[0]));
         robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, errorsDriveTurret[1]);
 
@@ -73,7 +71,7 @@ public class FullAim extends CommandBase {
 
         if (aimIndex == 1) {
             if (robot.turret.getLimeLightTargetDegrees() != null) {
-                robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.limelightInterplut.get(Constants.GOAL_POSE().minus(robot.drive.getPose()).getRotation().getAngle(AngleUnit.RADIANS)));
+                robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.limelightInterplut.get(robot.drive.getAngleToGoal(robot.turret.getLimelightPose())));
                 aimIndex = 2;
             } else if (robot.turret.readyToLaunch() && robot.turret.llResult == null) {
                 // TODO: add code to deal with case where if we don't see ATag despite turret + drivetrain reaching set point
