@@ -110,6 +110,12 @@ public class Mystery extends CommandOpMode {
     }
 
     @Override
+    public void initialize_loop() {
+        telemetryData.addData("ALLIANCE_COLOR", ALLIANCE_COLOR);
+        telemetryData.update();
+    }
+
+    @Override
     public void run() {
         // DO NOT REMOVE
         robot.updateLoop(telemetryData);
