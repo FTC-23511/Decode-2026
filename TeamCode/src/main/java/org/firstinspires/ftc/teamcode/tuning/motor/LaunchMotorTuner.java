@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -85,6 +86,7 @@ public class LaunchMotorTuner extends CommandOpMode {
         telemetryData.addData("sdk topMotor velocity", leftMotor.getVelocity());
         telemetryData.addData("sdk bottomMotor velocity", rightMotor.getVelocity());
         telemetryData.addData("encoder position", robot.launchEncoder.getPosition());
+        telemetryData.addData("Turret state", Turret.turretState);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -68,6 +69,7 @@ public class LaunchMotorEncoder extends CommandOpMode {
         telemetryData.addData("Launch Raw Motor Velocity", robot.launchEncoder.getRawVelocity());
         telemetryData.addData("Launch Corrected Motor Velocity", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Direct Motor Corrected Velocity", robot.launchMotors.getVelocities());
+        telemetryData.addData("Turret state", Turret.turretState);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
