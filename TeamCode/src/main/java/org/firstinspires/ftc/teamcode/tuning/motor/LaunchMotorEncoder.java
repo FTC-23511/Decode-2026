@@ -56,7 +56,7 @@ public class LaunchMotorEncoder extends CommandOpMode {
         // Keep all the has movement init for until when TeleOp starts
         // This is like the init but when the program is actually started
         if (timer == null) {
-//            robot.initHasMovement();
+            robot.initHasMovement();
             timer = new ElapsedTime();
         }
 
@@ -69,7 +69,6 @@ public class LaunchMotorEncoder extends CommandOpMode {
         telemetryData.addData("Launch Raw Motor Velocity", robot.launchEncoder.getRawVelocity());
         telemetryData.addData("Launch Corrected Motor Velocity", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Direct Motor Corrected Velocity", robot.launchMotors.getVelocities());
-        telemetryData.addData("Turret state", Turret.turretState);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
