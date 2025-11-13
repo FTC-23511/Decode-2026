@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
@@ -66,7 +67,11 @@ public class FullTeleOp extends CommandOpMode {
         // Driver controls
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d())))
+                new ConditionalCommand(
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d()))),
+                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
@@ -192,7 +197,7 @@ public class FullTeleOp extends CommandOpMode {
                         ChassisSpeeds.fromFieldRelativeSpeeds(
                                 driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
                                 -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier + (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? Math.PI : 0),
                                 robotAngle
                         )
                 );
