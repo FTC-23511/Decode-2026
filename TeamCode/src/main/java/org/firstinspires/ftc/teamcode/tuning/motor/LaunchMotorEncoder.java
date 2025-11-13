@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -55,7 +56,7 @@ public class LaunchMotorEncoder extends CommandOpMode {
         // Keep all the has movement init for until when TeleOp starts
         // This is like the init but when the program is actually started
         if (timer == null) {
-//            robot.initHasMovement();
+            robot.initHasMovement();
             timer = new ElapsedTime();
         }
 
@@ -70,9 +71,7 @@ public class LaunchMotorEncoder extends CommandOpMode {
         telemetryData.addData("Direct Motor Corrected Velocity", robot.launchMotors.getVelocities());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        robot.pinpoint.update();
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
 //        robot.controlHub.clearBulkCache();
 //        robot.expansionHub.clearBulkCache();
     }

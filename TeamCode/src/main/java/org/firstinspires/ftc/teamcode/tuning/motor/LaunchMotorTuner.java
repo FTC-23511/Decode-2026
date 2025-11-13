@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -25,6 +26,8 @@ public class LaunchMotorTuner extends CommandOpMode {
 
     public static double TARGET_VEL = 0.0;
     public static double POS_TOLERANCE = 0;
+
+    private double motorVel = 0;
 
     private static final PIDFController launcherPIDF = new PIDFController(P, I, D, F);
 
@@ -55,10 +58,14 @@ public class LaunchMotorTuner extends CommandOpMode {
     @Override
     public void run() {
         if (timer == null) {
+            robot.initHasMovement();
             timer = new ElapsedTime();
         }
 
-        double motorVel = robot.launchEncoder.getCorrectedVelocity();
+        double newVel = robot.launchEncoder.getCorrectedVelocity();
+        if (Math.abs(newVel) < Constants.LAUNCHER_MAX_VELOCITY) {
+            motorVel = newVel;
+        }
         double voltage = robot.getVoltage();
 
         launcherPIDF.setPIDF(P, I, D, F / (voltage / 12.0));
@@ -82,11 +89,7 @@ public class LaunchMotorTuner extends CommandOpMode {
         telemetryData.addData("encoder position", robot.launchEncoder.getPosition());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        robot.pinpoint.update();
-        telemetryData.update();
-//        robot.controlHub.clearBulkCache();
-//        robot.expansionHub.clearBulkCache();
+        robot.updateLoop(telemetryData);
     }
     
     @Override

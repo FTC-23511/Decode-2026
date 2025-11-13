@@ -31,7 +31,6 @@ public class Turret extends SubsystemBase {
             Arrays.asList(0.0, 0.1) // output: offset from april tag
     );
 
-
     public enum Motif {
         NOT_FOUND,
         GPP,

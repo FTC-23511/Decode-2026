@@ -112,8 +112,7 @@ public class Mystery extends CommandOpMode {
     @Override
     public void run() {
         // DO NOT REMOVE
-        super.run();
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {

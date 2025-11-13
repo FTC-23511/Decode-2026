@@ -157,7 +157,7 @@ public class Motor implements HardwareDevice {
                 lastVelo = velo;
                 lastTimeStamp = currentTime;
             }
-            return velo;
+            return velo * direction.getMultiplier();
         }
 
         /**
@@ -176,10 +176,11 @@ public class Motor implements HardwareDevice {
          */
         public double getCorrectedVelocity() {
             double real = getRawVelocity();
-            while (Math.abs(veloEstimate - real) > CPS_STEP / 2.0) {
-                real += Math.signum(veloEstimate - real) * CPS_STEP;
+            double abs = Math.abs(real);
+            while (Math.abs(veloEstimate - abs) > CPS_STEP / 2.0) {
+                abs += Math.signum(veloEstimate - abs) * CPS_STEP;
             }
-            return real;
+            return abs * Math.signum(real);
         }
 
     }
@@ -579,7 +580,4 @@ public class Motor implements HardwareDevice {
     public void stopMotor() {
         motor.setPower(0);
     }
-
-
-
 }

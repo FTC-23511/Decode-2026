@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.globals;
 
+import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.EXPANSION_HUB_PRODUCT_NUMBER;
+import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.SERVO_HUB_PRODUCT_NUMBER;
+
+import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import android.util.Log;
@@ -10,6 +16,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 import com.seattlesolvers.solverslib.hardware.SensorDigitalDevice;
@@ -19,10 +26,12 @@ import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
+import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -64,7 +73,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public MotorGroup intakeMotors;
 
     public MotorGroup launchMotors;
-    public MotorEx.Encoder launchEncoder;
+    public Motor.Encoder launchEncoder;
 
     public CRServoEx FRswervo;
     public CRServoEx FLswervo;
@@ -104,6 +113,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .debugLog(false) // Log EVERYTHING
                 .build();
 
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.experimental.setMaximumParallelCommands(8);
+        PhotonCore.enable();
+
         // Hardware
         voltageSensor = hwMap.voltageSensor.iterator().next();
 
@@ -127,29 +141,30 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         launchMotors = new MotorGroup(
                 new MotorEx(hwMap, "leftLaunchMotor")
-                        .setCachingTolerance(0.01)
-                        .setInverted(true),
+                        .setCachingTolerance(0.01),
                 new MotorEx(hwMap, "rightLaunchMotor")
                         .setCachingTolerance(0.01)
+                        .setInverted(true)
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new MotorEx(hwMap, "leftLaunchMotor").encoder;
+        launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
+        launchEncoder.setDirection(Motor.Direction.REVERSE);
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
         FLswervo = new CRServoEx(hwMap, "FL", new AbsoluteAnalogEncoder(hwMap, "FL")
                 .zero(FL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
         BLswervo = new CRServoEx(hwMap, "BL", new AbsoluteAnalogEncoder(hwMap, "BL")
                 .zero(BL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
         BRswervo = new CRServoEx(hwMap, "BR", new AbsoluteAnalogEncoder(hwMap, "BR")
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
-                .setCachingTolerance(0.01);
+                .setCachingTolerance(0.02);
 
         turretServos = new CRServoGroup(
                 new CRServoEx(hwMap, "leftTurretServo")
@@ -193,7 +208,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turret = new Turret();
 
         // Robot/CommandScheduler configurations
-        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
+//        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
 
 //        for (LynxModule hub : hwMap.getAll(LynxModule.class)) {
 //            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
@@ -205,6 +220,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //                servoHub = hub;
 //            }
 //        }
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.experimental.setMaximumParallelCommands(8);
 
         register(drive, intake, launcher, turret);
 
@@ -221,13 +239,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
     
     public double getVoltage() {
-        if (voltageTimer == null) {
-            voltageTimer = new ElapsedTime();
-            cachedVoltage = voltageSensor.getVoltage();
-        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
-            cachedVoltage = voltageSensor.getVoltage();
-        }
-        return cachedVoltage;
+        return 12;
+        // TODO: fix getVoltage eventually
+//        if (voltageTimer == null) {
+//            cachedVoltage = voltageSensor.getVoltage();
+//        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
+//            cachedVoltage = voltageSensor.getVoltage();
+//        }
+//        return cachedVoltage;
     }
 
     public void exportProfiler(File file) {
@@ -257,4 +276,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         imu.initialize(parameters);
     }
      */
+
+    public void updateLoop(TelemetryData telemetryData) {
+        CommandScheduler.getInstance().run();
+        telemetryData.update();
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
+    }
 }

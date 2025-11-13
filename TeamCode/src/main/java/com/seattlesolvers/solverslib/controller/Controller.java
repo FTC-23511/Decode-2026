@@ -116,7 +116,6 @@ public abstract class Controller {
      * @return Whether the error is within the acceptable bounds.
      */
     public boolean atSetPoint(double pv) {
-
         return Math.abs(errorVal_p) < errorTolerance_p
                 && Math.abs(errorVal_v) < errorTolerance_v;
     }

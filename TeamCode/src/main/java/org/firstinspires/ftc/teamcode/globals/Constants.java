@@ -21,7 +21,7 @@ public class Constants {
 
     public static OpModeType OP_MODE_TYPE;
     public static AllianceColor ALLIANCE_COLOR = AllianceColor.BLUE;
-    public static double VOLTAGE_SENSOR_POLLING_RATE = 10; // Hertz
+    public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
 
     // Drive
     public static Pose2d END_POSE = new Pose2d();
@@ -57,7 +57,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.5841;
+    public static double INTAKE_PIVOT_FORWARD = 0.5641;
     public static double INTAKE_PIVOT_HOLD = 0.5;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD;
 
@@ -75,7 +75,7 @@ public class Constants {
     public static double RAMP_ENGAGED = 0.3;
     public static double RAMP_DISENGAGED = 0.06;
 
-    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.004, 0, 0, 0.00055); // Coefficients for ticks
+    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00052); // Coefficients for ticks
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
@@ -85,12 +85,12 @@ public class Constants {
 
     public static double LAUNCHER_FAR_VELOCITY = 6.0; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
-    public static double LAUNCHER_MAX_VELOCITY = 2000; // Ticks/second
+    public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be checked off CAD
-    public static double MIN_HOOD_SERVO_POS = 0.00; // MUST MATCH WITH VALUE ABOVE
-    public static double MAX_HOOD_ANGLE = 50; // Degrees from horizontal // TODO: needs to be checked off CAD
-    public static double MAX_HOOD_SERVO_POS = 1.0; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_HOOD_SERVO_POS = 0.34; // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal // TODO: needs to be checked off CAD
+    public static double MAX_HOOD_SERVO_POS = 0.823; // Position // MUST MATCH WITH VALUE ABOVE
     public static double MIN_LL_HOOD_ANGLE = 16; // Degrees from horizontal // Minimum hood angle for Limelight to be able to see AprilTags from anywhere on the field// TODO: needs to be tuned
 
     // Turret
