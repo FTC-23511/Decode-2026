@@ -69,7 +69,8 @@ public class LimelightAngle extends CommandOpMode {
 
         telemetryData.addData("loop time", timer.milliseconds());
         timer.reset();
-        telemetryData.addData("Angle", robot.turret.tyOffset(lastKnownPose));
+        telemetryData.addData("Angle (Radians)", robot.turret.tyOffset(lastKnownPose));
+        telemetryData.addData("Angle (Degrees)", Math.toDegrees(robot.turret.tyOffset(lastKnownPose)));
         telemetryData.addData("bot pose", lastKnownPose);
 
 
