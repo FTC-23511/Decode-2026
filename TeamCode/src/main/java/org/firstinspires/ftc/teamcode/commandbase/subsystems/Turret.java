@@ -29,8 +29,9 @@ import java.util.Arrays;
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final InterpLUT limelightInterplut = new InterpLUT(
-            Arrays.asList(Math.PI, 0.1), // input: angle
-            Arrays.asList(0.0, 0.1) // output: offset from april tag
+            Arrays.asList(Math.PI, 0.1), // input: angle of 2 lines
+            Arrays.asList(0.0, 0.1) // output: new goal pos
+
     );
 
     public enum Motif {
@@ -245,8 +246,8 @@ public class Turret extends SubsystemBase {
         return null;
     }
 
-    public double tyOffset(@NonNull Pose2d robotPose) {
-        double angleToGoal = angleToPose(robotPose, GOAL_POSE());
+    public double tyOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
+        double angleToGoal = angleToPose(robotPose, goalPose);
         double angleToATag = angleToPose(robotPose, APRILTAG_POSE());
 
         return angleToATag - angleToGoal;
@@ -284,6 +285,22 @@ public class Turret extends SubsystemBase {
                 true
         );
     }
+
+    public double getTyOffset(@NonNull Pose2d robotPose) {
+        double offset = tyOffset(robotPose, GOAL_POSE());
+        double adjustment = limelightInterplut.get(offset);
+
+        Pose2d adjustedGoal;
+        if (adjustment < 0) {
+            adjustedGoal = new Pose2d(GOAL_POSE().getX() + adjustment, GOAL_POSE().getY(), GOAL_POSE().getHeading());
+        } else {
+            adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() + adjustment, GOAL_POSE().getHeading());
+        }
+
+        return tyOffset(robotPose, adjustedGoal);
+    }
+
+
 
     /**
      * Converts an angle in radians, field-centric, normalized to 0-2pi to two separate angles, one for drivetrain and one for the turret
