@@ -100,7 +100,7 @@ public class LimeLightTest extends CommandOpMode {
 
                         telemetry.addData("MT1 Location", "(" + x + ", " + y + ", " + z + ")");
                     } else {
-                        telemetry.addData("MT1 Location", (Object) null);
+                        telemetry.addData("MT1 Location", "null");
                     }
 
                     Pose3D botpose_mt2 = result.getBotpose_MT2();
@@ -113,9 +113,9 @@ public class LimeLightTest extends CommandOpMode {
                         y = DistanceUnit.INCH.fromMeters(y);
                         z = DistanceUnit.INCH.fromMeters(z);
 
-                        telemetry.addData("MT1 Location", "(" + x + ", " + y + ", " + z + ")");
+                        telemetry.addData("MT2 Location", "(" + x + ", " + y + ", " + z + ")");
                     } else {
-                        telemetry.addData("MT2 Location", (Object) null);
+                        telemetry.addData("MT2 Location", "null");
                     }
 
                     telemetryData.addData("txPixels", fiducial.getTargetXPixels());

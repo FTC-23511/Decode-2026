@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.sensor;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -9,11 +10,10 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-//@Config
+@Config
 @TeleOp(name = "LimelightAngle", group = "Sensor")
 public class LimelightAngle extends CommandOpMode {
     public GamepadEx driver;
@@ -26,6 +26,8 @@ public class LimelightAngle extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
     Pose2d lastKnownPose = new Pose2d();
 
+
+    public static boolean USE_MT1 = true;
 
     @Override
     public void initialize() {
@@ -57,22 +59,24 @@ public class LimelightAngle extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        // TODO: Add robot drive movement here
+        Pose2d robotPose = USE_MT1 ? robot.turret.getLimelightPose() : robot.turret.getLimelightPoseMT2();
 
-
-        if (robot.turret.getLimelightPose() != null) {
-            lastKnownPose = robot.turret.getLimelightPose();
-
+        if (robotPose != null) {
+            lastKnownPose = robotPose;
         }
-        robot.turret.updateLLResult(5);
 
+        robot.turret.updateLLResult(5);
 
         telemetryData.addData("loop time", timer.milliseconds());
         timer.reset();
-        telemetryData.addData("Angle (Radians)", robot.turret.tyOffset(lastKnownPose, Constants.GOAL_POSE()));
-        telemetryData.addData("Angle (Degrees)", Math.toDegrees(robot.turret.tyOffset(lastKnownPose, Constants.GOAL_POSE())));
-        telemetryData.addData("bot pose", lastKnownPose);
 
+        if (lastKnownPose == null) {
+            telemetryData.addData("bot pose", null);
+        } else {
+            telemetryData.addData("Angle (Radians)", robot.turret.tyOffset(lastKnownPose, Constants.GOAL_POSE()));
+            telemetryData.addData("Angle (Degrees)", Math.toDegrees(robot.turret.tyOffset(lastKnownPose, Constants.GOAL_POSE())));
+            telemetryData.addData("bot pose", lastKnownPose);
+        }
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

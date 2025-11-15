@@ -21,6 +21,7 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -29,9 +30,8 @@ import java.util.Arrays;
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final InterpLUT limelightInterplut = new InterpLUT(
-            Arrays.asList(Math.PI, 0.1), // input: angle of 2 lines
-            Arrays.asList(0.0, 0.1) // output: new goal pos
-
+            Arrays.asList(0.0, 8.40), // input: angle of 2 lines (degrees)
+            Arrays.asList(0.0, 6.0) // output: new goal pos (inches)
     );
 
     public enum Motif {
@@ -183,9 +183,7 @@ public class Turret extends SubsystemBase {
         return null;
     }
 
-    /*
     public Pose2d getLimelightPoseMT2() {
-
         if (llResult != null) {
             for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
                 int id = fiducial.getFiducialId();
@@ -193,20 +191,20 @@ public class Turret extends SubsystemBase {
                 if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
                         || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
 
-                    robot.limelight.updateRobotOrientation(robot.drive.getPose().getHeading());
+                    robot.limelight.updateRobotOrientation(MathUtils.normalizeDegrees(robot.drive.getPose().getRotation().getDegrees() + 90.0, false));
                     Pose3D botPose = llResult.getBotpose_MT2();
 
                     if (botPose != null) {
-                        double x = botPose.getPosition().x;
-                        double y = botPose.getPosition().y;
-                        double z = botPose.getPosition().z;
+                        Position position = botPose.getPosition();
 
-                        x = DistanceUnit.INCH.fromMeters(x);
-                        y = DistanceUnit.INCH.fromMeters(y);
-                        z = DistanceUnit.INCH.fromMeters(z);
+                        double x = DistanceUnit.INCH.fromMeters(position.x);
+                        double y = DistanceUnit.INCH.fromMeters(position.y);;
 
-                        if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(z)) {
-                            return new Pose2d(x, y, z);
+                        double heading = botPose.getOrientation().getYaw(AngleUnit.RADIANS);
+                        heading = MathUtils.normalizeRadians(heading + Math.PI / 2, true); // TODO: Figure out angle difference between our coordinate system and LL's
+
+                        if (x > -80 && x < 80 && y > -80 && y < 80 && !Double.isNaN(heading)) {
+                            return new Pose2d(x, y, heading);
                         }
                     }
                 }
@@ -215,8 +213,6 @@ public class Turret extends SubsystemBase {
 
         return null;
     }
-
-     */
 
     public Pose2d getLimelightPose() {
         if (llResult != null) {
@@ -235,7 +231,7 @@ public class Turret extends SubsystemBase {
 
                         heading = MathUtils.normalizeRadians(heading + Math.PI/2, true); // TODO: Figure out angle difference between our coordinate system and LL's
 
-                        if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(heading)) {
+                        if (x > -80 && x < 80 && y > -80 && y < 80 && !Double.isNaN(heading)) {
                             return new Pose2d(x, y, heading);
                         }
                     }
@@ -299,8 +295,6 @@ public class Turret extends SubsystemBase {
 
         return tyOffset(robotPose, adjustedGoal);
     }
-
-
 
     /**
      * Converts an angle in radians, field-centric, normalized to 0-2pi to two separate angles, one for drivetrain and one for the turret
