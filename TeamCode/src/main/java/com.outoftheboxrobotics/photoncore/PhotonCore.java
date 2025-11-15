@@ -1,6 +1,7 @@
 package com.outoftheboxrobotics.photoncore;
 
 import android.content.Context;
+import android.util.Log;
 
 
 import com.outoftheboxrobotics.photoncore.Neutrino.Rev2MSensor.Rev2mDistanceSensorEx;
@@ -173,13 +174,11 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
     }
 
     protected static boolean shouldParallelize(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand) ||
-                (command instanceof LynxSetServoPulseWidthCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand);
     }
 
     protected static boolean shouldAckImmediately(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand) ||
-                (command instanceof LynxSetServoPulseWidthCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand);
     }
 
     private boolean isSimilar(LynxRespondable respondable1, LynxRespondable respondable2){
@@ -324,9 +323,13 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
         for(LynxModule m : replacements.keySet()){
             usbDevice.removeConfiguredModule(m);
             try {
+                // TODO: check new code
                 ConcurrentHashMap<Integer, LynxModule> knownModules = (ConcurrentHashMap<Integer, LynxModule>) ReflectionUtils.getField(usbDevice.getClass(), "knownModules").get(usbDevice);
-                PhotonLynxModule photonLynxModule = replacements.get(m);
-                knownModules.put(photonLynxModule.getModuleAddress(), photonLynxModule);
+                synchronized (knownModules) {
+                    PhotonLynxModule photonLynxModule = replacements.get(m);
+                    knownModules.put(photonLynxModule.getModuleAddress(), photonLynxModule);
+                    RobotLog.vv(LynxUsbDeviceImpl.TAG, "addConfiguredModule() name#=%s", photonLynxModule.getDeviceName());
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

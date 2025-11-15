@@ -24,6 +24,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
@@ -197,8 +198,8 @@ public class FullTeleOp extends CommandOpMode {
                         ChassisSpeeds.fromFieldRelativeSpeeds(
                                 driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
                                 -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier + (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? Math.PI : 0),
-                                robotAngle
+                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                                new Rotation2d(robotAngle.getAngle(AngleUnit.RADIANS) + (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? Math.PI : 0))
                         )
                 );
             }
