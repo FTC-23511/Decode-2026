@@ -46,6 +46,9 @@ public class FullTeleOp extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
+    public static double MAX_OUTPUT = 1;
+    public static boolean PROBLEMATIC_TELEMETRY = false;
+
     @Override
     public void initialize() {
         // Must have for all opModes
@@ -173,6 +176,7 @@ public class FullTeleOp extends CommandOpMode {
             if (driver.isDown(GamepadKeys.Button.START)) {
                 robot.drive.swerve.updateWithXLock();
             } else {
+                robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
                 double minSpeed = 0.3; // As a fraction of the max speed of the robot
                 double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
@@ -206,38 +210,43 @@ public class FullTeleOp extends CommandOpMode {
         }
         robot.profiler.end("Swerve Drive");
 
-        robot.profiler.start("High TelemetryData");
+
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-//        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-//        telemetryData.addData("Robot Pose", robot.drive.getPose());
+        if (PROBLEMATIC_TELEMETRY) {
+            robot.profiler.start("High TelemetryData");
+
+            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
+            telemetryData.addData("Robot Pose", robot.drive.getPose());
+            telemetryData.addData("Turret Position", robot.turret.getPosition());
+            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
+            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
+            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
+            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
+            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
+
+            robot.profiler.end("High TelemetryData");
+        }
+
+        robot.profiler.start("Low TelemetryData");
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());
 
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
-//        telemetryData.addData("Turret Position", robot.turret.getPosition());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-//        telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 
-//        telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 
-        robot.profiler.end("High TelemetryData");
-        robot.profiler.start("Low TelemetryData");
-
         telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-//        telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-//        telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-//        telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-//        telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
 
         telemetryData.addData("Sigma", "Polar");
         robot.profiler.end("Low TelemetryData");

@@ -116,7 +116,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.experimental.setMaximumParallelCommands(8);
-        PhotonCore.disable();
+        PhotonCore.enable();
 
         // Hardware
         voltageSensor = hwMap.voltageSensor.iterator().next();
