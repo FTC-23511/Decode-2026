@@ -78,7 +78,7 @@ public class CoaxialSwerveDrivetrain extends RobotDrive {
         if (Math.abs(targetVelocity.vyMetersPerSecond / (maxSpeed * maxOutput)) > maxScaleOverOutput) {
             maxScaleOverOutput = targetVelocity.vyMetersPerSecond / (maxSpeed * maxOutput);
         }
-        if (Math.abs(targetVelocity.omegaRadiansPerSecond / (maxSpeed * maxAngularSpeed)) > maxScaleOverOutput) {
+        if (Math.abs(targetVelocity.omegaRadiansPerSecond / (maxAngularSpeed * maxOutput)) > maxScaleOverOutput) {
             maxScaleOverOutput = targetVelocity.omegaRadiansPerSecond / (maxAngularSpeed * maxOutput);
         }
         
