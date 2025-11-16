@@ -1,6 +1,7 @@
 package com.seattlesolvers.solverslib.drivebase.swerve.coaxial;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.drivebase.RobotDrive;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
@@ -39,7 +40,7 @@ public class CoaxialSwerveDrivetrain extends RobotDrive {
         this.trackWidth = trackWidth;
         this.wheelBase = wheelBase;
         this.maxSpeed = maxSpeed;
-        this.maxAngularSpeed = maxSpeed / (Math.hypot(trackWidth, wheelBase) * Math.PI);
+        this.maxAngularSpeed = maxSpeed / Math.hypot(trackWidth / 2, wheelBase / 2);
 
         for (Motor motor : motors) {
             motor.setRunMode(Motor.RunMode.RawPower);
@@ -72,20 +73,22 @@ public class CoaxialSwerveDrivetrain extends RobotDrive {
      */
     public void setTargetVelocity(ChassisSpeeds targetVelocity) {
         double maxScaleOverOutput = 1;
-        if (Math.abs(targetVelocity.vxMetersPerSecond / (maxSpeed * maxOutput)) > maxScaleOverOutput) {
-            maxScaleOverOutput = targetVelocity.vxMetersPerSecond / (maxSpeed * maxOutput);
+        double maxAllowedLinearSpeed = maxSpeed * maxOutput;
+        double maxAllowedAngularSpeed = maxAngularSpeed * maxOutput;
+        if (Math.abs(targetVelocity.vxMetersPerSecond / maxAllowedLinearSpeed) > maxScaleOverOutput) {
+            maxScaleOverOutput = Math.abs(targetVelocity.vxMetersPerSecond / maxAllowedLinearSpeed);
         }
-        if (Math.abs(targetVelocity.vyMetersPerSecond / (maxSpeed * maxOutput)) > maxScaleOverOutput) {
-            maxScaleOverOutput = targetVelocity.vyMetersPerSecond / (maxSpeed * maxOutput);
+        if (Math.abs(targetVelocity.vyMetersPerSecond / maxAllowedLinearSpeed) > maxScaleOverOutput) {
+            maxScaleOverOutput = Math.abs(targetVelocity.vyMetersPerSecond / maxAllowedLinearSpeed);
         }
-        if (Math.abs(targetVelocity.omegaRadiansPerSecond / (maxAngularSpeed * maxOutput)) > maxScaleOverOutput) {
-            maxScaleOverOutput = targetVelocity.omegaRadiansPerSecond / (maxAngularSpeed * maxOutput);
+        if (Math.abs(targetVelocity.omegaRadiansPerSecond / maxAllowedAngularSpeed) > maxScaleOverOutput) {
+            maxScaleOverOutput = Math.abs(targetVelocity.omegaRadiansPerSecond / maxAllowedAngularSpeed);
         }
         
         this.targetVelocity = new ChassisSpeeds(
-                targetVelocity.vxMetersPerSecond * (1/maxScaleOverOutput),
-                targetVelocity.vyMetersPerSecond * (1/maxScaleOverOutput),
-                targetVelocity.omegaRadiansPerSecond * (1/maxScaleOverOutput)
+                targetVelocity.vxMetersPerSecond / maxScaleOverOutput,
+                targetVelocity.vyMetersPerSecond / maxScaleOverOutput,
+                targetVelocity.omegaRadiansPerSecond / maxScaleOverOutput
         );
     }
 
