@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -60,7 +61,12 @@ public class FullAim extends CommandBase {
     @Override
     public void execute() {
         if (aimIndex <= 2) {
-            robot.drive.swerve.updateWithTargetVelocity(robot.drive.follower.calculate(robot.drive.getPose()));
+            robot.drive.swerve.updateWithTargetVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        robot.drive.follower.calculate(robot.drive.getPose()),
+                        robot.drive.getPose().getRotation()
+                )
+            );
         } else {
             robot.drive.swerve.updateWithXLock();
         }

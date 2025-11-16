@@ -31,7 +31,6 @@ public class Launcher extends SubsystemBase {
             Arrays.asList(-0.01, 0.0, 4.29,   4.76,   5.22,   5.65,   6.06,   6.48,   10.0), // input: velocity (m/s)
             Arrays.asList(0.0,   0.0, 1267.0, 1367.0, 1500.0, 1667.0, 1810.0, 2000.0, 2100.0) // output:
     );
-    // 4.76 m/s -> 1500 tick/s
 
     public Launcher() {
         launcherVel.createLUT();
