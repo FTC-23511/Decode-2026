@@ -99,6 +99,7 @@ public class Constants {
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.4, 0, 0.023, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.06, 0, 0.0023, 0); // Coefficients for radians
+    public static double LIMELIGHT_TURRET_OUTPUT = 0.5;
     public static double LIMELIGHT_PID_THRESHOLD = 4; // LL TY Degrees
     public static double TURRET_TY_TOLERANCE = 1.967; // LL TY Degrees
     public static double TURRET_POS_TOLERANCE = 0.067; // Radians

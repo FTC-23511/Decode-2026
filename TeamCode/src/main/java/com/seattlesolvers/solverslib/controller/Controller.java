@@ -1,7 +1,10 @@
 package com.seattlesolvers.solverslib.controller;
 
+import com.seattlesolvers.solverslib.util.MathUtils;
+
 public abstract class Controller {
     private double minOutput = 0;
+    private double maxOutput = Double.POSITIVE_INFINITY;
     protected double setPoint;
     protected double measuredValue;
 
@@ -51,7 +54,7 @@ public abstract class Controller {
         if (atSetPoint()) {
             return rawOutput;
         } else {
-            return Math.max(Math.abs(rawOutput), minOutput) * Math.signum(rawOutput);
+            return MathUtils.clamp(Math.abs(rawOutput), minOutput, maxOutput) * Math.signum(rawOutput);
         }
     }
 
@@ -183,5 +186,25 @@ public abstract class Controller {
      */
     public double getMinimumOutput() {
         return minOutput;
+    }
+
+    /**
+     * An option to enforce a minimum (magnitude of the / absolute value of the) output from
+     * subsequent calculations from the controller if the controller is not {@link #atSetPoint()}
+     * @param minOutput the minimum (magnitude of the / absolute value of the) output for the controller
+     * @return this object for chaining purposes
+     */
+    public Controller setMaxOutput(double maxOutput) {
+        this.maxOutput = maxOutput;
+        return this;
+    }
+
+    /**
+     * Gets the maximum output (Positive Infinity by default)
+     *
+     * @return the maximum output
+     */
+    public double getMaxOutput() {
+        return maxOutput;
     }
 }

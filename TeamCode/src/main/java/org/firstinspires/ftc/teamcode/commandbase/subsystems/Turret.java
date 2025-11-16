@@ -13,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -70,12 +71,14 @@ public class Turret extends SubsystemBase {
             case ANGLE_CONTROL:
                 turretController.setTolerance(TURRET_POS_TOLERANCE);
                 turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(1);
 
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case LIMELIGHT_CONTROL:
                 turretController.setTolerance(TURRET_TY_TOLERANCE);
                 turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(LIMELIGHT_TURRET_OUTPUT);
 
                 turretController.setSetPoint(value);
                 turretController.calculate(value - TURRET_TY_TOLERANCE - 0.1); // update the internal controller's PV to outside of allowed tolerance so that readyToLaunch() does not return true instantly
@@ -264,7 +267,7 @@ public class Turret extends SubsystemBase {
 
     public double medianYOffset() {
         if (medianY.isEmpty()) {
-            return Double.NaN;
+            return 0;
         }
 
         ArrayList<Double> sortedMedianY = new ArrayList<>(medianY);
@@ -312,7 +315,11 @@ public class Turret extends SubsystemBase {
         );
     }
 
-    public double getTyOffset(@NonNull Pose2d robotPose) {
+    public double getTyOffset(Pose2d robotPose) {
+        if (robotPose == null) {
+            return 0;
+        }
+
         double offset = medianYOffset();
         double adjustment = limelightInterplut.get(offset);
 
