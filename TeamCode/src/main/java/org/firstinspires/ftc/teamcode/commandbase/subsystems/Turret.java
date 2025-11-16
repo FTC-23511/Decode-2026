@@ -25,13 +25,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final InterpLUT limelightInterplut = new InterpLUT(
-            Arrays.asList(0.0, 8.40), // input: angle of 2 lines (degrees)
-            Arrays.asList(0.0, 6.0) // output: new goal pos (inches)
+            Arrays.asList(-80.0, -67.0,  -36.0,  0.0, 16.7, 41.0, 67.0, 80.0), // input: y-axis of robot
+            Arrays.asList(-13.0, -12.67, -12.67, 0.0, 3.67, 4.67, 6.7,  7.0) // output: new goal pos (inches)
     );
 
     public enum Motif {
@@ -51,10 +53,12 @@ public class Turret extends SubsystemBase {
     public static TurretState turretState = ANGLE_CONTROL;
     public LLResult llResult = null;
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public ArrayList<Double> medianY = new ArrayList<>();
 
     public Turret() {
         turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
         turretController.setTolerance(TURRET_POS_TOLERANCE);
+        limelightInterplut.createLUT();
     }
 
     public void init() {
@@ -155,6 +159,15 @@ public class Turret extends SubsystemBase {
         for (int i = n; i > 0; i--) {
             llResult = robot.limelight.getLatestResult();
             if (llResult != null && llResult.isValid()) {
+                Pose2d llPose = getLimelightPose();
+
+                if (llPose != null) {
+                    medianY.add(llPose.getY());
+                }
+
+                if (medianY.size() > 10) {
+                    medianY.remove(0);
+                }
                 break;
             } else {
                 llResult = null;
@@ -249,6 +262,23 @@ public class Turret extends SubsystemBase {
         return angleToATag - angleToGoal;
     }
 
+    public double medianYOffset() {
+        if (medianY.isEmpty()) {
+            return Double.NaN;
+        }
+
+        ArrayList<Double> sortedMedianY = new ArrayList<>(medianY);
+        Collections.sort(sortedMedianY);
+
+        if (sortedMedianY.size() % 2 == 1) {
+            return sortedMedianY.get(sortedMedianY.size() / 2);
+        }
+
+        return
+            (sortedMedianY.get(sortedMedianY.size() / 2 - 1) +
+            sortedMedianY.get(sortedMedianY.size() / 2)) / 2.0;
+    }
+
     public boolean setMotifState() {
         if (llResult != null && llResult.isValid()) {
             for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
@@ -283,7 +313,7 @@ public class Turret extends SubsystemBase {
     }
 
     public double getTyOffset(@NonNull Pose2d robotPose) {
-        double offset = tyOffset(robotPose, GOAL_POSE());
+        double offset = medianYOffset();
         double adjustment = limelightInterplut.get(offset);
 
         Pose2d adjustedGoal;

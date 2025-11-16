@@ -71,7 +71,7 @@ public class FullAim extends CommandBase {
 
         if (aimIndex == 1) {
             if (robot.turret.getLimeLightTargetDegrees() != null) {
-                robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.limelightInterplut.get(robot.drive.getAngleToGoal(robot.turret.getLimelightPose())));
+                robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.getTyOffset((robot.turret.getLimelightPose())));
                 aimIndex = 2;
             } else if (robot.turret.readyToLaunch() && robot.turret.llResult == null) {
                 // TODO: add code to deal with case where if we don't see ATag despite turret + drivetrain reaching set point

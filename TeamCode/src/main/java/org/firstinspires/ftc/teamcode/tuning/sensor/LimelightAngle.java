@@ -21,12 +21,14 @@ public class LimelightAngle extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    private final TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
-    Pose2d lastKnownPose = new Pose2d();
+    private Pose2d lastKnownPose = new Pose2d();
 
-
+    private double[] lastAngles = new double[10]; // fixed-size primitive buffer
+    private int angleCount = 0;
+    private int insertIndex = 0;
     public static boolean USE_MT1 = true;
 
     @Override
@@ -73,9 +75,26 @@ public class LimelightAngle extends CommandOpMode {
         if (lastKnownPose == null) {
             telemetryData.addData("bot pose", null);
         } else {
-            telemetryData.addData("Angle (Radians)", robot.turret.tyOffset(lastKnownPose, Constants.GOAL_POSE()));
-            telemetryData.addData("Angle (Degrees)", Math.toDegrees(robot.turret.tyOffset(lastKnownPose, Constants.GOAL_POSE())));
-            telemetryData.addData("bot pose", lastKnownPose);
+            Pose2d llPose = robot.turret.getLimelightPose();
+
+            if (llPose != null) {
+                robot.turret.medianY.add(llPose.getY());
+            }
+
+            if (robot.turret.medianY.size() > 10) {
+                robot.turret.medianY.remove(0);
+            }
+
+            if (!robot.turret.medianY.isEmpty()) {
+                double angle = robot.turret.medianYOffset();
+                telemetryData.addData("Median Y", angle);
+                telemetryData.addData("tY Offset", robot.turret.getTyOffset(lastKnownPose));
+                telemetryData.addData("bot pose", lastKnownPose);
+            } else {
+                telemetryData.addData("Median Y", "medianTy is Empty");
+            }
+
+
         }
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
