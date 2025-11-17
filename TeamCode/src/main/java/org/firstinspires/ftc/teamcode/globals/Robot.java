@@ -236,16 +236,19 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
     
     public double getVoltage() {
-        return 12;
-        // TODO: fix getVoltage eventually
-//        if (voltageTimer == null) {
-//            cachedVoltage = voltageSensor.getVoltage();
-//        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
-//            cachedVoltage = voltageSensor.getVoltage();
-//        }
-//        return cachedVoltage;
+       return cachedVoltage;
     }
 
+    private void cacheVoltage() {
+       if (voltageTimer == null) {
+           voltageTimer = new ElapsedTime();
+           cachedVoltage = voltageSensor.getVoltage();
+       } else if (voltageTimer.milliseconds() > (1000 / VOLTAGE_SENSOR_POLLING_RATE)) {
+           cachedVoltage = voltageSensor.getVoltage();
+           voltageTimer.reset();
+       }
+    }
+    
     public void exportProfiler(File file) {
         RobotLog.i("Starting async profiler export to: " + file.getAbsolutePath());
 
@@ -279,5 +282,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         telemetryData.update();
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
+        cacheVoltage();
     }
 }
