@@ -60,7 +60,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //    public LynxModule servoHub;
 //    public ArrayList<LynxModule> hubs;
     public VoltageSensor voltageSensor;
-    private double cachedVoltage;
+    private double cachedVoltage = 12;
     private ElapsedTime voltageTimer;
 
     public boolean readyToLaunch = false;
