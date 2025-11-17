@@ -8,11 +8,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
+import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -29,6 +33,8 @@ public class LimelightTuner extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
+    public static double angleVal = 0;
+
     @Override
     public void initialize() {
         // Must have for all opModes
@@ -43,17 +49,38 @@ public class LimelightTuner extends CommandOpMode {
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
 
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.getTyOffset((robot.turret.getLimelightPose()))))
+                        new InstantCommand(() -> angleVal += 0.25),
+                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, angleVal))
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+                        new InstantCommand(() -> angleVal -= 0.25),
+                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, angleVal))
                 )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.getTyOffset((robot.turret.getLimelightPose()))))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
+                new StationaryAimbotFullLaunch()
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                new UninterruptibleCommand(new CancelCommand())
         );
     }
 
@@ -75,7 +102,21 @@ public class LimelightTuner extends CommandOpMode {
 
         telemetryData.addData("Turret Set Point", robot.turret.turretController.getSetPoint());
         telemetryData.addData("Turret Enum", Turret.turretState);
+        telemetryData.addData("Angle Mode Value", angleVal);
 
+        double robotPose = robot.drive.getPose().getRotation().getDegrees();
+        double turretPos = Math.toDegrees(robot.turret.getPosition());
+
+        telemetryData.addData("Robot Pose", robotPose);
+        telemetryData.addData("turretPos", turretPos);
+
+        telemetryData.addData("Robot Full Angle", (
+                robotPose + turretPos - 90.0)
+        );
+
+        telemetryData.addData("Robot Full Corrected Angle", MathUtils.normalizeDegrees(
+                robotPose + turretPos - 90.0, false)
+        );
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

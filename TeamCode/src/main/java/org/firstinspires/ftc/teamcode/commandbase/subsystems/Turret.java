@@ -13,7 +13,6 @@ import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -78,7 +77,7 @@ public class Turret extends SubsystemBase {
             case LIMELIGHT_CONTROL:
                 turretController.setTolerance(TURRET_TY_TOLERANCE);
                 turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(LIMELIGHT_TURRET_OUTPUT);
+                turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_OUTPUT);
 
                 turretController.setSetPoint(value);
                 turretController.calculate(value - TURRET_TY_TOLERANCE - 0.1); // update the internal controller's PV to outside of allowed tolerance so that readyToLaunch() does not return true instantly
@@ -122,8 +121,10 @@ public class Turret extends SubsystemBase {
 
                 if (Math.abs(error) > LIMELIGHT_PID_THRESHOLD) {
                     turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
+                    turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_OUTPUT);
                 } else {
                     turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
+                    turretController.setMaxOutput(LIMELIGHT_SMALL_TURRET_OUTPUT);
                 }
 
                 double power = turretController.calculate(ty);
@@ -207,7 +208,12 @@ public class Turret extends SubsystemBase {
                 if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
                         || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
 
-                    robot.limelight.updateRobotOrientation(MathUtils.normalizeDegrees(robot.drive.getPose().getRotation().getDegrees() + 90.0, false));
+                    robot.limelight.updateRobotOrientation(
+                            MathUtils.normalizeDegrees(
+                                    robot.drive.getPose().getRotation().getDegrees()
+                                            + Math.toDegrees(getPosition()) - 90.0, false)
+                    );
+
                     Pose3D botPose = llResult.getBotpose_MT2();
 
                     if (botPose != null) {
@@ -230,7 +236,7 @@ public class Turret extends SubsystemBase {
         return null;
     }
 
-    public Pose2d getLimelightPose() {
+    public Pose2d getLimelightPoseMT1() {
         if (llResult != null) {
             for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
                 int id = fiducial.getFiducialId();
@@ -256,6 +262,10 @@ public class Turret extends SubsystemBase {
         }
 
         return null;
+    }
+
+    public Pose2d getLimelightPose() {
+        return USE_LIMELIGHT_MT1 ? getLimelightPoseMT1() : getLimelightPoseMT2();
     }
 
     public double tyOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
