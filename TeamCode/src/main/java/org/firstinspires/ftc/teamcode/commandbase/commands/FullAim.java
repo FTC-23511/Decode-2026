@@ -104,6 +104,7 @@ public class FullAim extends CommandBase {
                 }
 
                 errorsAngleVelocity = Launcher.distanceToLauncherValues(Constants.GOAL_POSE().minus(robotPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
+                robot.turret.lastKnownPose = robotPose;
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;
                 } else {

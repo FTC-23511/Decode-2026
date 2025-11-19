@@ -35,6 +35,7 @@ public class Turret extends SubsystemBase {
             Arrays.asList(-80.0, -67.0,  -36.0,  0.0, 16.7, 41.0, 67.0, 80.0), // input: y-axis of robot
             Arrays.asList(-13.0, -12.67, -12.67, 0.0, 3.67, 4.67, 6.7,  7.0) // output: new goal pos (inches)
     );
+    public Pose2d lastKnownPose = new Pose2d(); // only for logging purposes
 
     public enum Motif {
         NOT_FOUND,
@@ -217,11 +218,8 @@ public class Turret extends SubsystemBase {
                     Pose3D botPose = llResult.getBotpose_MT2();
 
                     if (botPose != null) {
-                        Position position = botPose.getPosition();
-
-                        double x = DistanceUnit.INCH.fromMeters(position.x);
-                        double y = DistanceUnit.INCH.fromMeters(position.y);;
-
+                        double x = DistanceUnit.INCH.fromMeters(botPose.getPosition().y);
+                        double y = -DistanceUnit.INCH.fromMeters(botPose.getPosition().x);
                         double heading = botPose.getOrientation().getYaw(AngleUnit.RADIANS);
                         heading = MathUtils.normalizeRadians(heading + Math.PI / 2, true); // TODO: Figure out angle difference between our coordinate system and LL's
 

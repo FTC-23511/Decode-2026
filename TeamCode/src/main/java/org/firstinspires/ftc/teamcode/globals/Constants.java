@@ -45,7 +45,7 @@ public class Constants {
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 3.602; // Radians
     public static double FL_ENCODER_OFFSET = 3.753; // Radians
-    public static double BL_ENCODER_OFFSET = 0.65; // Radians
+    public static double BL_ENCODER_OFFSET = 2.0; // Radians
     public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(8, 0, 0.25, 0); // Coefficients for inches
@@ -57,7 +57,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.5641;
+    public static double INTAKE_PIVOT_FORWARD = 0.5567;
     public static double INTAKE_PIVOT_HOLD = 0.5;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD;
 
@@ -83,7 +83,7 @@ public class Constants {
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
     public static final double TARGET_HEIGHT = 1.0; // meters
 
-    public static double LAUNCHER_FAR_VELOCITY = 6.0; // Meters/second
+    public static double LAUNCHER_FAR_VELOCITY = 5.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
 

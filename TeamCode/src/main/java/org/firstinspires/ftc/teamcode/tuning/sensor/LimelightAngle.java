@@ -10,6 +10,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -87,6 +88,7 @@ public class LimelightAngle extends CommandOpMode {
                 telemetryData.addData("Median Y", angle);
                 telemetryData.addData("tY Offset", robot.turret.getTyOffset(lastKnownPose));
                 telemetryData.addData("bot pose", lastKnownPose);
+                telemetryData.addData("Distance (m)", Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
             } else {
                 telemetryData.addData("Median Y", "medianTy is Empty");
             }
