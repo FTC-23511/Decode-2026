@@ -15,13 +15,23 @@ public class Constants {
         TELEOP
     }
     public enum AllianceColor {
-        RED,
-        BLUE
+        BLUE(1), RED(-1);
+
+        private int val;
+
+        AllianceColor(int multiplier) {
+            val = multiplier;
+        }
+
+        public int getMultiplier() {
+            return val;
+        }
     }
 
     public static OpModeType OP_MODE_TYPE;
     public static AllianceColor ALLIANCE_COLOR = AllianceColor.BLUE;
     public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
+    public static boolean PROBLEMATIC_TELEMETRY = false;
 
     // Drive
     public static Pose2d END_POSE = new Pose2d();
@@ -48,18 +58,19 @@ public class Constants {
     public static double BL_ENCODER_OFFSET = 2.0; // Radians
     public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
-    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(8, 0, 0.25, 0); // Coefficients for inches
-    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(10, 0, 0.67, 0); // Coefficients for radians
+    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(2.5, 0, 0.25, 0); // Coefficients for inches
+    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(3, 0, 0.2, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
+    public static PIDFCoefficients AIMBOT_COEFFICIENTS = new PIDFCoefficients(3.5, 0, 0, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.41; // Inches
     public static double HEADING_TOLERANCE = 0.041; // Radians
     public static double XY_MIN_OUTPUT = 12; // Inches/second
-    public static double HEADING_MIN_OUTPUT = 0.5; // Radians/second
+    public static double HEADING_MIN_OUTPUT = 1; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.5567;
-    public static double INTAKE_PIVOT_HOLD = 0.5;
-    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD;
+    public static double INTAKE_PIVOT_FORWARD = 0.5641;
+    public static double INTAKE_PIVOT_HOLD = 0.4967;
+    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.0167;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -1.0;
@@ -76,7 +87,7 @@ public class Constants {
     public static double RAMP_DISENGAGED = 0.06;
 
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00052); // Coefficients for ticks
-    public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
+    public static double FLYWHEEL_VEL_TOLERANCE = 100; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
     public static final double GRAVITY = 9.81; // meters/second
@@ -97,17 +108,17 @@ public class Constants {
     public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.4, 0, 0.023, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.06, 0, 0.0023, 0); // Coefficients for radians
-    public static double LIMELIGHT_LARGE_TURRET_OUTPUT = 0.5;
-    public static double LIMELIGHT_SMALL_TURRET_OUTPUT = 0.25;
-    public static double LIMELIGHT_PID_THRESHOLD = 4; // LL TY Degrees
+    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
+    public static double LIMELIGHT_LARGE_TURRET_MAX_OUTPUT = 0.4;
+    public static double LIMELIGHT_SMALL_TURRET_MAX_OUTPUT = 0.25;
+    public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
     public static boolean USE_LIMELIGHT_MT1 = false;
-    public static double TURRET_TY_TOLERANCE = 1.967; // LL TY Degrees
+    public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
     public static double TURRET_POS_TOLERANCE = 0.067; // Radians
-    public static double TURRET_MIN_OUTPUT = 0.15; // Power
+    public static double TURRET_MIN_OUTPUT = 0.167; // Power
     public static double TURRET_ENCODER_OFFSET = 3.877; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
-    public static Pose2d GOAL_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -72 : 72), 72, 0); } // Inches
-    public static Pose2d APRILTAG_POSE() { return new Pose2d((ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -55.630 : 55.630), 58.346, 0); } // Feet
+    public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
+    public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet
     public static double TURRET_BUFFER = (16.7 / 360.0) * 2 * Math.PI; // Radians // used for calculating drivetrain rotation in aimbot
 }

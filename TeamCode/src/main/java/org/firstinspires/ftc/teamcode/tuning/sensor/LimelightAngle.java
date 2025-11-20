@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.tuning.sensor;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -76,24 +79,37 @@ public class LimelightAngle extends CommandOpMode {
             Pose2d llPose = robot.turret.getLimelightPose();
 
             if (llPose != null) {
-                robot.turret.medianY.add(llPose.getY());
+                robot.turret.updateMedianReadings(llPose);
             }
 
-            if (robot.turret.medianY.size() > 10) {
-                robot.turret.medianY.remove(0);
+            if (robot.turret.medianWallAngle.size() > 10) {
+                robot.turret.medianWallAngle.remove(0);
             }
 
-            if (!robot.turret.medianY.isEmpty()) {
-                double angle = robot.turret.medianYOffset();
+            if (!robot.turret.medianWallAngle.isEmpty()) {
+                double angle = robot.turret.getMedianWallAngle();
                 telemetryData.addData("Median Y", angle);
-                telemetryData.addData("tY Offset", robot.turret.getTyOffset(lastKnownPose));
+                try {
+                    telemetryData.addData("tY Offset", robot.turret.getTyOffset(lastKnownPose));
+                    double offset = -robot.turret.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
+                    double adjustment = robot.turret.limelightInterplut.get(offset);
+
+                    Pose2d adjustedGoal;
+                    if (adjustment < 0) {
+                        adjustedGoal = new Pose2d(GOAL_POSE().getX() - (adjustment * ALLIANCE_COLOR.getMultiplier()), GOAL_POSE().getY(), GOAL_POSE().getHeading());
+                    } else {
+                        adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
+                    }
+                    telemetryData.addData("offset", offset);
+                    telemetryData.addData("adjusted goal", adjustedGoal);
+                } catch (Exception ignored) {
+                    telemetryData.addData("tY Offset", "out of bounds error");
+                }
                 telemetryData.addData("bot pose", lastKnownPose);
                 telemetryData.addData("Distance (m)", Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
             } else {
                 telemetryData.addData("Median Y", "medianTy is Empty");
             }
-
-
         }
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

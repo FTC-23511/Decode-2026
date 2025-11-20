@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commandbase.commands;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -41,13 +42,13 @@ public class FullAim extends CommandBase {
 
     @Override
     public void initialize() {
-        ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
+        ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
 
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
         // Preliminary estimates of where drivetrain and turret should face
-        double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.angleToPose(robot.drive.getPose(), GOAL_POSE()));
+        double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robot.drive.getPose(), GOAL_POSE()));
         robot.drive.follower.setTarget(robot.drive.getPose().rotate(errorsDriveTurret[0]));
         robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, errorsDriveTurret[1]);
 
@@ -75,6 +76,8 @@ public class FullAim extends CommandBase {
             robot.turret.updateLLResult(5);
         }
 
+        RobotLog.aa("aimIndex", String.valueOf(aimIndex));
+
         if (aimIndex == 1) {
             if (robot.turret.getLimeLightTargetDegrees() != null) {
                 robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.getTyOffset((robot.turret.getLimelightPose())));
@@ -94,9 +97,9 @@ public class FullAim extends CommandBase {
             }
         }
 
-        if (aimIndex == 2.5 && timer.milliseconds() > 250) {
+        if (aimIndex == 2.5 && timer.milliseconds() > 500) {
             if (robot.turret.readyToLaunch()) {
-                robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition()); // lock turret to current position
+//                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
                 Pose2d robotPose = robot.turret.getLimelightPose();
 
                 if (robotPose == null) {
@@ -131,12 +134,12 @@ public class FullAim extends CommandBase {
             ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
         }
 
-        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
+        robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition());
         robot.readyToLaunch = !interrupted && !impossible;
     }
 
     @Override
     public boolean isFinished() {
-        return impossible || (aimIndex == 3 && robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && timer.milliseconds() > 250);
+        return impossible || (aimIndex == 3 && robot.launcher.flywheelReady() && timer.milliseconds() > 250);
     }
 }

@@ -11,6 +11,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -21,7 +22,6 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -32,8 +32,8 @@ import java.util.Collections;
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final InterpLUT limelightInterplut = new InterpLUT(
-            Arrays.asList(-80.0, -67.0,  -36.0,  0.0, 16.7, 41.0, 67.0, 80.0), // input: y-axis of robot
-            Arrays.asList(-13.0, -12.67, -12.67, 0.0, 3.67, 4.67, 6.7,  7.0) // output: new goal pos (inches)
+            Arrays.asList(-0.25, 0.1, 0.3,  0.5,  0.6,  Math.PI/4, 0.9, 0.94,   Math.PI/2), // input: angle formed by lines between robot to goal and far field wall
+            Arrays.asList(7.0,   6.7, 5.67, 2.67, 1.67, 0.0,       0.0, -12.67, -12.67) // output: new goal pos (inches)
     );
     public Pose2d lastKnownPose = new Pose2d(); // only for logging purposes
 
@@ -54,7 +54,7 @@ public class Turret extends SubsystemBase {
     public static TurretState turretState = ANGLE_CONTROL;
     public LLResult llResult = null;
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
-    public ArrayList<Double> medianY = new ArrayList<>();
+    public ArrayList<Double> medianWallAngle = new ArrayList<>();
 
     public Turret() {
         turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
@@ -78,10 +78,9 @@ public class Turret extends SubsystemBase {
             case LIMELIGHT_CONTROL:
                 turretController.setTolerance(TURRET_TY_TOLERANCE);
                 turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_OUTPUT);
+                turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_MAX_OUTPUT);
 
                 turretController.setSetPoint(value);
-                turretController.calculate(value - TURRET_TY_TOLERANCE - 0.1); // update the internal controller's PV to outside of allowed tolerance so that readyToLaunch() does not return true instantly
                 break;
             case OFF:
                 robot.turretServos.set(0);
@@ -122,10 +121,10 @@ public class Turret extends SubsystemBase {
 
                 if (Math.abs(error) > LIMELIGHT_PID_THRESHOLD) {
                     turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
-                    turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_OUTPUT);
+                    turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_MAX_OUTPUT);
                 } else {
                     turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
-                    turretController.setMaxOutput(LIMELIGHT_SMALL_TURRET_OUTPUT);
+                    turretController.setMaxOutput(LIMELIGHT_SMALL_TURRET_MAX_OUTPUT);
                 }
 
                 double power = turretController.calculate(ty);
@@ -167,11 +166,11 @@ public class Turret extends SubsystemBase {
                 Pose2d llPose = getLimelightPose();
 
                 if (llPose != null) {
-                    medianY.add(llPose.getY());
+                    updateMedianReadings(llPose);
                 }
 
-                if (medianY.size() > 10) {
-                    medianY.remove(0);
+                if (medianWallAngle.size() > 10) {
+                    medianWallAngle.remove(0);
                 }
                 break;
             } else {
@@ -266,61 +265,32 @@ public class Turret extends SubsystemBase {
         return USE_LIMELIGHT_MT1 ? getLimelightPoseMT1() : getLimelightPoseMT2();
     }
 
-    public double tyOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
-        double angleToGoal = angleToPose(robotPose, goalPose);
-        double angleToATag = angleToPose(robotPose, APRILTAG_POSE());
-
-        return angleToATag - angleToGoal;
+    public void updateMedianReadings(Pose2d llPose) {
+        medianWallAngle.add(posesToAngle(llPose, Constants.GOAL_POSE()) - posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()));
     }
 
-    public double medianYOffset() {
-        if (medianY.isEmpty()) {
-            return 0;
+    public double getMedianWallAngle() {
+        if (medianWallAngle.isEmpty()) {
+            return Math.PI / 4;
         }
 
-        ArrayList<Double> sortedMedianY = new ArrayList<>(medianY);
-        Collections.sort(sortedMedianY);
+        ArrayList<Double> sortedMedianWallAngle = new ArrayList<>(medianWallAngle);
+        Collections.sort(sortedMedianWallAngle);
 
-        if (sortedMedianY.size() % 2 == 1) {
-            return sortedMedianY.get(sortedMedianY.size() / 2);
+        if (sortedMedianWallAngle.size() % 2 == 1) {
+            return sortedMedianWallAngle.get(sortedMedianWallAngle.size() / 2);
         }
 
         return
-            (sortedMedianY.get(sortedMedianY.size() / 2 - 1) +
-            sortedMedianY.get(sortedMedianY.size() / 2)) / 2.0;
+            (sortedMedianWallAngle.get(sortedMedianWallAngle.size() / 2 - 1) +
+            sortedMedianWallAngle.get(sortedMedianWallAngle.size() / 2)) / 2.0;
     }
 
-    public boolean setMotifState() {
-        if (llResult != null && llResult.isValid()) {
-            for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
-                int id = fiducial.getFiducialId();
+    public double tyOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
+        double angleToGoal = Math.toDegrees(posesToAngle(robotPose, goalPose));
+        double angleToATag = Math.toDegrees(posesToAngle(robotPose, APRILTAG_POSE()))   ;
 
-                if (id == 21) {
-                    motifState = Motif.PPG;
-                    return true;
-                } else if (id == 22) {
-                    motifState = Motif.PGP;
-                    return true;
-                } else if (id == 23) {
-                    motifState = Motif.GPP;
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param robotPose what the targetPose is being compared to
-     * @param targetPose what the robotPose is being compared to
-     * @return angle in radians, field-centric, normalized to 0-2pi
-     */
-    public static double angleToPose(Pose2d robotPose, Pose2d targetPose) {
-        return MathUtils.normalizeRadians(
-                new Vector2d(targetPose).minus(new Vector2d(robotPose)).angle(),
-                true
-        );
+        return angleToATag - angleToGoal;
     }
 
     public double getTyOffset(Pose2d robotPose) {
@@ -328,17 +298,33 @@ public class Turret extends SubsystemBase {
             return 0;
         }
 
-        double offset = medianYOffset();
+        double offset = -getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
+        RobotLog.aa("offset", String.valueOf(offset));
         double adjustment = limelightInterplut.get(offset);
+        RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;
         if (adjustment < 0) {
-            adjustedGoal = new Pose2d(GOAL_POSE().getX() + adjustment, GOAL_POSE().getY(), GOAL_POSE().getHeading());
+            adjustedGoal = new Pose2d(GOAL_POSE().getX() - (adjustment * ALLIANCE_COLOR.getMultiplier()), GOAL_POSE().getY(), GOAL_POSE().getHeading());
         } else {
-            adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() + adjustment, GOAL_POSE().getHeading());
+            adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
         }
 
-        return tyOffset(robotPose, adjustedGoal);
+        double finalOffset = tyOffset(robotPose, adjustedGoal);
+        RobotLog.aa("final offset", String.valueOf(finalOffset));
+        return finalOffset;
+    }
+
+    /**
+     * @param robotPose what the targetPose is being compared to
+     * @param targetPose what the robotPose is being compared to
+     * @return angle in radians, field-centric, normalized to 0-2pi
+     */
+    public static double posesToAngle(Pose2d robotPose, Pose2d targetPose) {
+        return MathUtils.normalizeRadians(
+                new Vector2d(targetPose).minus(new Vector2d(robotPose)).angle(),
+                true
+        );
     }
 
     /**
@@ -361,5 +347,26 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
         update();
+    }
+
+    public boolean setMotifState() {
+        if (llResult != null && llResult.isValid()) {
+            for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
+                int id = fiducial.getFiducialId();
+
+                if (id == 21) {
+                    motifState = Motif.PPG;
+                    return true;
+                } else if (id == 22) {
+                    motifState = Motif.PGP;
+                    return true;
+                } else if (id == 23) {
+                    motifState = Motif.GPP;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

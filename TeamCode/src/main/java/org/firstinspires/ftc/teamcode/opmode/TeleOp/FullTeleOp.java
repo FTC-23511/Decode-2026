@@ -20,6 +20,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
@@ -48,7 +49,6 @@ public class FullTeleOp extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
 
     public static double MAX_OUTPUT = 1;
-    public static boolean PROBLEMATIC_TELEMETRY = false;
 
     @Override
     public void initialize() {
@@ -73,8 +73,8 @@ public class FullTeleOp extends CommandOpMode {
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d()))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(new Translation2d(), new Rotation2d(Math.PI)))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(new Translation2d(), new Rotation2d()))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 )
         );
@@ -117,7 +117,6 @@ public class FullTeleOp extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.readyToLaunch = true),
                         new InstantCommand(() -> robot.launcher.setRamp(true)),
-                        new WaitCommand(200),
                         new ClearLaunch(true)
                 )
         );
@@ -246,7 +245,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
         telemetryData.addData("lastKnownPose", robot.turret.lastKnownPose);
-        telemetryData.addData("Distance (m)", Constants.GOAL_POSE().minus(robot.turret.lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
+        telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());

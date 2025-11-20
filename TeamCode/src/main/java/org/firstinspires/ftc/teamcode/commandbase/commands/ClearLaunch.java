@@ -51,14 +51,6 @@ public class ClearLaunch extends CommandBase {
         // TODO: Add code to auto launch third ball that sometimes gets stuck
         if (preciseShots && !robot.launcher.flywheelReady()) {
             robot.intake.setIntake(Intake.MotorState.STOP);
-        } else if (timer.milliseconds() > 1241 && timer.milliseconds() < 1467) {
-            robot.intake.setIntake(Intake.MotorState.REVERSE);
-            robot.intake.setPivot(Intake.PivotState.HOLD);
-        } else if (timer.milliseconds() > 1467 && timer.milliseconds() < 1541) {
-            robot.intake.setIntake(Intake.MotorState.STOP);
-            robot.intake.setPivot(Intake.PivotState.TRANSFER);
-        } else if (robot.intake.intakeJammed) {
-            // do nothing and let intake auto unjam
         } else {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
         }
@@ -80,6 +72,6 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 2670); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 1867); // TODO: replace with real end condition of the command
     }
 }

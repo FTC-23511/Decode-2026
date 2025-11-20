@@ -236,14 +236,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
     
     public double getVoltage() {
-        return 12;
         // TODO: fix getVoltage eventually
-//        if (voltageTimer == null) {
-//            cachedVoltage = voltageSensor.getVoltage();
-//        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
-//            cachedVoltage = voltageSensor.getVoltage();
-//        }
-//        return cachedVoltage;
+        if (voltageTimer == null) {
+            cachedVoltage = voltageSensor.getVoltage();
+        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
+            cachedVoltage = voltageSensor.getVoltage();
+        }
+        if (((Double) cachedVoltage).isNaN() || cachedVoltage == 0) {
+            cachedVoltage = 12;
+        }
+        return cachedVoltage;
     }
 
     public void exportProfiler(File file) {

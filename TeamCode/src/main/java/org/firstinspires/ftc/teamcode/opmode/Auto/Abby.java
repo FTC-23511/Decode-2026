@@ -21,11 +21,14 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
+import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
@@ -133,35 +136,43 @@ public class Abby extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-        telemetryData.addData("Robot Pose", robot.drive.getPose());
-        telemetryData.addData("Target Pose", robot.drive.follower.getTarget());
-        telemetryData.addData("Calculated", robot.drive.follower.calculate(robot.drive.getPose()));
+        if (PROBLEMATIC_TELEMETRY) {
+            robot.profiler.start("High TelemetryData");
 
+            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
+            telemetryData.addData("Robot Pose", robot.drive.getPose());
+            telemetryData.addData("Turret Position", robot.turret.getPosition());
+            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
+            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
+            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
+            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
+            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
+
+            robot.profiler.end("High TelemetryData");
+        }
+
+        robot.profiler.start("Low TelemetryData");
+        telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
+        telemetryData.addData("atTarget", robot.drive.follower.atTarget());
         telemetryData.addData("X Error", robot.drive.follower.getError().getTranslation().getX());
         telemetryData.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
         telemetryData.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
 
-        telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-        telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-        telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-        telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-        telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
-
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
-        telemetryData.addData("Turret Position", robot.turret.getPosition());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("LLResult Null", robot.turret.llResult == null);
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-        telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 
-        telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
+
+        telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+
+        telemetryData.addData("Sigma", "Polar");
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         telemetryData.update();
@@ -182,7 +193,9 @@ public class Abby extends CommandOpMode {
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
                 new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
-                new ClearLaunch(true)
+                new ClearLaunch(true).alongWith(
+                        new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
+                )
         );
     }
 

@@ -58,7 +58,7 @@ public class Drive extends SubsystemBase {
 
     public Pose2d getPose() {
         if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : Constants.PINPOINT_TELEOP_POLLING_RATE))
-            || lastPose == null) {
+                || lastPose == null) {
 
             timer.reset();
             lastPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
@@ -73,10 +73,6 @@ public class Drive extends SubsystemBase {
 
     public void setPose(Pose2d pose) {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
-    }
-
-    public double getAngleToGoal(Pose2d robotPose) {
-        return Constants.GOAL_POSE().minus(robotPose).getRotation().getAngle(AngleUnit.RADIANS);
     }
 
     @Override
