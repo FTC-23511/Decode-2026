@@ -48,7 +48,7 @@ public class Constants {
     public static double PINPOINT_AUTO_POLLING_RATE = 150; // Hertz // TODO: needs to be tuned
 
     public static double STRAFING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
-    public static double TURNING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
+    public static double TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
     public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
 
@@ -94,6 +94,7 @@ public class Constants {
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
     public static final double TARGET_HEIGHT = 1.0; // meters
 
+    public static double LAUNCHER_VERY_FAR_VELOCITY = 7.0;
     public static double LAUNCHER_FAR_VELOCITY = 5.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
@@ -116,7 +117,7 @@ public class Constants {
     public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
     public static double TURRET_POS_TOLERANCE = 0.067; // Radians
     public static double TURRET_MIN_OUTPUT = 0.167; // Power
-    public static double TURRET_ENCODER_OFFSET = 3.877; // Radians
+    public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
     public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet

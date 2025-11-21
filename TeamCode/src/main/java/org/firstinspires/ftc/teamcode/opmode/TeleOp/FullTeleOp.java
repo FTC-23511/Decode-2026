@@ -84,8 +84,8 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, robot.turret.getTyOffset((robot.turret.getLimelightPose()))))
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_VERY_FAR_VELOCITY, false)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
                 )
         );
 
@@ -102,7 +102,7 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
+                Intake.ActiveStopIntake()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
@@ -114,10 +114,18 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.readyToLaunch = true),
-                        new InstantCommand(() -> robot.launcher.setRamp(true)),
-                        new ClearLaunch(true)
+                new ConditionalCommand(
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> robot.readyToLaunch = true),
+                                new InstantCommand(() -> robot.launcher.setRamp(true)),
+                                new ClearLaunch(false)
+                        ),
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> robot.readyToLaunch = true),
+                                new InstantCommand(() -> robot.launcher.setRamp(true)),
+                                new ClearLaunch(true)
+                        ),
+                        () -> gamepad1.left_trigger > 0.5
                 )
         );
 

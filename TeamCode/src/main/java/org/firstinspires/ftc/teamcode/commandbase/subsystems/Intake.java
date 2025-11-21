@@ -3,9 +3,12 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
+import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Intake extends SubsystemBase {
@@ -161,5 +164,13 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         updateDistanceSensors();
         updateIntake();
+    }
+
+    public static SequentialCommandGroup ActiveStopIntake() {
+        return new SequentialCommandGroup(
+                new SetIntake(MotorState.FORWARD, PivotState.HOLD),
+                new WaitCommand(500),
+                new SetIntake(MotorState.STOP, PivotState.HOLD)
+        );
     }
 }
