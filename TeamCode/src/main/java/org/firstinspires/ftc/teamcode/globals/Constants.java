@@ -112,6 +112,7 @@ public class Constants {
     public static double LIMELIGHT_LARGE_TURRET_MAX_OUTPUT = 0.4;
     public static double LIMELIGHT_SMALL_TURRET_MAX_OUTPUT = 0.25;
     public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
+    public static double LIMELIGHT_POLLING_RATE = 10; // Hertz // TODO: needs to be tuned
     public static boolean USE_LIMELIGHT_MT1 = false;
     public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
     public static double TURRET_POS_TOLERANCE = 0.067; // Radians

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ACTIVE_TRACKING;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.LIMELIGHT_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
@@ -47,12 +49,14 @@ public class Turret extends SubsystemBase {
     public enum TurretState {
         LIMELIGHT_CONTROL,
         ANGLE_CONTROL,
+        ACTIVE_TRACKING,
         OFF
     }
 
     public static Motif motifState = Motif.NOT_FOUND;
     public static TurretState turretState = ANGLE_CONTROL;
     public LLResult llResult = null;
+    private final ElapsedTime turretTimer;
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
     public ArrayList<Double> medianWallAngle = new ArrayList<>();
 
@@ -60,6 +64,7 @@ public class Turret extends SubsystemBase {
         turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
         turretController.setTolerance(TURRET_POS_TOLERANCE);
         limelightInterplut.createLUT();
+        turretTimer = new ElapsedTime();
     }
 
     public void init() {
@@ -81,6 +86,11 @@ public class Turret extends SubsystemBase {
                 turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_MAX_OUTPUT);
 
                 turretController.setSetPoint(value);
+                break;
+            case ACTIVE_TRACKING:
+                turretController.setTolerance(TURRET_TY_TOLERANCE);
+                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(1);
                 break;
             case OFF:
                 robot.turretServos.set(0);
@@ -139,6 +149,33 @@ public class Turret extends SubsystemBase {
             } else {
                 robot.profiler.start("Turret Write");
                 robot.turretServos.set(0); // turn off servo power if nothing is visible
+                robot.profiler.end("Turret Write");
+            }
+        } else if (turretState.equals(ACTIVE_TRACKING)) {
+            robot.profiler.start("Turret Read");
+            if (OP_MODE_TYPE.equals(OpModeType.AUTO) || turretTimer.milliseconds() > 1000 / LIMELIGHT_POLLING_RATE) {
+                turretTimer.reset();
+                updateLLResult(5);
+            }
+            robot.profiler.end("Turret Read");
+
+            double[] targetDegrees = getLimeLightTargetDegrees();
+
+            if (targetDegrees != null) {
+                double ty = targetDegrees[1];
+                double power = turretController.calculate(ty);
+
+                robot.profiler.start("Turret Write");
+                if (Math.abs(getPosition()) < Math.abs(MAX_TURRET_ANGLE)) {
+                    robot.turretServos.set(power);
+                } else {
+                    robot.turretServos.set(0);
+                }
+                robot.profiler.end("Turret Write");
+            } else {
+                robot.profiler.start("Turret Write");
+                double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robot.drive.getPose(), GOAL_POSE()));
+                robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, errorsDriveTurret[1]);
                 robot.profiler.end("Turret Write");
             }
         }
