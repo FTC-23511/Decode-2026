@@ -106,7 +106,8 @@ public class Constants {
     public static double MIN_LL_HOOD_ANGLE = 16; // Degrees from horizontal // Minimum hood angle for Limelight to be able to see AprilTags from anywhere on the field// TODO: needs to be tuned
 
     // Turret
-    public static double TURRET_OFF_CENTER_FRONT_BACK = 0.0; // Inches // TODO: needs to be checked off CAD
+    public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
+    public static double LIMELIGHT_TURRET_OFFSET = -4.124; // Inches
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.4, 0, 0.023, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
