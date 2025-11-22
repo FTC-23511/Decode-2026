@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.LIMELIGHT_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
@@ -10,8 +11,10 @@ import androidx.annotation.NonNull;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -34,10 +37,18 @@ public class Turret extends SubsystemBase {
 
     public final InterpLUT limelightInterplut = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(-12.67,     -12.67, 0.0,  0.0,        1.67, 2.67, 4.67, 6.7, 7.0) // output: new goal pos (inches)
+            Arrays.asList(-12.67,     -12.67, 0.0,  0.0,        3.67, 4.67, 6.67, 8.67, 8.67) // output: new goal pos (inches)
     );
 
-    public Pose2d lastKnownPose = new Pose2d(); // only for logging purposes
+    private final ElapsedTime timer = new ElapsedTime();
+    private Pose2d turretPose = null;
+    private final ArrayList<Pose2d> turretPoseEstimates = new ArrayList<>();
+    public Pose2d getTurretPose() {
+        return turretPose;
+    }
+    public void updateTurretPose(Pose2d turretPose) {
+        this.turretPose = turretPose;
+    }
 
     public enum Motif {
         NOT_FOUND,
@@ -49,7 +60,8 @@ public class Turret extends SubsystemBase {
     public enum TurretState {
         LIMELIGHT_CONTROL,
         ANGLE_CONTROL,
-        OFF
+        GOAL_LOCK_CONTROL,
+        OFF,
     }
 
     public static Motif motifState = Motif.NOT_FOUND;
@@ -77,6 +89,19 @@ public class Turret extends SubsystemBase {
 
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
+            case GOAL_LOCK_CONTROL:
+                turretController.setTolerance(TURRET_POS_TOLERANCE);
+                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(1);
+
+                if (value == 0) {
+                    double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
+
+                    turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
+                } else {
+                    turretController.setSetPoint(value);
+                }
+                break;
             case LIMELIGHT_CONTROL:
                 turretController.setTolerance(TURRET_TY_TOLERANCE);
                 turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
@@ -101,53 +126,81 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
-        if (turretState.equals(ANGLE_CONTROL)) {
-            robot.profiler.start("Turret Read");
-            double power = turretController.calculate(getPosition());
-            robot.profiler.end("Turret Read");
+        double power;
+        switch (turretState) {
+            case ANGLE_CONTROL:
+                robot.profiler.start("Turret Read");
+                power = turretController.calculate(getPosition());
+                robot.profiler.end("Turret Read");
 
-            robot.profiler.start("Turret Write");
-            robot.turretServos.set(power);
-            robot.profiler.end("Turret Write");
+                robot.profiler.start("Turret Write");
+                robot.turretServos.set(power);
+                robot.profiler.end("Turret Write");
 
-        } else if (turretState.equals(LIMELIGHT_CONTROL)) {
-            robot.profiler.start("Turret Read");
-            updateLLResult(5);
-            robot.profiler.end("Turret Read");
-
-            double[] targetDegrees = getLimeLightTargetDegrees();
-
-            if (targetDegrees != null) {
-                double ty = targetDegrees[1];
-                double error = ty - turretController.getSetPoint();
-
-                if (Math.abs(error) > LIMELIGHT_PID_THRESHOLD) {
-                    turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
-                    turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_MAX_OUTPUT);
-                } else {
-                    turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
-                    turretController.setMaxOutput(LIMELIGHT_SMALL_TURRET_MAX_OUTPUT);
+                break;
+            case GOAL_LOCK_CONTROL:
+                robot.profiler.start("Turret Read");
+                // only use drive pose estimate if we aren't in a command using the turret
+                if (!CommandScheduler.getInstance().isAvailable(robot.turret)) {
+                    updateTurretPose(robot.drive.getPose());
+                    turretPoseEstimates.clear();
                 }
 
-                double power = turretController.calculate(ty);
+                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
+
+                turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
+
+                power = turretController.calculate(getPosition());
+                robot.profiler.end("Turret Read");
 
                 robot.profiler.start("Turret Write");
                 if (Math.abs(getPosition()) < Math.abs(MAX_TURRET_ANGLE)) {
                     robot.turretServos.set(power);
+                    RobotLog.aa("turret power", String.valueOf(power));
                 } else {
                     robot.turretServos.set(0);
                 }
                 robot.profiler.end("Turret Write");
-            } else {
-                robot.profiler.start("Turret Write");
-                robot.turretServos.set(0); // turn off servo power if nothing is visible
-                robot.profiler.end("Turret Write");
-            }
+                break;
+            case LIMELIGHT_CONTROL:
+                robot.profiler.start("Turret Read");
+                updateLLResult(5);
+                robot.profiler.end("Turret Read");
+
+                double[] targetDegrees = getLimeLightTargetDegrees();
+
+                if (targetDegrees != null) {
+                    double ty = targetDegrees[1];
+                    double error = ty - turretController.getSetPoint();
+
+                    if (Math.abs(error) > LIMELIGHT_PID_THRESHOLD) {
+                        turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
+                        turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_MAX_OUTPUT);
+                    } else {
+                        turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
+                        turretController.setMaxOutput(LIMELIGHT_SMALL_TURRET_MAX_OUTPUT);
+                    }
+
+                    power = turretController.calculate(ty);
+
+                    robot.profiler.start("Turret Write");
+                    if (Math.abs(getPosition()) < Math.abs(MAX_TURRET_ANGLE)) {
+                        robot.turretServos.set(power);
+                    } else {
+                        robot.turretServos.set(0);
+                    }
+                    robot.profiler.end("Turret Write");
+                } else {
+                    robot.profiler.start("Turret Write");
+                    robot.turretServos.set(0); // turn off servo power if nothing is visible
+                    robot.profiler.end("Turret Write");
+                }
+                break;
         }
     }
 
     public boolean readyToLaunch() {
-        return (turretController.atSetPoint() && turretState.equals(ANGLE_CONTROL))
+        return (turretController.atSetPoint() && (turretState.equals(ANGLE_CONTROL)) || turretState.equals(GOAL_LOCK_CONTROL))
                 || (llResult != null && turretController.atSetPoint() && turretState.equals(LIMELIGHT_CONTROL));
     }
 
@@ -158,8 +211,9 @@ public class Turret extends SubsystemBase {
     /**
      * Updates internal limelight result in the Turret class
      * @param n max number of times to attempt reading to get a valid result
+     * @return if the update was successful
      */
-    public void updateLLResult(int n) {
+    public boolean updateLLResult(int n) {
         llResult = null;
 
         for (int i = n; i > 0; i--) {
@@ -169,6 +223,7 @@ public class Turret extends SubsystemBase {
 
                 if (llPose != null) {
                     updateMedianReadings(llPose);
+                    updateTurretPoseReadings(llPose);
                 }
 
                 if (medianWallAngle.size() > 10) {
@@ -179,6 +234,8 @@ public class Turret extends SubsystemBase {
                 llResult = null;
             }
         }
+
+        return llResult != null;
     }
 
     public double[] getLimeLightTargetDegrees() {
@@ -223,12 +280,8 @@ public class Turret extends SubsystemBase {
                         double x = DistanceUnit.INCH.fromMeters(botPose.getPosition().y);
                         double y = -DistanceUnit.INCH.fromMeters(botPose.getPosition().x);
 
-                        Vector2d turretOffset = new Vector2d(TURRET_OFF_CENTER_FRONT_BACK, 0)
-                                .rotateBy(pinpointPose.getHeading());
-                        Pose2d turretOffset2 = new Pose2d(turretOffset.getX(), turretOffset.getY(), 0);
-
                         if (x > -80 && x < 80 && y > -80 && y < 80) {
-                            return new Pose2d(x, y, pinpointPose.getRotation()).relativeTo(turretOffset2);
+                            return new Pose2d(x, y, pinpointPose.getRotation());
                         }
                     }
                 }
@@ -272,6 +325,32 @@ public class Turret extends SubsystemBase {
 
     public void updateMedianReadings(Pose2d llPose) {
         medianWallAngle.add(angleToWall(llPose));
+    }
+    public void updateTurretPoseReadings(Pose2d llPose) {
+        turretPoseEstimates.add(llPose);
+
+        if (turretPoseEstimates.size() > 10) {
+            turretPoseEstimates.remove(0);
+        }
+
+        double avgX = turretPoseEstimates.stream()
+                .mapToDouble(Pose2d::getX)
+                .average()
+                .orElse(llPose.getX());
+
+        double avgY = turretPoseEstimates.stream()
+                .mapToDouble(Pose2d::getY)
+                .average()
+                .orElse(llPose.getY());
+
+        double avgHeading = turretPoseEstimates.stream()
+                .mapToDouble(Pose2d::getHeading)
+                .average()
+                .orElse(llPose.getHeading());
+
+        // Update the turretPose variable with the averaged values
+        robot.turret.updateTurretPose(new Pose2d(avgX, avgY, avgHeading));
+        timer.reset();
     }
 
     public double angleToWall(Pose2d robotPose) {
@@ -318,6 +397,10 @@ public class Turret extends SubsystemBase {
         RobotLog.aa("adjustedGoal", adjustedGoal.toString());
 
         return adjustedGoal;
+    }
+
+    public Pose2d adjustedGoalPose() {
+        return adjustedGoalPose(turretPose);
     }
 
     public double getTyOffset(Pose2d robotPose) {

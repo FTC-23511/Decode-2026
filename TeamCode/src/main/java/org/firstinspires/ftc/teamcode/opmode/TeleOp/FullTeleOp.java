@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -14,7 +13,6 @@ import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
-import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
@@ -26,10 +24,8 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -227,8 +223,6 @@ public class FullTeleOp extends CommandOpMode {
         }
         robot.profiler.end("Swerve Drive");
 
-        robot.turret.updateLLResult(5);
-
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
@@ -256,11 +250,10 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
-        telemetryData.addData("lastKnownPose", robot.turret.lastKnownPose);
-        telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
         try {
-            telemetryData.addData("getLimelightPose()", robot.turret.getLimelightPose());
+            telemetryData.addData("lastKnownPose", robot.turret.getTurretPose());
         } catch (Exception ignored) {}
+        telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());

@@ -14,8 +14,12 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
+
+import java.util.Arrays;
 
 @Config
 @TeleOp(name = "LimelightAngle", group = "Sensor")
@@ -86,7 +90,7 @@ public class LimelightAngle extends CommandOpMode {
 
             if (!robot.turret.medianWallAngle.isEmpty()) {
                 double angle = robot.turret.getMedianWallAngle();
-                telemetryData.addData("Median Y", angle);
+                telemetryData.addData("Median Wall Angle", angle);
                 try {
                     telemetryData.addData("tY Offset", robot.turret.getTyOffset(lastKnownPose));
                     double offset = -robot.turret.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
@@ -100,13 +104,20 @@ public class LimelightAngle extends CommandOpMode {
                     }
                     telemetryData.addData("offset", offset);
                     telemetryData.addData("adjusted goal", adjustedGoal);
+                    double globalHeadingTarget = Turret.posesToAngle(lastKnownPose, robot.turret.adjustedGoalPose(lastKnownPose));
+                    telemetryData.addData("globalHeadingTarget", globalHeadingTarget);
+                    double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(globalHeadingTarget);
+                    telemetryData.addData("errorsDriveTurret", Arrays.toString(errorsDriveTurret));
                 } catch (Exception ignored) {
                     telemetryData.addData("tY Offset", "out of bounds error");
                 }
+                telemetryData.addData("turret position", robot.turret.getPosition());
                 telemetryData.addData("bot pose", lastKnownPose);
-                telemetryData.addData("Distance (m)", Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
+                double distance = Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch;
+                telemetryData.addData("Distance (m)", distance);
+                telemetryData.addData("Launcher Math Values", Arrays.toString(Launcher.distanceToLauncherValues(distance)));
             } else {
-                telemetryData.addData("Median Y", "medianTy is Empty");
+                telemetryData.addData("Median Wall Angle", "medianWallAngle is Empty");
             }
         }
 

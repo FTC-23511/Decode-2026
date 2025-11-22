@@ -7,6 +7,8 @@ import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveDrivetrain;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.p2p.P2PController;
@@ -28,7 +30,7 @@ public class Drive extends SubsystemBase {
         swerve = new CoaxialSwerveDrivetrain(
                 TRACK_WIDTH,
                 WHEEL_BASE,
-                OP_MODE_TYPE.equals(OpModeType.AUTO) ? AUTO_MAX_DRIVE_VELOCITY : MAX_DRIVE_VELOCITY,
+                MAX_DRIVE_VELOCITY,
                 SWERVO_PIDF_COEFFICIENTS,
                 new MotorEx[]{
                         robot.FRmotor,
@@ -73,6 +75,16 @@ public class Drive extends SubsystemBase {
 
     public void setPose(Pose2d pose) {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
+    }
+
+    public Pose2d turretPoseToDrivePose(Pose2d turretPose) {
+        return new Pose2d(
+                turretPose.getTranslation()
+                        .plus(new Translation2d(-TURRET_OFF_CENTER_FRONT_BACK, 0)
+                                .rotateBy(new Rotation2d(robot.turret.getPosition()))
+                        ),
+                turretPose.getRotation()
+        );
     }
 
     @Override

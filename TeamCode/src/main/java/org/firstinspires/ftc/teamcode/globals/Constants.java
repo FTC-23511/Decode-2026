@@ -41,11 +41,9 @@ public class Constants {
     public static double TRACK_WIDTH = 11.27362; // Inches
     public static double WHEEL_BASE = 11.50976; // Inches
     public static double MAX_DRIVE_VELOCITY = 7.75 * 12; // Inches/second
-    public static double AUTO_MAX_DRIVE_VELOCITY = 50; // Inches/second
     public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
-    public static double AUTO_MAX_ANGULAR_VELOCITY = AUTO_MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
     public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
-    public static double PINPOINT_AUTO_POLLING_RATE = 150; // Hertz // TODO: needs to be tuned
+    public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
 
     public static double STRAFING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
     public static double TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
@@ -68,8 +66,8 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 1; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.525;
-    public static double INTAKE_PIVOT_HOLD = 0.4576;
+    public static double INTAKE_PIVOT_FORWARD = 0.535;
+    public static double INTAKE_PIVOT_HOLD = 0.4676;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.0167;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
@@ -115,8 +113,9 @@ public class Constants {
     public static double LIMELIGHT_SMALL_TURRET_MAX_OUTPUT = 0.25;
     public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
     public static boolean USE_LIMELIGHT_MT1 = false;
+    public static double GLOBAL_TARGET_UPDATE_HZ = 10;
     public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
-    public static double TURRET_POS_TOLERANCE = 0.0567; // Radians
+    public static double TURRET_POS_TOLERANCE = 0.0367; // Radians
     public static double TURRET_MIN_OUTPUT = 0.167; // Power
     public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
