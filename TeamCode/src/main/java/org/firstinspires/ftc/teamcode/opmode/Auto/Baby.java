@@ -46,15 +46,23 @@ public class Baby extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-16.702194357366775, -65.00313479623824, Math.toRadians(90))); // Starting Pose
-        pathPoses.add(new Pose2d(-12.413793103448281, -53.71786833855799, Math.toRadians(90))); // Line 1
-        pathPoses.add(new Pose2d(-23.02194357366772, -36.33855799373042, Math.toRadians(180))); // Line 2
-        pathPoses.add(new Pose2d(-62.52037617554859, -36.11285266457679, Math.toRadians(180))); // Line 3
-        pathPoses.add(new Pose2d(-13.090909090909083, -53.49216300940439, Math.toRadians(180))); // Line 4
-        pathPoses.add(new Pose2d(-60.71473354231975, -56.20062695924764, Math.toRadians(-165))); // Line 5
-        pathPoses.add(new Pose2d(-62.068965517241374, -62.746081504702204, Math.toRadians(-165))); // Line 6
-        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(-180))); // Line 7
-        pathPoses.add(new Pose2d(-20.08777429467085, -33.40438871473354, Math.toRadians(-180))); // Line 8
+        pathPoses.add(new Pose2d(-14.8, -65, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-23.96614950634697, -11.475317348377999, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-61.74330042313117, -11.475317348377999, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-47.72919605077574, -11.475317348377999, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-47.72919605077574, -0.7108603667136748, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-55.24400564174894, -0.7108603667136748, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-13.090909090909083, -23.45839210155148, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-14.8, -65, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-60.327447833065804, -53.97110754414126, Math.toRadians(15))); // Line 8
+        pathPoses.add(new Pose2d(-62.068965517241374, -62.746081504702204, Math.toRadians(15))); // Line 9
+        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-15.25521669341894, -65.0658105939005, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-23.96614950634697, -36.86318758815233, Math.toRadians(0))); // Line 12
+        pathPoses.add(new Pose2d(-60.72778561354019, -36.86318758815233, Math.toRadians(0))); // Line 13
+        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(0))); // Line 14
+        pathPoses.add(new Pose2d(-15.25521669341894, -65.0658105939005, Math.toRadians(0))); // Line 15
+        pathPoses.add(new Pose2d(-29.856135401974612, -55.954866008462616, Math.toRadians(0))); // Line 16
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -80,7 +88,7 @@ public class Baby extends CommandOpMode {
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0);
+        robot.turret.setTurret(ANGLE_CONTROL, 1.965 * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -88,23 +96,31 @@ public class Baby extends CommandOpMode {
                 new SequentialCommandGroup(
                         // init
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1, 1500),
+                        pathShoot(0, 1500),
 
                         // spike 1
-                        new DriveTo(pathPoses.get(2)).withTimeout(670),
-                        pathIntake(3, 1867, 0.5),
-                        pathShoot(4, 2250),
+                        new DriveTo(pathPoses.get(1)).withTimeout(2250),
+                        pathIntake(2, 1867, 0.35),
+                        new DriveTo(pathPoses.get(4)).withTimeout(2250),
+                        new DriveTo(pathPoses.get(5)).withTimeout(2250),
+                        new DriveTo(pathPoses.get(6)).withTimeout(2250),
+                        pathShoot(7, 2250),
 
                         // spike 2
-                        pathIntake(5, 2267, 0.5),
-                        pathShoot(7, 3000),
-                        new ClearLaunch(true),
+                        pathIntake(8, 2267, 0.75),
+                        pathIntake(9, 2267, 0.35),
+                        new DriveTo(pathPoses.get(10)).withTimeout(2250),
+                        pathShoot(11, 3000),
 
-                        new DriveTo(pathPoses.get(8)) // park
+                        // spike 3
+                        new DriveTo(pathPoses.get(12)).withTimeout(2250),
+                        pathIntake(13, 2267, 0.35),
+                        pathShoot(15, 3000),
+
+                        new DriveTo(pathPoses.get(16)) // park
                 )
         );
     }
@@ -185,7 +201,7 @@ public class Baby extends CommandOpMode {
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, -1.5 * ALLIANCE_COLOR.getMultiplier())),
+                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 2.14 * ALLIANCE_COLOR.getMultiplier())),
                 new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(

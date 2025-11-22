@@ -46,17 +46,20 @@ public class Jinu extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(144))); // Starting Pose
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(122.67))); // Line 1
-        pathPoses.add(new Pose2d(-16.0, 24.0, Math.toRadians(60))); // Line 2
-        pathPoses.add(new Pose2d(-16.7, 11.0, Math.toRadians(10))); // Line 3
-        pathPoses.add(new Pose2d(-49.67, 11.0, Math.toRadians(10))); // Line 4
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 5
-        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(10))); // Line 6
-        pathPoses.add(new Pose2d(-55.0, -12.0, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(10))); // Line 8
-        pathPoses.add(new Pose2d(-49.52, 40.73, Math.toRadians(121))); // Line 9
-        pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 1
+        pathPoses.add(new Pose2d(-55.24400564174894, 12.490832157968967, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-55.65021156558532, 0.7108603667136748, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 5
+        pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-34.1212976022567, -12.490832157968967, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 9
+        pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 12
+        pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(0))); // Line 13
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -82,7 +85,7 @@ public class Jinu extends CommandOpMode {
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0);
+        robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -97,17 +100,21 @@ public class Jinu extends CommandOpMode {
                         pathShoot(1, 1500),
 
                         // spike 1
-                        new DriveTo(pathPoses.get(2)).withTimeout(670),
-                        pathIntake(3, 1867, 0.5),
+                        pathIntake(2, 1867, 0.35),
+                        new DriveTo(pathPoses.get(4)).withTimeout(1000),
                         pathShoot(5, 2250),
 
                         // spike 2
-                        pathIntake(6, 2267, 0.5),
-                        new DriveTo(pathPoses.get(8)).withTimeout(670),
+                        new DriveTo(pathPoses.get(6)).withTimeout(1000),
+                        pathIntake(7, 2267, 0.35),
                         pathShoot(9, 3000),
-                        new ClearLaunch(true),
+
+                        // spike 3
+                        new DriveTo(pathPoses.get(10)).withTimeout(2267),
+                        pathIntake(11, 2267, 0.35),
+                        pathShoot(12, 2250),
                         
-                        new DriveTo(pathPoses.get(10)) // park
+                        new DriveTo(pathPoses.get(13)) // park
                 )
         );
     }
@@ -188,7 +195,7 @@ public class Jinu extends CommandOpMode {
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, -1.5 * ALLIANCE_COLOR.getMultiplier())),
+//                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier())),
                 new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(

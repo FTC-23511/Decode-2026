@@ -46,12 +46,12 @@ public class Mystery extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-16.642054574638845, -62.98555377207063, Math.toRadians(90))); // Starting Pose
-        pathPoses.add(new Pose2d(-12.413793103448281, -53.71786833855799, Math.toRadians(90))); // Line 1
+        pathPoses.add(new Pose2d(-14.792937399678976, -65.0658105939005, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-12.413793103448281, -53.71786833855799, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-23.02194357366772, -36.33855799373042, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-62.52037617554859, -36.11285266457679, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-13.090909090909083, -53.49216300940439, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-60.71473354231975, -56.20062695924764, Math.toRadians(15))); // Line 5
+        pathPoses.add(new Pose2d(-60.327447833065804, -53.97110754414126, Math.toRadians(15))); // Line 5
         pathPoses.add(new Pose2d(-62.068965517241374, -62.746081504702204, Math.toRadians(15))); // Line 6
         pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-20.08777429467085, -33.40438871473354, Math.toRadians(0))); // Line 8
@@ -80,7 +80,7 @@ public class Mystery extends CommandOpMode {
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0);
+        robot.turret.setTurret(ANGLE_CONTROL, 0.8 * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -185,7 +185,7 @@ public class Mystery extends CommandOpMode {
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, -1.5 * ALLIANCE_COLOR.getMultiplier())),
+//                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 0.8 * ALLIANCE_COLOR.getMultiplier())),
                 new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(
