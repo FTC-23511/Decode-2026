@@ -46,11 +46,11 @@ public class Jinu extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(53))); // Starting Pose
         pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 1
         pathPoses.add(new Pose2d(-55.24400564174894, 12.490832157968967, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-55.65021156558532, 0.7108603667136748, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-59.40288924558587, 1.1170662905500706, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 5
         pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0))); // Line 7
@@ -85,7 +85,7 @@ public class Jinu extends CommandOpMode {
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -93,7 +93,7 @@ public class Jinu extends CommandOpMode {
                 new SequentialCommandGroup(
                         // init
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
+                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier())),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload

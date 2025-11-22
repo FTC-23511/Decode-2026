@@ -77,7 +77,9 @@ public class Turret extends SubsystemBase {
     }
 
     public void init() {
-        setTurret(TurretState.OFF, 0);
+        if (!OP_MODE_TYPE.equals(OpModeType.AUTO)) {
+            setTurret(TurretState.OFF, 0);
+        }
     }
 
     public void setTurret(TurretState turretState, double value) {
@@ -376,7 +378,7 @@ public class Turret extends SubsystemBase {
 
     public double tyOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
         double angleToGoal = Math.toDegrees(posesToAngle(robotPose, goalPose));
-        double angleToATag = Math.toDegrees(posesToAngle(robotPose, APRILTAG_POSE()))   ;
+        double angleToATag = Math.toDegrees(posesToAngle(robotPose, APRILTAG_POSE()));
 
         return angleToATag - angleToGoal;
     }

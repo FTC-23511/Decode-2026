@@ -46,7 +46,7 @@ public class Baby extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-14.8, -65, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-14.8, -65, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-23.96614950634697, -11.475317348377999, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-61.74330042313117, -11.475317348377999, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-47.72919605077574, -11.475317348377999, Math.toRadians(0))); // Line 3
