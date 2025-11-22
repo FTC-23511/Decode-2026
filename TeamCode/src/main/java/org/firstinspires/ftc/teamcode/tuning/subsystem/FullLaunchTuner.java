@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -23,6 +24,7 @@ public class FullLaunchTuner extends CommandOpMode {
 
     public ElapsedTime timer;
 
+    public static double TURRET_POS = 0.0; // raw servo pos
     public static boolean USE_RAW_SERVO_POS = false;
     public static double HOOD_SERVO_OUTPUT = 0.0; // either raw servo pos or hood angle
     public static double LAUNCHER_TARGET_VEL = 0.0; // ticks/sec
@@ -70,6 +72,8 @@ public class FullLaunchTuner extends CommandOpMode {
             robot.launcher.setHood(HOOD_SERVO_OUTPUT);
         }
 
+        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TURRET_POS);
+
         robot.launcher.setFlywheelTicks(LAUNCHER_TARGET_VEL);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
@@ -82,6 +86,7 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Launch Motor Power", robot.launchMotors.get());
         telemetryData.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
+        telemetryData.addData("Turret Pos", robot.turret.getPosition());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

@@ -21,21 +21,19 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
-import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Abby (close auto)", preselectTeleOp = "AAAFullTeleOp")
-public class Abby extends CommandOpMode {
+@Autonomous(name = "Jinu (close gate auto)", preselectTeleOp = "AAAFullTeleOp")
+public class Jinu extends CommandOpMode {
     public ElapsedTime timer;
 
     TelemetryData telemetryData = new TelemetryData(
@@ -100,14 +98,15 @@ public class Abby extends CommandOpMode {
 
                         // spike 1
                         new DriveTo(pathPoses.get(2)).withTimeout(670),
-                        pathIntake(3, 1867),
+                        pathIntake(3, 1867, 0.5),
                         pathShoot(5, 2250),
 
                         // spike 2
-                        pathIntake(6, 2267),
+                        pathIntake(6, 2267, 0.5),
                         new DriveTo(pathPoses.get(8)).withTimeout(670),
                         pathShoot(9, 3000),
-
+                        new ClearLaunch(true),
+                        
                         new DriveTo(pathPoses.get(10)) // park
                 )
         );
@@ -189,7 +188,7 @@ public class Abby extends CommandOpMode {
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
+                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, -1.5 * ALLIANCE_COLOR.getMultiplier())),
                 new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(
@@ -199,8 +198,12 @@ public class Abby extends CommandOpMode {
     }
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
+        return pathIntake(pathStartingIndex, timeout, 1.0);
+    }
+
+    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
