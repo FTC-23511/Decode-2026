@@ -198,6 +198,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
+        limelight.setPollRateHz(250);
         limelight.pipelineSwitch(0);
         limelight.start();
 

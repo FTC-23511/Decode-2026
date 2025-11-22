@@ -117,11 +117,13 @@ public class FullTeleOp extends CommandOpMode {
                 new ConditionalCommand(
                         new SequentialCommandGroup(
                                 new InstantCommand(() -> robot.readyToLaunch = true),
+                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
                                 new InstantCommand(() -> robot.launcher.setRamp(true)),
                                 new ClearLaunch(false)
                         ),
                         new SequentialCommandGroup(
                                 new InstantCommand(() -> robot.readyToLaunch = true),
+                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
                                 new InstantCommand(() -> robot.launcher.setRamp(true)),
                                 new ClearLaunch(true)
                         ),
@@ -194,7 +196,8 @@ public class FullTeleOp extends CommandOpMode {
                 double minSpeed = 0.3; // As a fraction of the max speed of the robot
                 double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-                Rotation2d robotAngle = robot.drive.getPose().getRotation();
+                Pose2d robotPose = robot.drive.getPose();
+                Rotation2d robotAngle = robotPose.getRotation();
                 double headingCorrection = 0;
 
                 if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
@@ -207,7 +210,7 @@ public class FullTeleOp extends CommandOpMode {
                     if (robot.drive.follower.atTarget()) {
                         headingCorrection = 0;
                     } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
-                        robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
                         headingCorrection = 0;
                     }
                 }
@@ -224,6 +227,7 @@ public class FullTeleOp extends CommandOpMode {
         }
         robot.profiler.end("Swerve Drive");
 
+        robot.turret.updateLLResult(5);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
@@ -254,6 +258,9 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
         telemetryData.addData("lastKnownPose", robot.turret.lastKnownPose);
         telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
+        try {
+            telemetryData.addData("getLimelightPose()", robot.turret.getLimelightPose());
+        } catch (Exception ignored) {}
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());

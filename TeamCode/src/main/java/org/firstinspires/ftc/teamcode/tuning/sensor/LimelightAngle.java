@@ -30,8 +30,6 @@ public class LimelightAngle extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
     private Pose2d lastKnownPose = new Pose2d();
 
-    public static boolean USE_MT1 = true;
-
     @Override
     public void initialize() {
         // Must have for all opModes
@@ -62,7 +60,7 @@ public class LimelightAngle extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        Pose2d robotPose = USE_MT1 ? robot.turret.getLimelightPose() : robot.turret.getLimelightPoseMT2();
+        Pose2d robotPose = robot.turret.getLimelightPose();
 
         if (robotPose != null) {
             lastKnownPose = robotPose;

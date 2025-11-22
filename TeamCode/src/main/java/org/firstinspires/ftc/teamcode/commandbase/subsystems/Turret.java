@@ -31,10 +31,12 @@ import java.util.Collections;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
+
     public final InterpLUT limelightInterplut = new InterpLUT(
-            Arrays.asList(-0.25, 0.1, 0.3,  0.5,  0.6,  Math.PI/4, 0.9, 0.94,   Math.PI/2), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(7.0,   6.7, 5.67, 2.67, 1.67, 0.0,       0.0, -12.67, -12.67) // output: new goal pos (inches)
+            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
+            Arrays.asList(-12.67,     -12.67, 0.0,  0.0,        1.67, 2.67, 4.67, 6.7, 7.0) // output: new goal pos (inches)
     );
+
     public Pose2d lastKnownPose = new Pose2d(); // only for logging purposes
 
     public enum Motif {
@@ -200,7 +202,7 @@ public class Turret extends SubsystemBase {
         return null;
     }
 
-    public Pose2d getLimelightPoseMT2() {
+    private Pose2d getLimelightPoseMT2() {
         if (llResult != null) {
             for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
                 int id = fiducial.getFiducialId();
@@ -211,19 +213,22 @@ public class Turret extends SubsystemBase {
                     robot.limelight.updateRobotOrientation(
                             MathUtils.normalizeDegrees(
                                     robot.drive.getPose().getRotation().getDegrees()
-                                            + Math.toDegrees(getPosition()) - 90.0, false)
+                                            + Math.toDegrees(getPosition()) + 90.0, true)
                     );
 
                     Pose3D botPose = llResult.getBotpose_MT2();
 
                     if (botPose != null) {
+                        Pose2d pinpointPose = robot.drive.getPose();
                         double x = DistanceUnit.INCH.fromMeters(botPose.getPosition().y);
                         double y = -DistanceUnit.INCH.fromMeters(botPose.getPosition().x);
-                        double heading = botPose.getOrientation().getYaw(AngleUnit.RADIANS);
-                        heading = MathUtils.normalizeRadians(heading + Math.PI / 2, true); // TODO: Figure out angle difference between our coordinate system and LL's
 
-                        if (x > -80 && x < 80 && y > -80 && y < 80 && !Double.isNaN(heading)) {
-                            return new Pose2d(x, y, heading);
+                        Vector2d turretOffset = new Vector2d(TURRET_OFF_CENTER_FRONT_BACK, 0)
+                                .rotateBy(pinpointPose.getHeading());
+                        Pose2d turretOffset2 = new Pose2d(turretOffset.getX(), turretOffset.getY(), 0);
+
+                        if (x > -80 && x < 80 && y > -80 && y < 80) {
+                            return new Pose2d(x, y, pinpointPose.getRotation()).relativeTo(turretOffset2);
                         }
                     }
                 }
@@ -233,7 +238,7 @@ public class Turret extends SubsystemBase {
         return null;
     }
 
-    public Pose2d getLimelightPoseMT1() {
+    private Pose2d getLimelightPoseMT1() {
         if (llResult != null) {
             for (LLResultTypes.FiducialResult fiducial : llResult.getFiducialResults()) {
                 int id = fiducial.getFiducialId();
@@ -266,7 +271,11 @@ public class Turret extends SubsystemBase {
     }
 
     public void updateMedianReadings(Pose2d llPose) {
-        medianWallAngle.add(posesToAngle(llPose, Constants.GOAL_POSE()) - posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()));
+        medianWallAngle.add(angleToWall(llPose));
+    }
+
+    public double angleToWall(Pose2d robotPose) {
+        return posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()) - posesToAngle(robotPose, Constants.GOAL_POSE());
     }
 
     public double getMedianWallAngle() {
@@ -291,6 +300,24 @@ public class Turret extends SubsystemBase {
         double angleToATag = Math.toDegrees(posesToAngle(robotPose, APRILTAG_POSE()))   ;
 
         return angleToATag - angleToGoal;
+    }
+
+    public Pose2d adjustedGoalPose(Pose2d robotPose) {
+        double offset = posesToAngle(robotPose, Constants.GOAL_POSE()) - posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()) * ALLIANCE_COLOR.getMultiplier();
+        RobotLog.aa("offset", String.valueOf(offset));
+        double adjustment = limelightInterplut.get(offset);
+        RobotLog.aa("adjustment", String.valueOf(adjustment));
+
+        Pose2d adjustedGoal;
+        if (adjustment < 0) {
+            adjustedGoal = new Pose2d(GOAL_POSE().getX() - (adjustment * ALLIANCE_COLOR.getMultiplier()), GOAL_POSE().getY(), GOAL_POSE().getHeading());
+        } else {
+            adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
+        }
+
+        RobotLog.aa("adjustedGoal", adjustedGoal.toString());
+
+        return adjustedGoal;
     }
 
     public double getTyOffset(Pose2d robotPose) {

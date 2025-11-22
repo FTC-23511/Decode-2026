@@ -68,8 +68,8 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 1; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.5641;
-    public static double INTAKE_PIVOT_HOLD = 0.4967;
+    public static double INTAKE_PIVOT_FORWARD = 0.525;
+    public static double INTAKE_PIVOT_HOLD = 0.4576;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.0167;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
@@ -107,7 +107,7 @@ public class Constants {
 
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
-    public static double LIMELIGHT_TURRET_OFFSET = -4.124; // Inches
+    private static double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(1.4, 0, 0.023, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
@@ -116,7 +116,7 @@ public class Constants {
     public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
     public static boolean USE_LIMELIGHT_MT1 = false;
     public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
-    public static double TURRET_POS_TOLERANCE = 0.067; // Radians
+    public static double TURRET_POS_TOLERANCE = 0.0567; // Radians
     public static double TURRET_MIN_OUTPUT = 0.167; // Power
     public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
