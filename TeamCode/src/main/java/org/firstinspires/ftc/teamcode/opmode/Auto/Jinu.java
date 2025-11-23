@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -9,11 +10,11 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
-import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -47,18 +48,18 @@ public class Jinu extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(53))); // Starting Pose
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 1
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 1
         pathPoses.add(new Pose2d(-55.24400564174894, 12.490832157968967, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-59.40288924558587, 1.1170662905500706, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 5
+        pathPoses.add(new Pose2d(-58.40288924558587, 1.1170662905500706, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 5
         pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-63.10112359550561, -12.597110754414118, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-34.1212976022567, -12.490832157968967, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 9
-        pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 12
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 9
+        pathPoses.add(new Pose2d(-24.73194221508828, -36.173354735152486, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-62.86998394863563, -36.173354735152486, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 12
         pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(0))); // Line 13
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -71,7 +72,6 @@ public class Jinu extends CommandOpMode {
     @Override
     public void initialize() {
         generatePath();
-        timer = new ElapsedTime();
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
@@ -82,10 +82,10 @@ public class Jinu extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        robot.launcher.setHood(MIN_HOOD_SERVO_POS);
+        robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0);
+        robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -100,21 +100,22 @@ public class Jinu extends CommandOpMode {
                         pathShoot(1, 1500),
 
                         // spike 1
-                        pathIntake(2, 1867, 0.35),
+                        pathIntake(2, 1867, 0.50),
                         new DriveTo(pathPoses.get(4)).withTimeout(1000),
                         pathShoot(5, 2250),
 
                         // spike 2
                         new DriveTo(pathPoses.get(6)).withTimeout(1000),
-                        pathIntake(7, 2267, 0.35),
+                        pathIntake(7, 2267, 0.50),
                         pathShoot(9, 3000),
 
                         // spike 3
                         new DriveTo(pathPoses.get(10)).withTimeout(2267),
-                        pathIntake(11, 2267, 0.35),
-                        pathShoot(12, 2250),
+                        pathIntake(11, 2267, 0.50),
+                        pathShoot(12, 2250, false),
                         
-                        new DriveTo(pathPoses.get(13)) // park
+                        new DriveTo(pathPoses.get(13)), // park
+                        new InstantCommand(() -> END_POSE = robot.drive.getPose())
                 )
         );
     }
@@ -127,8 +128,12 @@ public class Jinu extends CommandOpMode {
 
     @Override
     public void run() {
-        // DO NOT REMOVE
+        // DO NOT REMOVE! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
+
+        if (timer == null) {
+            timer = new ElapsedTime();
+        }
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
@@ -176,11 +181,6 @@ public class Jinu extends CommandOpMode {
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 
         telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-
-        telemetryData.addData("Sigma", "Polar");
-
-        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        telemetryData.update();
     }
 
     @Override
@@ -189,14 +189,22 @@ public class Jinu extends CommandOpMode {
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
+        return pathShoot(pathStartingIndex, timeout, true);
+    }
+
+    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean pathShoot) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
+                        new ConditionalCommand(
+                                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                                new InstantCommand(),
+                                () -> pathShoot
+                        ),
+                        new InstantCommand(() -> robot.turret.setTurret(GOAL_LOCK_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier())),
+                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
                 ),
-//                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier())),
-                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
+//                new FullAim().withTimeout(2000),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(
                         new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))

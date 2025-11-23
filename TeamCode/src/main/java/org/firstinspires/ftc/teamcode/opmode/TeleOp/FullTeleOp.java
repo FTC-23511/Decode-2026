@@ -169,7 +169,9 @@ public class FullTeleOp extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
-
+        robot.drive.setPose(END_POSE);
+        telemetryData.addData("END_POSE", END_POSE);
+        telemetryData.update();
     }
 
     @Override

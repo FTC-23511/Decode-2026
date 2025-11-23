@@ -92,12 +92,12 @@ public class Mystery extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1, 1500),
+                        pathShoot(1, 3000),
 
                         // spike 1
                         new DriveTo(pathPoses.get(2)).withTimeout(670),
                         pathIntake(3, 1867, 0.5),
-                        pathShoot(4, 2250),
+                        pathShoot(4, 2267),
 
                         // spike 2
                         pathIntake(5, 2267, 0.5),

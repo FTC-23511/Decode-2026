@@ -48,11 +48,7 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void execute() {
-        // TODO: Add code to auto launch third ball that sometimes gets stuck
-        if (!Turret.turretState.equals(Turret.TurretState.OFF) && !robot.turret.readyToLaunch()) {
-            robot.intake.setIntake(Intake.MotorState.STOP);
-            timer.reset();
-        } else if (preciseShots && !robot.launcher.flywheelReady()) {
+        if (preciseShots && !robot.launcher.flywheelReady()) {
             robot.intake.setIntake(Intake.MotorState.STOP);
         } else {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);

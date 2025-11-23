@@ -64,7 +64,7 @@ public class FullAim extends CommandBase {
 
     @Override
     public void execute() {
-        if (aimIndex <= 2) {
+        if (aimIndex <= 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
             robot.drive.swerve.updateWithTargetVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                             robot.drive.follower.calculate(robot.drive.getPose()),
@@ -76,6 +76,7 @@ public class FullAim extends CommandBase {
         }
 
         RobotLog.aa("aimIndex", String.valueOf(aimIndex));
+//        robot.turret.updateLLResult(3);
 
         if (aimIndex == 1) {
 //            if (robot.turret.getLimeLightTargetDegrees() != null) {
@@ -89,7 +90,7 @@ public class FullAim extends CommandBase {
         if (aimIndex == 2) {
             if (robot.turret.readyToLaunch()) {
 //          robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
-                errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch - 0.1); // TODO: REPLACE BS -0.1
+                errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch - DISTANCE_BS); // TODO: REPLACE BS -0.1
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;
                 } else {

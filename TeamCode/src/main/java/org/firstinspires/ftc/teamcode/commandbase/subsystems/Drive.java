@@ -56,6 +56,10 @@ public class Drive extends SubsystemBase {
         );
 
         timer = new ElapsedTime();
+
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            setPose(END_POSE);
+        }
     }
 
     public Pose2d getPose() {

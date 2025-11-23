@@ -106,22 +106,30 @@ public class Constants {
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private static double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.67, 0.67, 0.0267, 0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.67, 0.00, 0.0267, 0); // Coefficients for radians
+
     public static double TURRET_MIN_INTEGRAL = 0;
     public static double TURRET_MAX_INTEGRAL = 0.5;
-    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
-    public static double LIMELIGHT_LARGE_TURRET_MAX_OUTPUT = 0.4;
-    public static double LIMELIGHT_SMALL_TURRET_MAX_OUTPUT = 0.25;
-    public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
-    public static boolean USE_LIMELIGHT_MT1 = false;
-    public static double GLOBAL_TARGET_UPDATE_HZ = 10;
     public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
-    public static double TURRET_POS_TOLERANCE = 0.02; // Radians
+    public static double TURRET_POS_TOLERANCE = 0.025; // Radians
+    public static double TURRET_POS_THRESHOLD = 0.1; // Radians
+    public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
+    public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
     public static double TURRET_MIN_OUTPUT = 0.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
+    public static double TURRET_BS = 0.1;
+    public static double DISTANCE_BS = 0.1;
+
+    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
+    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
+    public static double LIMELIGHT_LARGE_MAX_OUTPUT = 0.4;
+    public static double LIMELIGHT_SMALL_MAX_OUTPUT = 0.25;
+    public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
+    public static boolean USE_LIMELIGHT_MT1 = false;
+    public static double GLOBAL_TARGET_UPDATE_HZ = 10;
+
     public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
     public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet
     public static double TURRET_BUFFER = (16.7 / 360.0) * 2 * Math.PI; // Radians // used for calculating drivetrain rotation in aimbot

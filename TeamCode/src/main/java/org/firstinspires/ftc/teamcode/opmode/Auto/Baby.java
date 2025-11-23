@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -23,6 +24,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
+import org.firstinspires.ftc.teamcode.commandbase.commands.FullAim;
 import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -51,7 +53,7 @@ public class Baby extends CommandOpMode {
         pathPoses.add(new Pose2d(-61.74330042313117, -11.475317348377999, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-47.72919605077574, -11.475317348377999, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-47.72919605077574, -0.7108603667136748, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-55.24400564174894, -0.7108603667136748, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-59.40288924558587, -0.7108603667136748, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-13.090909090909083, -23.45839210155148, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-14.8, -65, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-60.327447833065804, -53.97110754414126, Math.toRadians(15))); // Line 8
@@ -85,7 +87,7 @@ public class Baby extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        robot.launcher.setHood(MIN_HOOD_SERVO_POS);
+        robot.launcher.setHood(MAX_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 1.965 * ALLIANCE_COLOR.getMultiplier());
@@ -97,15 +99,16 @@ public class Baby extends CommandOpMode {
                         // init
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
+                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 1.965 * ALLIANCE_COLOR.getMultiplier())),
 
                         // preload
-                        pathShoot(0, 1500),
+                        pathShoot(0, 3500, false),
 
                         // spike 1
                         new DriveTo(pathPoses.get(1)).withTimeout(2250),
                         pathIntake(2, 1867, 0.35),
-                        new DriveTo(pathPoses.get(4)).withTimeout(2250),
-                        new DriveTo(pathPoses.get(5)).withTimeout(2250),
+                        new DriveTo(pathPoses.get(4)).withTimeout(750),
+                        new DriveTo(pathPoses.get(5)).withTimeout(1267),
                         new DriveTo(pathPoses.get(6)).withTimeout(2250),
                         pathShoot(7, 2250),
 
@@ -133,8 +136,12 @@ public class Baby extends CommandOpMode {
 
     @Override
     public void run() {
-        // DO NOT REMOVE
+        // DO NOT REMOVE! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
+
+        if (timer == null) {
+            timer = new ElapsedTime();
+        }
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
@@ -195,14 +202,21 @@ public class Baby extends CommandOpMode {
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
+        return pathShoot(pathStartingIndex, timeout, true);
+    }
+
+    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean pathShoot) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
+                        new ConditionalCommand(
+                                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                                new InstantCommand(),
+                                () -> pathShoot
+                        ),
+                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_VERY_FAR_VELOCITY, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 2.14 * ALLIANCE_COLOR.getMultiplier())),
-                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
+//                new FullAim().withTimeout(2000),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(
                         new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
@@ -216,10 +230,10 @@ public class Baby extends CommandOpMode {
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                new DriveTo(pathPoses.get(pathStartingIndex+1), maxPower).withTimeout(2467)
+                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );
     }
 }

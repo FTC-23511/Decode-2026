@@ -98,34 +98,32 @@ public class Intake extends SubsystemBase {
 
     public void updateIntake() {
         robot.profiler.start("Intake Update");
-        if (pivotState.equals(PivotState.FORWARD)) {
-            switch (motorState) {
-                case FORWARD:
-                    if (transferFull()) {
-                        setPivot(PivotState.HOLD);
-                        setIntake(MotorState.STOP);
-                    }
 
-                    if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
-                        intakeJammed = true;
-                        intakeTimer.reset();
-                        setIntake(MotorState.REVERSE);
-                    }
-                    break;
-                case REVERSE:
-                    if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
-                        setIntake(MotorState.FORWARD);
-                        intakeJammed = false;
-                        intakeTimer.reset();
-                    }
-                    break;
-                case STOP:
-                    // No point of setting intakeMotor to 0 again
-                    break;
-            }
-        } else if (pivotState.equals(PivotState.HOLD)) {
-            setIntake(MotorState.STOP);
+        switch (motorState) {
+            case FORWARD:
+                if (transferFull()) {
+                    setPivot(PivotState.HOLD);
+                    setIntake(MotorState.STOP);
+                }
+
+                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
+                    intakeJammed = true;
+                    intakeTimer.reset();
+                    setIntake(MotorState.REVERSE);
+                }
+                break;
+            case REVERSE:
+                if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
+                    setIntake(MotorState.FORWARD);
+                    intakeJammed = false;
+                    intakeTimer.reset();
+                }
+                break;
+            case STOP:
+                // No point of setting intakeMotor to 0 again
+                break;
         }
+
         robot.profiler.end("Intake Update");
     }
 
@@ -169,7 +167,7 @@ public class Intake extends SubsystemBase {
     public static SequentialCommandGroup ActiveStopIntake() {
         return new SequentialCommandGroup(
                 new SetIntake(MotorState.FORWARD, PivotState.HOLD),
-                new WaitCommand(500),
+                new WaitCommand(250),
                 new SetIntake(MotorState.STOP, PivotState.HOLD)
         );
     }
