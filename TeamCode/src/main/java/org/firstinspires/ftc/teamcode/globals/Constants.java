@@ -56,19 +56,19 @@ public class Constants {
     public static double BL_ENCODER_OFFSET = 2.0; // Radians
     public static double BR_ENCODER_OFFSET = 1.89; // Radians
 
-    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(2.5, 0, 0.25, 0); // Coefficients for inches
-    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(3, 0, 0.2, 0); // Coefficients for radians
+    public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
+    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(5, 0, 0.3, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static PIDFCoefficients AIMBOT_COEFFICIENTS = new PIDFCoefficients(3.5, 0, 0, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.41; // Inches
     public static double HEADING_TOLERANCE = 0.041; // Radians
     public static double XY_MIN_OUTPUT = 12; // Inches/second
-    public static double HEADING_MIN_OUTPUT = 1; // Radians/second
+    public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     // Intake
     public static double INTAKE_PIVOT_FORWARD = 0.535;
     public static double INTAKE_PIVOT_HOLD = 0.476;
-    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.0167;
+    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.0267;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -1.0;
@@ -119,8 +119,8 @@ public class Constants {
     public static double TURRET_MIN_OUTPUT = 0.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
-    public static double TURRET_BS = 0.1;
-    public static double DISTANCE_BS = 0.067;
+    public static double TURRET_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 0.1041 : 0.12;
+    public static double DISTANCE_BS = 0.06867;
 
     public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians

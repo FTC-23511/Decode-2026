@@ -35,7 +35,7 @@ import java.util.Collections;
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    double bs = (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -30.0 : -14.1);
+    double bs = (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -12.67 : -5.1);
     public final InterpLUT limelightInterplut = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
             Arrays.asList( bs,         bs,    0.0,  0.0,        3.67, 4.67, 7.41, 10.67, 10.67) // output: new goal pos (inches)
@@ -482,13 +482,15 @@ public class Turret extends SubsystemBase {
      */
     public static double[] angleToDriveTurretErrors(double angle) {
         final double MAX_USABLE_TURRET_ANGLE = MAX_TURRET_ANGLE - TURRET_BUFFER;
-        double robotAngle = Robot.getInstance().drive.getPose().getHeading();
+        Pose2d robotPose = Robot.getInstance().drive.getPose();
+        double robotAngle = robotPose.getHeading();
 
         double error = MathUtils.normalizeRadians(angle - robotAngle, false);
+        double localTurretBS = TURRET_BS + (robotPose.getY() < -36 ? 0.0441 : 0);
         if (Math.abs(error) < MAX_USABLE_TURRET_ANGLE) {
-            return new double[]{0, error - TURRET_BS};
+            return new double[]{0, error - localTurretBS};
         } else {
-            return new double[]{robotAngle + (Math.abs(error) - MAX_USABLE_TURRET_ANGLE) * Math.signum(error), MAX_USABLE_TURRET_ANGLE * Math.signum(error) - TURRET_BS};
+            return new double[]{robotAngle + (Math.abs(error) - MAX_USABLE_TURRET_ANGLE) * Math.signum(error), MAX_USABLE_TURRET_ANGLE * Math.signum(error) - localTurretBS};
         }
     }
 

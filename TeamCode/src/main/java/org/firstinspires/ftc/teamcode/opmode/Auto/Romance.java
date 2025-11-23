@@ -197,11 +197,10 @@ public class Romance extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(5.67, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2 + 0.1) * ALLIANCE_COLOR.getMultiplier()))),
+                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2 - 0.1) * ALLIANCE_COLOR.getMultiplier()))),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(
                         new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
