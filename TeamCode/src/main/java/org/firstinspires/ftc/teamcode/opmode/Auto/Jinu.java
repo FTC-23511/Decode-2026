@@ -83,7 +83,7 @@ public class Jinu extends CommandOpMode {
         robot.init(hardwareMap);
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
-        robot.launcher.setRamp(true);
+        robot.launcher.setRamp(false);
         robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier());
 
@@ -97,11 +97,11 @@ public class Jinu extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1, 1500),
+                        pathShoot(1, 3500),
 
                         // spike 1
                         pathIntake(2, 1867, 0.50),
-                        new DriveTo(pathPoses.get(4)).withTimeout(1000),
+                        new DriveTo(pathPoses.get(4)).withTimeout(1000), // gate
                         pathShoot(5, 2250),
 
                         // spike 2
@@ -195,7 +195,6 @@ public class Jinu extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean pathShoot) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
                         new ConditionalCommand(
                                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                                 new InstantCommand(),
@@ -218,9 +217,9 @@ public class Jinu extends CommandOpMode {
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
-
+                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
+                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD),
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );
     }

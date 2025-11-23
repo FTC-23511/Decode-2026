@@ -12,7 +12,6 @@ public class ClearLaunch extends CommandBase {
     private final Robot robot;
     private final ElapsedTime timer;
     private final boolean preciseShots;
-    private int index = 0;
 
     /**
      * Assumes {@link FullAim} has already been performed or the robot is already aimed
@@ -71,6 +70,6 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 1867); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 1767); // TODO: replace with real end condition of the command
     }
 }

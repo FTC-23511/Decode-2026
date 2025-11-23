@@ -35,15 +35,19 @@ import java.util.Collections;
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
+    double bs = (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -30.0 : -14.1);
     public final InterpLUT limelightInterplut = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(-20.0,     -20.0, 0.0,  0.0,        3.67, 4.67, 6.67, 8.67, 8.67) // output: new goal pos (inches)
+            Arrays.asList( bs,         bs,    0.0,  0.0,        3.67, 4.67, 7.41, 10.67, 10.67) // output: new goal pos (inches)
     );
 
     private final ElapsedTime timer = new ElapsedTime();
     private Pose2d turretPose = null;
     private final ArrayList<Pose2d> turretPoseEstimates = new ArrayList<>();
     public Pose2d getTurretPose() {
+        if (turretPose == null) {
+            turretPose = robot.drive.getPose();
+        }
         return turretPose;
     }
     public void updateTurretPose(Pose2d turretPose) {
@@ -98,6 +102,7 @@ public class Turret extends SubsystemBase {
                 turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
                 turretController.setIntegrationBounds(TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL);
 
+                getTurretPose(); // fixes goofy jinu
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
 
