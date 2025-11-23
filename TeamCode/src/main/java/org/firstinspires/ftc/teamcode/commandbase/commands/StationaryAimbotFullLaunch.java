@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commandbase.commands;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -12,6 +13,7 @@ StationaryAimbotFullLaunch extends SequentialCommandGroup {
         Robot robot = Robot.getInstance();
         addCommands(
                 new FullAim(),
+                new WaitCommand(250),
                 new ClearLaunch(true).alongWith(
                         new InstantCommand(
                                 () -> robot.drive.swerve.updateWithXLock() // Lock the drivetrain wheel to an X shape reduce how much we can be pushed)

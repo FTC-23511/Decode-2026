@@ -75,17 +75,15 @@ public class FullAim extends CommandBase {
             robot.drive.swerve.updateWithXLock();
         }
 
-        robot.turret.updateLLResult(5);
-
         RobotLog.aa("aimIndex", String.valueOf(aimIndex));
 
         if (aimIndex == 1) {
-            if (robot.turret.getLimeLightTargetDegrees() != null) {
+//            if (robot.turret.getLimeLightTargetDegrees() != null) {
                 aimIndex = 2;
-            } else if (robot.turret.readyToLaunch() && timer.milliseconds() >= 2000) {
+//            } else if (robot.turret.readyToLaunch() && timer.milliseconds() >= 2000) {
                 // TODO: add code to deal with case where if we don't see ATag even if turret is aimed correctly (wiggle or do a full spin or time out)
                 // NOTE: implementation should only do extreme measures of rotating if its consistently unable to find an ATag and not a one off loop
-            }
+//            }
         }
 
         if (aimIndex == 2) {

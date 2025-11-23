@@ -1,6 +1,7 @@
 package com.seattlesolvers.solverslib.controller;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.seattlesolvers.solverslib.util.MathUtils;
 
 /**
  * This is a SquIDF controller (based off the PIDF controller, but with error square rooted)
@@ -72,6 +73,6 @@ public class SquIDFController extends PIDFController {
         totalError = totalError < minIntegral ? minIntegral : Math.min(maxIntegral, totalError);
 
         // returns u(t)
-        return kP * Math.sqrt(errorVal_p) + kI * totalError + kD * errorVal_v + kF * setPoint;
+        return kP * MathUtils.sqrtWithSig(errorVal_p) + kI * totalError + kD * errorVal_v + kF * setPoint;
     }
 }

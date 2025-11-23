@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -67,7 +67,7 @@ public class Turret extends SubsystemBase {
     public static Motif motifState = Motif.NOT_FOUND;
     public static TurretState turretState = ANGLE_CONTROL;
     public LLResult llResult = null;
-    public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public SquIDFController turretController = new SquIDFController(TURRET_PIDF_COEFFICIENTS);
     public ArrayList<Double> medianWallAngle = new ArrayList<>();
 
     public Turret() {
@@ -85,27 +85,25 @@ public class Turret extends SubsystemBase {
     public void setTurret(TurretState turretState, double value) {
         switch (turretState) {
             case ANGLE_CONTROL:
-                turretController.setTolerance(TURRET_POS_TOLERANCE);
+                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
                 turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
                 turretController.setMaxOutput(1);
+                turretController.setIntegrationBounds(TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL);
 
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case GOAL_LOCK_CONTROL:
-                turretController.setTolerance(TURRET_POS_TOLERANCE);
+                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
                 turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
                 turretController.setMaxOutput(1);
+                turretController.setIntegrationBounds(TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL);
 
-                if (value == 0) {
-                    double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
+                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
+                turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
 
-                    turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
-                } else {
-                    turretController.setSetPoint(value);
-                }
                 break;
             case LIMELIGHT_CONTROL:
-                turretController.setTolerance(TURRET_TY_TOLERANCE);
+                turretController.setTolerance(TURRET_TY_TOLERANCE, Double.POSITIVE_INFINITY);
                 turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
                 turretController.setMaxOutput(LIMELIGHT_LARGE_TURRET_MAX_OUTPUT);
 
@@ -143,7 +141,7 @@ public class Turret extends SubsystemBase {
             case GOAL_LOCK_CONTROL:
                 robot.profiler.start("Turret Read");
                 // only use drive pose estimate if we aren't in a command using the turret
-                if (!CommandScheduler.getInstance().isAvailable(robot.turret)) {
+                if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
                     updateTurretPose(robot.drive.getPose());
                     turretPoseEstimates.clear();
                 }
@@ -151,6 +149,10 @@ public class Turret extends SubsystemBase {
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
 
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
+
+                if (robot.turret.turretController.atSetPoint()) {
+                    robot.turret.turretController.clearTotalError();
+                }
 
                 power = turretController.calculate(getPosition());
                 robot.profiler.end("Turret Read");
@@ -202,7 +204,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return (turretController.atSetPoint() && (turretState.equals(ANGLE_CONTROL)) || turretState.equals(GOAL_LOCK_CONTROL))
+        return (turretController.atSetPoint() && (turretState.equals(ANGLE_CONTROL) || turretState.equals(GOAL_LOCK_CONTROL)))
                 || (llResult != null && turretController.atSetPoint() && turretState.equals(LIMELIGHT_CONTROL));
     }
 
@@ -213,9 +215,8 @@ public class Turret extends SubsystemBase {
     /**
      * Updates internal limelight result in the Turret class
      * @param n max number of times to attempt reading to get a valid result
-     * @return if the update was successful
      */
-    public boolean updateLLResult(int n) {
+    public void updateLLResult(int n) {
         llResult = null;
 
         for (int i = n; i > 0; i--) {
@@ -237,7 +238,6 @@ public class Turret extends SubsystemBase {
             }
         }
 
-        return llResult != null;
     }
 
     public double[] getLimeLightTargetDegrees() {
@@ -361,7 +361,7 @@ public class Turret extends SubsystemBase {
 
     public double getMedianWallAngle() {
         if (medianWallAngle.isEmpty()) {
-            return Math.PI / 4;
+            return Double.NaN;
         }
 
         ArrayList<Double> sortedMedianWallAngle = new ArrayList<>(medianWallAngle);
@@ -384,7 +384,16 @@ public class Turret extends SubsystemBase {
     }
 
     public Pose2d adjustedGoalPose(Pose2d robotPose) {
-        double offset = posesToAngle(robotPose, Constants.GOAL_POSE()) - posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()) * ALLIANCE_COLOR.getMultiplier();
+        if (turretPose == null) {
+            turretPose = robotPose;
+            updateTurretPose(robotPose);
+        }
+
+        if (medianWallAngle.isEmpty()) {
+            updateMedianReadings(robotPose);
+        }
+
+        double offset = -getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
         double adjustment = limelightInterplut.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));

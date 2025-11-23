@@ -251,7 +251,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
         telemetryData.addData("LLResult Null", robot.turret.llResult == null);
         try {
-            telemetryData.addData("lastKnownPose", robot.turret.getTurretPose());
+            telemetryData.addData("turretPose", robot.turret.getTurretPose());
         } catch (Exception ignored) {}
         telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
 

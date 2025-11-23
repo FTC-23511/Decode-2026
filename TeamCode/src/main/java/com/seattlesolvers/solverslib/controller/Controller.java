@@ -189,9 +189,9 @@ public abstract class Controller {
     }
 
     /**
-     * An option to enforce a minimum (magnitude of the / absolute value of the) output from
+     * An option to enforce a max (magnitude of the / absolute value of the) output from
      * subsequent calculations from the controller if the controller is not {@link #atSetPoint()}
-     * @param minOutput the minimum (magnitude of the / absolute value of the) output for the controller
+     * @param maxOutput the max (magnitude of the / absolute value of the) output for the controller
      * @return this object for chaining purposes
      */
     public Controller setMaxOutput(double maxOutput) {

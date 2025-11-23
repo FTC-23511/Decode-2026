@@ -28,6 +28,8 @@ public class TurretServosTuner extends CommandOpMode {
 
     public static double TARGET_POS = 0.0;
     public static double POS_TOLERANCE = 0.03;
+    public static double MIN_INTEGRAL = 0.0;
+    public static double MAX_INTEGRAL = 1.0;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public ElapsedTime timer;
@@ -58,10 +60,16 @@ public class TurretServosTuner extends CommandOpMode {
         robot.turret.turretController.setPIDF(P, I, D, F);
         robot.turret.turretController.setTolerance(POS_TOLERANCE);
         robot.turret.turretController.setMinimumOutput(MIN_OUTPUT);
+        robot.turret.turretController.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
 
         double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);
 
-        robot.turretServos.set(power);
+        if (robot.turret.turretController.atSetPoint()) {
+            robot.turretServos.set(0);
+            robot.turret.turretController.clearTotalError();
+        } else {
+            robot.turretServos.set(power);
+        }
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
