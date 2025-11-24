@@ -66,9 +66,9 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.535;
-    public static double INTAKE_PIVOT_HOLD = 0.476;
-    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.0267;
+    public static double INTAKE_PIVOT_FORWARD = 0.55;
+    public static double INTAKE_PIVOT_HOLD = 0.50;
+    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.02;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -1.0;
@@ -120,7 +120,7 @@ public class Constants {
     public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static double TURRET_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 0.1041 : 0.12;
-    public static double DISTANCE_BS = 0.06867;
+    public static double DISTANCE_BS = 0.045;
 
     public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
     public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians

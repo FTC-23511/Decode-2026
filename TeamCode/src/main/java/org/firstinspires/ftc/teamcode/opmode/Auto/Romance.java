@@ -47,6 +47,9 @@ import java.util.ArrayList;
 @Autonomous(name = "Romance (close far auto)", preselectTeleOp = "AAAFullTeleOp")
 public class Romance extends CommandOpMode {
     public ElapsedTime timer;
+    public static double BLUE_ROMANCE_BS = -0.15;
+    public static double RED_ROMANCE_BS = 0.15;
+    public static double ROMANCE_BS = 0.0;
 
     TelemetryData telemetryData = new TelemetryData(
             new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())
@@ -96,13 +99,15 @@ public class Romance extends CommandOpMode {
         robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
+        ROMANCE_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? BLUE_ROMANCE_BS : RED_ROMANCE_BS;
+
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
         schedule(
                 new SequentialCommandGroup(
                         // init
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2 + 0.1) * ALLIANCE_COLOR.getMultiplier()))),
+                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2) + ROMANCE_BS) * ALLIANCE_COLOR.getMultiplier())),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
@@ -200,7 +205,7 @@ public class Romance extends CommandOpMode {
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(5.67, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2 - 0.1) * ALLIANCE_COLOR.getMultiplier()))),
+                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2) + ROMANCE_BS) * ALLIANCE_COLOR.getMultiplier())),
                 new InstantCommand(() -> robot.readyToLaunch = true),
                 new ClearLaunch(true).alongWith(
                         new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))

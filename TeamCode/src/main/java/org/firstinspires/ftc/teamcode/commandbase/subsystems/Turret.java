@@ -38,7 +38,7 @@ public class Turret extends SubsystemBase {
     double bs = (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? -12.67 : -5.1);
     public final InterpLUT limelightInterplut = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList( bs,         bs,    0.0,  0.0,        3.67, 4.67, 7.41, 10.67, 10.67) // output: new goal pos (inches)
+            Arrays.asList( bs,         bs,    0.0,  0.0,        1.67, 4.67, 7.41, 14.14, 14.14) // output: new goal pos (inches)
     );
 
     private final ElapsedTime timer = new ElapsedTime();
