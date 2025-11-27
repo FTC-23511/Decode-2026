@@ -149,7 +149,7 @@ public class Translation2d {
 
     @Override
     public String toString() {
-        return String.format("Translation2d(X: %.2f, Y: %.2f)", m_x, m_y);
+        return String.format("Translation2d(X=%.2f,Y=%.2f)", m_x, m_y);
     }
 
     /**

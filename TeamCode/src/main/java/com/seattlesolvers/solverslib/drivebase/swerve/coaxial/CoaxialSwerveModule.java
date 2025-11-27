@@ -114,9 +114,9 @@ public class CoaxialSwerveModule {
     }
 
     public String getPowerTelemetry() {
-        return "Motor: " + MathUtils.round(motor.get(), 3) +
-                "; Servo: " + MathUtils.round(swervo.get(), 3) +
-                "; Absolute Encoder: " + MathUtils.round(swervo.getAbsoluteEncoder().getCurrentPosition(), 3);
+        return "Motor=" + MathUtils.round(motor.get(), 3) +
+                ",Servo=" + MathUtils.round(swervo.get(), 3) +
+                ",Absolute Encoder=" + MathUtils.round(swervo.getAbsoluteEncoder().getCurrentPosition(), 3);
     }
 
     public Vector2d getTargetVelocity() {

@@ -199,6 +199,6 @@ public class Vector2d {
     public String toString() {
         String x = Double.toString(m_x);
         String y = Double.toString(m_y);
-        return "( " + x + ", " + y + " )";
+        return "(" + x + "," + y + ")";
     }
 }
