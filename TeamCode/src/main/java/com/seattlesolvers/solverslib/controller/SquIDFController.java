@@ -70,8 +70,13 @@ public class SquIDFController extends PIDFController {
         e(t) = sp - pv, then the total error, E(t), equals sp*t - pv*t.
          */
         totalError += period * (setPoint - measuredValue);
-        totalError = totalError < minIntegral ? minIntegral : Math.min(maxIntegral, totalError);
-
+        totalError = MathUtils.clamp(totalError, integrationControl.getMinIntegral(), integrationControl.getMaxIntegral());
+        if ((Math.signum(totalError) != Math.signum(errorVal_p))) {
+            totalError *= integrationControl.getDecayFactor();
+        }
+        if (atSetPoint() && integrationControl.getIntegrationBehavior().equals(IntegrationBehavior.CLEAR_AT_SP)) {
+            totalError = 0;
+        }
         // returns u(t)
         return kP * MathUtils.sqrtWithSig(errorVal_p) + kI * totalError + kD * errorVal_v + kF * setPoint;
     }

@@ -132,7 +132,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
         intakeMotors = new MotorGroup(
-                new MotorEx(hwMap, "intakeMotor")
+                new MotorEx(hwMap, "backIntakeMotor")
+                        .setCachingTolerance(0.01)
+                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
+                        .setRunMode(Motor.RunMode.RawPower)
+                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE),
+                new MotorEx(hwMap, "frontIntakeMotor")
                         .setCachingTolerance(0.01)
                         .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)

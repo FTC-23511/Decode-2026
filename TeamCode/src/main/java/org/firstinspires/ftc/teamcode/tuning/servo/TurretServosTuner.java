@@ -5,12 +5,9 @@ import android.util.Log;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -59,7 +56,7 @@ public class TurretServosTuner extends CommandOpMode {
 
         robot.turret.turretController.setPIDF(P, I, D, F);
         robot.turret.turretController.setTolerance(POS_TOLERANCE);
-        robot.turret.turretController.setMinimumOutput(MIN_OUTPUT);
+        robot.turret.turretController.setMinOutput(MIN_OUTPUT);
         robot.turret.turretController.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
 
         double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);

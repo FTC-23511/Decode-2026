@@ -75,7 +75,7 @@ public class Turret extends SubsystemBase {
     public ArrayList<Double> medianWallAngle = new ArrayList<>();
 
     public Turret() {
-        turretController.setMinimumOutput(TURRET_MIN_OUTPUT);
+        turretController.setMinOutput(TURRET_MIN_OUTPUT);
         turretController.setTolerance(TURRET_POS_TOLERANCE);
         limelightInterplut.createLUT();
     }

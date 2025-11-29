@@ -36,8 +36,9 @@
     <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2F3UGC" parentModuleAddress="2">
         <LynxModule name="Expansion Hub 2" port="2">
             <goBILDA5202SeriesMotor name="leftLaunchMotor" port="0"/>
+            <goBILDA5202SeriesMotor name="frontIntakeMotor" port="1"/>
             <goBILDA5202SeriesMotor name="rightLaunchMotor" port="2"/>
-            <goBILDA5202SeriesMotor name="intakeMotor" port="3"/>
+            <goBILDA5202SeriesMotor name="backIntakeMotor" port="3"/>
 
             <AnalogInput name="turretEncoder" port="0"/>
             <AnalogInput name="distanceSensor" port="1"/>

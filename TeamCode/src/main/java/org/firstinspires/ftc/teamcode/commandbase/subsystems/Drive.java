@@ -14,7 +14,6 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.p2p.P2PController;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -47,9 +46,9 @@ public class Drive extends SubsystemBase {
         ).setCachingTolerance(0.01, 0.01);
 
         follower = new P2PController(
-                new PIDFController(XY_COEFFICIENTS).setMinimumOutput(XY_MIN_OUTPUT),
-                new PIDFController(XY_COEFFICIENTS).setMinimumOutput(XY_MIN_OUTPUT),
-                (OP_MODE_TYPE.equals(OpModeType.TELEOP) ? new PIDFController(TELEOP_HEADING_COEFFICIENTS) : new PIDFController(HEADING_COEFFICIENTS)).setMinimumOutput(HEADING_MIN_OUTPUT),
+                new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
+                new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
+                (OP_MODE_TYPE.equals(OpModeType.TELEOP) ? new PIDFController(TELEOP_HEADING_COEFFICIENTS) : new PIDFController(HEADING_COEFFICIENTS)).setMinOutput(HEADING_MIN_OUTPUT),
                 ANGLE_UNIT,
                 XY_TOLERANCE,
                 HEADING_TOLERANCE

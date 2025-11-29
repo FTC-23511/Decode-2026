@@ -5,6 +5,7 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 public abstract class Controller {
     private double minOutput = 0;
     private double maxOutput = Double.POSITIVE_INFINITY;
+    private double openF = 0;
     protected double setPoint;
     protected double measuredValue;
 
@@ -35,7 +36,7 @@ public abstract class Controller {
      *
      * NOTE: Is not used publicly and is instead wrapped in
      * {@link #calculate(double)} before being visible to user to allow for
-     * other features such as {@link #setMinimumOutput(double)}
+     * other features such as {@link #setMinOutput(double)}
      *
      * @param pv The given measured value.
      * @return the value produced by u(t).
@@ -44,17 +45,18 @@ public abstract class Controller {
 
     /**
      * Calculates the control value, u(t). Also follows the minimum output
-     * (see: {@link #setMinimumOutput(double)}) if set.
+     * (see: {@link #setMinOutput(double)}) if set.
      *
      * @param pv The given measured value.
      * @return the value produced by u(t).
      */
     public double calculate(double pv) {
-        double rawOutput = calculateOutput(pv);
+        double output = calculateOutput(pv);
+        output += Math.signum(errorVal_p) * openF;
         if (atSetPoint()) {
-            return rawOutput;
+            return output;
         } else {
-            return MathUtils.clamp(Math.abs(rawOutput), minOutput, maxOutput) * Math.signum(rawOutput);
+            return MathUtils.clamp(Math.abs(output), minOutput, maxOutput) * Math.signum(output);
         }
     }
 
@@ -113,17 +115,6 @@ public abstract class Controller {
     }
 
     /**
-     * Returns true if the error is within the percentage of the total input range, determined by
-     * {@link #setTolerance}.
-     *
-     * @return Whether the error is within the acceptable bounds.
-     */
-    public boolean atSetPoint(double pv) {
-        return Math.abs(errorVal_p) < errorTolerance_p
-                && Math.abs(errorVal_v) < errorTolerance_v;
-    }
-
-    /**
      * @return the positional error e(t)
      */
     public double getPositionError() {
@@ -174,7 +165,7 @@ public abstract class Controller {
      * @param minOutput the minimum (magnitude of the / absolute value of the) output for the controller
      * @return this object for chaining purposes
      */
-    public Controller setMinimumOutput(double minOutput) {
+    public Controller setMinOutput(double minOutput) {
         this.minOutput = Math.abs(minOutput);
         return this;
     }
@@ -184,7 +175,7 @@ public abstract class Controller {
      *
      * @return the minimum output
      */
-    public double getMinimumOutput() {
+    public double getMinOutput() {
         return minOutput;
     }
 
@@ -206,5 +197,16 @@ public abstract class Controller {
      */
     public double getMaxOutput() {
         return maxOutput;
+    }
+
+    /**
+     * Adds a basic open-loop feedforward that is added to any calls to {@link #calculate(double)} and its variants.
+     * Term will flip to match sign error when being added.
+     * @param f the feedforward term
+     * @return this object for chaining purposes
+     */
+    public Controller setOpenF(double f) {
+        this.openF = f;
+        return this;
     }
 }
