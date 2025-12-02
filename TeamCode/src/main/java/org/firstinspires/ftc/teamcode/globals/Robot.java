@@ -231,12 +231,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         // aprilTagProcessor.setDecimation(10); // increases fps, but reduces range
 
-        VisionPortal.Builder builder = new VisionPortal.Builder();
-        builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1")); // TODO: check name
-        builder.setCameraResolution(new Size(640, 480));
-        builder.addProcessor(aprilTagProcessor);
-
-        visionPortal = builder.build();
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hwMap.get(WebcamName.class, "Webcam 1")) // TODO: check name
+                .setCameraResolution(new Size(640, 480))
+                .addProcessor(aprilTagProcessor)
+                .build();
 
         // Subsystems
         drive = new Drive();

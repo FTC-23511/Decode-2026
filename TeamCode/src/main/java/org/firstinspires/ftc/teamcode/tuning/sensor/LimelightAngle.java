@@ -64,13 +64,13 @@ public class LimelightAngle extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        Pose2d robotPose = robot.camera.getLimelightPose();
+        Pose2d robotPose = robot.camera.getCameraPose();
 
         if (robotPose != null) {
             lastKnownPose = robotPose;
         }
 
-        robot.camera.updateLLResult(5);
+        robot.camera.updateCameraResult(5);
 
         telemetryData.addData("loop time", timer.milliseconds());
         timer.reset();
@@ -78,7 +78,7 @@ public class LimelightAngle extends CommandOpMode {
         if (lastKnownPose == null) {
             telemetryData.addData("bot pose", null);
         } else {
-            Pose2d llPose = robot.camera.getLimelightPose();
+            Pose2d llPose = robot.camera.getCameraPose();
 
             if (llPose != null) {
                 robot.camera.updateMedianReadings(llPose);
@@ -94,7 +94,7 @@ public class LimelightAngle extends CommandOpMode {
                 try {
                     telemetryData.addData("tY Offset", robot.camera.getTyOffset(lastKnownPose));
                     double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
-                    double adjustment = robot.camera.limelightInterplut.get(offset);
+                    double adjustment = robot.camera.cameraInterplut.get(offset);
 
                     Pose2d adjustedGoal;
                     if (adjustment < 0) {

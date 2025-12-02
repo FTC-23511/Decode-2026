@@ -89,13 +89,6 @@ public class LimelightTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        double[] targetDegrees = robot.camera.getLimeLightTargetDegrees();
-        if (targetDegrees == null) {
-            telemetryData.addData("Turret tY", "null");
-        } else {
-            telemetryData.addData("Turret tY", robot.camera.getLimeLightTargetDegrees()[1]);
-        }
-
         telemetryData.addData("Turret Set Point", robot.turret.turretController.getSetPoint());
         telemetryData.addData("Turret Enum", Turret.turretState);
         telemetryData.addData("Angle Mode Value", angleVal);

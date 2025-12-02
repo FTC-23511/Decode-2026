@@ -163,9 +163,10 @@ public class Turret extends SubsystemBase {
                 }
                 robot.profiler.end("Turret Write");
                 break;
+            /*
             case LIMELIGHT_CONTROL:
                 robot.profiler.start("Turret Read");
-                robot.camera.updateLLResult(5);
+                robot.camera.updateCameraResult(5);
                 robot.profiler.end("Turret Read");
 
                 double[] targetDegrees = robot.camera.getLimeLightTargetDegrees();
@@ -197,12 +198,13 @@ public class Turret extends SubsystemBase {
                     robot.profiler.end("Turret Write");
                 }
                 break;
+             */
         }
     }
 
     public boolean readyToLaunch() {
         return (turretController.atSetPoint() && (turretState.equals(ANGLE_CONTROL) || turretState.equals(GOAL_LOCK_CONTROL)))
-                || (robot.camera.llResult != null && turretController.atSetPoint() && turretState.equals(LIMELIGHT_CONTROL));
+                || (robot.camera.detections != null && turretController.atSetPoint() && turretState.equals(LIMELIGHT_CONTROL));
     }
 
     public void updateTurretPoseReadings(Pose2d llPose) {
@@ -264,7 +266,7 @@ public class Turret extends SubsystemBase {
 
         double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = robot.camera.limelightInterplut.get(offset);
+        double adjustment = robot.camera.cameraInterplut.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;

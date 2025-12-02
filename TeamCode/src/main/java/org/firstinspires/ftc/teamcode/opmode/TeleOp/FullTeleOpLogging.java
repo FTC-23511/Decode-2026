@@ -263,7 +263,7 @@ public class FullTeleOpLogging extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("LLResult Null", robot.camera.llResult == null);
+        telemetryData.addData("LLResult Null", robot.camera.detections == null);
         try {
             telemetryData.addData("turretPose", robot.turret.getTurretPose());
         } catch (Exception ignored) {}
