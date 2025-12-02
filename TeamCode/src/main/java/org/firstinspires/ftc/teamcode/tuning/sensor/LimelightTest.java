@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LimeLightTest", group = "Sensor")
-public class LimeLightTest extends CommandOpMode {
+@TeleOp(name = "LimelightTest", group = "Sensor")
+public class LimelightTest extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
