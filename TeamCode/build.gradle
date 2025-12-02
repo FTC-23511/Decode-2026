@@ -26,6 +26,12 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+        }
+    }
 }
 
 repositories {
@@ -83,4 +89,8 @@ dependencies {
 
     // Panels Dashboard
     implementation "com.bylazar:fullpanels:1.0.5"
+
+    // JUnit 5
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
 }

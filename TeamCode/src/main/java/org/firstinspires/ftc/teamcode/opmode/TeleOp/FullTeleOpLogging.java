@@ -172,9 +172,7 @@ public class FullTeleOpLogging extends CommandOpMode {
         operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition()))
         );
-        operator.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
-        );
+
         operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
                 new StationaryAimbotFullLaunch()
         );
@@ -265,11 +263,11 @@ public class FullTeleOpLogging extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("LLResult Null", robot.turret.llResult == null);
+        telemetryData.addData("LLResult Null", robot.camera.llResult == null);
         try {
             telemetryData.addData("turretPose", robot.turret.getTurretPose());
         } catch (Exception ignored) {}
-        telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
+        telemetryData.addData("Wall Angle", robot.camera.getMedianWallAngle());
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());

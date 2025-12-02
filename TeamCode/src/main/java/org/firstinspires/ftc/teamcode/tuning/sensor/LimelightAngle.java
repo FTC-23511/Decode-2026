@@ -64,13 +64,13 @@ public class LimelightAngle extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        Pose2d robotPose = robot.turret.getLimelightPose();
+        Pose2d robotPose = robot.camera.getLimelightPose();
 
         if (robotPose != null) {
             lastKnownPose = robotPose;
         }
 
-        robot.turret.updateLLResult(5);
+        robot.camera.updateLLResult(5);
 
         telemetryData.addData("loop time", timer.milliseconds());
         timer.reset();
@@ -78,23 +78,23 @@ public class LimelightAngle extends CommandOpMode {
         if (lastKnownPose == null) {
             telemetryData.addData("bot pose", null);
         } else {
-            Pose2d llPose = robot.turret.getLimelightPose();
+            Pose2d llPose = robot.camera.getLimelightPose();
 
             if (llPose != null) {
-                robot.turret.updateMedianReadings(llPose);
+                robot.camera.updateMedianReadings(llPose);
             }
 
-            if (robot.turret.medianWallAngle.size() > 10) {
-                robot.turret.medianWallAngle.remove(0);
+            if (robot.camera.medianWallAngle.size() > 10) {
+                robot.camera.medianWallAngle.remove(0);
             }
 
-            if (!robot.turret.medianWallAngle.isEmpty()) {
-                double angle = robot.turret.getMedianWallAngle();
+            if (!robot.camera.medianWallAngle.isEmpty()) {
+                double angle = robot.camera.getMedianWallAngle();
                 telemetryData.addData("Median Wall Angle", angle);
                 try {
-                    telemetryData.addData("tY Offset", robot.turret.getTyOffset(lastKnownPose));
-                    double offset = -robot.turret.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
-                    double adjustment = robot.turret.limelightInterplut.get(offset);
+                    telemetryData.addData("tY Offset", robot.camera.getTyOffset(lastKnownPose));
+                    double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
+                    double adjustment = robot.camera.limelightInterplut.get(offset);
 
                     Pose2d adjustedGoal;
                     if (adjustment < 0) {

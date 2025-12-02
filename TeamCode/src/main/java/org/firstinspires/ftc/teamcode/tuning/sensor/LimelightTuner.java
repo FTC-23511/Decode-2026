@@ -63,10 +63,6 @@ public class LimelightTuner extends CommandOpMode {
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
-        );
-
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
         );
@@ -93,11 +89,11 @@ public class LimelightTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        double[] targetDegrees = robot.turret.getLimeLightTargetDegrees();
+        double[] targetDegrees = robot.camera.getLimeLightTargetDegrees();
         if (targetDegrees == null) {
             telemetryData.addData("Turret tY", "null");
         } else {
-            telemetryData.addData("Turret tY", robot.turret.getLimeLightTargetDegrees()[1]);
+            telemetryData.addData("Turret tY", robot.camera.getLimeLightTargetDegrees()[1]);
         }
 
         telemetryData.addData("Turret Set Point", robot.turret.turretController.getSetPoint());

@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.globals;
 
-import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.EXPANSION_HUB_PRODUCT_NUMBER;
-import static com.qualcomm.robotcore.hardware.configuration.LynxConstants.SERVO_HUB_PRODUCT_NUMBER;
-
 import com.outoftheboxrobotics.photoncore.PhotonCore;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.vision.apriltag.AprilTagProcessor.THREADS_DEFAULT;
 
 import android.util.Log;
+import android.util.Size;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -28,15 +26,21 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Camera;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.io.File;
 import java.util.Arrays;
@@ -88,6 +92,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public ServoEx rampServo;
 
     public Limelight3A limelight;
+    public AprilTagProcessor aprilTagProcessor;
+    public VisionPortal visionPortal;
 
     public GoBildaPinpointDriver pinpoint;
 //    public IMU imu;
@@ -96,6 +102,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Intake intake;
     public Launcher launcher;
     public Turret turret;
+    public Camera camera;
 
     public SensorDigitalDevice frontDistanceSensor;
     public SensorDigitalDevice backDistanceSensor;
@@ -204,14 +211,41 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(250);
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(4);
         limelight.start();
+
+        aprilTagProcessor = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawTagID(true)
+                .setDrawTagOutline(true)
+                .setDrawCubeProjection(true)
+                .setNumThreads(THREADS_DEFAULT)
+                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
+                .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
+                .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) // 640x480: 549.651, 549.651, 317.108, 236.644; 320x240: 281.5573273, 281.366942, 156.3332591, 119.8965271
+                .setCameraPose( // TODO: Check out offsets
+                        new Position(DistanceUnit.MM, 118.81560, 0, 0, 0),
+                        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 0, 0))
+                .build();
+
+        // aprilTagProcessor.setDecimation(10); // increases fps, but reduces range
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+        builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1")); // TODO: check name
+        builder.setCameraResolution(new Size(640, 480));
+        builder.addProcessor(aprilTagProcessor);
+
+        visionPortal = builder.build();
 
         // Subsystems
         drive = new Drive();
         intake = new Intake();
         launcher = new Launcher();
         turret = new Turret();
+
+        // vision
+        camera = new Camera();
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);

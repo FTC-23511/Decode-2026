@@ -33,7 +33,6 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-@Config
 @TeleOp(name = "AAAFullTeleOp")
 public class FullTeleOp extends CommandOpMode {
     public GamepadEx driver;
@@ -158,9 +157,6 @@ public class FullTeleOp extends CommandOpMode {
         operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition()))
         );
-        operator.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.LIMELIGHT_CONTROL, 0))
-        );
         operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
                 new StationaryAimbotFullLaunch()
         );
@@ -250,11 +246,9 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("LLResult Null", robot.turret.llResult == null);
-        try {
-            telemetryData.addData("turretPose", robot.turret.getTurretPose());
-        } catch (Exception ignored) {}
-        telemetryData.addData("Wall Angle", robot.turret.getMedianWallAngle());
+        telemetryData.addData("LLResult Null", robot.camera.llResult == null);
+        try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
+        telemetryData.addData("Wall Angle", robot.camera.getMedianWallAngle());
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());

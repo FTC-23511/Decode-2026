@@ -112,7 +112,7 @@ public class SolverLogger {
         str += ";Turret Target:Double:" + robot.turret.getTarget();
         str += ";Turret readyToLaunch:Boolean:" + robot.turret.readyToLaunch();
         str += ";turretPose:Pose2D:" + robot.turret.getTurretPose();
-        str += ";Wall Angle:Double:" + robot.turret.getMedianWallAngle();
+        str += ";Wall Angle:Double:" + robot.camera.getMedianWallAngle();
 
         str += ";Flywheel Active Control:Boolean:" + robot.launcher.getActiveControl();
         str += ";Flywheel Target Ball Velocity:Double:" + robot.launcher.getTargetFlywheelVelocity();
