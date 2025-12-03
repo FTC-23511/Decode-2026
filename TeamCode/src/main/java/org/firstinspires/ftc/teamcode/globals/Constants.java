@@ -66,8 +66,8 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.55;
-    public static double INTAKE_PIVOT_HOLD = 0.50;
+    public static double INTAKE_PIVOT_FORWARD = 0.54;
+    public static double INTAKE_PIVOT_HOLD = 0.49;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.02;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
@@ -117,7 +117,7 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
     public static double TURRET_MIN_OUTPUT = 0.0; // Power
-    public static double TURRET_ENCODER_OFFSET = 3.111; // Radians
+    public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static double TURRET_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 0.1041 : 0.12;
     public static double DISTANCE_BS = 0.045;

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class CascadeController extends Controller {
     private final Controller primary;
     private final Controller secondary;
+    private double velMeasuredValue;
     private double velSetPoint;
 
     public CascadeController(Controller primary, Controller secondary) {
@@ -29,13 +30,15 @@ public class CascadeController extends Controller {
         }
 
         if (Math.abs(period) > 1E-6) {
-            errorVal_v = velSetPoint - ((errorVal_p - prevErrorVal) / period);
+            velMeasuredValue = (errorVal_p - prevErrorVal) / period;
         } else {
-            errorVal_v = 0;
+            velMeasuredValue = 0;
         }
 
+        errorVal_v = velSetPoint - velMeasuredValue;
+
         double sp2 = primary.calculate(pv);
-        double co2 = secondary.calculate(sp2 + velSetPoint);
+        double co2 = secondary.calculate(velMeasuredValue, sp2 + velSetPoint);
 
         return co2;
     }
@@ -49,6 +52,7 @@ public class CascadeController extends Controller {
         setPoint = psp;
         velSetPoint = vsp;
         errorVal_p = setPoint - measuredValue;
-        errorVal_v = velSetPoint - ((errorVal_p - prevErrorVal) / period);
+        velMeasuredValue = (errorVal_p - prevErrorVal) / period;
+        errorVal_v = velSetPoint - velMeasuredValue;
     }
 }
