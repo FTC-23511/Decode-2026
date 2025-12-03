@@ -29,10 +29,9 @@ public class Camera {
     public ArrayList<AprilTagDetection> detections = null;
     public ArrayList<Double> medianWallAngle = new ArrayList<>();
 
-    double bs = (ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) ? -12.67 : -5.1);
     public final InterpLUT cameraInterplut = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList( bs,         bs,    0.0,  0.0,        1.67, 4.67, 7.41, 14.14, 14.14) // output: new goal pos (inches)
+            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 7.41, 14.14, 14.14) // output: new goal pos (inches)
     );
 
     public enum Motif {
@@ -44,7 +43,6 @@ public class Camera {
 
     public Camera() {
         cameraInterplut.createLUT();
-
     }
 
     /**
@@ -165,6 +163,11 @@ public class Camera {
 
     public void updateMedianReadings(Pose2d llPose) {
         medianWallAngle.add(robot.turret.angleToWall(llPose));
+    }
+
+    public double[] getTargetDegrees() {
+        // TODO: Arush write your code here
+        return null;
     }
 
     public void closeCamera() {

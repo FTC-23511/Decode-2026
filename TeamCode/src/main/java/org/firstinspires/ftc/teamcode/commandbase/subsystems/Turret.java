@@ -163,13 +163,12 @@ public class Turret extends SubsystemBase {
                 }
                 robot.profiler.end("Turret Write");
                 break;
-            /*
             case LIMELIGHT_CONTROL:
                 robot.profiler.start("Turret Read");
                 robot.camera.updateCameraResult(5);
                 robot.profiler.end("Turret Read");
 
-                double[] targetDegrees = robot.camera.getLimeLightTargetDegrees();
+                double[] targetDegrees = robot.camera.getTargetDegrees();
 
                 if (targetDegrees != null) {
                     double ty = targetDegrees[1];
@@ -198,7 +197,6 @@ public class Turret extends SubsystemBase {
                     robot.profiler.end("Turret Write");
                 }
                 break;
-             */
         }
     }
 
