@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode.tuning.sensor;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -62,11 +65,21 @@ public class ArducamTest extends CommandOpMode {
         robot.camera.updateCameraResult(3);
         telemetryData.addData("Loop Time", timer.milliseconds());
         robot.camera.getCameraTelemetry(telemetry);
-        telemetryData.addData("camera pose", robot.camera.getCameraPose());
+        Pose2d cameraPose = robot.camera.getCameraPose();
+        double[] targetDegrees = robot.camera.getTargetDegrees();
+
+        telemetryData.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
+        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+        telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        CommandScheduler.getInstance().run();
+        if (robot.camera.getCameraPose() != null) {
+            telemetryData.update();
+        }
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
 
     @Override

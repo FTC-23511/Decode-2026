@@ -4,7 +4,6 @@ import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.poses
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.USE_LIMELIGHT_MT1;
 
 import androidx.annotation.NonNull;
 
@@ -18,6 +17,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
+import org.opencv.core.Point;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,14 +64,14 @@ public class Camera {
 
     }
 
-    public double tyOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
+    public double txOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
         double angleToGoal = Math.toDegrees(posesToAngle(robotPose, goalPose));
         double angleToATag = Math.toDegrees(posesToAngle(robotPose, APRILTAG_POSE()));
 
         return angleToATag - angleToGoal;
     }
 
-    public double getTyOffset(Pose2d robotPose) {
+    public double getTxOffset(Pose2d robotPose) {
         if (robotPose == null) {
             return 0;
         }
@@ -88,9 +88,19 @@ public class Camera {
             adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
         }
 
-        double finalOffset = tyOffset(robotPose, adjustedGoal);
+        double finalOffset = txOffset(robotPose, adjustedGoal);
         RobotLog.aa("final offset", String.valueOf(finalOffset));
         return finalOffset;
+    }
+
+    public double[] getTargetDegrees() {
+        if (detections != null && !detections.isEmpty()) {
+            Point point = cleanDetection(detections).center;
+
+            return new double[]{point.x - 320, point.y - 240};
+        }
+
+        return null;
     }
 
     public Pose2d getCameraPose() {
@@ -107,8 +117,7 @@ public class Camera {
         if (detections != null && !detections.isEmpty()) {
             AprilTagDetection detection = cleanDetection(detections);
 
-            if (detection.metadata != null) {
-                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+            if (detection != null && detection.metadata != null) {
                 // Only use tags that don't have Obelisk in them
                 if (!detection.metadata.name.contains("Obelisk")) {
                     telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
@@ -119,10 +128,10 @@ public class Camera {
                             detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
                             detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
                             detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
+                    telemetry.addData("center", detection.center);
                 }
             } else {
-                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+                telemetry.addLine("\n==== Tag not found");
             }
         }
     }
@@ -163,11 +172,6 @@ public class Camera {
 
     public void updateMedianReadings(Pose2d llPose) {
         medianWallAngle.add(robot.turret.angleToWall(llPose));
-    }
-
-    public double[] getTargetDegrees() {
-        // TODO: Arush write your code here
-        return null;
     }
 
     public void closeCamera() {

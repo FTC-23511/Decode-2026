@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.LIMELIGHT_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.TX_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -29,7 +29,7 @@ public class Turret extends SubsystemBase {
     private final ArrayList<Pose2d> turretPoseEstimates = new ArrayList<>();
 
     public enum TurretState {
-        LIMELIGHT_CONTROL,
+        TX_CONTROL,
         ANGLE_CONTROL,
         GOAL_LOCK_CONTROL,
         OFF,
@@ -81,10 +81,10 @@ public class Turret extends SubsystemBase {
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
 
                 break;
-            case LIMELIGHT_CONTROL:
-                turretController.setTolerance(TURRET_TY_TOLERANCE, Double.POSITIVE_INFINITY);
-                turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(LIMELIGHT_LARGE_MAX_OUTPUT);
+            case TX_CONTROL:
+                turretController.setTolerance(TURRET_TX_TOLERANCE, Double.POSITIVE_INFINITY);
+                turretController.setCoefficients(CAMERA_LARGE_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(CAMERA_LARGE_MAX_OUTPUT);
 
                 turretController.setSetPoint(value);
                 break;
@@ -163,7 +163,7 @@ public class Turret extends SubsystemBase {
                 }
                 robot.profiler.end("Turret Write");
                 break;
-            case LIMELIGHT_CONTROL:
+            case TX_CONTROL:
                 robot.profiler.start("Turret Read");
                 robot.camera.updateCameraResult(5);
                 robot.profiler.end("Turret Read");
@@ -171,18 +171,18 @@ public class Turret extends SubsystemBase {
                 double[] targetDegrees = robot.camera.getTargetDegrees();
 
                 if (targetDegrees != null) {
-                    double ty = targetDegrees[1];
-                    double error = ty - turretController.getSetPoint();
+                    double tx = targetDegrees[0];
+                    double error = tx - turretController.getSetPoint();
 
-                    if (Math.abs(error) > LIMELIGHT_PID_THRESHOLD) {
-                        turretController.setCoefficients(LIMELIGHT_LARGE_PIDF_COEFFICIENTS);
-                        turretController.setMaxOutput(LIMELIGHT_LARGE_MAX_OUTPUT);
+                    if (Math.abs(error) > CAMERA_PID_THRESHOLD) {
+                        turretController.setCoefficients(CAMERA_LARGE_PIDF_COEFFICIENTS);
+                        turretController.setMaxOutput(CAMERA_LARGE_MAX_OUTPUT);
                     } else {
-                        turretController.setCoefficients(LIMELIGHT_SMALL_PIDF_COEFFICIENTS);
-                        turretController.setMaxOutput(LIMELIGHT_SMALL_MAX_OUTPUT);
+                        turretController.setCoefficients(CAMERA_SMALL_PIDF_COEFFICIENTS);
+                        turretController.setMaxOutput(CAMERA_SMALL_MAX_OUTPUT);
                     }
 
-                    power = turretController.calculate(ty);
+                    power = turretController.calculate(tx);
 
                     robot.profiler.start("Turret Write");
                     if (Math.abs(getPosition()) < Math.abs(MAX_TURRET_ANGLE)) {
@@ -202,7 +202,7 @@ public class Turret extends SubsystemBase {
 
     public boolean readyToLaunch() {
         return (turretController.atSetPoint() && (turretState.equals(ANGLE_CONTROL) || turretState.equals(GOAL_LOCK_CONTROL)))
-                || (robot.camera.detections != null && turretController.atSetPoint() && turretState.equals(LIMELIGHT_CONTROL));
+                || (robot.camera.detections != null && turretController.atSetPoint() && turretState.equals(TX_CONTROL));
     }
 
     public void updateTurretPoseReadings(Pose2d llPose) {

@@ -216,7 +216,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
-                .setDrawTagID(true)
+                .setDrawTagID(false)
                 .setDrawTagOutline(true)
                 .setDrawCubeProjection(true)
                 .setNumThreads(THREADS_DEFAULT)
@@ -224,16 +224,17 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
                 .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) // 640x480: 549.651, 549.651, 317.108, 236.644; 320x240: 281.5573273, 281.366942, 156.3332591, 119.8965271
-                .setCameraPose( // TODO: Check out offsets
-                        new Position(DistanceUnit.MM, 118.81560, 0, 0, 0),
-                        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 0, 0))
+                .setCameraPose( // TODO: Fix offsets
+                        new Position(DistanceUnit.MM, 0, 0, 0, 0),
+                        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 180, 0))
                 .build();
 
         // aprilTagProcessor.setDecimation(10); // increases fps, but reduces range
 
         visionPortal = new VisionPortal.Builder()
-                .setCamera(hwMap.get(WebcamName.class, "Webcam 1")) // TODO: check name
+                .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
+                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .addProcessor(aprilTagProcessor)
                 .build();
 

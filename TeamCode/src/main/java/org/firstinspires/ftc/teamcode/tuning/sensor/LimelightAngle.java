@@ -92,7 +92,7 @@ public class LimelightAngle extends CommandOpMode {
                 double angle = robot.camera.getMedianWallAngle();
                 telemetryData.addData("Median Wall Angle", angle);
                 try {
-                    telemetryData.addData("tY Offset", robot.camera.getTyOffset(lastKnownPose));
+                    telemetryData.addData("tY Offset", robot.camera.getTxOffset(lastKnownPose));
                     double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
                     double adjustment = robot.camera.cameraInterplut.get(offset);
 

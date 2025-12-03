@@ -110,7 +110,7 @@ public class Constants {
 
     public static double TURRET_MIN_INTEGRAL = 0;
     public static double TURRET_MAX_INTEGRAL = 0.5;
-    public static double TURRET_TY_TOLERANCE = 1.1; // LL TY Degrees
+    public static double TURRET_TX_TOLERANCE = 1.1; // Arducam TX
     public static double TURRET_POS_TOLERANCE = 0.025; // Radians
     public static double TURRET_POS_THRESHOLD = 0.1; // Radians
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
@@ -122,13 +122,11 @@ public class Constants {
     public static double TURRET_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 0.1041 : 0.12;
     public static double DISTANCE_BS = 0.045;
 
-    public static PIDFCoefficients LIMELIGHT_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
-    public static PIDFCoefficients LIMELIGHT_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
-    public static double LIMELIGHT_LARGE_MAX_OUTPUT = 0.4;
-    public static double LIMELIGHT_SMALL_MAX_OUTPUT = 0.25;
-    public static double LIMELIGHT_PID_THRESHOLD = 5; // LL TY Degrees
-    public static boolean USE_LIMELIGHT_MT1 = false;
-    public static double GLOBAL_TARGET_UPDATE_HZ = 10;
+    public static PIDFCoefficients CAMERA_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
+    public static PIDFCoefficients CAMERA_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.04, 0, 0.0023, 0); // Coefficients for radians
+    public static double CAMERA_LARGE_MAX_OUTPUT = 0.4;
+    public static double CAMERA_SMALL_MAX_OUTPUT = 0.25;
+    public static double CAMERA_PID_THRESHOLD = 5; // Arducam TX
 
     public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
     public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet

@@ -67,8 +67,8 @@ public class LimelightTuner extends CommandOpMode {
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.TX_CONTROL, 0))
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
