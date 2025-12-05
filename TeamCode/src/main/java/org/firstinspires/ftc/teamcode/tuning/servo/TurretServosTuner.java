@@ -57,7 +57,7 @@ public class TurretServosTuner extends CommandOpMode {
         robot.turret.turretController.setPIDF(P, I, D, F);
         robot.turret.turretController.setTolerance(POS_TOLERANCE);
         robot.turret.turretController.setMinOutput(MIN_OUTPUT);
-        robot.turret.turretController.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
+        robot.turret.turretController.integrationControl.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
 
         double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);
 

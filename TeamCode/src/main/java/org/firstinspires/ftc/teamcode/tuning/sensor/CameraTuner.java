@@ -11,7 +11,6 @@ import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -22,8 +21,8 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LimelightTuner", group = "Sensor")
-public class LimelightTuner extends CommandOpMode {
+@TeleOp(name = "CameraTuner", group = "Sensor")
+public class CameraTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -32,6 +31,15 @@ public class LimelightTuner extends CommandOpMode {
     private final TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
+
+    public static double P = 0.00;
+    public static double I = 0;
+    public static double D = 0.000;
+    public static double F = 0.000;
+    public static double MIN_OUTPUT = 0.15;
+
+    public static double TARGET_POS = 0.0;
+    public static double POS_TOLERANCE = 0.03;
 
     public static double angleVal = 0;
 
@@ -102,7 +110,6 @@ public class LimelightTuner extends CommandOpMode {
         telemetryData.addData("Robot Full Angle", (
                 robotPose + turretPos - 90.0)
         );
-
         telemetryData.addData("Robot Full Corrected Angle", MathUtils.normalizeDegrees(
                 robotPose + turretPos - 90.0, false)
         );

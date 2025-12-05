@@ -22,8 +22,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.Arrays;
 
 @Config
-@TeleOp(name = "LimelightAngle", group = "Sensor")
-public class LimelightAngle extends CommandOpMode {
+@TeleOp(name = "CameraAngle", group = "Sensor")
+public class CameraAngle extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -78,10 +78,10 @@ public class LimelightAngle extends CommandOpMode {
         if (lastKnownPose == null) {
             telemetryData.addData("bot pose", null);
         } else {
-            Pose2d llPose = robot.camera.getCameraPose();
+            Pose2d cameraPose = robot.camera.getCameraPose();
 
-            if (llPose != null) {
-                robot.camera.updateMedianReadings(llPose);
+            if (cameraPose != null) {
+                robot.camera.updateMedianReadings(cameraPose);
             }
 
             if (robot.camera.medianWallAngle.size() > 10) {

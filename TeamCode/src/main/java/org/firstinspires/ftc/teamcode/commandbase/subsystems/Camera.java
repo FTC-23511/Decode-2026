@@ -13,11 +13,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
+import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -65,7 +67,7 @@ public class Camera {
 //                .setDrawAxes(true)
 //                .setDrawTagOutline(true)
 //                .setDrawCubeProjection(true)
-                .setNumThreads(2)
+                .setNumThreads(3)
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
@@ -75,7 +77,7 @@ public class Camera {
                         new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 180, 0))
                 .build();
 
-        aprilTagProcessor.setDecimation(2); // increases fps, but reduces range
+        aprilTagProcessor.setDecimation(4); // increases fps, but reduces range
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
@@ -86,7 +88,9 @@ public class Camera {
     }
 
     public void initHasMovement() {
-        visionPortal.stopLiveView();
+        if (!Constants.TESTING_OP_MODE) {
+            visionPortal.stopLiveView();
+        }
     }
 
     /**
@@ -97,12 +101,21 @@ public class Camera {
         detections = null;
 
         for (int i = n; i > 0; i--) {
-            detections = aprilTagProcessor.getFreshDetections();
+            detections = aprilTagProcessor.getDetections();
 
             if (detections != null && !detections.isEmpty()) {
+                Pose2d pose = getCameraPose();
+
+                if (pose != null) {
+                    updateMedianReadings(pose);
+                    robot.turret.updateTurretPoseReadings(pose);
+                }
+
+                if (medianWallAngle.size() > 10) {
+                    medianWallAngle.remove(0);
+                }
+
                 break;
-            } else {
-                detections = null;
             }
         }
 
@@ -139,19 +152,43 @@ public class Camera {
 
     public double[] getTargetDegrees() {
         if (detections != null && !detections.isEmpty()) {
-            Point point = cleanDetection(detections).center;
+            AprilTagDetection detection = cleanDetection(detections);
 
-            return new double[]{point.x - 320, point.y - 240};
+            if (detection != null) {
+                return pixelsToDegrees(detection.center);
+            }
         }
 
         return null;
     }
 
+    public static double[] pixelsToDegrees(Point center) {
+        double px = center.x;
+        double py = center.y;
+
+        double xNorm = (px - 317.108) / 549.651;
+        double yNorm = (py - 236.644) / 549.651;
+
+        double horizontalAngle = Math.toDegrees(Math.atan(xNorm));
+        double verticalAngle = Math.toDegrees(Math.atan(yNorm));
+
+        return new double[]{horizontalAngle, verticalAngle};
+    }
+
     public Pose2d getCameraPose() {
         if (detections != null && !detections.isEmpty()) {
-            AprilTagPoseFtc ftcPose = cleanDetection(detections).ftcPose;
+            AprilTagDetection detection = cleanDetection(detections);
 
-            return new Pose2d(ftcPose.x, ftcPose.y, ftcPose.yaw);
+            if (detection != null) {
+                Pose3D robotPose = detection.robotPose;
+
+                if (robotPose != null) {
+                    return new Pose2d(robotPose.getPosition().y,
+                            -robotPose.getPosition().x,
+                            robot.drive.getPose().getHeading()
+                    );
+                }
+            }
         }
 
         return null;
@@ -214,8 +251,8 @@ public class Camera {
         );
     }
 
-    public void updateMedianReadings(Pose2d llPose) {
-        medianWallAngle.add(robot.turret.angleToWall(llPose));
+    public void updateMedianReadings(Pose2d cameraPose) {
+        medianWallAngle.add(robot.turret.angleToWall(cameraPose));
     }
 
     public void closeCamera() {

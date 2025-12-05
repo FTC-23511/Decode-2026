@@ -83,8 +83,8 @@ public class Turret extends SubsystemBase {
                 break;
             case TX_CONTROL:
                 turretController.setTolerance(TURRET_TX_TOLERANCE, Double.POSITIVE_INFINITY);
-                turretController.setCoefficients(CAMERA_LARGE_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(CAMERA_LARGE_MAX_OUTPUT);
+                turretController.setCoefficients(CAMERA_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(CAMERA_MAX_OUTPUT);
 
                 turretController.setSetPoint(value);
                 break;
@@ -165,23 +165,22 @@ public class Turret extends SubsystemBase {
                 break;
             case TX_CONTROL:
                 robot.profiler.start("Turret Read");
-                robot.camera.updateCameraResult(5);
+                robot.camera.updateCameraResult(3);
                 robot.profiler.end("Turret Read");
 
                 double[] targetDegrees = robot.camera.getTargetDegrees();
+                Pose2d pose2d = robot.camera.getCameraPose();
+
+                if (pose2d != null) {
+                    // only use drive pose estimate if we aren't in a command using the turret
+                    if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
+                        updateTurretPose(pose2d);
+                        turretPoseEstimates.clear();
+                    }
+                }
 
                 if (targetDegrees != null) {
                     double tx = targetDegrees[0];
-                    double error = tx - turretController.getSetPoint();
-
-                    if (Math.abs(error) > CAMERA_PID_THRESHOLD) {
-                        turretController.setCoefficients(CAMERA_LARGE_PIDF_COEFFICIENTS);
-                        turretController.setMaxOutput(CAMERA_LARGE_MAX_OUTPUT);
-                    } else {
-                        turretController.setCoefficients(CAMERA_SMALL_PIDF_COEFFICIENTS);
-                        turretController.setMaxOutput(CAMERA_SMALL_MAX_OUTPUT);
-                    }
-
                     power = turretController.calculate(tx);
 
                     robot.profiler.start("Turret Write");
@@ -229,8 +228,9 @@ public class Turret extends SubsystemBase {
 
         // Update the turretPose variable with the averaged values
         Pose2d newTurretPose = new Pose2d(avgX, avgY, avgHeading);
-        if (turretPose.minus(newTurretPose).getTranslation().getNorm() > 2
-            || turretPose.minus(newTurretPose).getRotation().getAngle(AngleUnit.RADIANS) > 0.25) {
+        if (turretPose == null
+            || (turretPose.minus(newTurretPose).getTranslation().getNorm() > 2
+                || turretPose.minus(newTurretPose).getRotation().getAngle(AngleUnit.RADIANS) > 0.25)) {
             robot.turret.updateTurretPose(newTurretPose);
         }
         timer.reset();

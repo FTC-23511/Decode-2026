@@ -4,21 +4,24 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
 @TeleOp(name = "ArducamTest", group = "Sensor")
@@ -28,9 +31,7 @@ public class ArducamTest extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    public static double ROBOT_HEADING = 0;
-
-    public static boolean USE_PINPOINT_HEADING = false;
+    public static double angleVal = 0.0;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -38,8 +39,13 @@ public class ArducamTest extends CommandOpMode {
 
     @Override
     public void initialize() {
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        FtcDashboard.getInstance().startCameraStream(camera, 0);
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        Constants.TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -50,7 +56,27 @@ public class ArducamTest extends CommandOpMode {
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
 
-        telemetry.setMsTransmissionInterval(11);
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> angleVal += 0.25),
+                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, angleVal))
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> angleVal -= 0.25),
+                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, angleVal))
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.TX_CONTROL, 0))
+        );
     }
 
     @Override
@@ -61,23 +87,28 @@ public class ArducamTest extends CommandOpMode {
             robot.initHasMovement();
             timer = new ElapsedTime();
         }
+        if (Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
+            robot.turret.turretController.setCoefficients(Constants.CAMERA_PIDF_COEFFICIENTS);
+        }
 
-        robot.camera.updateCameraResult(3);
         telemetryData.addData("Loop Time", timer.milliseconds());
-        robot.camera.getCameraTelemetry(telemetry);
+        if (!Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
+            robot.camera.updateCameraResult(3);
+            robot.camera.getCameraTelemetry(telemetry);
+        }
+
         Pose2d cameraPose = robot.camera.getCameraPose();
         double[] targetDegrees = robot.camera.getTargetDegrees();
 
         telemetryData.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
         telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+        telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
         telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         CommandScheduler.getInstance().run();
-        if (robot.camera.getCameraPose() != null) {
-            telemetryData.update();
-        }
+        telemetryData.update();
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
