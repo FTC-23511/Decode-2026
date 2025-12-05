@@ -5,18 +5,28 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 
+import android.util.Size;
+
 import androidx.annotation.NonNull;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
+import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -25,9 +35,12 @@ import java.util.Collections;
 
 public class Camera {
     private final Robot robot = Robot.getInstance();
+    public boolean enabled = false;
     public static Motif motifState = Motif.NOT_FOUND;
     public ArrayList<AprilTagDetection> detections = null;
     public ArrayList<Double> medianWallAngle = new ArrayList<>();
+    public AprilTagProcessor aprilTagProcessor;
+    public VisionPortal visionPortal;
 
     public final InterpLUT cameraInterplut = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
@@ -41,8 +54,39 @@ public class Camera {
         PPG
     }
 
-    public Camera() {
+    public Camera(HardwareMap hwMap) {
         cameraInterplut.createLUT();
+        init(hwMap);
+    }
+
+    public void init(HardwareMap hwMap) {
+        aprilTagProcessor = new AprilTagProcessor.Builder()
+                .setDrawTagID(false)
+//                .setDrawAxes(true)
+//                .setDrawTagOutline(true)
+//                .setDrawCubeProjection(true)
+                .setNumThreads(2)
+                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
+                .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
+                .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) // 640x480: 549.651, 549.651, 317.108, 236.644; 320x240: 281.5573273, 281.366942, 156.3332591, 119.8965271
+                .setCameraPose( // TODO: Fix offsets
+                        new Position(DistanceUnit.MM, 0, 0, 0, 0),
+                        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 180, 0))
+                .build();
+
+        aprilTagProcessor.setDecimation(2); // increases fps, but reduces range
+
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                .addProcessor(aprilTagProcessor)
+                .build();
+    }
+
+    public void initHasMovement() {
+        visionPortal.stopLiveView();
     }
 
     /**
@@ -53,7 +97,7 @@ public class Camera {
         detections = null;
 
         for (int i = n; i > 0; i--) {
-            detections = robot.aprilTagProcessor.getFreshDetections();
+            detections = aprilTagProcessor.getFreshDetections();
 
             if (detections != null && !detections.isEmpty()) {
                 break;
@@ -175,8 +219,8 @@ public class Camera {
     }
 
     public void closeCamera() {
-        if (robot.visionPortal != null) {
-            robot.visionPortal.close();
+        if (visionPortal != null) {
+            visionPortal.close();
         }
     }
 }

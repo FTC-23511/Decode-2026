@@ -92,8 +92,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public ServoEx rampServo;
 
     public Limelight3A limelight;
-    public AprilTagProcessor aprilTagProcessor;
-    public VisionPortal visionPortal;
 
     public GoBildaPinpointDriver pinpoint;
 //    public IMU imu;
@@ -214,30 +212,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         limelight.pipelineSwitch(4);
         limelight.start();
 
-        aprilTagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawTagID(false)
-                .setDrawTagOutline(true)
-                .setDrawCubeProjection(true)
-                .setNumThreads(THREADS_DEFAULT)
-                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
-                .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
-                .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) // 640x480: 549.651, 549.651, 317.108, 236.644; 320x240: 281.5573273, 281.366942, 156.3332591, 119.8965271
-                .setCameraPose( // TODO: Fix offsets
-                        new Position(DistanceUnit.MM, 0, 0, 0, 0),
-                        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 180, 0))
-                .build();
-
-        // aprilTagProcessor.setDecimation(10); // increases fps, but reduces range
-
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .addProcessor(aprilTagProcessor)
-                .build();
-
         // Subsystems
         drive = new Drive();
         intake = new Intake();
@@ -245,7 +219,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turret = new Turret();
 
         // vision
-        camera = new Camera();
+        camera = new Camera(hwMap);
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
@@ -273,6 +247,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intake.init();
         launcher.init();
         turret.init();
+        camera.initHasMovement();
     }
     
     public double getVoltage() {
