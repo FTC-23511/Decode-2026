@@ -38,7 +38,7 @@ public class BasicPhotonTest extends LinearOpMode {
             PhotonCore.enable();
         }
 
-        MotorEx intakeMotor = new MotorEx(hardwareMap, "intakeMotor").setCachingTolerance(INTAKE_MOTOR_CACHE_TOL);
+        MotorEx intakeMotor = new MotorEx(hardwareMap, "frontIntakeMotor").setCachingTolerance(INTAKE_MOTOR_CACHE_TOL);
         CRServoEx swervo = new CRServoEx(hardwareMap, "BR").setCachingTolerance(SWERVO_CACHE_TOL);
 
         waitForStart();

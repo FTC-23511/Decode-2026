@@ -106,11 +106,11 @@ public class Intake extends SubsystemBase {
                     setIntake(MotorState.STOP);
                 }
 
-                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
-                    intakeJammed = true;
-                    intakeTimer.reset();
-                    setIntake(MotorState.REVERSE);
-                }
+//                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
+//                    intakeJammed = true;
+//                    intakeTimer.reset();
+//                    setIntake(MotorState.REVERSE);
+//                }
                 break;
             case REVERSE:
                 if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
@@ -133,8 +133,9 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
-               && !intakeJammed;
+        return false;
+//        return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
+//               && !intakeJammed;
     }
 
     /*
@@ -160,7 +161,7 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        updateDistanceSensors();
+//        updateDistanceSensors();
         updateIntake();
     }
 

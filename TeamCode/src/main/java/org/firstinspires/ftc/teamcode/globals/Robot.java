@@ -203,6 +203,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
         pinpoint.resetPosAndIMU();
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
+        pinpoint.setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION);
 
         frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
         backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
@@ -251,7 +252,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
     
     public double getVoltage() {
-        // TODO: fix getVoltage eventually
+        return 12;
+        // this is chopped for loop times
+        /*
         if (voltageTimer == null) {
             cachedVoltage = voltageSensor.getVoltage();
         } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
@@ -261,6 +264,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             cachedVoltage = 12;
         }
         return cachedVoltage;
+         */
     }
 
     public void exportProfiler(File file) {
