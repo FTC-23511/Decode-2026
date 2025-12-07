@@ -57,7 +57,7 @@ public class FullAim extends CommandBase {
         // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
         errorsAngleVelocity = Launcher.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
         robot.launcher.setFlywheel(errorsAngleVelocity[0], true);
-        robot.launcher.setHood(MIN_LL_HOOD_ANGLE); // Put hood down to be able to see the AprilTags
+        robot.launcher.setHood(errorsAngleVelocity[1]);
         timer.reset();
         aimIndex = 1;
     }
@@ -76,18 +76,21 @@ public class FullAim extends CommandBase {
         }
 
         RobotLog.aa("aimIndex", String.valueOf(aimIndex));
-//        robot.turret.updateLLResult(3);
+        robot.camera.updateCameraResult(3);
 
         if (aimIndex == 1) {
-//            if (robot.turret.getLimeLightTargetDegrees() != null) {
+            if (robot.camera.getTargetDegrees() != null) {
+                robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(robot.camera.getCameraPose()));
                 aimIndex = 2;
-//            } else if (robot.turret.readyToLaunch() && timer.milliseconds() >= 2000) {
+                timer.reset();
+            } else if (robot.turret.readyToLaunch() && timer.milliseconds() >= 2000) {
                 // TODO: add code to deal with case where if we don't see ATag even if turret is aimed correctly (wiggle or do a full spin or time out)
                 // NOTE: implementation should only do extreme measures of rotating if its consistently unable to find an ATag and not a one off loop
-//            }
+            }
         }
 
         if (aimIndex == 2) {
+            robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(robot.camera.getCameraPose()));
             if (robot.turret.readyToLaunch()) {
 //          robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
                 errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch - DISTANCE_BS); // TODO: REPLACE BS -0.1
@@ -98,9 +101,6 @@ public class FullAim extends CommandBase {
                     robot.launcher.setHood(errorsAngleVelocity[1]);
                 }
                 aimIndex = 3;
-            } else {
-                timer.reset();
-                aimIndex = 1;
             }
         }
     }
