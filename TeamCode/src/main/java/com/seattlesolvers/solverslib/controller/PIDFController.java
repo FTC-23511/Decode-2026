@@ -38,13 +38,13 @@ public class PIDFController extends Controller {
      * Internal configuration class to deal with integration build-up. 
      * Has configurations for setting total integration bounds, decaying (if integration term becomes opposite of error), and {@link IntegrationBehavior}.
      */
-    public class IntegrationControl {
+    public static class IntegrationControl {
         IntegrationBehavior integrationBehavior;
         double decayFactor;
         double minIntegral;
         double maxIntegral;
 
-        IntegrationControl(IntegrationBehavior integrationBehavior, double decayFactor, double minIntegral, double maxIntegral) {
+        public IntegrationControl(IntegrationBehavior integrationBehavior, double decayFactor, double minIntegral, double maxIntegral) {
             this.integrationBehavior = integrationBehavior;
             this.decayFactor = decayFactor;
             this.minIntegral = minIntegral;

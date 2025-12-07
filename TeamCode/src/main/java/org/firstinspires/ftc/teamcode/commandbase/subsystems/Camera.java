@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.posesToAngle;
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.CAMERA_DECIMATION;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 
 import android.util.Size;
@@ -77,7 +78,7 @@ public class Camera {
                         new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 180, 0))
                 .build();
 
-        aprilTagProcessor.setDecimation(4); // increases fps, but reduces range
+        aprilTagProcessor.setDecimation(CAMERA_DECIMATION); // increases fps, but reduces range
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))

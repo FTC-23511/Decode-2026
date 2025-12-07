@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.globals;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -111,20 +112,24 @@ public class Constants {
 
     public static double TURRET_MIN_INTEGRAL = 0;
     public static double TURRET_MAX_INTEGRAL = 0.5;
-    public static double TURRET_TX_TOLERANCE = 1.1; // Arducam TX
+    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
+    public static double TURRET_INTEGRATION_DECAY = -0.1;
     public static double TURRET_POS_TOLERANCE = 0.025; // Radians
     public static double TURRET_POS_THRESHOLD = 0.1; // Radians
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
     public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
-    public static double TURRET_MIN_OUTPUT = 0.0; // Power
+    public static double TURRET_MIN_OUTPUT = -0.15; // Power
+    public static double TURRET_OPEN_F = -0.0841;
     public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
     public static double TURRET_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 0.1041 : 0.12;
     public static double DISTANCE_BS = 0.045;
 
-    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.02, 0, 0, 0); // Coefficients for radians
-    public static double CAMERA_MAX_OUTPUT = 0.4;
+    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(-0.0367, 0, -0.0012, 0); // Coefficients for radians
+    public static double CAMERA_TX_TOLERANCE = 2.0; // Arducam TX
+    public static double CAMERA_MAX_OUTPUT = 1.0;
+    public static float CAMERA_DECIMATION = 2;
 
     public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
     public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.tuning.sensor;
 
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -17,11 +18,15 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvWebcam;
+
+import java.util.concurrent.TimeUnit;
 
 @Config
 @TeleOp(name = "ArducamTest", group = "Sensor")
@@ -37,12 +42,14 @@ public class ArducamTest extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
+    private ExposureControl exposureControl;
+    private GainControl gainControl;
+
     @Override
     public void initialize() {
+//        exposureControl.setMode(ExposureControl.Mode.Manual);
+//        exposureControl.setExposure(15, TimeUnit.MILLISECONDS);
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvWebcam camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard.getInstance().startCameraStream(camera, 0);
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         Constants.TESTING_OP_MODE = true;
@@ -52,6 +59,7 @@ public class ArducamTest extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
 
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
@@ -81,21 +89,21 @@ public class ArducamTest extends CommandOpMode {
 
     @Override
     public void run() {
+        if (!Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
+            robot.camera.updateCameraResult(3);
+            robot.camera.getCameraTelemetry(telemetry);
+        }
+
         // Keep all the has movement init for until when TeleOp starts
         // This is like the init but when the program is actually started
         if (timer == null) {
             robot.initHasMovement();
             timer = new ElapsedTime();
-        }
-        if (Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
-            robot.turret.turretController.setCoefficients(Constants.CAMERA_PIDF_COEFFICIENTS);
+            exposureControl = robot.camera.visionPortal.getCameraControl(ExposureControl.class);
+            gainControl = robot.camera.visionPortal.getCameraControl(GainControl.class);
         }
 
         telemetryData.addData("Loop Time", timer.milliseconds());
-        if (!Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
-            robot.camera.updateCameraResult(3);
-            robot.camera.getCameraTelemetry(telemetry);
-        }
 
         Pose2d cameraPose = robot.camera.getCameraPose();
         double[] targetDegrees = robot.camera.getTargetDegrees();
@@ -104,6 +112,8 @@ public class ArducamTest extends CommandOpMode {
         telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
         telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
         telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
+        telemetryData.addData("exposureControl", exposureControl.isExposureSupported());
+        telemetryData.addData("gainControl", gainControl.getGain());
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

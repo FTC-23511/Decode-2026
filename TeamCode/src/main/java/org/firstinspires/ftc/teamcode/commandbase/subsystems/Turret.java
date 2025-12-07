@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
@@ -38,10 +39,11 @@ public class Turret extends SubsystemBase {
     public static TurretState turretState = ANGLE_CONTROL;
     public SquIDFController turretController = new SquIDFController(TURRET_PIDF_COEFFICIENTS);
 
-
     public Turret() {
-        turretController.setMinOutput(TURRET_MIN_OUTPUT);
+        turretController.setOpenF(TURRET_OPEN_F);
         turretController.setTolerance(TURRET_POS_TOLERANCE);
+        turretController.setMinOutput(0);
+        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
     }
 
     public void init() {
@@ -56,17 +58,20 @@ public class Turret extends SubsystemBase {
         }
         return turretPose;
     }
+
     public void updateTurretPose(Pose2d turretPose) {
         this.turretPose = turretPose;
     }
 
     public void setTurret(TurretState turretState, double value) {
+        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+
         switch (turretState) {
             case ANGLE_CONTROL:
                 turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
                 turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
                 turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                turretController.integrationControl.setIntegrationBounds(TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL);
+                turretController.setMinOutput(0);
 
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
@@ -74,7 +79,7 @@ public class Turret extends SubsystemBase {
                 turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
                 turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
                 turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                turretController.integrationControl.setIntegrationBounds(TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL);
+                turretController.setMinOutput(0);
 
                 getTurretPose(); // fixes goofy jinu
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
@@ -82,9 +87,10 @@ public class Turret extends SubsystemBase {
 
                 break;
             case TX_CONTROL:
-                turretController.setTolerance(TURRET_TX_TOLERANCE, Double.POSITIVE_INFINITY);
+                turretController.setTolerance(CAMERA_TX_TOLERANCE, Double.POSITIVE_INFINITY);
                 turretController.setCoefficients(CAMERA_PIDF_COEFFICIENTS);
                 turretController.setMaxOutput(CAMERA_MAX_OUTPUT);
+                turretController.setMinOutput(TURRET_MIN_OUTPUT);
 
                 turretController.setSetPoint(value);
                 break;
@@ -105,9 +111,16 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
+        robot.turret.turretController.setOpenF(TURRET_OPEN_F);
+        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+
         double power;
         switch (turretState) {
             case ANGLE_CONTROL:
+                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
+                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
+
                 robot.profiler.start("Turret Read");
                 power = turretController.calculate(getPosition());
                 robot.profiler.end("Turret Read");
@@ -129,6 +142,10 @@ public class Turret extends SubsystemBase {
 
                 break;
             case GOAL_LOCK_CONTROL:
+                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
+                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
+
                 robot.profiler.start("Turret Read");
                 // only use drive pose estimate if we aren't in a command using the turret
                 if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
@@ -167,6 +184,10 @@ public class Turret extends SubsystemBase {
                 robot.profiler.start("Turret Read");
                 robot.camera.updateCameraResult(3);
                 robot.profiler.end("Turret Read");
+
+                turretController.setTolerance(CAMERA_TX_TOLERANCE, Double.POSITIVE_INFINITY);
+                turretController.setCoefficients(CAMERA_PIDF_COEFFICIENTS);
+                turretController.setMaxOutput(CAMERA_MAX_OUTPUT);
 
                 double[] targetDegrees = robot.camera.getTargetDegrees();
                 Pose2d pose2d = robot.camera.getCameraPose();
