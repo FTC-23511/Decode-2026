@@ -47,9 +47,6 @@ public class ArducamTest extends CommandOpMode {
 
     @Override
     public void initialize() {
-//        exposureControl.setMode(ExposureControl.Mode.Manual);
-//        exposureControl.setExposure(15, TimeUnit.MILLISECONDS);
-
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         Constants.TESTING_OP_MODE = true;
@@ -100,7 +97,11 @@ public class ArducamTest extends CommandOpMode {
             robot.initHasMovement();
             timer = new ElapsedTime();
             exposureControl = robot.camera.visionPortal.getCameraControl(ExposureControl.class);
+            exposureControl.setMode(ExposureControl.Mode.Manual);
+            exposureControl.setExposure(15, TimeUnit.MILLISECONDS);
+
             gainControl = robot.camera.visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(248);
         }
 
         telemetryData.addData("Loop Time", timer.milliseconds());
@@ -114,6 +115,8 @@ public class ArducamTest extends CommandOpMode {
         telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
         telemetryData.addData("exposureControl", exposureControl.isExposureSupported());
         telemetryData.addData("gainControl", gainControl.getGain());
+        telemetryData.addData("min gainControl", gainControl.getMinGain());
+        telemetryData.addData("max gainControl", gainControl.getMaxGain());
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
