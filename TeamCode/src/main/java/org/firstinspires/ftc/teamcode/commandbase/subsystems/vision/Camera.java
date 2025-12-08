@@ -27,8 +27,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +70,7 @@ public class Camera {
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
+                .setRegionOfInterest(new Rect(50, 50,100, 100))
                 .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) // 640x480: 549.651, 549.651, 317.108, 236.644; 320x240: 281.5573273, 281.366942, 156.3332591, 119.8965271
                 .setCameraPose( // TODO: Fix offsets
                         new Position(DistanceUnit.MM, 0, 0, 0, 0),
@@ -77,6 +78,8 @@ public class Camera {
                 .build();
 
         aprilTagProcessor.setDecimation(CAMERA_DECIMATION); // increases fps, but reduces range
+
+//        aprilTagProcessor.setRegionOfInterest(new Rect(50, 50,100, 100));
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))

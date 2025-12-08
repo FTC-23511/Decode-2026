@@ -323,7 +323,7 @@ public class AprilTagProcessorImpl extends AprilTagProcessor
                 Point[] cornerPts = new Point[4];
                 for (int p = 0; p < 4; p++)
                 {
-                    // <--- CRITICAL: Apply offset here so Pose calculations use Global coordinates
+                    // CRITICAL: Apply offset here so Pose calculations use Global coordinates
                     cornerPts[p] = new Point(corners[p][0] + offsetX, corners[p][1] + offsetY);
                 }
 
