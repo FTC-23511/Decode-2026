@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.commandbase.subsystems;
+package org.firstinspires.ftc.teamcode.commandbase.subsystems.vision;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.posesToAngle;
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
-import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -28,7 +27,6 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Point;
 
