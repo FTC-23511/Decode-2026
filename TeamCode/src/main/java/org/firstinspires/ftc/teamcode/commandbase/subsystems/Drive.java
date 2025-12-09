@@ -24,6 +24,7 @@ public class Drive extends SubsystemBase {
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
     private Pose2d lastPose;
+    private boolean poseUpdated = false;
 
     public Drive() {
         swerve = new CoaxialSwerveDrivetrain(
