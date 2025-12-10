@@ -142,7 +142,7 @@ public class InterpLUT {
         // If safeMode is enabled/true (false by default), returns the first/last value in the list
         if (input <= mX.get(0)) {
             if (safeMode) {
-                return mY.getFirst();
+                return mY.get(0);
             } else {
                 throw new IllegalArgumentException("User requested value outside of bounds of LUT. Bounds are: " + mX.get(0).toString() + " to " + mX.get(n - 1).toString() + ". Value provided was: " + input);
             }
@@ -150,7 +150,7 @@ public class InterpLUT {
 
         if (input >= mX.get(n - 1)) {
             if (safeMode) {
-                return mY.getLast();
+                return mY.get(n - 1);
             } else {
                 throw new IllegalArgumentException("User requested value outside of bounds of LUT. Bounds are: " + mX.get(0).toString() + " to " + mX.get(n - 1).toString() + ". Value provided was: " + input);
             }

@@ -249,13 +249,14 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("LLResult Null", robot.camera.detections == null);
+        telemetryData.addData("Camera Result Null", robot.camera.detections == null);
         try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
         telemetryData.addData("Wall Angle", robot.camera.getMedianWallAngle());
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
+        telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
 
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);

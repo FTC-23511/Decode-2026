@@ -46,10 +46,12 @@ public class Intake extends SubsystemBase {
     }
 
     public void init() {
-        if (OP_MODE_TYPE == OpModeType.AUTO) {
-            setPivot(PivotState.HOLD);
-        } else {
-            setPivot(PivotState.FORWARD);
+        if (!TESTING_OP_MODE) {
+            if (OP_MODE_TYPE == OpModeType.AUTO) {
+                setPivot(PivotState.HOLD);
+            } else {
+                setPivot(PivotState.FORWARD);
+            }
         }
     }
 

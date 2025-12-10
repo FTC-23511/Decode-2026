@@ -23,7 +23,7 @@ public class FullAim extends CommandBase {
     private double aimIndex = 0;
     /**
      * 0 = initial state
-     * 1 = moving to initial state estimates for turret / launcher based off pinpoint, lasts until limelight sees ATag or timeout
+     * 1 = moving to initial state estimates for turret / launcher based off pinpoint, lasts until camera sees ATag or timeout
      * 2 = drivetrain stops and turret compensates for remaining drivetrain error, lasts until turret is at target
      * 3 = just waiting for hood/flywheel to reach final set states
      */
@@ -79,7 +79,9 @@ public class FullAim extends CommandBase {
         robot.camera.updateCameraResult(3);
 
         if (aimIndex == 1) {
-            if (robot.camera.getTargetDegrees() != null) {
+            Pose2d cameraPose = robot.camera.getCameraPose();
+
+            if (cameraPose != null) {
                 robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(robot.camera.getCameraPose()));
                 aimIndex = 2;
                 timer.reset();
@@ -91,8 +93,9 @@ public class FullAim extends CommandBase {
 
         if (aimIndex == 2) {
             robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(robot.camera.getCameraPose()));
+
             if (robot.turret.readyToLaunch()) {
-//          robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
+                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
                 errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch - DISTANCE_BS); // TODO: REPLACE BS -0.1
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;
@@ -122,6 +125,6 @@ public class FullAim extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return impossible || (aimIndex == 3 && robot.turret.readyToLaunch() && robot.launcher.flywheelReady());
+        return impossible || (aimIndex == 3 && robot.launcher.flywheelReady());
     }
 }

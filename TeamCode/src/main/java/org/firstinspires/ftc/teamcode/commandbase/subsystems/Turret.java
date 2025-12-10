@@ -221,8 +221,10 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return (turretController.atSetPoint() && (turretState.equals(ANGLE_CONTROL) || turretState.equals(GOAL_LOCK_CONTROL)))
-                || (robot.camera.detections != null && turretController.atSetPoint() && turretState.equals(TX_CONTROL));
+        return turretController.atSetPoint() &&
+                ((turretState.equals(ANGLE_CONTROL) || turretState.equals(GOAL_LOCK_CONTROL))
+                  || (robot.camera.detections != null && turretController.atSetPoint() && turretState.equals(TX_CONTROL))
+                );
     }
 
     public void updateTurretPoseReadings(Pose2d llPose) {

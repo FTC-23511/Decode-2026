@@ -54,9 +54,9 @@ public class Camera {
             true
     );
 
-    public final InterpLUT roiHeightLUT = new InterpLUT(
-            Arrays.asList(0.0,   144.0), // input: distance between robot and AprilTag (inches)
-            Arrays.asList(-12.0, 100.0), // output: camera region of interest height
+    public final InterpLUT roiYOffsetLUT = new InterpLUT(
+            Arrays.asList(0.0,  28.0,   39.0,  56.0, 67.0,  80.616, 99.31,  112.00, 120.0, 136.0, 150.0), // input: distance between robot and AprilTag (inches)
+            Arrays.asList(240.0, 230.0, 129.8, 81.0, 67.0,  45.0,   33.2,   25.0,   22.0,  20.0,   20.0), // output: camera region of interest Y Offset
             true
     );
 
@@ -69,7 +69,7 @@ public class Camera {
 
     public Camera(HardwareMap hwMap) {
         goalAdjustmentLUT.createLUT();
-        roiHeightLUT.createLUT();
+        roiYOffsetLUT.createLUT();
         init(hwMap);
     }
 
@@ -109,8 +109,8 @@ public class Camera {
 
             GainControl gainControl = robot.camera.visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(100);
-        } catch (Exception ignored) {
-            Log.wtf("WHAT A TERRIBLE FAILURE.", "Camera Exposure/Gain Control got fried");
+        } catch (Exception e) {
+            Log.wtf("WHAT A TERRIBLE FAILURE.", "Camera Exposure/Gain Control got fried \n" + e);
         }
     }
 
@@ -151,7 +151,7 @@ public class Camera {
         if (robotPose == null) return;
 
         // 1. Get Distance (Inches)
-        double distance = GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
+        double distance = APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
 
         // 2. Define Keyframes (Using Top-Left Coordinates)
 
@@ -166,7 +166,8 @@ public class Camera {
         double hFar = 96.0;       // Height is 96 (Top Strip)
 
         // 3. Calculate Linear Interpolation
-        int finalY = (int) mapEquation(distance, distClose, yClose, distFar, yFar);
+//        int finalY = (int) mapEquation(distance, distClose, yClose, distFar, yFar);
+        int finalY = (int) roiYOffsetLUT.get(distance);
         int finalH = (int) mapEquation(distance, distClose, hClose, distFar, hFar);
 
         cameraY = finalY;
