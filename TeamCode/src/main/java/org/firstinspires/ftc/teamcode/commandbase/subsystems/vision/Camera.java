@@ -1,11 +1,9 @@
-package org.firstinspires.ftc.teamcode.commandbase.subsystems;
+package org.firstinspires.ftc.teamcode.commandbase.subsystems.vision;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.posesToAngle;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.CAMERA_DECIMATION;
-import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import android.util.Log;
 import android.util.Size;
 
 import androidx.annotation.NonNull;
@@ -14,10 +12,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
-import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -28,13 +27,13 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 public class Camera {
     private final Robot robot = Robot.getInstance();
@@ -43,11 +42,22 @@ public class Camera {
     public ArrayList<AprilTagDetection> detections = null;
     public ArrayList<Double> medianWallAngle = new ArrayList<>();
     public AprilTagProcessor aprilTagProcessor;
+    public RectProcessor rectProcessor;
     public VisionPortal visionPortal;
 
-    public final InterpLUT cameraInterplut = new InterpLUT(
+    public double cameraY = -1;
+    public double cameraH = -1;
+
+    public final InterpLUT goalAdjustmentLUT = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 7.41, 14.14, 14.14) // output: new goal pos (inches)
+            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 7.41, 14.14, 14.14), // output: new goal pos (inches)
+            true
+    );
+
+    public final InterpLUT roiHeightLUT = new InterpLUT(
+            Arrays.asList(0.0,   144.0), // input: distance between robot and AprilTag (inches)
+            Arrays.asList(-12.0, 100.0), // output: camera region of interest height
+            true
     );
 
     public enum Motif {
@@ -58,7 +68,8 @@ public class Camera {
     }
 
     public Camera(HardwareMap hwMap) {
-        cameraInterplut.createLUT();
+        goalAdjustmentLUT.createLUT();
+        roiHeightLUT.createLUT();
         init(hwMap);
     }
 
@@ -72,20 +83,35 @@ public class Camera {
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
+                .setRegionOfInterest(new Rect(0, 0,640, 480))
                 .setLensIntrinsics(549.651, 549.651, 317.108, 236.644) // 640x480: 549.651, 549.651, 317.108, 236.644; 320x240: 281.5573273, 281.366942, 156.3332591, 119.8965271
-                .setCameraPose( // TODO: Fix offsets
+                .setCameraPose( // TODO: Fix offsets (forward, which I think is x)
                         new Position(DistanceUnit.MM, 0, 0, 0, 0),
                         new YawPitchRollAngles(AngleUnit.DEGREES, 0, 64.506770, 180, 0))
                 .build();
 
-        aprilTagProcessor.setDecimation(CAMERA_DECIMATION); // increases fps, but reduces range
+        aprilTagProcessor.setDecimation(CAMERA_CLOSE_DECIMATION); // increases fps, but reduces range
+
+        rectProcessor = new RectProcessor();
+        rectProcessor.setRoi(new Rect(0, 0, 640, 480));
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .addProcessor(aprilTagProcessor)
+                .addProcessor(rectProcessor)
                 .build();
+        try {
+            ExposureControl exposureControl = robot.camera.visionPortal.getCameraControl(ExposureControl.class);
+            exposureControl.setMode(ExposureControl.Mode.Manual);
+            exposureControl.setExposure(15, TimeUnit.MILLISECONDS);
+
+            GainControl gainControl = robot.camera.visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(100);
+        } catch (Exception ignored) {
+            Log.wtf("WHAT A TERRIBLE FAILURE.", "Camera Exposure/Gain Control got fried");
+        }
     }
 
     public void initHasMovement() {
@@ -100,7 +126,7 @@ public class Camera {
      */
     public void updateCameraResult(int n) {
         detections = null;
-
+        updateROI(robot.drive.getPose());
         for (int i = n; i > 0; i--) {
             detections = aprilTagProcessor.getDetections();
 
@@ -119,7 +145,68 @@ public class Camera {
                 break;
             }
         }
+    }
 
+    public void updateROI(Pose2d robotPose) {
+        if (robotPose == null) return;
+
+        // 1. Get Distance (Inches)
+        double distance = GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
+
+        // 2. Define Keyframes (Using Top-Left Coordinates)
+
+        // CLOSE (30 inches) -> Bottom Half
+        double distClose = 30.0;
+        double yClose = 240.0;    // Starts at pixel 240 (Middle)
+        double hClose = 240.0;    // Height is 240 (Middle to Bottom)
+
+        // FAR (144 inches) -> Top Strip
+        double distFar = 144.0;
+        double yFar = 0.0;        // Starts at pixel 0 (Top Edge)
+        double hFar = 96.0;       // Height is 96 (Top Strip)
+
+        // 3. Calculate Linear Interpolation
+        int finalY = (int) mapEquation(distance, distClose, yClose, distFar, yFar);
+        int finalH = (int) mapEquation(distance, distClose, hClose, distFar, hFar);
+
+        cameraY = finalY;
+        cameraH = finalH;
+
+        // 4. Create the Rect (Standard 0-640 coords)
+        // x = 0 (Left Edge)
+        // width = 640 (Full Width)
+        Rect calculatedRoi = new Rect(0, finalY, 640, finalH);
+
+        // 5. Update BOTH processors
+        aprilTagProcessor.setRegionOfInterest(calculatedRoi);
+        rectProcessor.setRoi(calculatedRoi);
+    }
+
+    /**
+     * Standard Linear Equation Solver (Point-Slope Form)
+     * Calculates y based on x, given two known points (x1,y1) and (x2,y2).
+     */
+    private double mapEquation(double x, double x1, double y1, double x2, double y2) {
+        // 1. Clamp input to prevent the box from flying off screen
+        // If we are closer than the 'Close' point, just stay at the 'Close' settings.
+        if (x <= x1) return y1;
+        if (x >= x2) return y2;
+
+        // 2. Calculate Slope (m)
+        double m = (y2 - y1) / (x2 - x1);
+
+        // 3. Calculate Result (Point-Slope formula: y - y1 = m(x - x1))
+        return y1 + m * (x - x1);
+    }
+
+    public void updateDecimation(double distance) {
+        if (distance < DECIMATION_THRESHOLD && !USE_CLOSE_DECIMATION) {
+            aprilTagProcessor.setDecimation(CAMERA_CLOSE_DECIMATION);
+            USE_CLOSE_DECIMATION = true;
+        } else if (USE_CLOSE_DECIMATION) {
+            aprilTagProcessor.setDecimation(CAMERA_FAR_DECIMATION);
+            USE_CLOSE_DECIMATION = false;
+        }
     }
 
     public double txOffset(@NonNull Pose2d robotPose, Pose2d goalPose) {
@@ -136,7 +223,7 @@ public class Camera {
 
         double offset = -getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = cameraInterplut.get(offset);
+        double adjustment = goalAdjustmentLUT.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;
@@ -193,6 +280,34 @@ public class Camera {
         }
 
         return null;
+    }
+
+    public double getTagHeight() {
+        if (detections != null && !detections.isEmpty()) {
+            AprilTagDetection detection = cleanDetection(detections);
+
+            if (detection != null) {
+                Point[] corners = detection.corners;
+
+                // Initialize min and max variables
+                double minY = Double.MAX_VALUE;
+                double maxY = Double.MIN_VALUE;
+                double minX = Double.MAX_VALUE;
+                double maxX = Double.MIN_VALUE;
+
+                // Loop through all 4 corners to find the bounds
+                for (Point point : corners) {
+                    if (point.y < minY) minY = point.y;
+                    if (point.y > maxY) maxY = point.y;
+                    if (point.x < minX) minX = point.x;
+                    if (point.x > maxX) maxX = point.x;
+                }
+
+                return maxY - minY;
+            }
+        }
+
+        return -1;
     }
 
     public void getCameraTelemetry(Telemetry telemetry) {

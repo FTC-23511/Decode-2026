@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.tuning.sensor;
 
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -42,14 +44,8 @@ public class ArducamTest extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
-    private ExposureControl exposureControl;
-    private GainControl gainControl;
-
     @Override
     public void initialize() {
-//        exposureControl.setMode(ExposureControl.Mode.Manual);
-//        exposureControl.setExposure(15, TimeUnit.MILLISECONDS);
-
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         Constants.TESTING_OP_MODE = true;
@@ -88,6 +84,39 @@ public class ArducamTest extends CommandOpMode {
     }
 
     @Override
+    public void initialize_loop() {
+        if (timer == null) {
+            robot.initHasMovement();
+            timer = new ElapsedTime();
+        }
+
+        robot.camera.updateCameraResult(3);
+        robot.camera.getCameraTelemetry(telemetry);
+
+        telemetryData.addData("Loop Time", timer.milliseconds());
+
+        Pose2d cameraPose = robot.camera.getCameraPose();
+        double[] targetDegrees = robot.camera.getTargetDegrees();
+
+        telemetryData.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
+        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+        telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
+        telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
+        telemetryData.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+        telemetryData.addData("test distance", TEST_DISTANCE);
+        telemetryData.addData("tag height (px)", robot.camera.getTagHeight());
+        telemetryData.addData("roi cameraH (px)", robot.camera.cameraH);
+        telemetryData.addData("roi cameraY (px)", robot.camera.cameraY);
+        timer.reset();
+
+        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
+        telemetryData.update();
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
+        robot.pinpoint.update();
+    }
+
+    @Override
     public void run() {
         if (!Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
             robot.camera.updateCameraResult(3);
@@ -99,8 +128,6 @@ public class ArducamTest extends CommandOpMode {
         if (timer == null) {
             robot.initHasMovement();
             timer = new ElapsedTime();
-            exposureControl = robot.camera.visionPortal.getCameraControl(ExposureControl.class);
-            gainControl = robot.camera.visionPortal.getCameraControl(GainControl.class);
         }
 
         telemetryData.addData("Loop Time", timer.milliseconds());
@@ -112,8 +139,10 @@ public class ArducamTest extends CommandOpMode {
         telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
         telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
         telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
-        telemetryData.addData("exposureControl", exposureControl.isExposureSupported());
-        telemetryData.addData("gainControl", gainControl.getGain());
+        telemetryData.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+        telemetryData.addData("tag height (px)", robot.camera.getTagHeight());
+        telemetryData.addData("roi cameraH (px)", robot.camera.cameraH);
+        telemetryData.addData("roi cameraY (px)", robot.camera.cameraY);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

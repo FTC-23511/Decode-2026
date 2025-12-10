@@ -128,7 +128,11 @@ public class Constants {
     public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(-0.0367, 0, -0.0012, 0); // Coefficients for radians
     public static double CAMERA_TX_TOLERANCE = 2.0; // Arducam TX
     public static double CAMERA_MAX_OUTPUT = 1.0;
-    public static float CAMERA_DECIMATION = 2;
+    public static float CAMERA_CLOSE_DECIMATION = 2;
+    public static float CAMERA_FAR_DECIMATION = 2;
+    public static boolean USE_CLOSE_DECIMATION = true;
+    public static double TEST_DISTANCE = 80;
+    public static double DECIMATION_THRESHOLD = 80; // inches
 
     public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
     public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet

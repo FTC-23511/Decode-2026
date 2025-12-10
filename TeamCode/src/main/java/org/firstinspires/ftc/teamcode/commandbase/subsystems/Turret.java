@@ -285,7 +285,7 @@ public class Turret extends SubsystemBase {
 
         double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = robot.camera.cameraInterplut.get(offset);
+        double adjustment = robot.camera.goalAdjustmentLUT.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;

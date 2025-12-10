@@ -94,7 +94,7 @@ public class CameraAngle extends CommandOpMode {
                 try {
                     telemetryData.addData("tY Offset", robot.camera.getTxOffset(lastKnownPose));
                     double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
-                    double adjustment = robot.camera.cameraInterplut.get(offset);
+                    double adjustment = robot.camera.goalAdjustmentLUT.get(offset);
 
                     Pose2d adjustedGoal;
                     if (adjustment < 0) {
