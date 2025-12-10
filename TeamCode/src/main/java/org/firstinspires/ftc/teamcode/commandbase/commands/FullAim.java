@@ -21,6 +21,7 @@ public class FullAim extends CommandBase {
     private final Robot robot;
     private final ElapsedTime timer;
     private double aimIndex = 0;
+    private boolean moveRobot = true;
     /**
      * 0 = initial state
      * 1 = moving to initial state estimates for turret / launcher based off pinpoint, lasts until camera sees ATag or timeout
@@ -42,29 +43,40 @@ public class FullAim extends CommandBase {
 
     @Override
     public void initialize() {
-        ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
-
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
-        // Preliminary estimates of where drivetrain and turret should face
-        Pose2d robotPose = robot.drive.getPose();
-        double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robotPose)));
-        robot.drive.follower.setTarget(robotPose.rotate(errorsDriveTurret[0]));
-        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, errorsDriveTurret[0] + errorsDriveTurret[1]);
-        robot.turret.updateTurretPose(robotPose);
+        Pose2d cameraPose = robot.camera.getCameraPose();
 
-        // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
-        errorsAngleVelocity = Launcher.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
-        robot.launcher.setFlywheel(errorsAngleVelocity[0], true);
-        robot.launcher.setHood(errorsAngleVelocity[1]);
+        if (cameraPose != null) {
+            robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
+            aimIndex = 2;
+            moveRobot = false;
+        } else {
+            // Preliminary estimates of where drivetrain and turret should face
+            ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
+
+            Pose2d robotPose = robot.drive.getPose();
+            double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robotPose)));
+            robot.drive.follower.setTarget(robotPose.rotate(errorsDriveTurret[0]));
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, errorsDriveTurret[0] + errorsDriveTurret[1]);
+            robot.turret.updateTurretPose(robotPose);
+
+            // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
+            errorsAngleVelocity = Launcher.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
+            robot.launcher.setFlywheel(errorsAngleVelocity[0], true);
+            robot.launcher.setHood(errorsAngleVelocity[1]);
+            aimIndex = 1;
+            moveRobot = true;
+        }
+
         timer.reset();
-        aimIndex = 1;
     }
 
     @Override
     public void execute() {
-        if (aimIndex <= 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+        // TODO: Consider making aimIndex condition < 2
+        if (aimIndex <= 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP) && moveRobot) {
             robot.drive.swerve.updateWithTargetVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                             robot.drive.follower.calculate(robot.drive.getPose()),
@@ -82,7 +94,7 @@ public class FullAim extends CommandBase {
             Pose2d cameraPose = robot.camera.getCameraPose();
 
             if (cameraPose != null) {
-                robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(robot.camera.getCameraPose()));
+                robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
                 aimIndex = 2;
                 timer.reset();
             } else if (robot.turret.readyToLaunch() && timer.milliseconds() >= 2000) {
@@ -92,7 +104,11 @@ public class FullAim extends CommandBase {
         }
 
         if (aimIndex == 2) {
-            robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(robot.camera.getCameraPose()));
+            Pose2d cameraPose = robot.camera.getCameraPose();
+
+            if (cameraPose != null) {
+                robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
+            }
 
             if (robot.turret.readyToLaunch()) {
                 robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
