@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
+import com.seattlesolvers.solverslib.util.MovingAverageFilter;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -121,7 +122,7 @@ public class Camera {
     }
 
     /**
-     * Updates internal limelight result in the Turret class
+     * Updates internal camera result in the Turret class
      * @param n max number of times to attempt reading to get a valid result
      */
     public void updateCameraResult(int n) {
@@ -272,7 +273,8 @@ public class Camera {
                 Pose3D robotPose = detection.robotPose;
 
                 if (robotPose != null) {
-                    return new Pose2d(robotPose.getPosition().y,
+                    return new Pose2d(
+                            robotPose.getPosition().y,
                             -robotPose.getPosition().x,
                             robot.drive.getPose().getHeading()
                     );

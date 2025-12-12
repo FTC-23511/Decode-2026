@@ -107,28 +107,28 @@ public class Constants {
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private static double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.67, 0.00, 0.0267, 0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.41, 0.00, 0.02, 0); // Coefficients for radians
 
     public static double TURRET_MIN_INTEGRAL = 0;
     public static double TURRET_MAX_INTEGRAL = 0.5;
     public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
-    public static double TURRET_INTEGRATION_DECAY = -0.1;
-    public static double TURRET_POS_TOLERANCE = 0.025; // Radians
+    public static double TURRET_INTEGRATION_DECAY = 0.5;
+    public static double TURRET_POS_TOLERANCE = 0.05; // Radians
     public static double TURRET_POS_THRESHOLD = 0.1; // Radians
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
     public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
-    public static double TURRET_MIN_OUTPUT = -0.15; // Power
-    public static double TURRET_OPEN_F = -0.0841;
+    public static double TURRET_MIN_OUTPUT = 0.12; // Power
+    public static double TURRET_OPEN_F = 0.1;
     public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
-    public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range)
-    public static double TURRET_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? 0.1041 : 0.12;
-    public static double DISTANCE_BS = 0.045;
+    public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
+    public static double DISTANCE_BS = 0.0;
 
-    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(-0.0367, 0, -0.0012, 0); // Coefficients for radians
-    public static double CAMERA_TX_TOLERANCE = 2.0; // Arducam TX
+    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0.0015, 0); // Coefficients for radians
+    public static double CAMERA_TX_TOLERANCE = 1.67; // Arducam TX
     public static double CAMERA_MAX_OUTPUT = 1.0;
-    public static float CAMERA_CLOSE_DECIMATION = 2;
+    public static double CAMERA_MIN_OUTPUT = 0.0;
+    public static float CAMERA_CLOSE_DECIMATION = 3;
     public static float CAMERA_FAR_DECIMATION = 2;
     public static boolean USE_CLOSE_DECIMATION = true;
     public static double TEST_DISTANCE = 80;

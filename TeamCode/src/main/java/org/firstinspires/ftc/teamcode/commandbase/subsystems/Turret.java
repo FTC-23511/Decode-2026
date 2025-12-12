@@ -37,7 +37,7 @@ public class Turret extends SubsystemBase {
     }
 
     public static TurretState turretState = ANGLE_CONTROL;
-    public SquIDFController turretController = new SquIDFController(TURRET_PIDF_COEFFICIENTS);
+    public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
 
     public Turret() {
         turretController.setOpenF(TURRET_OPEN_F);
@@ -63,8 +63,14 @@ public class Turret extends SubsystemBase {
         this.turretPose = turretPose;
     }
 
+    public void clearTurretPose() {
+        turretPoseEstimates.clear();
+        turretPose = null;
+    }
+
     public void setTurret(TurretState turretState, double value) {
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+        turretController.setOpenF(TURRET_OPEN_F);
 
         switch (turretState) {
             case ANGLE_CONTROL:
@@ -114,6 +120,10 @@ public class Turret extends SubsystemBase {
         robot.turret.turretController.setOpenF(TURRET_OPEN_F);
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
 
+        if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
+            clearTurretPose();
+        }
+
         double power;
         switch (turretState) {
             case ANGLE_CONTROL:
@@ -134,7 +144,6 @@ public class Turret extends SubsystemBase {
                 robot.profiler.start("Turret Write");
                 if (robot.turret.turretController.atSetPoint()) {
                     robot.turretServos.set(0);
-                    robot.turret.turretController.clearTotalError();
                 } else {
                     robot.turretServos.set(power);
                 }
@@ -147,13 +156,8 @@ public class Turret extends SubsystemBase {
                 turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
 
                 robot.profiler.start("Turret Read");
-                // only use drive pose estimate if we aren't in a command using the turret
-                if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
-                    updateTurretPose(robot.drive.getPose());
-                    turretPoseEstimates.clear();
-                }
 
-                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
+                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose(getTurretPose())));
 
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
 
@@ -186,23 +190,16 @@ public class Turret extends SubsystemBase {
                 robot.profiler.end("Turret Read");
 
                 turretController.setTolerance(CAMERA_TX_TOLERANCE, Double.POSITIVE_INFINITY);
-                turretController.setCoefficients(CAMERA_PIDF_COEFFICIENTS);
+                turretController.setPIDF(CAMERA_PIDF_COEFFICIENTS.p, CAMERA_PIDF_COEFFICIENTS.i, CAMERA_PIDF_COEFFICIENTS.d, CAMERA_PIDF_COEFFICIENTS.f);
+                turretController.setMinOutput(CAMERA_MIN_OUTPUT);
                 turretController.setMaxOutput(CAMERA_MAX_OUTPUT);
 
-                double[] targetDegrees = robot.camera.getTargetDegrees();
-                Pose2d pose2d = robot.camera.getCameraPose();
-
-                if (pose2d != null) {
-                    // only use drive pose estimate if we aren't in a command using the turret
-                    if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
-                        updateTurretPose(pose2d);
-                        turretPoseEstimates.clear();
-                    }
-                }
+                double[] targetDegrees = robot.camera.getTargetDegrees(); // just to make sure reading is valid
 
                 if (targetDegrees != null) {
                     double tx = targetDegrees[0];
-                    power = turretController.calculate(tx);
+                    power = -turretController.calculate(tx); // TODO: maybe figure out why we need to reverse power on TX_CONTROL
+//                    power += robot.turretEncoder.getVelocity() * CAMERA_PIDF_COEFFICIENTS.d;
 
                     robot.profiler.start("Turret Write");
                     if (Math.abs(getPosition()) < Math.abs(MAX_TURRET_ANGLE)) {
@@ -253,7 +250,7 @@ public class Turret extends SubsystemBase {
         Pose2d newTurretPose = new Pose2d(avgX, avgY, avgHeading);
         if (turretPose == null
             || (turretPose.minus(newTurretPose).getTranslation().getNorm() > 2
-                || turretPose.minus(newTurretPose).getRotation().getAngle(AngleUnit.RADIANS) > 0.25)) {
+                || turretPose.minus(newTurretPose).getRotation().getAngle(AngleUnit.RADIANS) > 0.1)) {
             robot.turret.updateTurretPose(newTurretPose);
         }
         timer.reset();
@@ -307,22 +304,45 @@ public class Turret extends SubsystemBase {
     }
 
     /**
-     * Converts an angle in radians, field-centric, normalized to 0-2pi to two separate angles, one for drivetrain and one for the turret
-     * @param angle the angle to be converted
-     * @return a two-item list of angles for the drivetrain and turret error in that specific order (robot-centric)
+     * Converts an angle in radians (field-centric, normalized to 0-2pi) to two separate
+     * robot-centric error angles, one for the drivetrain and one for the turret.
+     * @param targetAngle The field-centric target angle in radians.
+     * @return double[] {drivetrainError, turretError} (Robot-centric radians)
      */
-    public static double[] angleToDriveTurretErrors(double angle) {
+    public static double[] angleToDriveTurretErrors(double targetAngle) {
         final double MAX_USABLE_TURRET_ANGLE = MAX_TURRET_ANGLE - TURRET_BUFFER;
-        Pose2d robotPose = Robot.getInstance().drive.getPose();
-        double robotAngle = robotPose.getHeading();
 
-        double error = MathUtils.normalizeRadians(angle - robotAngle, false);
-        double localTurretBS = TURRET_BS + (robotPose.getY() < -36 ? 0.0441 : 0);
-        if (Math.abs(error) < MAX_USABLE_TURRET_ANGLE) {
-            return new double[]{0, error - localTurretBS};
+        double robotAngle = Robot.getInstance().drive.getPose().getHeading();
+
+        // 1. Calculate the total required rotation to face target (Robot Centric)
+        double totalError = MathUtils.normalizeRadians(targetAngle - robotAngle, false);
+
+        // 2. Logic Distribution
+        double drivetrainError;
+        double turretError;
+
+        if (Math.abs(totalError) <= MAX_USABLE_TURRET_ANGLE) {
+            // Target is within the usable turret range:
+            // Drivetrain stays still, Turret handles the entire rotation.
+            drivetrainError = 0;
+            turretError = totalError;
         } else {
-            return new double[]{robotAngle + (Math.abs(error) - MAX_USABLE_TURRET_ANGLE) * Math.signum(error), MAX_USABLE_TURRET_ANGLE * Math.signum(error) - localTurretBS};
+            // Target is outside the usable turret range:
+            // Turret locks to its maximum usable angle in the direction of the target.
+            // Drivetrain handles the remaining overflow (the amount needed to move the target
+            // back into the turret's MAX range).
+
+            double sign = Math.signum(totalError);
+
+            // Turret locks to its maximum limit in the correct direction
+            turretError = MAX_USABLE_TURRET_ANGLE * sign;
+
+            // Drivetrain takes the remainder: Total required - What the turret is doing
+            // This is the essential fix from your original code—we return the ERROR delta.
+            drivetrainError = totalError - turretError;
         }
+
+        return new double[]{drivetrainError, turretError};
     }
 
     @Override

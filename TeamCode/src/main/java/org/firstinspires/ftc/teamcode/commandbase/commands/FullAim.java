@@ -21,7 +21,6 @@ public class FullAim extends CommandBase {
     private final Robot robot;
     private final ElapsedTime timer;
     private double aimIndex = 0;
-    private boolean moveRobot = true;
     /**
      * 0 = initial state
      * 1 = moving to initial state estimates for turret / launcher based off pinpoint, lasts until camera sees ATag or timeout
@@ -46,28 +45,25 @@ public class FullAim extends CommandBase {
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
+        robot.camera.updateCameraResult(3);
         Pose2d cameraPose = robot.camera.getCameraPose();
 
+        ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
         if (cameraPose != null) {
             robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
             aimIndex = 2;
-            moveRobot = false;
         } else {
             // Preliminary estimates of where drivetrain and turret should face
-            ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
-
             Pose2d robotPose = robot.drive.getPose();
-            double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robotPose)));
+            double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robot.turret.getTurretPose())));
             robot.drive.follower.setTarget(robotPose.rotate(errorsDriveTurret[0]));
             robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, errorsDriveTurret[0] + errorsDriveTurret[1]);
-            robot.turret.updateTurretPose(robotPose);
 
             // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
             errorsAngleVelocity = Launcher.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
-            robot.launcher.setFlywheel(errorsAngleVelocity[0], true);
+            robot.launcher.setFlywheel(errorsAngleVelocity[0], false);
             robot.launcher.setHood(errorsAngleVelocity[1]);
             aimIndex = 1;
-            moveRobot = true;
         }
 
         timer.reset();
@@ -75,8 +71,8 @@ public class FullAim extends CommandBase {
 
     @Override
     public void execute() {
-        // TODO: Consider making aimIndex condition < 2
-        if (aimIndex <= 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP) && moveRobot) {
+        // TODO: Consider making aimIndex condition <= 2
+        if (aimIndex < 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
             robot.drive.swerve.updateWithTargetVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                             robot.drive.follower.calculate(robot.drive.getPose()),
@@ -100,6 +96,11 @@ public class FullAim extends CommandBase {
             } else if (robot.turret.readyToLaunch() && timer.milliseconds() >= 2000) {
                 // TODO: add code to deal with case where if we don't see ATag even if turret is aimed correctly (wiggle or do a full spin or time out)
                 // NOTE: implementation should only do extreme measures of rotating if its consistently unable to find an ATag and not a one off loop
+            } else {
+                Pose2d robotPose = robot.drive.getPose();
+                double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robot.turret.getTurretPose())));
+                robot.drive.follower.setTarget(robotPose.rotate(errorsDriveTurret[0]));
+                robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, errorsDriveTurret[0] + errorsDriveTurret[1]);
             }
         }
 
@@ -108,10 +109,14 @@ public class FullAim extends CommandBase {
 
             if (cameraPose != null) {
                 robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
+                timer.reset();
+            } else if (timer.milliseconds() > 1000) {
+                aimIndex = 1;
             }
 
             if (robot.turret.readyToLaunch()) {
                 robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
+                robot.drive.setPose(robot.turret.getTurretPose()); // update drive pose with better x and y
                 errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch - DISTANCE_BS); // TODO: REPLACE BS -0.1
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;

@@ -39,8 +39,10 @@ public class Launcher extends SubsystemBase {
     }
 
     public void init() {
-        setRamp(OP_MODE_TYPE == OpModeType.AUTO);
-        setHood(MIN_HOOD_ANGLE);
+        if (!TESTING_OP_MODE) {
+            setRamp(OP_MODE_TYPE == OpModeType.AUTO);
+            setHood(MIN_HOOD_ANGLE);
+        }
         setFlywheel(0, false);
     }
 

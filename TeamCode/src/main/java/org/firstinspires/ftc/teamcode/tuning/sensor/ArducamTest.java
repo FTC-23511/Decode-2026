@@ -56,7 +56,6 @@ public class ArducamTest extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
 
@@ -107,6 +106,7 @@ public class ArducamTest extends CommandOpMode {
         telemetryData.addData("tag height (px)", robot.camera.getTagHeight());
         telemetryData.addData("roi cameraH (px)", robot.camera.cameraH);
         telemetryData.addData("roi cameraY (px)", robot.camera.cameraY);
+        telemetryData.addData("turret state", Turret.turretState);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
@@ -140,6 +140,7 @@ public class ArducamTest extends CommandOpMode {
         telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
         telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
         telemetryData.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+        telemetryData.addData("test distance", TEST_DISTANCE);
         telemetryData.addData("tag height (px)", robot.camera.getTagHeight());
         telemetryData.addData("roi cameraH (px)", robot.camera.cameraH);
         telemetryData.addData("roi cameraY (px)", robot.camera.cameraY);
@@ -150,6 +151,7 @@ public class ArducamTest extends CommandOpMode {
         telemetryData.update();
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
+        robot.pinpoint.update();
     }
 
     @Override

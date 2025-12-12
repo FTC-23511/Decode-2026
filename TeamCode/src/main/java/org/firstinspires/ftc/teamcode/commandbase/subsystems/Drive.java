@@ -12,19 +12,16 @@ import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.p2p.P2PController;
-import com.seattlesolvers.solverslib.util.MathUtils;
 
-import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
+    public boolean unsureXY = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
-    private Pose2d lastPose;
-    private boolean poseUpdated = false;
 
     public Drive() {
         swerve = new CoaxialSwerveDrivetrain(
@@ -63,18 +60,7 @@ public class Drive extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : Constants.PINPOINT_TELEOP_POLLING_RATE))
-                || lastPose == null) {
-
-            timer.reset();
-            lastPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
-        }
-
-        return new Pose2d(
-                lastPose.getX(),
-                lastPose.getY(),
-                MathUtils.normalizeRadians(lastPose.getHeading(), false)
-        );
+        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
     }
 
     public void setPose(Pose2d pose) {
@@ -94,7 +80,9 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
 //        swerve.update(); // Not needed as we are using updateWithTargetVelocity() in the opModes
-        robot.pinpoint.update();
+        if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : PINPOINT_TELEOP_POLLING_RATE))) {
+            robot.pinpoint.update();
+        }
     }
 
     public void init() {
