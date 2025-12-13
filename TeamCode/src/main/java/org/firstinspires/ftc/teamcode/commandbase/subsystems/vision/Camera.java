@@ -91,16 +91,20 @@ public class Camera {
 
         aprilTagProcessor.setDecimation(CAMERA_CLOSE_DECIMATION); // increases fps, but reduces range
 
-        rectProcessor = new RectProcessor();
-        rectProcessor.setRoi(new Rect(0, 0, 640, 480));
-
-        visionPortal = new VisionPortal.Builder()
+        VisionPortal.Builder builder = new VisionPortal.Builder()
                 .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .addProcessor(aprilTagProcessor)
-                .addProcessor(rectProcessor)
-                .build();
+                .addProcessor(aprilTagProcessor);
+
+        if (TESTING_OP_MODE) {
+            rectProcessor = new RectProcessor();
+            rectProcessor.setRoi(new Rect(0, 0, 640, 480));
+            builder.addProcessor(rectProcessor);
+        }
+
+        visionPortal = builder.build();
+
         try {
             ExposureControl exposureControl = robot.camera.visionPortal.getCameraControl(ExposureControl.class);
             exposureControl.setMode(ExposureControl.Mode.Manual);
@@ -153,12 +157,12 @@ public class Camera {
 
         // CLOSE (30 inches) -> Bottom Half
         double distClose = 30.0;
-        double yClose = 240.0;    // Starts at pixel 240 (Middle)
+//        double yClose = 240.0;    // Starts at pixel 240 (Middle)
         double hClose = 240.0;    // Height is 240 (Middle to Bottom)
 
         // FAR (144 inches) -> Top Strip
         double distFar = 144.0;
-        double yFar = 0.0;        // Starts at pixel 0 (Top Edge)
+//        double yFar = 0.0;        // Starts at pixel 0 (Top Edge)
         double hFar = 96.0;       // Height is 96 (Top Strip)
 
         // 3. Calculate Linear Interpolation
@@ -176,7 +180,7 @@ public class Camera {
         // ignore all calculations if we don't know where we are on the field
         if (robot.drive.unsureXY) {
             finalY = 0;
-            finalH = 320;
+            finalH = 480;
         }
 
         Rect calculatedRoi = new Rect(0, finalY, 640, finalH);

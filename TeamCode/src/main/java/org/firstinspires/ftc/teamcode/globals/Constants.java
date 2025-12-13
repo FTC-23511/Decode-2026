@@ -80,8 +80,9 @@ public class Constants {
     public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
-    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
-    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
+    public static double DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
+//    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
+//    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
     // Launcher
     public static double RAMP_ENGAGED = 0.3;

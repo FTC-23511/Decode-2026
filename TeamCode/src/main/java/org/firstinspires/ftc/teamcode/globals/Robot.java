@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -96,6 +97,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public SensorDigitalDevice frontDistanceSensor;
     public SensorDigitalDevice backDistanceSensor;
+    public AnalogInput distanceSensor;
 
     public void init(HardwareMap hwMap) {
         File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
@@ -197,8 +199,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         pinpoint.setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS));
         pinpoint.setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION);
 
-        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
-        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
+//        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
+//        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
+
+        distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(250);

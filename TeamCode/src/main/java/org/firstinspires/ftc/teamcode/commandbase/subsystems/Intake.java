@@ -27,18 +27,18 @@ public class Intake extends SubsystemBase {
         HOLD
     }
 
-    /* Used for normal distance mode on distance sensor
+    // Used for normal distance mode on distance sensor
     public enum DistanceState {
         FOV_15,
         FOV_20,
         FOV_27
     }
-     */
 
     public boolean intakeJammed = false;
     private final ElapsedTime intakeTimer;
     public static MotorState motorState = MotorState.STOP;
     public static PivotState pivotState = PivotState.HOLD;
+    public static DistanceState distanceState = DistanceState.FOV_15;
 
     public Intake() {
         intakeTimer = new ElapsedTime();
@@ -129,37 +129,36 @@ public class Intake extends SubsystemBase {
         robot.profiler.end("Intake Update");
     }
 
-    public void updateDistanceSensors() {
-        robot.frontDistanceSensor.update();
-        robot.backDistanceSensor.update();
+    public void updateSensors() {
+//        robot.frontDistanceSensor.update();
+//        robot.backDistanceSensor.update();
+    }
+
+    public double getDistance() {
+        double distance;
+
+        switch (distanceState) {
+            case FOV_20:
+                distance = (robot.distanceSensor.getVoltage() * 48.7) - 4.9;
+                break;
+            case FOV_27:
+                distance = (robot.distanceSensor. getVoltage() * 78.1) - 10.2;
+                break;
+            case FOV_15:
+            default:
+                distance = (robot.distanceSensor.getVoltage() * 32.5) - 2.6;
+                break;
+        }
+
+        return distance;
     }
 
     public boolean transferFull() {
         return false;
-//        return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
-//               && !intakeJammed;
+
+        //  return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
+        //  && !intakeJammed;
     }
-
-    /*
-    public double getDistance(DistanceState distanceState){
-        double distance = 0;
-
-        switch (distanceState) {
-            case FOV_15:
-                distance = robot.distanceSensor.getVoltage() * 32.05 - 2.6;
-                break;
-            case FOV_20:
-                distance =  robot.distanceSensor.getVoltage() * 48.70 - 4.9;
-                break;
-            case FOV_27:
-                distance =  robot.distanceSensor.getVoltage() * 78.1 - 10.2;
-                break;
-        }
-
-        Intake.distanceState = distanceState;
-        return distance;
-    }
-     */
 
     @Override
     public void periodic() {

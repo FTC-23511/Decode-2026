@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.BACK_DISTANCE_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.globals.Constants.FRONT_DISTANCE_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -78,11 +77,12 @@ public class IntakeSubsystemTuner extends CommandOpMode {
         telemetryData.addData("SERVO_POS", SERVO_POS);
         telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
 
-        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
-        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
+        telemetryData.addData("Distance Threshold", DISTANCE_THRESHOLD);
+//        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
+//        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
 
-        telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
-        telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
+//        telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
+//        telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
 
         telemetryData.addData("Intake Current", ((MotorEx) robot.intakeMotors.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
         telemetryData.addData("Intake Over Current", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());

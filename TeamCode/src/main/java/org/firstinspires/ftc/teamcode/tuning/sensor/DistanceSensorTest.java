@@ -49,10 +49,11 @@ public class DistanceSensorTest extends CommandOpMode {
     }
 
     public void update() {
-        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
-        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
+//        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
+//        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
+        telemetryData.addData("Threshold", DISTANCE_THRESHOLD);
 
-        telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
+        telemetryData.addData("Threshold Met", robot.frontDistanceSensor.isActive());
         telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
 
         telemetryData.update();
