@@ -81,19 +81,11 @@ public class CameraAngle extends CommandOpMode {
             Pose2d cameraPose = robot.camera.getCameraPose();
 
             if (cameraPose != null) {
-                robot.camera.updateMedianReadings(cameraPose);
-            }
-
-            if (robot.camera.medianWallAngle.size() > 10) {
-                robot.camera.medianWallAngle.remove(0);
-            }
-
-            if (!robot.camera.medianWallAngle.isEmpty()) {
-                double angle = robot.camera.getMedianWallAngle();
+                double angle = robot.turret.angleToWall(cameraPose);
                 telemetryData.addData("Median Wall Angle", angle);
                 try {
                     telemetryData.addData("tY Offset", robot.camera.getTxOffset(lastKnownPose));
-                    double offset = -robot.camera.getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
+                    double offset = -robot.turret.angleToWall(cameraPose) * ALLIANCE_COLOR.getMultiplier();
                     double adjustment = robot.camera.goalAdjustmentLUT.get(offset);
 
                     Pose2d adjustedGoal;

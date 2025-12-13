@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
-import com.seattlesolvers.solverslib.util.MovingAverageFilter;
+import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -33,7 +33,6 @@ import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class Camera {
@@ -41,7 +40,6 @@ public class Camera {
     public boolean enabled = false;
     public static Motif motifState = Motif.NOT_FOUND;
     public ArrayList<AprilTagDetection> detections = null;
-    public ArrayList<Double> medianWallAngle = new ArrayList<>();
     public AprilTagProcessor aprilTagProcessor;
     public RectProcessor rectProcessor;
     public VisionPortal visionPortal;
@@ -51,7 +49,7 @@ public class Camera {
 
     public final InterpLUT goalAdjustmentLUT = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 7.41, 14.14, 14.14), // output: new goal pos (inches)
+            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
             true
     );
 
@@ -128,6 +126,7 @@ public class Camera {
     public void updateCameraResult(int n) {
         detections = null;
         updateROI(robot.drive.getPose());
+        updateDecimation(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
         for (int i = n; i > 0; i--) {
             detections = aprilTagProcessor.getDetections();
 
@@ -135,12 +134,7 @@ public class Camera {
                 Pose2d pose = getCameraPose();
 
                 if (pose != null) {
-                    updateMedianReadings(pose);
                     robot.turret.updateTurretPoseReadings(pose);
-                }
-
-                if (medianWallAngle.size() > 10) {
-                    medianWallAngle.remove(0);
                 }
 
                 break;
@@ -150,6 +144,7 @@ public class Camera {
 
     public void updateROI(Pose2d robotPose) {
         if (robotPose == null) return;
+
 
         // 1. Get Distance (Inches)
         double distance = APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
@@ -177,6 +172,13 @@ public class Camera {
         // 4. Create the Rect (Standard 0-640 coords)
         // x = 0 (Left Edge)
         // width = 640 (Full Width)
+
+        // ignore all calculations if we don't know where we are on the field
+        if (robot.drive.unsureXY) {
+            finalY = 0;
+            finalH = 320;
+        }
+
         Rect calculatedRoi = new Rect(0, finalY, 640, finalH);
 
         // 5. Update BOTH processors
@@ -205,7 +207,7 @@ public class Camera {
         if (distance < DECIMATION_THRESHOLD && !USE_CLOSE_DECIMATION) {
             aprilTagProcessor.setDecimation(CAMERA_CLOSE_DECIMATION);
             USE_CLOSE_DECIMATION = true;
-        } else if (USE_CLOSE_DECIMATION) {
+        } else if (distance > DECIMATION_THRESHOLD && USE_CLOSE_DECIMATION) {
             aprilTagProcessor.setDecimation(CAMERA_FAR_DECIMATION);
             USE_CLOSE_DECIMATION = false;
         }
@@ -215,7 +217,7 @@ public class Camera {
         double angleToGoal = Math.toDegrees(posesToAngle(robotPose, goalPose));
         double angleToATag = Math.toDegrees(posesToAngle(robotPose, APRILTAG_POSE()));
 
-        return angleToATag - angleToGoal;
+        return MathUtils.normalizeDegrees(angleToATag - angleToGoal, false);
     }
 
     public double getTxOffset(Pose2d robotPose) {
@@ -223,19 +225,7 @@ public class Camera {
             return 0;
         }
 
-        double offset = -getMedianWallAngle() * ALLIANCE_COLOR.getMultiplier();
-        RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = goalAdjustmentLUT.get(offset);
-        RobotLog.aa("adjustment", String.valueOf(adjustment));
-
-        Pose2d adjustedGoal;
-        if (adjustment < 0) {
-            adjustedGoal = new Pose2d(GOAL_POSE().getX() - (adjustment * ALLIANCE_COLOR.getMultiplier()), GOAL_POSE().getY(), GOAL_POSE().getHeading());
-        } else {
-            adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
-        }
-
-        double finalOffset = txOffset(robotPose, adjustedGoal);
+        double finalOffset = txOffset(robotPose, robot.turret.adjustedGoalPose(robotPose));
         RobotLog.aa("final offset", String.valueOf(finalOffset));
         return finalOffset;
     }
@@ -313,7 +303,7 @@ public class Camera {
         return -1;
     }
 
-    public void getCameraTelemetry(Telemetry telemetry) {
+    public void writeCameraTelemetry(Telemetry telemetry) {
         if (detections != null && !detections.isEmpty()) {
             AprilTagDetection detection = cleanDetection(detections);
 
@@ -350,28 +340,6 @@ public class Camera {
         }
 
         return null;
-    }
-
-    public double getMedianWallAngle() {
-        if (robot.camera.medianWallAngle.isEmpty()) {
-            return Double.NaN;
-        }
-
-        ArrayList<Double> sortedMedianWallAngle = new ArrayList<>(robot.camera.medianWallAngle);
-        Collections.sort(sortedMedianWallAngle);
-
-        if (sortedMedianWallAngle.size() % 2 == 1) {
-            return sortedMedianWallAngle.get(sortedMedianWallAngle.size() / 2);
-        }
-
-        return (
-            (sortedMedianWallAngle.get(sortedMedianWallAngle.size() / 2 - 1) +
-             sortedMedianWallAngle.get(sortedMedianWallAngle.size() / 2)) / 2.0
-        );
-    }
-
-    public void updateMedianReadings(Pose2d cameraPose) {
-        medianWallAngle.add(robot.turret.angleToWall(cameraPose));
     }
 
     public void closeCamera() {

@@ -16,19 +16,11 @@ import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvWebcam;
-
-import java.util.concurrent.TimeUnit;
 
 @Config
 @TeleOp(name = "ArducamTest", group = "Sensor")
@@ -90,7 +82,7 @@ public class ArducamTest extends CommandOpMode {
         }
 
         robot.camera.updateCameraResult(3);
-        robot.camera.getCameraTelemetry(telemetry);
+        robot.camera.writeCameraTelemetry(telemetry);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
 
@@ -120,7 +112,7 @@ public class ArducamTest extends CommandOpMode {
     public void run() {
         if (!Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
             robot.camera.updateCameraResult(3);
-            robot.camera.getCameraTelemetry(telemetry);
+            robot.camera.writeCameraTelemetry(telemetry);
         }
 
         // Keep all the has movement init for until when TeleOp starts

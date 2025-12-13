@@ -49,7 +49,7 @@ public class Launcher extends SubsystemBase {
     public void setFlywheel(double vel, boolean setActiveControl) {
         flywheelController.setSetPoint(Math.min(launcherVel.get(vel), LAUNCHER_MAX_VELOCITY));
         targetFlywheelVelocity = vel;
-        activeControl = setActiveControl;
+        setActiveControl(setActiveControl);
     }
 
     /**
@@ -58,7 +58,7 @@ public class Launcher extends SubsystemBase {
      */
     public void setFlywheelTicks(double vel) {
         flywheelController.setSetPoint(vel);
-        activeControl = true;
+        setActiveControl(true);
     }
 
     public double getTargetHoodAngle() {
@@ -71,6 +71,9 @@ public class Launcher extends SubsystemBase {
 
     public void setActiveControl(boolean state) {
         activeControl = state;
+        if (state == false) {
+            setHood(targetHoodAngle);
+        }
     }
 
     public boolean getActiveControl() {
@@ -81,13 +84,15 @@ public class Launcher extends SubsystemBase {
         return flywheelController.getSetPoint();
     }
 
-    private void updateFlywheel() {
+    private void update() {
         robot.profiler.start("Launcher Update");
         if (activeControl) {
-            flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f / (robot.getVoltage() / 12));
+            flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
             robot.launchMotors.set(
                     flywheelController.calculate(robot.launchEncoder.getCorrectedVelocity())
             );
+
+            setHood(targetHoodAngle - (flywheelController.getPositionError() * HOOD_COMPENSATION), true);
         } else {
             if (getFlywheelTarget() == 0) {
                 robot.launchMotors.set(0);
@@ -103,8 +108,14 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setHood(double angle) {
+        setHood(angle, false);
+    }
+
+    private void setHood(double angle, boolean compensation) {
         double angle2 = Range.clip(angle, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE);
-        targetHoodAngle = angle2;
+        if (!compensation) {
+            targetHoodAngle = angle2;
+        }
         // Solved from proportion (targetServo - minServo) / servoRange = (targetAngle - minAngle) / angleRange
         robot.hoodServo.set(
                 (angle2 - MIN_HOOD_ANGLE) / (MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * (MAX_HOOD_SERVO_POS - MIN_HOOD_SERVO_POS) + MIN_HOOD_SERVO_POS
@@ -155,7 +166,7 @@ public class Launcher extends SubsystemBase {
             finalAngleHoriz = optimalAngleHoriz;
 
             // Check velocity limit for this optimal shot
-            if (minVelocity > MAX_DRIVE_VELOCITY) {
+            if (minVelocity > LAUNCHER_MAX_BALL_VELOCITY) {
                 // Even the most efficient shot is too fast. IMPOSSIBLE.
                 return new double[]{Double.NaN, Double.NaN};
             }
@@ -177,6 +188,11 @@ public class Launcher extends SubsystemBase {
         if (distance <= 0.825) {
             finalAngleVert = MIN_HOOD_ANGLE;
             finalAngleHoriz = 90.0 - MIN_HOOD_ANGLE; // Convert to horizontal system (90-50=40 deg)
+        } else if (distance >= 1.8) {
+            finalAngleHoriz = MAX_HOOD_ANGLE;
+            finalAngleVert = 90.0 - MAX_HOOD_ANGLE;
+        } else {
+
         }
 
         // --- 3. Recalculate Velocity for the Forced Angle (Cases B and C) ---
@@ -208,6 +224,6 @@ public class Launcher extends SubsystemBase {
 
     @Override
     public void periodic() {
-        updateFlywheel();
+        update();
     }
 }

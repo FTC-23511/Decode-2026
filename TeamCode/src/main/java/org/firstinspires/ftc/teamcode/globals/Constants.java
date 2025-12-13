@@ -32,6 +32,7 @@ public class Constants {
     public static OpModeType OP_MODE_TYPE;
     public static AllianceColor ALLIANCE_COLOR = AllianceColor.BLUE;
     public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
+    public static double DEFAULT_VOLTAGE = 12.67; // Volts
     public static boolean PROBLEMATIC_TELEMETRY = false;
     public static boolean TESTING_OP_MODE = false;
 
@@ -68,7 +69,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.54;
+    public static double INTAKE_PIVOT_FORWARD = 0.5341;
     public static double INTAKE_PIVOT_HOLD = 0.49;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.02;
 
@@ -87,7 +88,7 @@ public class Constants {
     public static double RAMP_DISENGAGED = 0.06;
 
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00052); // Coefficients for ticks
-    public static double FLYWHEEL_VEL_TOLERANCE = 100; // Ticks
+    public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
     public static final double GRAVITY = 9.81; // meters/second
@@ -98,11 +99,13 @@ public class Constants {
     public static double LAUNCHER_FAR_VELOCITY = 5.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
+    public static double LAUNCHER_MAX_BALL_VELOCITY = 100; // Meters/second // TODO: maybe actually deal with this later
 
-    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: needs to be checked off CAD
+    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.34; // MUST MATCH WITH VALUE ABOVE
-    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal // TODO: needs to be checked off CAD
+    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
     public static double MAX_HOOD_SERVO_POS = 0.823; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double HOOD_COMPENSATION = 0.0167; // ticks to degrees
     
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
@@ -119,12 +122,12 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
     public static double TURRET_MIN_OUTPUT = 0.12; // Power
-    public static double TURRET_OPEN_F = 0.1;
+    public static double TURRET_OPEN_F = 0.1041;
     public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
-    public static double DISTANCE_BS = 0.0;
+    public static double DISTANCE_BS = 0.067; // meters
 
-    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0.0015, 0); // Coefficients for radians
+    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01241, 0, 0.00167, 0); // Coefficients for radians
     public static double CAMERA_TX_TOLERANCE = 1.67; // Arducam TX
     public static double CAMERA_MAX_OUTPUT = 1.0;
     public static double CAMERA_MIN_OUTPUT = 0.0;

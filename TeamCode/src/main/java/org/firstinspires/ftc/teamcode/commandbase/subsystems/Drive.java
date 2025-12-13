@@ -86,6 +86,10 @@ public class Drive extends SubsystemBase {
     }
 
     public void init() {
-        follower.setTarget(new Pose2d());
+        follower.setTarget(END_POSE);
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            setPose(END_POSE);
+            unsureXY = true;
+        }
     }
 }

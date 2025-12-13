@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -45,6 +46,8 @@ public class FullAim extends CommandBase {
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
+        robot.turret.updateTurretPose(null); // clear any prior readings of where turret was
+
         robot.camera.updateCameraResult(3);
         Pose2d cameraPose = robot.camera.getCameraPose();
 
@@ -52,7 +55,16 @@ public class FullAim extends CommandBase {
         if (cameraPose != null) {
             robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
             aimIndex = 2;
+
+            if (robot.drive.unsureXY) {
+                robot.drive.setPose(new Pose2d(cameraPose.getTranslation(), robot.drive.getPose().getRotation()));
+                robot.drive.unsureXY = false;
+            }
         } else {
+            if (robot.drive.unsureXY) {
+                robot.drive.setPose(new Pose2d(new Translation2d(), robot.drive.getPose().getRotation()));
+            }
+
             // Preliminary estimates of where drivetrain and turret should face
             Pose2d robotPose = robot.drive.getPose();
             double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robot.turret.getTurretPose())));
@@ -85,10 +97,14 @@ public class FullAim extends CommandBase {
 
         RobotLog.aa("aimIndex", String.valueOf(aimIndex));
         robot.camera.updateCameraResult(3);
+        Pose2d cameraPose = robot.camera.getCameraPose();
+
+        if (robot.drive.unsureXY && cameraPose != null) {
+            robot.drive.setPose(new Pose2d(cameraPose.getTranslation(), robot.drive.getPose().getRotation()));
+            robot.drive.unsureXY = false;
+        }
 
         if (aimIndex == 1) {
-            Pose2d cameraPose = robot.camera.getCameraPose();
-
             if (cameraPose != null) {
                 robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
                 aimIndex = 2;
@@ -105,19 +121,16 @@ public class FullAim extends CommandBase {
         }
 
         if (aimIndex == 2) {
-            Pose2d cameraPose = robot.camera.getCameraPose();
-
             if (cameraPose != null) {
-                robot.turret.setTurret(Turret.TurretState.TX_CONTROL, robot.camera.getTxOffset(cameraPose));
                 timer.reset();
             } else if (timer.milliseconds() > 1000) {
                 aimIndex = 1;
             }
 
             if (robot.turret.readyToLaunch()) {
+                RobotLog.aa("done with aimbot", String.valueOf(robot.camera.getTargetDegrees()[0]));
                 robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
-                robot.drive.setPose(robot.turret.getTurretPose()); // update drive pose with better x and y
-                errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch - DISTANCE_BS); // TODO: REPLACE BS -0.1
+                errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch + DISTANCE_BS); // TODO: REPLACE BS -0.1
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;
                 } else {

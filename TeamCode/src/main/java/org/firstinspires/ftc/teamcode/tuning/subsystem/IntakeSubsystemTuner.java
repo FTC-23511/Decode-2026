@@ -84,7 +84,6 @@ public class IntakeSubsystemTuner extends CommandOpMode {
         telemetryData.addData("Front Threshold Met", robot.frontDistanceSensor.isActive());
         telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
 
-        telemetryData.addData("Robot Current", robot.getVoltage());
         telemetryData.addData("Intake Current", ((MotorEx) robot.intakeMotors.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
         telemetryData.addData("Intake Over Current", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
 

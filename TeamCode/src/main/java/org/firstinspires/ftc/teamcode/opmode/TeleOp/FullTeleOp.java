@@ -67,10 +67,13 @@ public class FullTeleOp extends CommandOpMode {
         // Driver controls
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(new Translation2d(0, 65), new Rotation2d(Math.PI)))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(new Translation2d(0, 65), new Rotation2d()))),
-                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                new SequentialCommandGroup(
+                        new ConditionalCommand(
+                                new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
+                                new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d()))),
+                                () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                        ),
+                        new InstantCommand(() -> robot.drive.unsureXY = true)
                 )
         );
 
@@ -229,8 +232,6 @@ public class FullTeleOp extends CommandOpMode {
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("High TelemetryData");
 
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-            telemetryData.addData("Robot Pose", robot.drive.getPose());
             telemetryData.addData("Turret Position", robot.turret.getPosition());
             telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
             telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
@@ -243,15 +244,22 @@ public class FullTeleOp extends CommandOpMode {
         }
 
         robot.profiler.start("Low TelemetryData");
+
+        double[] targetDegrees = robot.camera.getTargetDegrees();
+        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+        telemetryData.addData("unsureXY", robot.drive.unsureXY);
+
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());
+        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
+        telemetryData.addData("Robot Pose", robot.drive.getPose());
 
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("Camera Result Null", robot.camera.detections == null);
+        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
         try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
-        telemetryData.addData("Wall Angle", robot.camera.getMedianWallAngle());
+        telemetryData.addData("Wall Angle", robot.turret.angleToWall());
         try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());

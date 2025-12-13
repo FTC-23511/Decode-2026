@@ -187,7 +187,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
-                .setInverted(false);;
+                .setInverted(false);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pinpoint.setOffsets(-76.32, 152.62, DistanceUnit.MM);
@@ -244,9 +244,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
     
     public double getVoltage() {
-        return 12;
+//        return 12;
         // this is chopped for loop times
-        /*
         if (voltageTimer == null) {
             cachedVoltage = voltageSensor.getVoltage();
         } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
@@ -256,7 +255,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             cachedVoltage = 12;
         }
         return cachedVoltage;
-         */
     }
 
     public void exportProfiler(File file) {

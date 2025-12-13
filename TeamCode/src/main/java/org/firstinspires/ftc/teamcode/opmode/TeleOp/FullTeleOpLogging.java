@@ -267,7 +267,7 @@ public class FullTeleOpLogging extends CommandOpMode {
         try {
             telemetryData.addData("turretPose", robot.turret.getTurretPose());
         } catch (Exception ignored) {}
-        telemetryData.addData("Wall Angle", robot.camera.getMedianWallAngle());
+        telemetryData.addData("Wall Angle", robot.turret.angleToWall());
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());

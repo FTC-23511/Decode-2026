@@ -66,9 +66,8 @@ public class LaunchMotorTuner extends CommandOpMode {
         if (Math.abs(newVel) < Constants.LAUNCHER_MAX_VELOCITY) {
             motorVel = newVel;
         }
-        double voltage = robot.getVoltage();
 
-        launcherPIDF.setPIDF(P, I, D, F / (voltage / 12.0));
+        launcherPIDF.setPIDF(P, I, D, F);
 
         launcherPIDF.setTolerance(POS_TOLERANCE, 0);
         launcherPIDF.setSetPoint(TARGET_VEL);
@@ -81,7 +80,6 @@ public class LaunchMotorTuner extends CommandOpMode {
         timer.reset();
 
         telemetryData.addData("power", power);
-        telemetryData.addData("voltage", voltage);
         telemetryData.addData("target velocity", TARGET_VEL);
         telemetryData.addData("actual velocity", motorVel);
         telemetryData.addData("sdk topMotor velocity", leftMotor.getVelocity());
