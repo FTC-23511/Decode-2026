@@ -80,7 +80,8 @@ public class Constants {
     public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
-    public static double DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
+    public static double DISTANCE_THRESHOLD = 6.00; // cm // TODO: needs to be tuned
+    public static double DISTANCE_TIME = 250; // milliseconds // TODO: needs to be tuned
 //    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 //    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
@@ -123,7 +124,7 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
     public static double TURRET_MIN_OUTPUT = 0.12; // Power
-    public static double TURRET_OPEN_F = 0.1041;
+    public static double TURRET_OPEN_F = 0.1067;
     public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
     public static double DISTANCE_BS = 0.067; // meters

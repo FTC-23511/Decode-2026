@@ -129,7 +129,7 @@ public class FullAim extends CommandBase {
 
             if (robot.turret.readyToLaunch()) {
                 RobotLog.aa("done with aimbot", String.valueOf(robot.camera.getTargetDegrees()[0]));
-                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
+//                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
                 errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch + DISTANCE_BS); // TODO: REPLACE BS -0.1
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
+import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -17,7 +18,6 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
@@ -224,6 +224,15 @@ public class FullTeleOp extends CommandOpMode {
                 );
             }
         }
+
+        if (robot.intake.transferFull() && !Intake.motorState.equals(Intake.MotorState.STOP)) {
+            gamepad1.rumble(100);
+            gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
+        } else {
+            gamepad1.stopRumble();
+            gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
+        }
+
         robot.profiler.end("Swerve Drive");
 
         telemetryData.addData("Loop Time", timer.milliseconds());
@@ -269,6 +278,7 @@ public class FullTeleOp extends CommandOpMode {
 
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
+        telemetryData.addData("Intake transferFull", robot.intake.transferFull());
 
         telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 

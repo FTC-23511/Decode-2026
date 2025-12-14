@@ -36,13 +36,17 @@ public class Intake extends SubsystemBase {
 
     public boolean intakeJammed = false;
     private final ElapsedTime intakeTimer;
+    private final ElapsedTime distanceTimer;
+    private boolean withinDistance = false;
     public static MotorState motorState = MotorState.STOP;
     public static PivotState pivotState = PivotState.HOLD;
     public static DistanceState distanceState = DistanceState.FOV_15;
 
     public Intake() {
         intakeTimer = new ElapsedTime();
+        distanceTimer = new ElapsedTime();
         intakeTimer.reset();
+        distanceTimer.reset();
     }
 
     public void init() {
@@ -86,6 +90,8 @@ public class Intake extends SubsystemBase {
                 robot.intakeMotors.set(INTAKE_REVERSE_SPEED);
                 break;
         }
+
+        Intake.motorState = motorState;
     }
 
     public void toggleIntake() {
@@ -101,12 +107,19 @@ public class Intake extends SubsystemBase {
     public void updateIntake() {
         robot.profiler.start("Intake Update");
 
+        if (getDistance() < DISTANCE_THRESHOLD) {
+            withinDistance = true;
+        } else {
+            withinDistance = false;
+            distanceTimer.reset();
+        }
+
         switch (motorState) {
             case FORWARD:
-                if (transferFull()) {
-                    setPivot(PivotState.HOLD);
-                    setIntake(MotorState.STOP);
-                }
+//                if (transferFull()) {
+//                    setPivot(PivotState.HOLD);
+//                    setIntake(MotorState.STOP);
+//                }
 
 //                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
 //                    intakeJammed = true;
@@ -154,7 +167,7 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return false;
+        return withinDistance && distanceTimer.milliseconds() >= DISTANCE_TIME;
 
         //  return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
         //  && !intakeJammed;
