@@ -27,14 +27,11 @@ public class DriveTo extends CommandBase {
     @Override
     public void initialize() {
         robot.drive.follower.setTarget(target);
+        robot.drive.swerve.setMaxSpeed(maxPower);
     }
 
     @Override
     public void execute() {
-        if (maxPower != previousMaxPower) {
-            robot.drive.swerve.setMaxSpeed(maxPower);
-        }
-
         robot.drive.swerve.updateWithTargetVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                         robot.drive.follower.calculate(robot.drive.getPose()),
@@ -50,8 +47,6 @@ public class DriveTo extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        if (maxPower != previousMaxPower) {
-            robot.drive.swerve.setMaxSpeed(previousMaxPower);
-        }
+        robot.drive.swerve.setMaxSpeed(previousMaxPower);
     }
 }

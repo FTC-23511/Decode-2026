@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -46,14 +47,14 @@ public class Mystery extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-14.792937399678976, -65.0658105939005, Math.toRadians(90))); // Starting Pose
-        pathPoses.add(new Pose2d(-12.413793103448281, -53.71786833855799, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-14.8, -63, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(90))); // Line 1
         pathPoses.add(new Pose2d(-23.02194357366772, -36.33855799373042, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-62.52037617554859, -36.11285266457679, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-13.090909090909083, -53.49216300940439, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-13.090909090909083, -53.49216300940439, Math.toRadians(30))); // Line 4
         pathPoses.add(new Pose2d(-60.327447833065804, -53.97110754414126, Math.toRadians(15))); // Line 5
         pathPoses.add(new Pose2d(-62.068965517241374, -62.746081504702204, Math.toRadians(15))); // Line 6
-        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(30))); // Line 7
         pathPoses.add(new Pose2d(-20.08777429467085, -33.40438871473354, Math.toRadians(0))); // Line 8
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -77,10 +78,9 @@ public class Mystery extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        robot.launcher.setHood(MIN_HOOD_SERVO_POS);
+        robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0.8 * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -88,21 +88,18 @@ public class Mystery extends CommandOpMode {
                 new SequentialCommandGroup(
                         // init
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1, 3000),
+                        pathShoot(1, 1000),
 
                         // spike 1
-                        new DriveTo(pathPoses.get(2)).withTimeout(670),
-                        pathIntake(3, 1867, 0.5),
+                        pathIntake(2, 1867, 0.5),
                         pathShoot(4, 2267),
 
                         // spike 2
                         pathIntake(5, 2267, 0.5),
                         pathShoot(7, 3000),
-                        new ClearLaunch(true),
 
                         new DriveTo(pathPoses.get(8)) // park
                 )
@@ -180,17 +177,8 @@ public class Mystery extends CommandOpMode {
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
-                ),
-//                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 0.8 * ALLIANCE_COLOR.getMultiplier())),
-                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
-                new InstantCommand(() -> robot.readyToLaunch = true),
-                new ClearLaunch(true).alongWith(
-                        new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
-                )
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new StationaryAimbotFullLaunch()
         );
     }
 
@@ -203,7 +191,8 @@ public class Mystery extends CommandOpMode {
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                new DriveTo(pathPoses.get(pathStartingIndex+1), maxPower).withTimeout(2467)
+                new DriveTo(pathPoses.get(pathStartingIndex+1), maxPower).withTimeout(2467),
+                Intake.ActiveStopIntake()
         );
     }
 }
