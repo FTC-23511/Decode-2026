@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -15,10 +16,11 @@ import com.seattlesolvers.solverslib.p2p.P2PController;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Config
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
-    public boolean unsureXY = false;
+    public static boolean unsureXY = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
