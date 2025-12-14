@@ -21,6 +21,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -37,6 +38,7 @@ import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -47,9 +49,7 @@ import java.util.ArrayList;
 @Autonomous(name = "Romance (close far auto)", preselectTeleOp = "AAAFullTeleOp")
 public class Romance extends CommandOpMode {
     public ElapsedTime timer;
-    public static double BLUE_ROMANCE_BS = -0.15;
-    public static double RED_ROMANCE_BS = 0.15;
-    public static double ROMANCE_BS = 0.0;
+    public static boolean GATE_OPEN = false;
 
     TelemetryData telemetryData = new TelemetryData(
             new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())
@@ -61,17 +61,18 @@ public class Romance extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(144))); // Starting Pose
+        pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(324))); // Starting Pose
         pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 1
-        pathPoses.add(new Pose2d(-16.0, 24.0, Math.toRadians(60))); // Line 2
-        pathPoses.add(new Pose2d(-16.7, 11.0, Math.toRadians(10))); // Line 3
-        pathPoses.add(new Pose2d(-51.0, 11.0, Math.toRadians(10))); // Line 4
-        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 5
-        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(10))); // Line 6
-        pathPoses.add(new Pose2d(-55.0, -12.0, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(10))); // Line 8
-        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 9
-        pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-16.7, 11.0, Math.toRadians(10))); // Line 2
+        pathPoses.add(new Pose2d(-51.0, 11.0, Math.toRadians(10))); // Line 3
+        pathPoses.add(new Pose2d(-49.15, 1.12, Math.toRadians(10))); // Line 4 - pre-gate
+        pathPoses.add(new Pose2d(-56.0, 1.12, Math.toRadians(10))); // Line 5 - gate pose
+        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 6
+        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(10))); // Line 7
+        pathPoses.add(new Pose2d(-55.0, -12.0, Math.toRadians(10))); // Line 8
+        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(10))); // Line 9
+        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 10
+        pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 11
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -99,40 +100,51 @@ public class Romance extends CommandOpMode {
         robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
-        ROMANCE_BS = ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? BLUE_ROMANCE_BS : RED_ROMANCE_BS;
-
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
         schedule(
                 new SequentialCommandGroup(
                         // init
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2) + ROMANCE_BS) * ALLIANCE_COLOR.getMultiplier())),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
                         pathShoot(1, 2500),
-                        new WaitCommand(1000),
 
                         // spike 1
-                        new DriveTo(pathPoses.get(2)).withTimeout(300),
-                        pathIntake(3, 1867),
-                        pathShoot(5, 2250),
+                        pathIntake(2, 1867),
+                        new ConditionalCommand(
+                                new SequentialCommandGroup(
+                                        new DriveTo(pathPoses.get(4)).withTimeout(300),
+                                        new DriveTo(pathPoses.get(5)).withTimeout(300)
+                                ),
+                                new InstantCommand(),
+                                () -> GATE_OPEN
+                        ),
+                        pathShoot(6, 2250),
 
                         // spike 2
-                        pathIntake(6, 2267),
-//                        new DriveTo(pathPoses.get(8)).withTimeout(670),
-                        pathShoot(9, 3000),
+                        pathIntake(7, 2267),
+                        pathShoot(10, 3000),
                         new ClearLaunch(true),
                         
-                        new DriveTo(pathPoses.get(10)) // park
+                        new DriveTo(pathPoses.get(11)) // park
                 )
         );
     }
 
     @Override
     public void initialize_loop() {
-        telemetryData.addData("ALLIANCE_COLOR", ALLIANCE_COLOR);
+        if (gamepad1.cross || gamepad2.cross || gamepad1.triangle || gamepad2.triangle) {
+            GATE_OPEN = false;
+        } else if (gamepad1.circle || gamepad2.circle || gamepad1.square || gamepad2.square) {
+            GATE_OPEN = true;
+        }
+
+        telemetryData.addData("Cross / Triangle", "false");
+        telemetryData.addData("Circle / Square", "true");
+        telemetryData.addData("Gate Open", GATE_OPEN);
+        telemetryData.addData("Alliance Color", ALLIANCE_COLOR);
         telemetryData.update();
     }
 
@@ -202,14 +214,10 @@ public class Romance extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new InstantCommand(() -> robot.launcher.setFlywheel(5.67, true))
-                ),
-                new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, ((Math.PI/2) + ROMANCE_BS) * ALLIANCE_COLOR.getMultiplier())),
-                new InstantCommand(() -> robot.readyToLaunch = true),
-                new ClearLaunch(true).alongWith(
-                        new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
-                )
+                        new DriveTo(pathPoses.get(pathStartingIndex)),
+                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, (Math.PI/2) * ALLIANCE_COLOR.getMultiplier()))
+                ).withTimeout(timeout),
+                new StationaryAimbotFullLaunch()
         );
     }
 

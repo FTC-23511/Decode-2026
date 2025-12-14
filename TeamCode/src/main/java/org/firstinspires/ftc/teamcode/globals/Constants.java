@@ -128,7 +128,7 @@ public class Constants {
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
     public static double DISTANCE_BS = 0.067; // meters
 
-    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01241, 0, 0.00167, 0); // Coefficients for radians
+    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01267, 0, 0.00167, 0); // Coefficients for radians
     public static double CAMERA_TX_TOLERANCE = 1.67; // Arducam TX
     public static double CAMERA_MAX_OUTPUT = 1.0;
     public static double CAMERA_MIN_OUTPUT = 0.0;

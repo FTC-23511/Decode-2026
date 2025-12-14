@@ -187,7 +187,9 @@ public class Camera {
 
         // 5. Update BOTH processors
         aprilTagProcessor.setRegionOfInterest(calculatedRoi);
-        rectProcessor.setRoi(calculatedRoi);
+        if (rectProcessor != null) {
+            rectProcessor.setRoi(calculatedRoi);
+        }
     }
 
     /**
