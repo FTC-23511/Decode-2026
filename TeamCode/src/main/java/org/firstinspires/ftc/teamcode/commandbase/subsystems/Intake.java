@@ -167,7 +167,7 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return withinDistance && distanceTimer.milliseconds() >= DISTANCE_TIME;
+        return false;
 
         //  return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
         //  && !intakeJammed;

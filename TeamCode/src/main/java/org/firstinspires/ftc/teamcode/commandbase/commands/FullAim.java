@@ -154,7 +154,7 @@ public class FullAim extends CommandBase {
             ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
         }
 
-        robot.readyToLaunch = !impossible;
+        robot.readyToLaunch = true;
     }
 
     @Override

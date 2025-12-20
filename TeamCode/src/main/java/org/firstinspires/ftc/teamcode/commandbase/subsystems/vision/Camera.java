@@ -149,7 +149,6 @@ public class Camera {
     public void updateROI(Pose2d robotPose) {
         if (robotPose == null) return;
 
-
         // 1. Get Distance (Inches)
         double distance = APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
 
