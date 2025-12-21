@@ -685,6 +685,8 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
             }
             writeByteArray(Register.SET_BULK_READ, arr); //write all registers sequentially
         }
+
+        return this;
     }
 
     /**
@@ -696,6 +698,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      */
     public GoBildaPinpointDriver setErrorDetectionType(ErrorDetectionType e){
         errorDetectionType = e;
+        return this;
     }
 
     /**
@@ -710,6 +713,8 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     public GoBildaPinpointDriver setOffsets(double xOffset, double yOffset, DistanceUnit distanceUnit){
         writeFloat(Register.X_POD_OFFSET, (float) distanceUnit.toMm(xOffset));
         writeFloat(Register.Y_POD_OFFSET, (float) distanceUnit.toMm(yOffset));
+
+        return this;
     }
 
     /**
@@ -717,14 +722,19 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * <strong> Robot MUST be stationary </strong> <br><br>
      * Device takes a large number of samples, and uses those as the gyroscope zero-offset. This takes approximately 0.25 seconds.
      */
-    public void recalibrateIMU(){writeInt(Register.DEVICE_CONTROL,1<<0);}
+    public void recalibrateIMU(){
+        writeInt(Register.DEVICE_CONTROL,1<<0);
+    }
 
     /**
      * Resets the current position to 0,0,0 and recalibrates the Odometry Computer's internal IMU. <br><br>
      * <strong> Robot MUST be stationary </strong> <br><br>
      * Device takes a large number of samples, and uses those as the gyroscope zero-offset. This takes approximately 0.25 seconds.
      */
-    public GoBildaPinpointDriver resetPosAndIMU(){writeInt(Register.DEVICE_CONTROL,1<<1);}
+    public GoBildaPinpointDriver resetPosAndIMU() {
+        writeInt(Register.DEVICE_CONTROL,1<<1);
+        return this;
+    }
 
     /**
      * Can reverse the direction of each encoder.
@@ -745,6 +755,8 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
         if (yEncoder == EncoderDirection.REVERSED){
             writeInt(Register.DEVICE_CONTROL,1<<2);
         }
+
+        return this;
     }
 
     /**
@@ -758,6 +770,8 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
         if (pods == GoBildaOdometryPods.goBILDA_4_BAR_POD){
             writeByteArray(Register.MM_PER_TICK,(floatToByteArray(goBILDA_4_BAR_POD, ByteOrder.LITTLE_ENDIAN)));
         }
+
+        return this;
     }
 
     /**
@@ -810,6 +824,8 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
         writeByteArray(Register.X_POSITION,(floatToByteArray((float) pos.getX(DistanceUnit.MM), ByteOrder.LITTLE_ENDIAN)));
         writeByteArray(Register.Y_POSITION,(floatToByteArray((float) pos.getY(DistanceUnit.MM),ByteOrder.LITTLE_ENDIAN)));
         writeByteArray(Register.H_ORIENTATION,(floatToByteArray((float) pos.getHeading(AngleUnit.RADIANS),ByteOrder.LITTLE_ENDIAN)));
+
+        return this;
     }
 
     /**
