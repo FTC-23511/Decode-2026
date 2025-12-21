@@ -660,7 +660,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * when .update() is called. Use this to minimize read times based on your unique application.
      * @param registers An array of registers, add registers that you need data from frequently.
      */
-    public void setBulkReadScope(Register... registers){
+    public GoBildaPinpointDriver setBulkReadScope(Register... registers){
 
         if(deviceVersion == 0){
             deviceVersion = readInt(Register.DEVICE_VERSION);
@@ -694,7 +694,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * LOCAL_TEST: "Controller only" validation that ensures that the data is !NAN, is not all zeros, and is a reasonable number.
      * This is faster than CRC but may not catch every erroneous read.<br>
      */
-    public void setErrorDetectionType(ErrorDetectionType e){
+    public GoBildaPinpointDriver setErrorDetectionType(ErrorDetectionType e){
         errorDetectionType = e;
     }
 
@@ -707,7 +707,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * @param yOffset how far forward from the center of the robot is the Y (Strafe) pod? forward increases
      * @param distanceUnit the unit of distance used for offsets.
      */
-    public void setOffsets(double xOffset, double yOffset, DistanceUnit distanceUnit){
+    public GoBildaPinpointDriver setOffsets(double xOffset, double yOffset, DistanceUnit distanceUnit){
         writeFloat(Register.X_POD_OFFSET, (float) distanceUnit.toMm(xOffset));
         writeFloat(Register.Y_POD_OFFSET, (float) distanceUnit.toMm(yOffset));
     }
@@ -724,14 +724,14 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * <strong> Robot MUST be stationary </strong> <br><br>
      * Device takes a large number of samples, and uses those as the gyroscope zero-offset. This takes approximately 0.25 seconds.
      */
-    public void resetPosAndIMU(){writeInt(Register.DEVICE_CONTROL,1<<1);}
+    public GoBildaPinpointDriver resetPosAndIMU(){writeInt(Register.DEVICE_CONTROL,1<<1);}
 
     /**
      * Can reverse the direction of each encoder.
      * @param xEncoder FORWARD or REVERSED, X (forward) pod should increase when the robot is moving forward
      * @param yEncoder FORWARD or REVERSED, Y (strafe) pod should increase when the robot is moving left
      */
-    public void setEncoderDirections(EncoderDirection xEncoder, EncoderDirection yEncoder){
+    public GoBildaPinpointDriver setEncoderDirections(EncoderDirection xEncoder, EncoderDirection yEncoder){
         if (xEncoder == EncoderDirection.FORWARD){
             writeInt(Register.DEVICE_CONTROL,1<<5);
         }
@@ -751,7 +751,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * If you're using goBILDA odometry pods, the ticks-per-mm values are stored here for easy access.<br><br>
      * @param pods goBILDA_SWINGARM_POD or goBILDA_4_BAR_POD
      */
-    public void setEncoderResolution(GoBildaOdometryPods pods){
+    public GoBildaPinpointDriver setEncoderResolution(GoBildaOdometryPods pods){
         if (pods == GoBildaOdometryPods.goBILDA_SWINGARM_POD) {
             writeByteArray(Register.MM_PER_TICK, (floatToByteArray(goBILDA_SWINGARM_POD, ByteOrder.LITTLE_ENDIAN)));
         }
@@ -806,7 +806,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * relative to that new, more accurate position.
      * @param pos a Pose2D describing the robot's new position.
      */
-    public void setPosition(Pose2D pos){
+    public GoBildaPinpointDriver setPosition(Pose2D pos){
         writeByteArray(Register.X_POSITION,(floatToByteArray((float) pos.getX(DistanceUnit.MM), ByteOrder.LITTLE_ENDIAN)));
         writeByteArray(Register.Y_POSITION,(floatToByteArray((float) pos.getY(DistanceUnit.MM),ByteOrder.LITTLE_ENDIAN)));
         writeByteArray(Register.H_ORIENTATION,(floatToByteArray((float) pos.getHeading(AngleUnit.RADIANS),ByteOrder.LITTLE_ENDIAN)));
