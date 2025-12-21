@@ -97,7 +97,7 @@ public class FullTeleOp extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
-                        new InstantCommand(() -> robot.intake.toggleIntake())
+                        new InstantCommand(() -> robot.intake.toggleIntakeMotor())
                 )
         );
 
@@ -278,7 +278,6 @@ public class FullTeleOp extends CommandOpMode {
 
         telemetryData.addData("Intake Motor State", Intake.motorState);
         telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
-        telemetryData.addData("Intake transferFull", robot.intake.transferFull());
 
         telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 

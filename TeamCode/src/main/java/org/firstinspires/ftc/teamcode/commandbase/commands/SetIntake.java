@@ -52,6 +52,6 @@ public class SetIntake extends CommandBase {
             return true;
         }
 
-        return !waitForArtifacts && timer.milliseconds() > 200;
+        return !waitForArtifacts;
     }
 }

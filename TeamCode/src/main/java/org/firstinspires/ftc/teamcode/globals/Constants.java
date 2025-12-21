@@ -57,7 +57,7 @@ public class Constants {
     public static double FR_ENCODER_OFFSET = 3.602; // Radians
     public static double FL_ENCODER_OFFSET = 3.753; // Radians
     public static double BL_ENCODER_OFFSET = 2.0; // Radians
-    public static double BR_ENCODER_OFFSET = 1.89; // Radians
+    public static double BR_ENCODER_OFFSET = 1.12; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
     public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(5, 0, 0.3, 0); // Coefficients for radians
@@ -69,8 +69,8 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.5341;
-    public static double INTAKE_PIVOT_HOLD = 0.49;
+    public static double INTAKE_PIVOT_FORWARD = 0.615;
+    public static double INTAKE_PIVOT_HOLD = 0.5709;
     public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.02;
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
@@ -80,8 +80,8 @@ public class Constants {
     public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
-    public static double DISTANCE_THRESHOLD = 6.00; // cm // TODO: needs to be tuned
-    public static double DISTANCE_TIME = 250; // milliseconds // TODO: needs to be tuned
+    public static double DISTANCE_THRESHOLD = 6.867; // cm
+    public static double DISTANCE_TIME = 267; // milliseconds
 //    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 //    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
@@ -107,8 +107,8 @@ public class Constants {
     public static double MIN_HOOD_SERVO_POS = 0.34; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
     public static double MAX_HOOD_SERVO_POS = 0.823; // Position // MUST MATCH WITH VALUE ABOVE
-    public static double HOOD_COMPENSATION = 0.0167; // ticks to degrees
-    
+    public static double HOOD_COMPENSATION = 0.0067; // ticks to degrees
+
     // Turret
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private static double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
@@ -124,7 +124,7 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
     public static double TURRET_MIN_OUTPUT = 0.12; // Power
-    public static double TURRET_OPEN_F = 0.1067;
+    public static double TURRET_OPEN_F = 0.1;
     public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
     public static double DISTANCE_BS = 0.067; // meters

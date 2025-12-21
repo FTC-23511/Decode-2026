@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.command.WaitCommand;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -27,7 +26,7 @@ public class Intake extends SubsystemBase {
         HOLD
     }
 
-    // Used for normal distance mode on distance sensor
+    // Used for normal distance mode (AnalogInput) on distance sensor
     public enum DistanceState {
         FOV_15,
         FOV_20,
@@ -36,8 +35,8 @@ public class Intake extends SubsystemBase {
 
     public boolean intakeJammed = false;
     private final ElapsedTime intakeTimer;
-    private final ElapsedTime distanceTimer;
-    private boolean withinDistance = false;
+    public final ElapsedTime distanceTimer;
+    public boolean withinDistance = false;
     public static MotorState motorState = MotorState.STOP;
     public static PivotState pivotState = PivotState.HOLD;
     public static DistanceState distanceState = DistanceState.FOV_15;
@@ -94,7 +93,7 @@ public class Intake extends SubsystemBase {
         Intake.motorState = motorState;
     }
 
-    public void toggleIntake() {
+    public void toggleIntakeMotor() {
         if (pivotState.equals(PivotState.FORWARD)) {
             if (motorState.equals(MotorState.FORWARD)) {
                 setIntake(MotorState.STOP);
@@ -107,24 +106,24 @@ public class Intake extends SubsystemBase {
     public void updateIntake() {
         robot.profiler.start("Intake Update");
 
-        if (getDistance() < DISTANCE_THRESHOLD) {
-            withinDistance = true;
-        } else {
-            withinDistance = false;
-            distanceTimer.reset();
-        }
-
         switch (motorState) {
             case FORWARD:
 //                if (transferFull()) {
 //                    setPivot(PivotState.HOLD);
 //                    setIntake(MotorState.STOP);
 //                }
+//                intakeJammed = true;
+//                intakeTimer.reset();
+//                setIntake(MotorState.REVERSE);
+
+                withinDistance = DISTANCE_THRESHOLD >= getDistance();
+
+                if (!withinDistance) {
+                    distanceTimer.reset();
+                }
 
 //                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
-//                    intakeJammed = true;
-//                    intakeTimer.reset();
-//                    setIntake(MotorState.REVERSE);
+//
 //                }
                 break;
             case REVERSE:
@@ -140,11 +139,6 @@ public class Intake extends SubsystemBase {
         }
 
         robot.profiler.end("Intake Update");
-    }
-
-    public void updateSensors() {
-//        robot.frontDistanceSensor.update();
-//        robot.backDistanceSensor.update();
     }
 
     public double getDistance() {
@@ -167,15 +161,11 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return false;
-
-        //  return robot.frontDistanceSensor.isActive() && robot.frontDistanceSensor.isActive()
-        //  && !intakeJammed;
+        return withinDistance && distanceTimer.milliseconds() >= DISTANCE_TIME;
     }
 
     @Override
     public void periodic() {
-//        updateDistanceSensors();
         updateIntake();
     }
 

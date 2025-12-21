@@ -24,6 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -47,12 +48,6 @@ public class Camera {
     public double cameraY = -1;
     public double cameraH = -1;
 
-    public final InterpLUT goalAdjustmentLUT = new InterpLUT(
-            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
-            true
-    );
-
     public final InterpLUT roiYOffsetLUT = new InterpLUT(
             Arrays.asList(0.0,  28.0,   39.0,  56.0, 67.0,  80.616, 99.31,  112.00, 120.0, 136.0, 150.0), // input: distance between robot and AprilTag (inches)
             Arrays.asList(240.0, 230.0, 129.8, 81.0, 67.0,  45.0,   33.2,   25.0,   22.0,  20.0,   20.0), // output: camera region of interest Y Offset
@@ -67,7 +62,6 @@ public class Camera {
     }
 
     public Camera(HardwareMap hwMap) {
-        goalAdjustmentLUT.createLUT();
         roiYOffsetLUT.createLUT();
         init(hwMap);
     }
@@ -149,34 +143,16 @@ public class Camera {
     public void updateROI(Pose2d robotPose) {
         if (robotPose == null) return;
 
-        // 1. Get Distance (Inches)
         double distance = APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
 
-        // 2. Define Keyframes (Using Top-Left Coordinates)
-
-        // CLOSE (30 inches) -> Bottom Half
-        double distClose = 30.0;
-//        double yClose = 240.0;    // Starts at pixel 240 (Middle)
-        double hClose = 240.0;    // Height is 240 (Middle to Bottom)
-
-        // FAR (144 inches) -> Top Strip
-        double distFar = 144.0;
-//        double yFar = 0.0;        // Starts at pixel 0 (Top Edge)
-        double hFar = 96.0;       // Height is 96 (Top Strip)
-
-        // 3. Calculate Linear Interpolation
-//        int finalY = (int) mapEquation(distance, distClose, yClose, distFar, yFar);
         int finalY = (int) roiYOffsetLUT.get(distance);
-        int finalH = (int) mapEquation(distance, distClose, hClose, distFar, hFar);
+        int finalH = (int) MathFunctions.mapEquation(distance, 30.0, 240.0, 144.0, 96.0);
 
+        // For logging
         cameraY = finalY;
         cameraH = finalH;
 
-        // 4. Create the Rect (Standard 0-640 coords)
-        // x = 0 (Left Edge)
-        // width = 640 (Full Width)
-
-        // ignore all calculations if we don't know where we are on the field
+        // Ignore all calculations if we don't know where we are on the field
         if (robot.drive.unsureXY) {
             finalY = 0;
             finalH = 480;
@@ -184,28 +160,10 @@ public class Camera {
 
         Rect calculatedRoi = new Rect(0, finalY, 640, finalH);
 
-        // 5. Update BOTH processors
         aprilTagProcessor.setRegionOfInterest(calculatedRoi);
         if (rectProcessor != null) {
             rectProcessor.setRoi(calculatedRoi);
         }
-    }
-
-    /**
-     * Standard Linear Equation Solver (Point-Slope Form)
-     * Calculates y based on x, given two known points (x1,y1) and (x2,y2).
-     */
-    private double mapEquation(double x, double x1, double y1, double x2, double y2) {
-        // 1. Clamp input to prevent the box from flying off screen
-        // If we are closer than the 'Close' point, just stay at the 'Close' settings.
-        if (x <= x1) return y1;
-        if (x >= x2) return y2;
-
-        // 2. Calculate Slope (m)
-        double m = (y2 - y1) / (x2 - x1);
-
-        // 3. Calculate Result (Point-Slope formula: y - y1 = m(x - x1))
-        return y1 + m * (x - x1);
     }
 
     public void updateDecimation(double distance) {
@@ -240,25 +198,13 @@ public class Camera {
             AprilTagDetection detection = cleanDetection(detections);
 
             if (detection != null) {
-                return pixelsToDegrees(detection.center);
+                return MathFunctions.pixelsToDegrees(detection.center);
             }
         }
 
         return null;
     }
 
-    public static double[] pixelsToDegrees(Point center) {
-        double px = center.x;
-        double py = center.y;
-
-        double xNorm = (px - 317.108) / 549.651;
-        double yNorm = (py - 236.644) / 549.651;
-
-        double horizontalAngle = Math.toDegrees(Math.atan(xNorm));
-        double verticalAngle = Math.toDegrees(Math.atan(yNorm));
-
-        return new double[]{horizontalAngle, verticalAngle};
-    }
 
     public Pose2d getCameraPose() {
         if (detections != null && !detections.isEmpty()) {
@@ -285,23 +231,7 @@ public class Camera {
             AprilTagDetection detection = cleanDetection(detections);
 
             if (detection != null) {
-                Point[] corners = detection.corners;
-
-                // Initialize min and max variables
-                double minY = Double.MAX_VALUE;
-                double maxY = Double.MIN_VALUE;
-                double minX = Double.MAX_VALUE;
-                double maxX = Double.MIN_VALUE;
-
-                // Loop through all 4 corners to find the bounds
-                for (Point point : corners) {
-                    if (point.y < minY) minY = point.y;
-                    if (point.y > maxY) maxY = point.y;
-                    if (point.x < minX) minX = point.x;
-                    if (point.x > maxX) maxX = point.x;
-                }
-
-                return maxY - minY;
+                return MathFunctions.getPointDimensions(detection.corners)[1];
             }
         }
 

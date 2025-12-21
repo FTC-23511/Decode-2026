@@ -13,6 +13,7 @@ import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
+import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
@@ -35,6 +37,12 @@ public class Turret extends SubsystemBase {
         OFF,
     }
 
+    public final InterpLUT goalAdjustmentLUT = new InterpLUT(
+            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
+            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
+            true
+    );
+
     public static TurretState turretState = ANGLE_CONTROL;
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
 
@@ -43,6 +51,8 @@ public class Turret extends SubsystemBase {
         turretController.setTolerance(TURRET_POS_TOLERANCE);
         turretController.setMinOutput(0);
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+
+        goalAdjustmentLUT.createLUT();
     }
 
     public void init() {
@@ -281,7 +291,7 @@ public class Turret extends SubsystemBase {
 
         double offset = -robot.turret.angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = robot.camera.goalAdjustmentLUT.get(offset);
+        double adjustment = goalAdjustmentLUT.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;

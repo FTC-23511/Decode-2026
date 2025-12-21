@@ -63,14 +63,14 @@ public class Romance extends CommandOpMode {
 
         pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(324))); // Starting Pose
         pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 1
-        pathPoses.add(new Pose2d(-16.7, 11.0, Math.toRadians(10))); // Line 2
-        pathPoses.add(new Pose2d(-52.5, 11.0, Math.toRadians(10))); // Line 3 -
-        pathPoses.add(new Pose2d(-49.15, 1.12, Math.toRadians(10))); // Line 4 - pre-gate
-        pathPoses.add(new Pose2d(-56.0, 1.12, Math.toRadians(10))); // Line 5 - gate pose
+        pathPoses.add(new Pose2d(-16.7, 14.0, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-52.41, 14.0, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-49.15, -2.67, Math.toRadians(0))); // Line 4 - pre-gate
+        pathPoses.add(new Pose2d(-57.41, -2.67, Math.toRadians(0))); // Line 5 - gate pose
         pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 6
-        pathPoses.add(new Pose2d(-12.7, -12.0, Math.toRadians(10))); // Line 7
-        pathPoses.add(new Pose2d(-57.0, -12.0, Math.toRadians(10))); // Line 8 -
-        pathPoses.add(new Pose2d(-32.0, -12.0, Math.toRadians(10))); // Line 9
+        pathPoses.add(new Pose2d(-12.7, -13.5, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-58.0, -13.5, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-32.0, -13.5, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 10
         pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 11
 
@@ -98,6 +98,7 @@ public class Romance extends CommandOpMode {
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
+        robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -114,8 +115,8 @@ public class Romance extends CommandOpMode {
                         pathIntake(2, 1867),
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        new DriveTo(pathPoses.get(4)).withTimeout(567),
-                                        new DriveTo(pathPoses.get(5)).withTimeout(841)
+                                        new DriveTo(pathPoses.get(4)).withTimeout(300),
+                                        new DriveTo(pathPoses.get(5)).withTimeout(300)
                                 ),
                                 new InstantCommand(),
                                 () -> GATE_OPEN
@@ -225,8 +226,7 @@ public class Romance extends CommandOpMode {
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
 
-                new DriveTo(pathPoses.get(pathStartingIndex + 1)).withTimeout(2000),
-                Intake.ActiveStopIntake()
+                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );
     }
 }

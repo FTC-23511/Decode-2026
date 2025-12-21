@@ -106,7 +106,7 @@ public class FullTeleOpLogging extends CommandOpMode {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
-                        new InstantCommand(() -> robot.intake.toggleIntake())
+                        new InstantCommand(() -> robot.intake.toggleIntakeMotor())
                 )
         );
 

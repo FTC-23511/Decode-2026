@@ -74,7 +74,7 @@ public abstract class AprilTagProcessor implements VisionProcessor
 
     public static AprilTagProcessor easyCreateWithDefaults()
     {
-        return new AprilTagProcessor.Builder().build();
+        return new Builder().build();
     }
 
     public static class Builder

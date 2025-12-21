@@ -12,7 +12,7 @@ StationaryAimbotFullLaunch extends SequentialCommandGroup {
     public StationaryAimbotFullLaunch() {
         Robot robot = Robot.getInstance();
         addCommands(
-                new FullAim().withTimeout(4000),
+                new FullAim(),
                 new WaitCommand(250),
                 new ClearLaunch(true).alongWith(
                         new InstantCommand(
