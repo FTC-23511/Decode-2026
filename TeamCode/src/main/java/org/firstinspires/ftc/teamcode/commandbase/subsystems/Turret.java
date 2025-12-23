@@ -1,14 +1,9 @@
 package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.TX_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.*;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
-import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -16,24 +11,20 @@ import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    private final ElapsedTime timer = new ElapsedTime();
     private Pose2d turretPose = null;
-    private final ArrayList<Pose2d> turretPoseEstimates = new ArrayList<>();
+    public static double poseOffset = 0;
 
     public enum TurretState {
-        TX_CONTROL,
-        ANGLE_CONTROL,
         GOAL_LOCK_CONTROL,
+        ANGLE_CONTROL,
         OFF,
     }
 
@@ -43,20 +34,35 @@ public class Turret extends SubsystemBase {
             true
     );
 
-    public static TurretState turretState = ANGLE_CONTROL;
+    public static TurretState turretState = GOAL_LOCK_CONTROL;
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+
+//    public CascadeController turretController = new CascadeController(
+//            new PIDFController(TURRET_PIDF_COEFFICIENTS)
+//                    .setIntegrationControl(
+//                            new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL)
+//                    ),
+//            new PIDFController(TURRET_PIDF_COEFFICIENTS)
+//                    .setIntegrationControl(
+//                            new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL)
+//                    )
+//    );
 
     public Turret() {
         turretController.setOpenF(TURRET_OPEN_F);
-        turretController.setTolerance(TURRET_POS_TOLERANCE);
-        turretController.setMinOutput(0);
+        turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
+        turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+        turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+        turretController.setMinOutput(0);
 
         goalAdjustmentLUT.createLUT();
     }
 
     public void init() {
-        if (!OP_MODE_TYPE.equals(OpModeType.AUTO)) {
+        if (!TESTING_OP_MODE) {
+            setTurret(GOAL_LOCK_CONTROL, 0);
+        } else {
             setTurret(TurretState.OFF, 0);
         }
     }
@@ -72,45 +78,22 @@ public class Turret extends SubsystemBase {
         this.turretPose = turretPose;
     }
 
-    public void clearTurretPose() {
-        turretPoseEstimates.clear();
-        turretPose = null;
-    }
-
     public void setTurret(TurretState turretState, double value) {
-        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
-        turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
-
         switch (turretState) {
-            case ANGLE_CONTROL:
-                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
-                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                turretController.setMinOutput(0);
-
-                turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
-                break;
             case GOAL_LOCK_CONTROL:
-                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
-                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                turretController.setMinOutput(0);
-
-                getTurretPose(); // fixes goofy jinu
+                // value = manual offset (inches), where + is right side and - is left side
+                poseOffset = value * ALLIANCE_COLOR.getMultiplier();
+                turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
-
                 break;
-            case TX_CONTROL:
-                turretController.setTolerance(CAMERA_TX_TOLERANCE);
-                turretController.setPIDF(CAMERA_PIDF_COEFFICIENTS.p * (DEFAULT_VOLTAGE / robot.getVoltage()), CAMERA_PIDF_COEFFICIENTS.i, CAMERA_PIDF_COEFFICIENTS.d, CAMERA_PIDF_COEFFICIENTS.f);
-                turretController.setMaxOutput(CAMERA_MAX_OUTPUT);
-                turretController.setMinOutput(TURRET_MIN_OUTPUT);
-
+            case ANGLE_CONTROL:
+                // value = turret target (radians)
+                turretController.clearTotalError();
                 turretController.setSetPoint(value);
-                turretController.calculate(CAMERA_TX_TOLERANCE + value + 0.1); // makes sure atSetPoint doesn't return true early
-                break;
+
             case OFF:
+                turretController.clearTotalError();
                 robot.turretServos.set(0);
                 break;
         }
@@ -127,44 +110,11 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
-        robot.turret.turretController.setOpenF(TURRET_OPEN_F);
-        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
-
-        if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
-            clearTurretPose();
-        }
-
+        turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
         double power;
+
         switch (turretState) {
-            case ANGLE_CONTROL:
-                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
-                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-
-                robot.profiler.start("Turret Read");
-                power = turretController.calculate(getPosition());
-                robot.profiler.end("Turret Read");
-
-                if (Math.abs(turretController.getPositionError()) > TURRET_POS_THRESHOLD) {
-                    turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                } else {
-                    turretController.setMaxOutput(TURRET_SMALL_MAX_OUTPUT);
-                }
-
-                robot.profiler.start("Turret Write");
-                if (robot.turret.turretController.atSetPoint()) {
-                    robot.turretServos.set(0);
-                } else {
-                    robot.turretServos.set(power);
-                }
-                robot.profiler.end("Turret Write");
-
-                break;
             case GOAL_LOCK_CONTROL:
-                turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
-                turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
-                turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-
                 robot.profiler.start("Turret Read");
 
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose(getTurretPose())));
@@ -194,73 +144,25 @@ public class Turret extends SubsystemBase {
                 }
                 robot.profiler.end("Turret Write");
                 break;
-            case TX_CONTROL:
-                robot.profiler.start("Turret Read");
-                robot.camera.updateCameraResult(3);
-                robot.profiler.end("Turret Read");
 
-                turretController.setTolerance(CAMERA_TX_TOLERANCE, Double.POSITIVE_INFINITY);
-                turretController.setCoefficients(CAMERA_PIDF_COEFFICIENTS);
-                turretController.setMinOutput(CAMERA_MIN_OUTPUT);
-                turretController.setMaxOutput(CAMERA_MAX_OUTPUT);
+            case ANGLE_CONTROL:
+                power = turretController.calculate(getPosition());
 
-                double[] targetDegrees = robot.camera.getTargetDegrees();
-
-                if (targetDegrees != null) {
-                    double tx = targetDegrees[0];
-                    power = -turretController.calculate(tx); // TODO: maybe figure out why we need to reverse power on TX_CONTROL
-
-                    robot.profiler.start("Turret Write");
-                    if (Math.abs(getPosition()) < Math.abs(MAX_TURRET_ANGLE)) {
-                        robot.turretServos.set(power);
-                    } else {
-                        robot.turretServos.set(0);
-                    }
-                    robot.profiler.end("Turret Write");
+                if (robot.turret.turretController.atSetPoint()) {
+                    robot.turretServos.set(0);
                 } else {
-                    robot.profiler.start("Turret Write");
-                    robot.turretServos.set(0); // turn off servo power if nothing is visible
-                    robot.profiler.end("Turret Write");
+                    robot.turretServos.set(power);
                 }
+                break;
+
+            case OFF:
+                // We already set turret power to 0, so do nothing in the update
                 break;
         }
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint()
-                && (turretState.equals(ANGLE_CONTROL) || turretState.equals(GOAL_LOCK_CONTROL) || (robot.camera.getCameraPose() != null && turretState.equals(TX_CONTROL)));
-    }
-
-    public void updateTurretPoseReadings(Pose2d llPose) {
-        turretPoseEstimates.add(llPose);
-
-        if (turretPoseEstimates.size() > 3) {
-            turretPoseEstimates.remove(0);
-        }
-
-        double avgX = turretPoseEstimates.stream()
-                .mapToDouble(Pose2d::getX)
-                .average()
-                .orElse(llPose.getX());
-
-        double avgY = turretPoseEstimates.stream()
-                .mapToDouble(Pose2d::getY)
-                .average()
-                .orElse(llPose.getY());
-
-        double avgHeading = turretPoseEstimates.stream()
-                .mapToDouble(Pose2d::getHeading)
-                .average()
-                .orElse(llPose.getHeading());
-
-        // Update the turretPose variable with the averaged values
-        Pose2d newTurretPose = new Pose2d(avgX, avgY, avgHeading);
-        if (turretPose == null
-            || (turretPose.minus(newTurretPose).getTranslation().getNorm() > 2
-                || turretPose.minus(newTurretPose).getRotation().getAngle(AngleUnit.RADIANS) > 0.1)) {
-            robot.turret.updateTurretPose(newTurretPose);
-        }
-        timer.reset();
+        return turretController.atSetPoint();
     }
 
     public double angleToWall(Pose2d robotPose) {
@@ -291,7 +193,7 @@ public class Turret extends SubsystemBase {
 
         double offset = -robot.turret.angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = goalAdjustmentLUT.get(offset);
+        double adjustment = goalAdjustmentLUT.get(offset) + poseOffset;
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;

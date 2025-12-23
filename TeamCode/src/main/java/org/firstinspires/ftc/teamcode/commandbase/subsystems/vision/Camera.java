@@ -29,7 +29,6 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
 import java.util.ArrayList;
@@ -47,6 +46,8 @@ public class Camera {
 
     public double cameraY = -1;
     public double cameraH = -1;
+
+    private final ArrayList<Pose2d> cameraPoseEstimates = new ArrayList<>();
 
     public final InterpLUT roiYOffsetLUT = new InterpLUT(
             Arrays.asList(0.0,  28.0,   39.0,  56.0, 67.0,  80.616, 99.31,  112.00, 120.0, 136.0, 150.0), // input: distance between robot and AprilTag (inches)
@@ -118,7 +119,7 @@ public class Camera {
     }
 
     /**
-     * Updates internal camera result in the Turret class
+     * Updates internal camera result
      * @param n max number of times to attempt reading to get a valid result
      */
     public void updateCameraResult(int n) {
@@ -129,10 +130,10 @@ public class Camera {
             detections = aprilTagProcessor.getDetections();
 
             if (detections != null && !detections.isEmpty()) {
-                Pose2d pose = getCameraPose();
+                Pose2d cameraPose = getCameraPose();
 
-                if (pose != null) {
-                    robot.turret.updateTurretPoseReadings(pose);
+                if (cameraPose != null) {
+                    robot.camera.updateCameraPoseReadings(cameraPose);
                 }
 
                 break;
@@ -151,12 +152,6 @@ public class Camera {
         // For logging
         cameraY = finalY;
         cameraH = finalH;
-
-        // Ignore all calculations if we don't know where we are on the field
-        if (robot.drive.unsureXY) {
-            finalY = 0;
-            finalH = 480;
-        }
 
         Rect calculatedRoi = new Rect(0, finalY, 640, finalH);
 
@@ -224,6 +219,34 @@ public class Camera {
         }
 
         return null;
+    }
+
+    private void updateCameraPoseReadings(Pose2d cameraPose) {
+        cameraPoseEstimates.add(cameraPose);
+
+        if (cameraPoseEstimates.size() > 3) {
+            cameraPoseEstimates.remove(0);
+        }
+    }
+
+    public Pose2d getAverageCameraPose(Pose2d cameraPose) {
+        double avgX = cameraPoseEstimates.stream()
+                .mapToDouble(Pose2d::getX)
+                .average()
+                .orElse(cameraPose.getX());
+
+        double avgY = cameraPoseEstimates.stream()
+                .mapToDouble(Pose2d::getY)
+                .average()
+                .orElse(cameraPose.getY());
+
+        double avgHeading = cameraPoseEstimates.stream()
+                .mapToDouble(Pose2d::getHeading)
+                .average()
+                .orElse(cameraPose.getHeading());
+
+        // Update robot variable with the averaged values
+        return new Pose2d(avgX, avgY, avgHeading);
     }
 
     public double getTagHeight() {

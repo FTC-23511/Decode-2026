@@ -216,7 +216,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launcher = new Launcher();
         turret = new Turret();
 
-        // vision
+        // Camera for vision
         camera = new Camera(hwMap);
 
         // Robot/CommandScheduler configurations

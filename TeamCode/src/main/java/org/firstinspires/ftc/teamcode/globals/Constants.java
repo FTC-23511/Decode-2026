@@ -15,6 +15,7 @@ public class Constants {
         AUTO,
         TELEOP
     }
+
     public enum AllianceColor {
         BLUE(1), RED(-1);
 
@@ -127,7 +128,6 @@ public class Constants {
     public static double TURRET_OPEN_F = 0.1;
     public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
     public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
-    public static double DISTANCE_BS = 0.067; // meters
 
     public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01267, 0, 0.00167, 0); // Coefficients for radians
     public static double CAMERA_TX_TOLERANCE = 1.67; // Arducam TX

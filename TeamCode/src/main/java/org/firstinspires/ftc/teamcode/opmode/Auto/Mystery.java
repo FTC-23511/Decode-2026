@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -80,7 +79,7 @@ public class Mystery extends CommandOpMode {
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0.8 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND

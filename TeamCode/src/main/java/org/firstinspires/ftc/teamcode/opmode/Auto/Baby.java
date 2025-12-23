@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -90,7 +89,7 @@ public class Baby extends CommandOpMode {
         robot.launcher.setHood(MAX_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
         robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 1.965 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -99,7 +98,7 @@ public class Baby extends CommandOpMode {
                         // init
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
-                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, 1.965 * ALLIANCE_COLOR.getMultiplier())),
+                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0)),
 
                         // preload
                         pathShoot(0, 3500, false),

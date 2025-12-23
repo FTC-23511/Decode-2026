@@ -14,14 +14,6 @@ import java.util.Arrays;
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    public enum Motif {
-        NOT_FOUND,
-        GPP,
-        PGP,
-        PPG
-    }
-
-    public static Motif motifState = Motif.NOT_FOUND;
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
@@ -40,7 +32,7 @@ public class Launcher extends SubsystemBase {
 
     public void init() {
         if (!TESTING_OP_MODE) {
-            setRamp(OP_MODE_TYPE == OpModeType.AUTO);
+            setRamp(OP_MODE_TYPE.equals(OpModeType.AUTO));
             setHood(MIN_HOOD_ANGLE);
         }
         setFlywheel(0, false);
@@ -71,7 +63,7 @@ public class Launcher extends SubsystemBase {
 
     public void setActiveControl(boolean state) {
         activeControl = state;
-        if (state == false) {
+        if (!state) {
             setHood(targetHoodAngle);
         }
     }
@@ -192,11 +184,10 @@ public class Launcher extends SubsystemBase {
             finalAngleHoriz = MAX_HOOD_ANGLE;
             finalAngleVert = 90.0 - MAX_HOOD_ANGLE;
         } else {
-
+            // TODO: Find out what edge cases are
         }
 
         // --- 3. Recalculate Velocity for the Forced Angle (Cases B and C) ---
-
         double angleToUseRad = Math.toRadians(finalAngleHoriz);
         double tanTheta = Math.tan(angleToUseRad);
         double cosTheta = Math.cos(angleToUseRad);
@@ -211,8 +202,7 @@ public class Launcher extends SubsystemBase {
 
         double requiredVelocity = Math.sqrt((g * x * x) / denominator);
 
-        // --- 4. Final Velocity Constraint Check and Return ---
-
+        // --- 4. Final Velocity Constraint Check and Return ---\
         if (requiredVelocity > MAX_DRIVE_VELOCITY) {
             // The required velocity for the forced angle is too high. IMPOSSIBLE.
             return new double[]{Double.NaN, Double.NaN};

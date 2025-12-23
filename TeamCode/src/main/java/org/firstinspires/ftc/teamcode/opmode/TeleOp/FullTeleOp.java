@@ -67,22 +67,15 @@ public class FullTeleOp extends CommandOpMode {
         // Driver controls
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new SequentialCommandGroup(
-                        new ConditionalCommand(
-                                new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
-                                new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d()))),
-                                () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
-                        ),
-                        new InstantCommand(() -> robot.drive.unsureXY = true)
+                new ConditionalCommand(
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d()))),
+                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.TX_CONTROL, 0))
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
@@ -151,18 +144,22 @@ public class FullTeleOp extends CommandOpMode {
                 new UninterruptibleCommand(new CancelCommand())
         );
 
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, -1))
-        );
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 1))
-        );
         operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset + 2))
         );
+
         operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition()))
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset - 2))
         );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset - 1))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset + 1))
+        );
+
         operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
                 new StationaryAimbotFullLaunch()
         );
@@ -256,7 +253,6 @@ public class FullTeleOp extends CommandOpMode {
 
         double[] targetDegrees = robot.camera.getTargetDegrees();
         telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
-        telemetryData.addData("unsureXY", robot.drive.unsureXY);
 
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());

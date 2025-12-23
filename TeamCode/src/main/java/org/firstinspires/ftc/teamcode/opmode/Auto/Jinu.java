@@ -14,7 +14,6 @@ import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
-import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
