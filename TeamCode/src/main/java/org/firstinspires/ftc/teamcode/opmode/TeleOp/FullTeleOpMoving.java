@@ -1,0 +1,309 @@
+package org.firstinspires.ftc.teamcode.opmode.TeleOp;
+
+import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
+import com.seattlesolvers.solverslib.util.TelemetryData;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAimbotFullLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.Robot;
+
+@TeleOp(name = "AAAFullTeleOpMoving")
+public class FullTeleOpMoving extends CommandOpMode {
+    public GamepadEx driver;
+    public GamepadEx operator;
+
+    public ElapsedTime timer;
+
+    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+
+    private final Robot robot = Robot.getInstance();
+
+    public static double MAX_OUTPUT = 1;
+
+    @Override
+    public void initialize() {
+        // Must have for all opModes
+        Constants.OP_MODE_TYPE = OpModeType.TELEOP;
+
+        // Resets the command scheduler
+        super.reset();
+
+        // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
+        robot.init(hardwareMap);
+
+        driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
+                new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(TURNING_SLEW_RATE_LIMIT),
+                null
+        );
+        operator = new GamepadEx(gamepad2);
+
+        // Driver controls
+        // Reset heading
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new ConditionalCommand(
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d()))),
+                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.launcher.setRamp(false)),
+                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
+                        new InstantCommand(() -> robot.intake.toggleIntakeMotor())
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenReleased(
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new ConditionalCommand(
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> robot.readyToLaunch = true),
+                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                                new InstantCommand(() -> robot.launcher.setRamp(true)),
+                                new ClearLaunch(false)
+                        ),
+                        new SequentialCommandGroup(
+                                new InstantCommand(() -> robot.readyToLaunch = true),
+                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                                new InstantCommand(() -> robot.launcher.setRamp(true)),
+                                new ClearLaunch(true)
+                        ),
+                        () -> gamepad1.left_trigger > 0.5
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
+                new MovingAimbotFullLaunch()
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                new UninterruptibleCommand(new CancelCommand())
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset + 2))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset - 2))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset - 1))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset + 1))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
+                new MovingAimbotFullLaunch()
+        );
+    }
+
+    @Override
+    public void initialize_loop() {
+        robot.drive.setPose(END_POSE);
+        telemetryData.addData("END_POSE", END_POSE);
+        telemetryData.update();
+    }
+
+    @Override
+    public void run() {
+        robot.profiler.start("Full Loop");
+        // Keep all the has movement init for until when TeleOp starts
+        // This is like the init but when the program is actually started
+        if (timer == null) {
+            robot.initHasMovement();
+            timer = new ElapsedTime();
+        }
+
+        robot.profiler.start("Swerve Drive");
+        if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
+            // Drive the robot
+            if (driver.isDown(GamepadKeys.Button.START)) {
+                robot.drive.swerve.updateWithXLock();
+            } else {
+                robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
+                double minSpeed = 0.3; // As a fraction of the max speed of the robot
+                double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+                Pose2d robotPose = robot.drive.getPose();
+                Rotation2d robotAngle = robotPose.getRotation();
+                double headingCorrection = 0;
+
+                if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                    robot.drive.headingLock = true;
+                    robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+                    robot.drive.headingLock = false;
+                } else if (robot.drive.headingLock) {
+                    headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
+                    if (robot.drive.follower.atTarget()) {
+                        headingCorrection = 0;
+                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
+                        headingCorrection = 0;
+                    }
+                }
+
+                robot.drive.swerve.updateWithTargetVelocity(
+                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                                -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                                new Rotation2d(robotAngle.getAngle(AngleUnit.RADIANS) + (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? Math.PI : 0))
+                        )
+                );
+            }
+        }
+
+        if (robot.intake.transferFull() && !Intake.motorState.equals(Intake.MotorState.STOP)) {
+            gamepad1.rumble(100);
+            gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
+        } else {
+            gamepad1.stopRumble();
+            gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
+        }
+
+        robot.profiler.end("Swerve Drive");
+
+        telemetryData.addData("Loop Time", timer.milliseconds());
+        timer.reset();
+
+        if (PROBLEMATIC_TELEMETRY) {
+            robot.profiler.start("High TelemetryData");
+
+            telemetryData.addData("Turret Position", robot.turret.getPosition());
+            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
+            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
+            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
+            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
+            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
+
+            robot.profiler.end("High TelemetryData");
+        }
+
+        robot.profiler.start("Low TelemetryData");
+
+        double[] targetDegrees = robot.camera.getTargetDegrees();
+        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+
+        telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
+        telemetryData.addData("atTarget", robot.drive.follower.atTarget());
+        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
+        telemetryData.addData("Robot Pose", robot.drive.getPose());
+
+        telemetryData.addData("Turret State", Turret.turretState);
+        telemetryData.addData("Turret Target", robot.turret.getTarget());
+        telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
+        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
+        try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
+        telemetryData.addData("Wall Angle", robot.turret.angleToWall());
+        try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
+
+        telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
+        telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
+        telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
+        telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
+
+        telemetryData.addData("Intake Motor State", Intake.motorState);
+        telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
+
+        telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+
+        telemetryData.addData("Sigma", "Polar");
+        robot.profiler.end("Low TelemetryData");
+
+        robot.profiler.start("Run + Update");
+        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
+        robot.updateLoop(telemetryData);
+        robot.profiler.end("Run + Update");
+        robot.profiler.end("Full Loop");
+    }
+
+    @Override
+    public void end() {
+        Constants.END_POSE = robot.drive.getPose();
+        robot.exportProfiler(robot.file);
+        telemetryData.update();
+    }
+}

@@ -118,6 +118,7 @@ public class Launcher extends SubsystemBase {
         return activeControl && flywheelController.atSetPoint();
     }
 
+
     /**
      * Calculates the required launch parameters (velocity and angle) that
      * use the lowest possible velocity while respecting ALL constraints.

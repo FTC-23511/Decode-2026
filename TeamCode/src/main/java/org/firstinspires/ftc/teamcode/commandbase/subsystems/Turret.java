@@ -91,6 +91,7 @@ public class Turret extends SubsystemBase {
                 // value = turret target (radians)
                 turretController.clearTotalError();
                 turretController.setSetPoint(value);
+                break;
 
             case OFF:
                 turretController.clearTotalError();
