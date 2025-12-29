@@ -14,9 +14,9 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.Arrays;
@@ -107,7 +107,7 @@ public class CameraAngle extends CommandOpMode {
                 telemetryData.addData("bot pose", lastKnownPose);
                 double distance = Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch;
                 telemetryData.addData("Distance (m)", distance);
-                telemetryData.addData("Launcher Math Values", Arrays.toString(Launcher.distanceToLauncherValues(distance)));
+                telemetryData.addData("Launcher Math Values", Arrays.toString(MathFunctions.distanceToLauncherValues(distance)));
             } else {
                 telemetryData.addData("Median Wall Angle", "medianWallAngle is Empty");
             }

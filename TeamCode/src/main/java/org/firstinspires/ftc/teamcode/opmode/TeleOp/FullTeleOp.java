@@ -251,9 +251,6 @@ public class FullTeleOp extends CommandOpMode {
 
         robot.profiler.start("Low TelemetryData");
 
-        double[] targetDegrees = robot.camera.getTargetDegrees();
-        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
-
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());
         telemetryData.addData("Heading", robot.drive.getPose().getHeading());

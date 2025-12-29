@@ -10,7 +10,6 @@ import java.util.List;
  * @author Arush - 23511 (for the additional constructor, chained calls, and safeMode)
  */
 public class InterpLUT {
-
     private List<Double> mX = new ArrayList<>();
     private List<Double> mY = new ArrayList<>();
     private List<Double> mM = new ArrayList<>();

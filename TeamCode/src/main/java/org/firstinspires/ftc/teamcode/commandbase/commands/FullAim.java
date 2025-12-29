@@ -11,15 +11,14 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class FullAim extends CommandBase {
     private final Robot robot;
     private final ElapsedTime timer;
     private double aimIndex = 0;
-    private final boolean useCamera;
     /**
      * 0 = initial state
      * 1 = moving to initial state estimates for turret / launcher based off pinpoint
@@ -33,13 +32,8 @@ public class FullAim extends CommandBase {
      * Full aimbot command
      */
     public FullAim() {
-       this(false);
-    }
-
-    public FullAim(boolean useCamera) {
         robot = Robot.getInstance();
         this.timer = new ElapsedTime();
-        this.useCamera = useCamera;
         addRequirements(robot.launcher, robot.turret, robot.drive, robot.intake);
     }
 
@@ -50,10 +44,6 @@ public class FullAim extends CommandBase {
 
         robot.turret.updateTurretPose(null); // clear any prior readings of where turret was
 
-        if (useCamera) {
-            // TODO: Add optional camera relocalization before
-        }
-
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
 
         if (!Turret.turretState.equals(Turret.TurretState.GOAL_LOCK_CONTROL)) {
@@ -61,7 +51,7 @@ public class FullAim extends CommandBase {
         }
 
         // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
-        errorsAngleVelocity = Launcher.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
+        errorsAngleVelocity = MathFunctions.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
         robot.launcher.setFlywheel(errorsAngleVelocity[0], false);
         robot.launcher.setHood(errorsAngleVelocity[1]);
         aimIndex = 1;
@@ -94,7 +84,7 @@ public class FullAim extends CommandBase {
             if (robot.turret.readyToLaunch()) {
                 RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
 //                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
-                errorsAngleVelocity = Launcher.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
+                errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
 
                 if (Double.isNaN(errorsAngleVelocity[0])) {
                     impossible = true;

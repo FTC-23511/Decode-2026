@@ -68,7 +68,6 @@ public class Abby extends CommandOpMode {
     @Override
     public void initialize() {
         generatePath();
-        timer = new ElapsedTime();
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;

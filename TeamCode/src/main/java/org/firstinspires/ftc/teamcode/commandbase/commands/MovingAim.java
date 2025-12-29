@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class MovingAim extends CommandBase {
@@ -29,7 +30,7 @@ public class MovingAim extends CommandBase {
     private final ElapsedTime timer;
     Position target;
 
-    ShootingMath math;
+    MathFunctions.ShootingMath math;
     public MovingAim() {
         robot = Robot.getInstance();
         timer = new ElapsedTime();
@@ -38,14 +39,13 @@ public class MovingAim extends CommandBase {
 
         final Pose2d goalPose = GOAL_POSE();
         Position goalPosition = new Position(DistanceUnit.METER, goalPose.getX() * inchesPerMeters, goalPose.getY() * inchesPerMeters, TARGET_HEIGHT, 0);
-        math = new ShootingMath(goalPosition, LAUNCHER_HEIGHT, BALL_RADIUS);
+        math = new MathFunctions.ShootingMath(goalPosition, LAUNCHER_HEIGHT, BALL_RADIUS);
 
         addRequirements(robot.launcher, robot.turret, robot.drive, robot.intake);
     }
 
 
     public void initialize() {
-
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.intake.setPivot(Intake.PivotState.HOLD);
 
@@ -66,6 +66,7 @@ public class MovingAim extends CommandBase {
             }
 
     }
+
     public void end(boolean interrupted){
         if (!interrupted) {
             robot.turret.setTurret(Turret.TurretState.OFF, 0);
@@ -73,14 +74,16 @@ public class MovingAim extends CommandBase {
             robot.readyToLaunch = false;
         }
     }
+
     public boolean isFinished() {
         return robot.readyToLaunch;
     }
+
     private void predictSet() {
         Pose2d robotPose = robot.drive.getPose();
         ChassisSpeeds robotSpeed = robot.drive.swerve.getTargetVelocity();
 
-        ShootingMath.PredictResult values = math.predict(robotPose, robotSpeed);
+        MathFunctions.ShootingMath.PredictResult values = math.predict(robotPose, robotSpeed);
         robot.launcher.setFlywheel(values.flyWheelSpeed, true);
         robot.launcher.setHood(values.hoodAngle);
         robot.turret.setTurret(ANGLE_CONTROL,values.turretAngle);

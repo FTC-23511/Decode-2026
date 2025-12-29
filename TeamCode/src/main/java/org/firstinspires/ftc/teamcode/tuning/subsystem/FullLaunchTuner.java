@@ -11,9 +11,9 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -79,8 +79,8 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Math Output Required Ball Vel", Launcher.distanceToLauncherValues(DISTANCE)[0]);
-        telemetryData.addData("Math Output Required Hood Angle", Launcher.distanceToLauncherValues(DISTANCE)[1]);
+        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
+        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
         telemetryData.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
         telemetryData.addData("Hood Pos", robot.hoodServo.get());
         telemetryData.addData("Launch Motor Power", robot.launchMotors.get());

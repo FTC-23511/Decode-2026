@@ -1,9 +1,21 @@
 package org.firstinspires.ftc.teamcode.globals;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.GRAVITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_MAX_BALL_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_DRIVE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
+
+import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.opencv.core.Point;
 
 public class MathFunctions {
-
     /**
      * Converts pixels on a camera to degrees, give its FX, FY, CX, and CY
      */
@@ -74,4 +86,272 @@ public class MathFunctions {
 
         return m * (x - x1) + y1;
     }
+
+    /**
+     * Converts ticks/sec to meters/sec
+     * @param ticksPerSec flywheel rotation in ticks/sec
+     * @return flywheel rotation in meters/sec
+     */
+    public static double convertToMetersPerSec(double ticksPerSec) {
+        double cpr = 28; // encoder count per revolution
+        double wheelDiameter = 0.0762; // 3 inches converted to meters
+        double wheelCircumference = Math.PI * wheelDiameter;
+        double distPerTick = wheelCircumference / cpr;
+
+        return ticksPerSec * distPerTick;
+    }
+
+    /**
+     * Converts meters/sec to ticks/sec
+     * @param metersPerSec flywheel surface velocity in meters/sec
+     * @return flywheel rotation in ticks/sec
+     */
+    public static double convertToTicksPerSec(double metersPerSec) {
+        double cpr = 28; // encoder counts per revolution
+        double wheelDiameter = 0.0762; // 3 inches in meters
+        double wheelCircumference = Math.PI * wheelDiameter;
+        double distPerTick = wheelCircumference / cpr;
+
+        return metersPerSec / distPerTick;
+    }
+
+
+    /**
+     * Calculates the required launch parameters (velocity and angle) that
+     * use the lowest possible velocity while respecting ALL constraints.
+     *
+     * @param distance The horizontal distance to the target (x) in meters.
+     * @return A 2-item List<Double> containing:
+     * - Index 0: required velocity (m/s)
+     * - Index 1: used launch angle (degrees) measured FROM THE VERTICAL.
+     * Returns [Double.NaN, Double.NaN] if the shot is impossible.
+     */
+    public static double[] distanceToLauncherValues(double distance) {
+        double g = GRAVITY;
+        double x = distance;
+        double deltaY = TARGET_HEIGHT - LAUNCHER_HEIGHT;
+
+        // --- 1. Calculate the theoretical minimum velocity shot ---
+
+        // v²_min = g * (Δy + sqrt(Δy² + x²))
+        double minVelocitySquared = g * (deltaY + Math.sqrt(Math.pow(deltaY, 2) + Math.pow(x, 2)));
+        double minVelocity = Math.sqrt(minVelocitySquared);
+
+        // Calculate the angle required for this absolute minimum velocity (FROM HORIZONTAL)
+        double tanThetaMin = minVelocitySquared / (g * x);
+        double optimalAngleHoriz = Math.toDegrees(Math.atan(tanThetaMin));
+
+        // Convert optimal angle to the vertical system for checking constraints
+        double optimalAngleVert = 90.0 - optimalAngleHoriz;
+
+        // --- 2. Determine the Final Angle (Vertical) for the solution ---
+        double finalAngleVert; // The angle we will use and return (FROM VERTICAL)
+        double finalAngleHoriz; // The angle used in the physics calculation (FROM HORIZONTAL)
+
+        if (optimalAngleVert >= MIN_HOOD_ANGLE && optimalAngleVert <= MAX_HOOD_ANGLE) {
+            // Case A: Optimal shot is within vertical angle limits. Use it.
+            finalAngleVert = optimalAngleVert;
+            finalAngleHoriz = optimalAngleHoriz;
+
+            // Check velocity limit for this optimal shot
+            if (minVelocity > LAUNCHER_MAX_BALL_VELOCITY) {
+                // Even the most efficient shot is too fast. IMPOSSIBLE.
+                return new double[]{Double.NaN, Double.NaN};
+            }
+
+            // Return the optimal, efficient solution
+            return new double[]{minVelocity, finalAngleVert};
+
+        } else if (optimalAngleVert < MIN_HOOD_ANGLE) {
+            // Case B: Optimal angle is too close to vertical. FORCED to MIN_ANGLE_VERT (16°).
+            finalAngleVert = MIN_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MIN_HOOD_ANGLE; // Convert to horizontal system (90-16=74 deg)
+
+        } else { // optimalAngleVert > MAX_ANGLE_VERT
+            // Case C: Optimal angle is too close to horizontal. FORCED to MAX_ANGLE_VERT (50°).
+            finalAngleVert = MAX_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MAX_HOOD_ANGLE; // Convert to horizontal system (90-50=40 deg)
+        }
+
+        if (distance <= 0.825) {
+            finalAngleVert = MIN_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MIN_HOOD_ANGLE; // Convert to horizontal system (90-50=40 deg)
+        } else if (distance >= 1.8) {
+            finalAngleHoriz = MAX_HOOD_ANGLE;
+            finalAngleVert = 90.0 - MAX_HOOD_ANGLE;
+        } else {
+            // TODO: Find out what edge cases are
+        }
+
+        // --- 3. Recalculate Velocity for the Forced Angle (Cases B and C) ---
+        double angleToUseRad = Math.toRadians(finalAngleHoriz);
+        double tanTheta = Math.tan(angleToUseRad);
+        double cosTheta = Math.cos(angleToUseRad);
+
+        // v₀² = (g * x²) / (2 * cos²(θ) * (x * tan(θ) - Δy))
+        double denominator = 2 * (cosTheta * cosTheta) * (x * tanTheta - deltaY);
+
+        // Check for physical impossibility (denominator <= 0)
+        if (denominator <= 0) {
+            return new double[]{Double.NaN, Double.NaN};
+        }
+
+        double requiredVelocity = Math.sqrt((g * x * x) / denominator);
+
+        // --- 4. Final Velocity Constraint Check and Return ---\
+        if (requiredVelocity > MAX_DRIVE_VELOCITY) {
+            // The required velocity for the forced angle is too high. IMPOSSIBLE.
+            return new double[]{Double.NaN, Double.NaN};
+        }
+
+        // Return the valid, constrained solution
+        return new double[]{requiredVelocity, finalAngleVert};
+    }
+
+    /**
+     * Calculates the necessary hood angle to hit the target given the current flywheel velocity.
+     *
+     * @param distance The horizontal distance to the target (x) in meters.
+     * @param velocity The current launcher velocity in meters/second.
+     * @return distance: The required hood angle (in degrees from vertical).
+     *         impossible: If the shot is impossible
+     * TODO: Fix this method to handle ball vel
+     */
+    public static Object[] getHoodAngleFromVelocity(double distance, double velocity) {
+        double g = GRAVITY;
+        double y = TARGET_HEIGHT - LAUNCHER_HEIGHT;
+        double x = distance;
+        double v2 = Math.pow(velocity, 2);
+        double x2 = Math.pow(x, 2);
+
+        // --- 1. Discriminant Check (Physics Impossibility) ---
+        // If the target is physically out of range (too far for this speed)
+        double a = g * x2;
+        double b = -2 * v2 * x;
+        double c = (2 * v2 * y) + (g * x2);
+        double discriminant = (b * b) - (4 * a * c);
+
+        if (discriminant < 0) {
+            // We cannot reach the target.
+            // Best effort: Return MAX_HOOD_ANGLE for maximum range.
+            return new Object[]{MAX_HOOD_ANGLE, true};
+        }
+
+        // --- 2. Calculate Ideal Angles ---
+        double tanTheta1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        double tanTheta2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+
+        // Convert to Vertical System
+        double angleVert1 = 90.0 - Math.toDegrees(Math.atan(tanTheta1));
+        double angleVert2 = 90.0 - Math.toDegrees(Math.atan(tanTheta2));
+
+        // --- 3. Pick the Best "Theoretical" Angle ---
+        // We prefer the "flatter" shot (larger vertical angle) if available
+        // because it spends less time in the air.
+        double bestAngle = Math.max(angleVert1, angleVert2);
+
+        // --- 4. Validation & Clamping (Hardware Limits) ---
+        if (bestAngle >= MIN_HOOD_ANGLE && bestAngle <= MAX_HOOD_ANGLE) {
+            // Perfect scenario: We can hit it exactly.
+            return new Object[]{bestAngle, false};
+        }
+        else {
+            if (bestAngle < MIN_HOOD_ANGLE) {
+                // Needed a steeper shot -> limit to MIN
+                return new Object[]{MIN_HOOD_ANGLE, true};
+            } else {
+                // Needed a flatter shot -> limit to MAX
+                return new Object[]{MAX_HOOD_ANGLE, true};
+            }
+        }
+    }
+
+    /**
+     * Finds leg of triangle given hypotenuse and the other leg
+     */
+    public static double findLeg(double hypot, double leg) {
+        if (leg > hypot || hypot <= 0 || leg <= 0) {
+            return Double.NaN;
+        }
+
+        return Math.sqrt(Math.pow(hypot, 2) - Math.pow(leg, 2));
+    }
+
+    /**
+     * Finds hypotenuse of triangle given both legs
+     */
+    public static double findHypotenuse(double leg1, double leg2) {
+        return Math.hypot(leg1, leg2);
+    }
+
+    /**
+     * Sub-class for shooting while moving math
+     */
+    public static class ShootingMath {
+        Position target;
+        double ballRadius;
+        Pose2D robot;
+        ChassisSpeeds speed;
+        double robotHeight;
+
+        public static class PredictResult {
+            public boolean success = false;
+            public double flyWheelSpeed = 0;
+            public double turretAngle = 0;
+            public double hoodAngle = 0;
+        };
+
+        public ShootingMath(Position target, double ballRadius, double robotHeight) {
+            this.target = target;
+            this.ballRadius = ballRadius;
+            this.robotHeight = robotHeight;
+        }
+
+
+        /**
+         * predicts the hood angle, turret angle, and flywheel speed of the robot when aiming while moving
+         * uses the robotPose, and robotSpeed.
+         */
+        public ShootingMath.PredictResult predict(Pose2d robotPose, ChassisSpeeds robotSpeed){
+            //make a new PredictResult
+            ShootingMath.PredictResult result = new PredictResult();
+            //variables adjusted with robot height and ball radius
+            final double targetX = target.x - ballRadius;
+            final double targetY = target.y - ballRadius;
+            final double targetZ = target.z - robotHeight - ballRadius;
+            final double robotX = robotPose.getX();
+            final double robotY = robotPose.getY();
+            final double inchesPerMeters = 39.3701;
+
+            //mathhhhhh
+            //finds the horizontal distance between the robot and the target
+            final double distance = Math.sqrt(Math.pow(targetX - robotX,2)+Math.pow(targetY - robotY,2));
+            //ball's travel time
+            final double time = Math.sqrt(2*((targetZ)+distance)/9.8);
+            //horizontal speed of the ball
+            final double vh = distance/time;
+            //vertical speed of the ball
+            final double vz = 9.8*(time) - vh;
+            //angle of shooting
+            final double alpha = Math.atan((targetY - robotY) / (targetX - robotX));
+            //x component of the speed of the ball
+            final double vx = Math.sin(alpha)*vh;
+            //y component of the speed of the ball
+            final double vy = Math.cos(alpha)*vh;
+            //x component of the speed of the flywheel
+            final double vfx = (vx)-robotSpeed.vxMetersPerSecond*inchesPerMeters;
+            //y component of the speed of the flywheel
+            final double vfy = (vy)-robotSpeed.vyMetersPerSecond*inchesPerMeters;
+            //horizontal component of the speed of the flywheel
+            final double vfh = Math.sqrt(Math.pow(vfx,2)+Math.pow(vfy,2));
+            //returning turret angle, hood angle, and fly wheel speed
+            result.turretAngle = Math.atan(vfy/vfx) - robotPose.getHeading();
+            result.hoodAngle = Math.atan(vz/vfh);
+            result.flyWheelSpeed = vfh;
+            result.success = true;
+
+            return result;
+        }
+    }
+
 }

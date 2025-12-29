@@ -81,9 +81,10 @@ public class Turret extends SubsystemBase {
     public void setTurret(TurretState turretState, double value) {
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                // value = manual offset (inches), where + is right side and - is left side
+                // poseOffset value = manual offset (inches), where + is right side and - is left side
                 poseOffset = value * ALLIANCE_COLOR.getMultiplier();
                 turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
+                
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
                 break;
@@ -163,15 +164,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint();
-    }
-
-    public double angleToWall(Pose2d robotPose) {
-        return posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()) - posesToAngle(robotPose, Constants.GOAL_POSE());
-    }
-
-    public double angleToWall() {
-        return angleToWall(getTurretPose());
+        return turretController.atSetPoint() && turretState.equals(GOAL_LOCK_CONTROL);
     }
 
     /**
@@ -184,6 +177,14 @@ public class Turret extends SubsystemBase {
                 new Vector2d(targetPose).minus(new Vector2d(robotPose)).angle(),
                 true
         );
+    }
+
+    public double angleToWall(Pose2d robotPose) {
+        return posesToAngle(new Pose2d(0, 72, 0), Constants.GOAL_POSE()) - posesToAngle(robotPose, Constants.GOAL_POSE());
+    }
+
+    public double angleToWall() {
+        return angleToWall(getTurretPose());
     }
 
     public Pose2d adjustedGoalPose(Pose2d robotPose) {
