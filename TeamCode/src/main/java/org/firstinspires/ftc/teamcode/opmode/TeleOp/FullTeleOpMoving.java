@@ -31,6 +31,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
@@ -157,19 +158,19 @@ public class FullTeleOpMoving extends CommandOpMode {
         );
 
         operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset + 2))
+                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, 1)))
         );
 
         operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset - 2))
+                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, -1)))
         );
 
         operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset - 1))
+                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(-1, 0)))
         );
 
         operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset + 1))
+                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(1, 0)))
         );
 
         operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
