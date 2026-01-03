@@ -20,10 +20,9 @@ public class FullAim extends CommandBase {
     private final ElapsedTime timer;
     private double aimIndex = 0;
     /**
-     * 0 = initial state
-     * 1 = moving to initial state estimates for turret / launcher based off pinpoint
-     * 2 = drivetrain stops and turret compensates for remaining drivetrain error, lasts until turret is at target
-     * 3 = just waiting for hood/flywheel to reach final set states
+     * 0 = initial state, ends in initialize()
+     * 1 = moving to initial state estimates for turret / launcher based off pinpoint, ends when turret is aimed at goal
+     * 2 = just waiting for hood/flywheel to reach final set states
      */
     private boolean impossible = false;
     double[] errorsAngleVelocity;
@@ -60,12 +59,6 @@ public class FullAim extends CommandBase {
 
     @Override
     public void execute() {
-        if (aimIndex == 1) {
-            Pose2d robotPose = robot.drive.getPose();
-            double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(Turret.posesToAngle(robotPose, robot.turret.adjustedGoalPose(robot.turret.getTurretPose())));
-            robot.drive.follower.setTarget(robotPose.rotate(errorsDriveTurret[0]));
-        }
-
         if (aimIndex < 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
             robot.drive.swerve.updateWithTargetVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -79,21 +72,20 @@ public class FullAim extends CommandBase {
 
         RobotLog.aa("aimIndex", String.valueOf(aimIndex));
 
-        if (aimIndex == 2) {
-            if (robot.turret.readyToLaunch()) {
-                RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
+        if (robot.turret.readyToLaunch()) {
+            RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
 //                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
-                errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
+            errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
 
-                if (Double.isNaN(errorsAngleVelocity[0])) {
-                    impossible = true;
-                } else {
-                    robot.launcher.setFlywheel(errorsAngleVelocity[0], true);
-                    robot.launcher.setHood(errorsAngleVelocity[1]);
-                }
-                aimIndex = 3;
+            if (Double.isNaN(errorsAngleVelocity[0])) {
+                impossible = true;
+            } else {
+                robot.launcher.setFlywheel(errorsAngleVelocity[0], true);
+                robot.launcher.setHood(errorsAngleVelocity[1]);
             }
+            aimIndex = 2;
         }
+
     }
 
     @Override
@@ -102,6 +94,7 @@ public class FullAim extends CommandBase {
             // TODO: Come up with a better way to deal with this
             robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
             robot.launcher.setHood(MIN_HOOD_ANGLE);
+            robot.turret.setTurret(Turret.TurretState.OFF, 0);
         }
 
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
@@ -113,6 +106,6 @@ public class FullAim extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return impossible || (aimIndex == 3 && robot.launcher.flywheelReady());
+        return impossible || (aimIndex == 2 && robot.launcher.flywheelReady());
     }
 }

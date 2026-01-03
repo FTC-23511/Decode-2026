@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Transform2d;
+import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
@@ -20,7 +23,7 @@ public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
     private Pose2d turretPose = null;
-    public static double poseOffset = 0;
+    public static Translation2d goalPoseOffset = new Translation2d();
 
     public enum TurretState {
         GOAL_LOCK_CONTROL,
@@ -81,8 +84,6 @@ public class Turret extends SubsystemBase {
     public void setTurret(TurretState turretState, double value) {
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                // poseOffset value = manual offset (inches), where + is right side and - is left side
-                poseOffset = value * ALLIANCE_COLOR.getMultiplier();
                 turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
                 
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose(getTurretPose())));
@@ -93,9 +94,7 @@ public class Turret extends SubsystemBase {
                 turretController.clearTotalError();
                 turretController.setSetPoint(value);
                 break;
-
             case OFF:
-                turretController.clearTotalError();
                 robot.turretServos.set(0);
                 break;
         }
@@ -195,7 +194,7 @@ public class Turret extends SubsystemBase {
 
         double offset = -angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
-        double adjustment = goalAdjustmentLUT.get(offset) + poseOffset;
+        double adjustment = goalAdjustmentLUT.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;
@@ -204,6 +203,8 @@ public class Turret extends SubsystemBase {
         } else {
             adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
         }
+
+        adjustedGoal.plus(new Transform2d(goalPoseOffset, new Rotation2d()));
 
         RobotLog.aa("adjustedGoal", adjustedGoal.toString());
 
