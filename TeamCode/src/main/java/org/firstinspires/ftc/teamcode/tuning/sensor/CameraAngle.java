@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.tuning.sensor;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -38,6 +39,7 @@ public class CameraAngle extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();

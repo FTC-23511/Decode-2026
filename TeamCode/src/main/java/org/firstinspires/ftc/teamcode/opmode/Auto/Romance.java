@@ -91,7 +91,6 @@ public class Romance extends CommandOpMode {
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
@@ -218,7 +217,7 @@ public class Romance extends CommandOpMode {
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );

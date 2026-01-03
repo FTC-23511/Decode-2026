@@ -25,7 +25,6 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -89,13 +88,8 @@ public class FullTeleOp extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
                         new InstantCommand(() -> robot.intake.toggleIntakeMotor())
                 )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
@@ -259,7 +253,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
+//        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
         try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
         telemetryData.addData("Wall Angle", robot.turret.angleToWall());
         try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}

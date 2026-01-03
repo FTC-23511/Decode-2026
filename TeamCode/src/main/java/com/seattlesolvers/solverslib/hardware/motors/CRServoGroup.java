@@ -40,7 +40,7 @@ public class CRServoGroup extends CRServo implements Iterable<CRServo> {
     public void set(double speed) {
         group[0].set(speed);
         for (int i = 1; i < group.length; i++) {
-            group[i].set(speed);
+            group[i].set(group[0].get());
         }
     }
 

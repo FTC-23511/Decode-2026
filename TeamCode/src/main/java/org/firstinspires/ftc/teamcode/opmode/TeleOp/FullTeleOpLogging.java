@@ -105,13 +105,12 @@ public class FullTeleOpLogging extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
                         new InstantCommand(() -> robot.intake.toggleIntakeMotor())
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
+                new SetIntake(Intake.MotorState.STOP)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(

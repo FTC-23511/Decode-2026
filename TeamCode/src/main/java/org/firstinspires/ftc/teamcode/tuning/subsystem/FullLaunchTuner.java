@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -30,7 +32,6 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double LAUNCHER_TARGET_VEL = 0.0; // ticks/sec
     public static double DISTANCE = 1.5; // meters
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
-    public static Intake.PivotState pivotState = Intake.PivotState.FORWARD;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -40,6 +41,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -60,7 +62,6 @@ public class FullLaunchTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        robot.intake.setPivot(pivotState);
         robot.intake.setIntake(motorState);
 
         robot.launcher.setRamp(true);

@@ -333,7 +333,7 @@ public final class CommandScheduler {
     }
 
     /**
-     * Sets the default command for a subsystem.  Registers that subsystem if it is not already
+     * Sets the default command for a subsystem. Registers that subsystem if it is not already
      * registered.  Default commands will run whenever there is no other command currently scheduled
      * that requires the subsystem.  Default commands should be written to never end (i.e. their
      * {@link Command#isFinished()} method should return false), as they would simply be re-scheduled

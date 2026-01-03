@@ -83,7 +83,6 @@ public class Jinu extends CommandOpMode {
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(false);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
@@ -216,9 +215,9 @@ public class Jinu extends CommandOpMode {
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
                 new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD),
+                new SetIntake(Intake.MotorState.STOP),
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );
     }

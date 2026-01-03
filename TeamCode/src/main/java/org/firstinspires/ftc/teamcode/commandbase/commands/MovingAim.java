@@ -46,7 +46,6 @@ public class MovingAim extends CommandBase {
 
     public void initialize() {
         robot.intake.setIntake(Intake.MotorState.STOP);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
 
         robot.turret.updateTurretPose(null); // clear any prior readings of where turret was
 

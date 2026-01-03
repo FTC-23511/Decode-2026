@@ -80,7 +80,6 @@ public class Abby extends CommandOpMode {
 
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
@@ -182,7 +181,7 @@ public class Abby extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
+                        new SetIntake(Intake.MotorState.FORWARD).beforeStarting(new WaitCommand(410)),
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
                 ),
@@ -198,7 +197,7 @@ public class Abby extends CommandOpMode {
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );

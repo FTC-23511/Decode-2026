@@ -88,7 +88,7 @@ public class Launcher extends SubsystemBase {
                     flywheelController.calculate(robot.launchEncoder.getCorrectedVelocity())
             );
 
-            setHood(targetHoodAngle, true);
+//            setHood(targetHoodAngle, true);
         } else {
             if (getFlywheelTarget() == 0) {
                 robot.launchMotors.set(0);

@@ -93,7 +93,7 @@ public class MathFunctions {
      * @return flywheel rotation in meters/sec
      */
     public static double convertToMetersPerSec(double ticksPerSec) {
-        double cpr = 28; // encoder count per revolution
+        double cpr = 28; // encoder count per revolution of 6000 rpm bare motor
         double wheelDiameter = 0.0762; // 3 inches converted to meters
         double wheelCircumference = Math.PI * wheelDiameter;
         double distPerTick = wheelCircumference / cpr;

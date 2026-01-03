@@ -80,7 +80,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoGroup turretServos;
     public AbsoluteAnalogEncoder turretEncoder;
 
-    public ServoEx intakePivotServo;
     public ServoEx hoodServo;
     public ServoEx rampServo;
 
@@ -145,16 +144,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         launchMotors = new MotorGroup(
                 new MotorEx(hwMap, "leftLaunchMotor")
-                        .setCachingTolerance(0.01),
+                        .setCachingTolerance(0.01)
+                        .setInverted(true),
                 new MotorEx(hwMap, "rightLaunchMotor")
                         .setCachingTolerance(0.01)
-                        .setInverted(true)
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
+        launchEncoder = new Motor(hwMap, "FL").encoder;
         launchEncoder.setDirection(Motor.Direction.REVERSE);
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
@@ -182,10 +181,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
-
-        intakePivotServo = new ServoEx(hwMap, "intakePivotServo")
-                .setInverted(true)
-                .setCachingTolerance(0.01);
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
@@ -217,7 +212,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turret = new Turret();
 
         // Camera for vision
-        camera = new Camera(hwMap);
+//        camera = new Camera(hwMap);
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
@@ -245,7 +240,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intake.init();
         launcher.init();
         turret.init();
-        camera.initHasMovement();
+//        camera.initHasMovement();
     }
     
     public double getVoltage() {

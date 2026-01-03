@@ -40,7 +40,6 @@ public class ClearLaunch extends CommandBase {
             robot.launcher.setRamp(true);
             robot.launcher.setActiveControl(true);
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
-            robot.intake.setPivot(Intake.PivotState.TRANSFER);
         }
         timer.reset();
     }
@@ -58,6 +57,7 @@ public class ClearLaunch extends CommandBase {
     public void end(boolean interrupted) {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, Turret.poseOffset);
         } else {
             // TODO: Add distance sensor checking for auto retry command
         }

@@ -174,11 +174,13 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
     }
 
     protected static boolean shouldParallelize(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand ||
+                command instanceof LynxSetServoPulseWidthCommand);
     }
 
     protected static boolean shouldAckImmediately(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand ||
+                command instanceof LynxSetServoPulseWidthCommand);
     }
 
     private boolean isSimilar(LynxRespondable respondable1, LynxRespondable respondable2){

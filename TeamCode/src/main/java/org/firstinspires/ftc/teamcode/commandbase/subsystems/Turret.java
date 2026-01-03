@@ -85,7 +85,7 @@ public class Turret extends SubsystemBase {
                 poseOffset = value * ALLIANCE_COLOR.getMultiplier();
                 turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
                 
-                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(turretPose, adjustedGoalPose(turretPose)));
+                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose(getTurretPose())));
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
                 break;
             case ANGLE_CONTROL:
@@ -123,15 +123,15 @@ public class Turret extends SubsystemBase {
 
                 turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
 
-                if (Math.abs(turretController.getPositionError()) > TURRET_POS_THRESHOLD) {
+                if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
                     turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
                 } else {
                     turretController.setMaxOutput(TURRET_SMALL_MAX_OUTPUT);
                 }
 
-                if (robot.turret.turretController.atSetPoint()) {
+                if (turretController.atSetPoint()) {
                     robot.turretServos.set(0);
-                    robot.turret.turretController.clearTotalError();
+                    turretController.clearTotalError();
                 }
 
                 power = turretController.calculate(getPosition());
@@ -150,7 +150,7 @@ public class Turret extends SubsystemBase {
             case ANGLE_CONTROL:
                 power = turretController.calculate(getPosition());
 
-                if (robot.turret.turretController.atSetPoint()) {
+                if (turretController.atSetPoint()) {
                     robot.turretServos.set(0);
                 } else {
                     robot.turretServos.set(power);
@@ -193,7 +193,7 @@ public class Turret extends SubsystemBase {
             updateTurretPose(robotPose);
         }
 
-        double offset = -robot.turret.angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
+        double offset = -angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
         RobotLog.aa("offset", String.valueOf(offset));
         double adjustment = goalAdjustmentLUT.get(offset) + poseOffset;
         RobotLog.aa("adjustment", String.valueOf(adjustment));
@@ -211,7 +211,7 @@ public class Turret extends SubsystemBase {
     }
 
     public Pose2d adjustedGoalPose() {
-        return adjustedGoalPose(robot.turret.getTurretPose());
+        return adjustedGoalPose(getTurretPose());
     }
 
     /**

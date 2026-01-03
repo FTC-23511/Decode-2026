@@ -70,10 +70,6 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     // Intake
-    public static double INTAKE_PIVOT_FORWARD = 0.615;
-    public static double INTAKE_PIVOT_HOLD = 0.5709;
-    public static double INTAKE_PIVOT_TRANSFER = INTAKE_PIVOT_FORWARD - 0.02;
-
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
@@ -87,8 +83,8 @@ public class Constants {
 //    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
     // Launcher
-    public static double RAMP_ENGAGED = 0.3;
-    public static double RAMP_DISENGAGED = 0.06;
+    public static double RAMP_ENGAGED = 0.52;
+    public static double RAMP_DISENGAGED = 0.26;
 
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00052); // Coefficients for ticks
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
@@ -104,35 +100,31 @@ public class Constants {
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
     public static double LAUNCHER_MAX_BALL_VELOCITY = 100; // Meters/second // TODO: maybe actually deal with this later
 
-    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
-    public static double MIN_HOOD_SERVO_POS = 0.34; // MUST MATCH WITH VALUE ABOVE
-    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
-    public static double MAX_HOOD_SERVO_POS = 0.823; // Position // MUST MATCH WITH VALUE ABOVE
-    public static double HOOD_COMPENSATION = 0.0067; // ticks to degrees
+    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: Check with CAD
+    public static double MIN_HOOD_SERVO_POS = 0.22; // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal // TODO: Check with CAD
+    public static double MAX_HOOD_SERVO_POS = 0.85; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double HOOD_COMPENSATION = 0.0067;
 
     // Turret
-    public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
-    private static double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.41, 0.00, 0.02, 0); // Coefficients for radians
-
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.43, 0.00, 0.0325, 0); // Coefficients for radians
+    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.NONE;
     public static double TURRET_MIN_INTEGRAL = 0;
-    public static double TURRET_MAX_INTEGRAL = 0.5;
-    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
-    public static double TURRET_INTEGRATION_DECAY = 0.5;
-    public static double TURRET_POS_TOLERANCE = 0.05; // Radians
-    public static double TURRET_POS_THRESHOLD = 0.1; // Radians
+    public static double TURRET_MAX_INTEGRAL = 1.0;
+    public static double TURRET_INTEGRATION_DECAY = 1.0;
+    public static double TURRET_POS_TOLERANCE = 0.03; // Radians
+    public static double TURRET_THRESHOLD = 0.1; // Radians
+    public static double TURRET_MIN_OUTPUT = 0.00; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
-    public static double TURRET_SMALL_MAX_OUTPUT = 0.18;
+    public static double TURRET_SMALL_MAX_OUTPUT = 0.067;
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
-    public static double TURRET_MIN_OUTPUT = 0.12; // Power
-    public static double TURRET_OPEN_F = 0.1;
-    public static double TURRET_ENCODER_OFFSET = 2.670; // Radians
-    public static double MAX_TURRET_ANGLE = (115 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
+    public static double TURRET_OPEN_F = 0.034;
+    public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
 
-    public static PIDFCoefficients CAMERA_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01267, 0, 0.00167, 0); // Coefficients for radians
-    public static double CAMERA_TX_TOLERANCE = 1.67; // Arducam TX
-    public static double CAMERA_MAX_OUTPUT = 1.0;
-    public static double CAMERA_MIN_OUTPUT = 0.0;
+    public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
+    private final double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
+    public static double MAX_TURRET_ANGLE = (150.0 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
+
     public static float CAMERA_CLOSE_DECIMATION = 3;
     public static float CAMERA_FAR_DECIMATION = 2;
     public static boolean USE_CLOSE_DECIMATION = true;

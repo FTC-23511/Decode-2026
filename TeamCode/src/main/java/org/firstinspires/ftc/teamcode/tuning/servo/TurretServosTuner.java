@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.servo;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -21,10 +23,16 @@ public class TurretServosTuner extends CommandOpMode {
     public static double I = 0;
     public static double D = 0.000;
     public static double F = 0.000;
-    public static double MIN_OUTPUT = 0.15;
+
+    public static double MIN_OUTPUT = 0.00;
+    public static double SMALL_MAX_OUTPUT = 1.00;
+    public static double LARGE_MAX_OUTPUT = 1.00;
+    public static double OPEN_F = 0.00;
 
     public static double TARGET_POS = 0.0;
-    public static double POS_TOLERANCE = 0.03;
+    public static double POS_TOLERANCE = 0.00;
+    public static double POS_THRESHOLD = 0.00;
+
     public static double MIN_INTEGRAL = 0.0;
     public static double MAX_INTEGRAL = 1.0;
 
@@ -37,6 +45,7 @@ public class TurretServosTuner extends CommandOpMode {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         Turret.turretState = Turret.TurretState.OFF;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -55,8 +64,16 @@ public class TurretServosTuner extends CommandOpMode {
         double servoPos = robot.turret.getPosition();
 
         robot.turret.turretController.setPIDF(P, I, D, F);
+        robot.turret.turretController.setOpenF(OPEN_F);
         robot.turret.turretController.setTolerance(POS_TOLERANCE);
         robot.turret.turretController.setMinOutput(MIN_OUTPUT);
+
+        if (Math.abs(robot.turret.turretController.getPositionError()) > POS_THRESHOLD) {
+            robot.turret.turretController.setMaxOutput(LARGE_MAX_OUTPUT);
+        } else {
+            robot.turret.turretController.setMaxOutput(SMALL_MAX_OUTPUT);
+        }
+
         robot.turret.turretController.integrationControl.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
 
         double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);

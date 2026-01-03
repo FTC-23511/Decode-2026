@@ -24,7 +24,7 @@ public class DistanceSensorTest extends CommandOpMode {
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
-    private final Robot robot = Robot.getInstance();;
+    private final Robot robot = Robot.getInstance();
     private GamepadEx driver;
 
     @Override
@@ -44,12 +44,10 @@ public class DistanceSensorTest extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).toggleWhenPressed(
                 new ParallelCommandGroup(
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD))
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 ),
                 new ParallelCommandGroup(
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.TRANSFER))
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
                 )
         );
     }

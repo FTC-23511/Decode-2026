@@ -86,7 +86,6 @@ public class Baby extends CommandOpMode {
 
         robot.launcher.setHood(MAX_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
@@ -205,7 +204,7 @@ public class Baby extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean pathShoot) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
+                        new SetIntake(Intake.MotorState.FORWARD).beforeStarting(new WaitCommand(410)),
                         new ConditionalCommand(
                                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                                 new InstantCommand(),
@@ -228,7 +227,7 @@ public class Baby extends CommandOpMode {
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );

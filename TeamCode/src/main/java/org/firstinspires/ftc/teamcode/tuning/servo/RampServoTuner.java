@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.servo;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -35,6 +37,7 @@ public class RampServoTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();

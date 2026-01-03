@@ -101,11 +101,11 @@ public class Camera {
         visionPortal = builder.build();
 
         try {
-            ExposureControl exposureControl = robot.camera.visionPortal.getCameraControl(ExposureControl.class);
+            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             exposureControl.setMode(ExposureControl.Mode.Manual);
             exposureControl.setExposure(15, TimeUnit.MILLISECONDS);
 
-            GainControl gainControl = robot.camera.visionPortal.getCameraControl(GainControl.class);
+            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(100);
         } catch (Exception e) {
             Log.wtf("WHAT A TERRIBLE FAILURE.", "Camera Exposure/Gain Control got fried \n" + e);
@@ -133,7 +133,7 @@ public class Camera {
                 Pose2d cameraPose = getCameraPose();
 
                 if (cameraPose != null) {
-                    robot.camera.updateCameraPoseReadings(cameraPose);
+                    updateCameraPoseReadings(cameraPose);
                 }
 
                 break;
