@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.globals;
 
+import static com.sun.tools.doclint.Entity.pi;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GRAVITY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_MAX_BALL_VELOCITY;
@@ -8,6 +9,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
@@ -69,7 +71,7 @@ public class MathFunctions {
     /**
      * Standard Linear Equation Solver (Point-Slope Form)
      * Calculates y based on x, given two known points (x1, y1) and (x2, y2).
-     *
+     * <p>
      * y - y1 = m(x - x1)
      * -> y = m(x - x1) + y1
      */
@@ -89,6 +91,7 @@ public class MathFunctions {
 
     /**
      * Converts ticks/sec to meters/sec
+     *
      * @param ticksPerSec flywheel rotation in ticks/sec
      * @return flywheel rotation in meters/sec
      */
@@ -103,6 +106,7 @@ public class MathFunctions {
 
     /**
      * Converts meters/sec to ticks/sec
+     *
      * @param metersPerSec flywheel surface velocity in meters/sec
      * @return flywheel rotation in ticks/sec
      */
@@ -214,7 +218,7 @@ public class MathFunctions {
      * @param distance The horizontal distance to the target (x) in meters.
      * @param velocity The current launcher velocity in meters/second.
      * @return distance: The required hood angle (in degrees from vertical).
-     *         impossible: If the shot is impossible
+     * impossible: If the shot is impossible
      * TODO: Fix this method to handle ball vel
      */
     public static Object[] getHoodAngleFromVelocity(double distance, double velocity) {
@@ -254,8 +258,7 @@ public class MathFunctions {
         if (bestAngle >= MIN_HOOD_ANGLE && bestAngle <= MAX_HOOD_ANGLE) {
             // Perfect scenario: We can hit it exactly.
             return new Object[]{bestAngle, false};
-        }
-        else {
+        } else {
             if (bestAngle < MIN_HOOD_ANGLE) {
                 // Needed a steeper shot -> limit to MIN
                 return new Object[]{MIN_HOOD_ANGLE, true};
@@ -296,10 +299,19 @@ public class MathFunctions {
 
         public static class PredictResult {
             public boolean success = false;
-            public double flyWheelSpeed = 0;
-            public double turretAngle = 0;
-            public double hoodAngle = 0;
-        };
+            public double flyWheelSpeed = 0; // m/s
+            public double turretAngle = 0; // radian
+            public double hoodAngle = 0; // radian
+
+
+            @Override
+            public String toString() {
+                return String.format("PredictResults(success=%s, flywheelSpeed=%.03f m/s, turretAngle=%.03f degrees, hoodAngle=%.03f degrees)",
+                        success ? "true" : "false", flyWheelSpeed, turretAngle * 180.0 / Math.PI, hoodAngle * 180.0 / Math.PI);
+            }
+        }
+
+        ;
 
         public ShootingMath(Position target, double ballRadius, double robotHeight) {
             this.target = target;
@@ -312,46 +324,60 @@ public class MathFunctions {
          * predicts the hood angle, turret angle, and flywheel speed of the robot when aiming while moving
          * uses the robotPose, and robotSpeed.
          */
-        public ShootingMath.PredictResult predict(Pose2d robotPose, ChassisSpeeds robotSpeed){
+        public ShootingMath.PredictResult predict(Pose2d robotPose, ChassisSpeeds robotSpeed) {
             //make a new PredictResult
             ShootingMath.PredictResult result = new PredictResult();
             //variables adjusted with robot height and ball radius
-            final double targetX = target.x - ballRadius;
+            final double targetX = target.x - Math.signum(target.x) * ballRadius;
             final double targetY = target.y - ballRadius;
             final double targetZ = target.z - robotHeight - ballRadius;
             final double robotX = robotPose.getX();
             final double robotY = robotPose.getY();
             final double inchesPerMeters = 39.3701;
 
+            RobotLog.aa("OriginalTargetPosition", String.valueOf(target));
+
+            RobotLog.aa("AdjustedTargetPosition", String.format("(%.03f, %.03f, %.03f)", targetX, targetY, targetZ));
+
             //mathhhhhh
+            final double gravity = GRAVITY * inchesPerMeters;
             //finds the horizontal distance between the robot and the target
-            final double distance = Math.sqrt(Math.pow(targetX - robotX,2)+Math.pow(targetY - robotY,2));
+            final double distance = Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2));
             //ball's travel time
-            final double time = Math.sqrt(2*((targetZ)+distance)/9.8);
+            final double time = Math.sqrt(2 * ((targetZ) + distance) / gravity);
             //horizontal speed of the ball
-            final double vh = distance/time;
+            final double vh = distance / time;
             //vertical speed of the ball
-            final double vz = 9.8*(time) - vh;
+            final double vz = gravity * (time) - vh;
             //angle of shooting
-            final double alpha = Math.atan((targetY - robotY) / (targetX - robotX));
+            final double alpha = Math.atan2((targetY - robotY), (targetX - robotX));
+
+            RobotLog.aa("ShootingState", String.format("distance:%.03f, time:%.03f, vh:%.03f, vz:%.03f, alpha:%.03f", distance, time, vh, vz, Math.toDegrees(alpha)));
+
             //x component of the speed of the ball
-            final double vx = Math.sin(alpha)*vh;
+            final double vx = Math.cos(alpha) * vh;
             //y component of the speed of the ball
-            final double vy = Math.cos(alpha)*vh;
+            final double vy = Math.sin(alpha) * vh;
             //x component of the speed of the flywheel
-            final double vfx = (vx)-robotSpeed.vxMetersPerSecond*inchesPerMeters;
+            final double vfx = (vx) - robotSpeed.vxMetersPerSecond * inchesPerMeters;
             //y component of the speed of the flywheel
-            final double vfy = (vy)-robotSpeed.vyMetersPerSecond*inchesPerMeters;
+            final double vfy = (vy) - robotSpeed.vyMetersPerSecond * inchesPerMeters;
             //horizontal component of the speed of the flywheel
-            final double vfh = Math.sqrt(Math.pow(vfx,2)+Math.pow(vfy,2));
+            final double vfh = Math.sqrt(Math.pow(vfx, 2) + Math.pow(vfy, 2));
+            //flywheel speed
+            final double vf = Math.sqrt(Math.pow(vfh, 2) + Math.pow(vz, 2));
+
+            RobotLog.aa("ShootingState2", String.format("vx:%.03f, vy:%.03f, vfx:%03f, vfy:%.03f, vfh:%.03f, vf:%.03f", vx, vy, vfx, vfy, vfh, vf));
+
             //returning turret angle, hood angle, and fly wheel speed
-            result.turretAngle = Math.atan(vfy/vfx) - robotPose.getHeading();
-            result.hoodAngle = Math.atan(vz/vfh);
-            result.flyWheelSpeed = vfh;
+            result.turretAngle = Math.atan2(vfy, vfx) - robotPose.getHeading();
+            result.hoodAngle = Math.atan2(vz, vfh);
+            result.flyWheelSpeed = vf / inchesPerMeters;//meters per second
             result.success = true;
 
             return result;
         }
     }
+
 
 }

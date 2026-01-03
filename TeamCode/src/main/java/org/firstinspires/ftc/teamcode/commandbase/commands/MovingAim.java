@@ -11,10 +11,12 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
+import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -28,6 +30,7 @@ public class MovingAim extends CommandBase {
     Robot robot;
     final double inchesPerMeters = 39.3701;
     final double BALL_RADIUS = 2.5;
+    double[] errorsAngleVelocity;
 
     MathFunctions.ShootingMath math;
 
@@ -38,7 +41,7 @@ public class MovingAim extends CommandBase {
 
         final Pose2d goalPose = GOAL_POSE();
         Position goalPosition = new Position(DISTANCE_UNIT, goalPose.getX(), goalPose.getY(), TARGET_HEIGHT * inchesPerMeters, 0);
-        math = new MathFunctions.ShootingMath(goalPosition, LAUNCHER_HEIGHT * inchesPerMeters, BALL_RADIUS);
+        math = new MathFunctions.ShootingMath(goalPosition, BALL_RADIUS, LAUNCHER_HEIGHT * inchesPerMeters);
 
         addRequirements(robot.launcher, robot.turret, robot.drive, robot.intake);
     }
@@ -61,6 +64,7 @@ public class MovingAim extends CommandBase {
         // TODO: to add the turrentReady() function.
         if (robot.launcher.flywheelReady() && robot.turret.readyToLaunch()) {
             robot.readyToLaunch = true;
+            errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
         }
 
     }
@@ -82,8 +86,14 @@ public class MovingAim extends CommandBase {
         ChassisSpeeds robotSpeed = robot.drive.swerve.getTargetVelocity();
 
         MathFunctions.ShootingMath.PredictResult values = math.predict(robotPose, robotSpeed);
+        //inch/second to meter to seconds
         robot.launcher.setFlywheel(values.flyWheelSpeed, true);
-        robot.launcher.setHood(values.hoodAngle);
-        robot.turret.setTurret(ANGLE_CONTROL, values.turretAngle);
+        //set hood angle to degrees in the right range
+        robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
+        // set turret angle to robot centric and to radians
+        robot.turret.setTurret(ANGLE_CONTROL, MathUtils.normalizeRadians(values.turretAngle, false));
+        RobotLog.aa("robotPose", String.valueOf(robotPose));
+        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
+        RobotLog.aa("PredictResult", String.valueOf(values));
     }
 }

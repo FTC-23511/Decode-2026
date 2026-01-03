@@ -1,20 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -39,7 +26,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAimbotFullLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -104,10 +90,6 @@ public class FullTeleOpMoving extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.toggleIntakeMotor())
                 )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SetIntake(Intake.MotorState.STOP)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
@@ -263,9 +245,6 @@ public class FullTeleOpMoving extends CommandOpMode {
 
         robot.profiler.start("Low TelemetryData");
 
-        double[] targetDegrees = robot.camera.getTargetDegrees();
-        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
-
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
         telemetryData.addData("atTarget", robot.drive.follower.atTarget());
         telemetryData.addData("Heading", robot.drive.getPose().getHeading());
@@ -274,7 +253,7 @@ public class FullTeleOpMoving extends CommandOpMode {
         telemetryData.addData("Turret State", Turret.turretState);
         telemetryData.addData("Turret Target", robot.turret.getTarget());
         telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
+//        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
         try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
         telemetryData.addData("Wall Angle", robot.turret.angleToWall());
         try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
