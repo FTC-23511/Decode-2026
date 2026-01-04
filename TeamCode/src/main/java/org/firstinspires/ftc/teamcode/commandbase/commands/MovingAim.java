@@ -59,16 +59,14 @@ public class MovingAim extends CommandBase {
 
     public void execute() {
         predictSet();
-        // TODO: to add the turrentReady() function.
-        if (robot.launcher.flywheelReady() && robot.turret.readyToLaunch()) {
+        if (robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.hoodReady()) {
             robot.readyToLaunch = true;
-            errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
         }
 
     }
 
     public void end(boolean interrupted) {
-        if (!interrupted) {
+        if (interrupted) {
             robot.turret.setTurret(Turret.TurretState.OFF, 0);
             robot.launcher.setActiveControl(false);
             robot.readyToLaunch = false;

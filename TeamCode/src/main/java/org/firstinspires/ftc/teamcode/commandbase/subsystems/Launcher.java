@@ -130,7 +130,11 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean flywheelReady() {
-        return activeControl && (flywheelController.atSetPoint() || !impossible);
+        return activeControl && flywheelController.atSetPoint();
+    }
+
+    public boolean hoodReady() {
+        return activeControl && robot.hoodServo.atSetPosition() && !impossible;
     }
 
     @Override

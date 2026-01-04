@@ -96,6 +96,11 @@ public class ServoEx implements HardwareDevice {
     }
 
     /**
+     * @return whether the servo is at the set position
+     */
+    public boolean atSetPosition() { return !Double.isNaN(lastPos) && Math.abs(getRawPosition() - lastPos) < cachingTolerance; }
+
+    /**
      * @param inverted whether the servo should be inverted/reversed
      * @return this object for chaining purposes
      */

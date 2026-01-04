@@ -167,7 +167,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint() && turretState.equals(GOAL_LOCK_CONTROL);
+        return turretController.atSetPoint() && !turretState.equals(OFF);
     }
 
     /**
