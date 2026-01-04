@@ -108,18 +108,19 @@ public class Constants {
 
     // Turret
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.43, 0.00, 0.0325, 0); // Coefficients for radians
+    public static double TURRET_OPEN_F = 0.034;
+    public static double TURRET_POS_TOLERANCE = 0.03; // Radians
+    public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
+    public static double TURRET_THRESHOLD = 0.1; // Radians
+    public static double TURRET_MIN_OUTPUT = 0.00;
+    public static double TURRET_SMALL_MAX_OUTPUT = 0.067;
+    public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
+    public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
+
     public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.NONE;
-    public static double TURRET_MIN_INTEGRAL = 0;
+    public static double TURRET_MIN_INTEGRAL = -1.0;
     public static double TURRET_MAX_INTEGRAL = 1.0;
     public static double TURRET_INTEGRATION_DECAY = 1.0;
-    public static double TURRET_POS_TOLERANCE = 0.03; // Radians
-    public static double TURRET_THRESHOLD = 0.1; // Radians
-    public static double TURRET_MIN_OUTPUT = 0.00; // Power
-    public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
-    public static double TURRET_SMALL_MAX_OUTPUT = 0.067;
-    public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
-    public static double TURRET_OPEN_F = 0.034;
-    public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
 
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private final double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
@@ -133,5 +134,4 @@ public class Constants {
 
     public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
     public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet
-    public static double TURRET_BUFFER = (16.7 / 360.0) * 2 * Math.PI; // Radians // used for calculating drivetrain rotation in aimbot
 }

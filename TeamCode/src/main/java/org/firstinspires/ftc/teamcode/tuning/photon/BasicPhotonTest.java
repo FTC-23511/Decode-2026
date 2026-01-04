@@ -34,6 +34,8 @@ public class BasicPhotonTest extends LinearOpMode {
         PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.experimental.setMaximumParallelCommands(8);
+        PhotonCore.experimental.setSinglethreadedOptimized(false);
+
         if (ENABLE_PHOTON) {
             PhotonCore.enable();
         }
@@ -62,7 +64,7 @@ public class BasicPhotonTest extends LinearOpMode {
                 }
             }
 
-            telemetryData.addData("Swervo getPower", swervo.get());
+            telemetryData.addData("motor encoder read", intakeMotor.encoder.getCorrectedVelocity());
 
             PhotonCore.CONTROL_HUB.clearBulkCache();
             PhotonCore.EXPANSION_HUB.clearBulkCache();

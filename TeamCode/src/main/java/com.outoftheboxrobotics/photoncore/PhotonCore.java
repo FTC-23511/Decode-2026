@@ -69,7 +69,7 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
 
     public static class ExperimentalParameters{
         private final AtomicBoolean singlethreadedOptimized = new AtomicBoolean(true);
-        private final AtomicInteger maximumParallelCommands = new AtomicInteger(4);
+        private final AtomicInteger maximumParallelCommands = new AtomicInteger(8);
 
         public void setSinglethreadedOptimized(boolean state){
             this.singlethreadedOptimized.set(state);

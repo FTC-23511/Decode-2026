@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.*;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -57,7 +58,7 @@ public class Turret extends SubsystemBase {
         turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
         turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
-        turretController.setMinOutput(0);
+        turretController.setMinOutput(TURRET_MIN_OUTPUT);
 
         goalAdjustmentLUT.createLUT();
     }
@@ -82,17 +83,24 @@ public class Turret extends SubsystemBase {
     }
 
     public void setTurret(TurretState turretState, double value) {
+        turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
+        turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
+        turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
+        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+        turretController.setMinOutput(TURRET_MIN_OUTPUT);
+
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
                 turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
-                
+
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose(getTurretPose())));
-                turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
+                double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
+                turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case ANGLE_CONTROL:
                 // value = turret target (radians)
                 turretController.clearTotalError();
-                turretController.setSetPoint(value);
+                turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case OFF:
                 robot.turretServos.set(0);
@@ -119,8 +127,8 @@ public class Turret extends SubsystemBase {
                 robot.profiler.start("Turret Read");
 
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose(getTurretPose())));
-
-                turretController.setSetPoint(driveTurretErrors[0] + driveTurretErrors[1]);
+                double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
+                turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
 
                 if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
                     turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
@@ -222,8 +230,6 @@ public class Turret extends SubsystemBase {
      * @return double[] {drivetrainError, turretError} (Robot-centric radians)
      */
     public static double[] angleToDriveTurretErrors(double targetAngle) {
-        final double MAX_USABLE_TURRET_ANGLE = MAX_TURRET_ANGLE - TURRET_BUFFER;
-
         double robotAngle = Robot.getInstance().drive.getPose().getHeading();
 
         // 1. Calculate the total required rotation to face target (Robot Centric)
@@ -233,7 +239,7 @@ public class Turret extends SubsystemBase {
         double drivetrainError;
         double turretError;
 
-        if (Math.abs(totalError) <= MAX_USABLE_TURRET_ANGLE) {
+        if (Math.abs(totalError) <= MAX_TURRET_ANGLE) {
             // Target is within the usable turret range:
             // Drivetrain stays still, Turret handles the entire rotation.
             drivetrainError = 0;
@@ -247,7 +253,7 @@ public class Turret extends SubsystemBase {
             double sign = Math.signum(totalError);
 
             // Turret locks to its maximum limit in the correct direction
-            turretError = MAX_USABLE_TURRET_ANGLE * sign;
+            turretError = MAX_TURRET_ANGLE * sign;
 
             // Drivetrain takes the remainder: Total required - What the turret is doing
             // This is the essential fix from your original code—we return the ERROR delta.

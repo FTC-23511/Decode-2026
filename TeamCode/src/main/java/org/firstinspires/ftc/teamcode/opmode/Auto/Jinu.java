@@ -46,19 +46,19 @@ public class Jinu extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(90))); // Starting Pose
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 1
+        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(53))); // Starting Pose
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 1
         pathPoses.add(new Pose2d(-55.24400564174894, 12.490832157968967, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-55.65021156558532, 0.7108603667136748, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 5
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 5
         pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-34.1212976022567, -12.490832157968967, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 9
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 9
         pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0))); // Line 10
         pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 12
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 12
         pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(0))); // Line 13
 
 
