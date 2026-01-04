@@ -98,7 +98,7 @@ public class CameraAngle extends CommandOpMode {
                     }
                     telemetryData.addData("offset", offset);
                     telemetryData.addData("adjusted goal", adjustedGoal);
-                    double globalHeadingTarget = Turret.posesToAngle(lastKnownPose, robot.turret.adjustedGoalPose(lastKnownPose));
+                    double globalHeadingTarget = Turret.posesToAngle(lastKnownPose, robot.turret.adjustedGoalPose());
                     telemetryData.addData("globalHeadingTarget", globalHeadingTarget);
                     double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(globalHeadingTarget);
                     telemetryData.addData("errorsDriveTurret", Arrays.toString(errorsDriveTurret));

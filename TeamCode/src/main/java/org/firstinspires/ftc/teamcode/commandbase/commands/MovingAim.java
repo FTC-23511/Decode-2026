@@ -50,8 +50,6 @@ public class MovingAim extends CommandBase {
     public void initialize() {
         robot.intake.setIntake(Intake.MotorState.STOP);
 
-        robot.turret.updateTurretPose(null); // clear any prior readings of where turret was
-
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
 
         if (!Turret.turretState.equals(GOAL_LOCK_CONTROL)) {

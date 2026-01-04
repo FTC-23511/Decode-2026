@@ -193,7 +193,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.CRC)
                 .resetPosAndIMU()
                 .setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS))
-                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION);
+                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION, GoBildaPinpointDriver.Register.X_VELOCITY, GoBildaPinpointDriver.Register.Y_VELOCITY, GoBildaPinpointDriver.Register.H_VELOCITY);
 
 //        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
 //        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
@@ -228,7 +228,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //            }
 //        }
 
-        register(drive, intake, launcher, turret);
+//        register(drive, intake, launcher, turret); // not needed bc SubsystemBase registers it anyways 💀
 
         if (OP_MODE_TYPE.equals(OpModeType.AUTO)) {
             initHasMovement();

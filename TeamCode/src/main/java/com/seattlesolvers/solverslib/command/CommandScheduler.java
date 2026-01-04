@@ -214,10 +214,12 @@ public final class CommandScheduler {
             return;
         }
 
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("periodics");
         // Run the periodic method of all registered subsystems.
         for (Subsystem subsystem : m_subsystems.keySet()) {
             subsystem.periodic();
         }
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("periodics");
 
         // Poll buttons for new commands to add.
         for (Runnable button : m_buttons) {

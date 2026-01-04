@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.photon;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -8,10 +10,15 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServo;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.globals.GoBildaPinpointDriver;
 
 import java.util.List;
 
@@ -26,6 +33,8 @@ public class BasicPhotonTest extends LinearOpMode {
     public static double INTAKE_MOTOR_CACHE_TOL = -0.01;
     public static double SWERVO_CACHE_TOL = -0.01;
     public static double WRITES = 1;
+    public static double READS = 1;
+    public static double PINPOINT_READS = 1;
     public static double POWER_INCREMENT = 0.0;
     double power = 0;
 
@@ -42,6 +51,13 @@ public class BasicPhotonTest extends LinearOpMode {
 
         MotorEx intakeMotor = new MotorEx(hardwareMap, "frontIntakeMotor").setCachingTolerance(INTAKE_MOTOR_CACHE_TOL);
         CRServoEx swervo = new CRServoEx(hardwareMap, "BR").setCachingTolerance(SWERVO_CACHE_TOL);
+        GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint").setOffsets(-76.32, 152.62, DistanceUnit.MM)
+                .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
+                .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
+                .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.CRC)
+                .resetPosAndIMU()
+                .setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS))
+                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION, GoBildaPinpointDriver.Register.X_VELOCITY, GoBildaPinpointDriver.Register.Y_VELOCITY, GoBildaPinpointDriver.Register.H_VELOCITY);
 
         waitForStart();
 
@@ -64,7 +80,13 @@ public class BasicPhotonTest extends LinearOpMode {
                 }
             }
 
-            telemetryData.addData("motor encoder read", intakeMotor.encoder.getCorrectedVelocity());
+            for (int i = 0; i < READS; i++) {
+                intakeMotor.encoder.getCorrectedVelocity();
+            }
+
+            for (int i = 0; i < PINPOINT_READS; i++) {
+                pinpoint.update();
+            }
 
             PhotonCore.CONTROL_HUB.clearBulkCache();
             PhotonCore.EXPANSION_HUB.clearBulkCache();

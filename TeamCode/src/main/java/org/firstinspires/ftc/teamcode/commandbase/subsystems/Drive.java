@@ -82,9 +82,12 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
 //        swerve.update(); // Not needed as we are using updateWithTargetVelocity() in the opModes
+        robot.profiler.start("Drive Update");
         if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : PINPOINT_TELEOP_POLLING_RATE))) {
             robot.pinpoint.update();
+            timer.reset();
         }
+        robot.profiler.end("Drive Update");
     }
 
     public void init() {

@@ -183,7 +183,7 @@ public class Camera {
             return 0;
         }
 
-        double finalOffset = txOffset(robotPose, robot.turret.adjustedGoalPose(robotPose));
+        double finalOffset = txOffset(robotPose, robot.turret.adjustedGoalPose());
         RobotLog.aa("final offset", String.valueOf(finalOffset));
         return finalOffset;
     }
