@@ -101,9 +101,9 @@ public class Constants {
     public static double LAUNCHER_MAX_BALL_VELOCITY = 100; // Meters/second // TODO: maybe actually deal with this later
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: Check with CAD
-    public static double MIN_HOOD_SERVO_POS = 0.22; // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_HOOD_SERVO_POS = 0.18; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal // TODO: Check with CAD
-    public static double MAX_HOOD_SERVO_POS = 0.85; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
     public static double HOOD_COMPENSATION = 0.0067;
 
     // Turret
