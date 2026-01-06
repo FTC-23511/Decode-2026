@@ -104,18 +104,18 @@ public class Constants {
     public static double MIN_HOOD_SERVO_POS = 0.18; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal // TODO: Check with CAD
     public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
-    public static double HOOD_COMPENSATION = 0.0067;
 
     // Turret
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.43, 0.0, 0.0, 0.0); // Coefficients for radians
-    public static double TURRET_OPEN_F = 0.034;
-    public static double TURRET_VEL_FF = 0;
+    public static double TURRET_EXTERNAL_D = 0.0; // Coefficient for radians/second
+    public static double TURRET_VEL_FF = 0; // Coefficient for radians/second
+    public static double TURRET_OPEN_F = 0.034; // Power
     public static double TURRET_POS_TOLERANCE = 0.03; // Radians
-    public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
+    public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second // TODO: figure out if we even need this
     public static double TURRET_THRESHOLD = 0.1; // Radians
-    public static double TURRET_MIN_OUTPUT = 0.00;
-    public static double TURRET_SMALL_MAX_OUTPUT = 0.067;
-    public static double TURRET_LARGE_MAX_OUTPUT = 1.0;
+    public static double TURRET_MIN_OUTPUT = 0.00; // Power
+    public static double TURRET_SMALL_MAX_OUTPUT = 0.067; // Power
+    public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
 
     public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.NONE;

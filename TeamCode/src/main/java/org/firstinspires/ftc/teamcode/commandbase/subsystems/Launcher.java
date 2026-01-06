@@ -110,7 +110,7 @@ public class Launcher extends SubsystemBase {
     }
 
     private void setHood(double angle, boolean compensation) {
-        if (compensation) {
+        if (compensation) { // TODO: fix this code, it is cooked.
             double launchVel = robot.launchEncoder.getCorrectedVelocity();
             robot.launchMotors.set(flywheelController.calculate(launchVel));
 

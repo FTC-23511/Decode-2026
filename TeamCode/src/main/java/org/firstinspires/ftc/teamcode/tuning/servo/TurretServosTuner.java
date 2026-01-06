@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.tuning.servo;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
-
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -19,23 +17,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 @Config
 @TeleOp(name = "TurretServosTuner", group = "Servo")
 public class TurretServosTuner extends CommandOpMode {
-    public static double P = 0.43;
-    public static double I = 0.0;
-    public static double D = 0.0;
-    public static double F = 0.0;
-
-    public static double MIN_OUTPUT = 0.0;
-    public static double SMALL_MAX_OUTPUT = 1.0;
-    public static double LARGE_MAX_OUTPUT = 1.0;
-    public static double OPEN_F = 0.034;
-
     public static double TARGET_POS = 0.0;
-    public static double POS_TOLERANCE = 0.03;
-    public static double POS_THRESHOLD = 0.1;
-
-    public static double MIN_INTEGRAL = 0.0;
-    public static double MAX_INTEGRAL = 1.0;
-
+    public static double TARGET_VEL = 0.0;
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public ElapsedTime timer;
     private final Robot robot = Robot.getInstance();
@@ -44,8 +27,8 @@ public class TurretServosTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
-        Turret.turretState = Turret.TurretState.OFF;
-        TESTING_OP_MODE = true;
+        Constants.TESTING_OP_MODE = true;
+        Turret.turretState = Turret.TurretState.GOAL_LOCK_CONTROL;
 
         // Resets the command scheduler
         super.reset();
@@ -57,41 +40,25 @@ public class TurretServosTuner extends CommandOpMode {
     @Override
     public void run() {
         if (timer == null) {
-            Turret.turretState = Turret.TurretState.OFF;
+            robot.initHasMovement();
             timer = new ElapsedTime();
         }
-        Turret.turretState = Turret.TurretState.OFF;
-        double servoPos = robot.turret.getPosition();
+        robot.turret.updateCoefficients(); // this internally updates all the coefficients, do not remove
 
-        robot.turret.turretController.setPIDF(P, I, D, F);
-        robot.turret.turretController.setOpenF(OPEN_F);
-        robot.turret.turretController.setTolerance(POS_TOLERANCE);
-        robot.turret.turretController.setMinOutput(MIN_OUTPUT);
-
-        if (Math.abs(robot.turret.turretController.getPositionError()) > POS_THRESHOLD) {
-            robot.turret.turretController.setMaxOutput(LARGE_MAX_OUTPUT);
-        } else {
-            robot.turret.turretController.setMaxOutput(SMALL_MAX_OUTPUT);
-        }
-
-        robot.turret.turretController.integrationControl.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
-
-        double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);
-
-        if (robot.turret.turretController.atSetPoint()) {
-            robot.turretServos.set(0);
-            robot.turret.turretController.clearTotalError();
-        } else {
-            robot.turretServos.set(power);
-        }
+        // update pos and vel targets
+        robot.turret.turretController.setSetPoint(TARGET_POS);
+        Turret.targetVel = TARGET_VEL;
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Actual Pos", servoPos);
+        telemetryData.addData("Actual Pos", robot.turret.getPosition());
         telemetryData.addData("Target Pos", TARGET_POS);
 
-        telemetryData.addData("Set Power", power);
+        telemetryData.addData("Smoothed Vel", robot.turret.getVelocity());
+        telemetryData.addData("Target Vel", TARGET_VEL);
+        telemetryData.addData("Unfiltered Vel", -robot.turret.turretController.getVelocityError()); // TODO: check if this is actually equivalent to unfiltered vel
+
         telemetryData.addData("Get Power", robot.turretServos.getSpeeds().toString());
         telemetryData.addData("atSetPoint", robot.turret.turretController.atSetPoint());
 
@@ -99,12 +66,12 @@ public class TurretServosTuner extends CommandOpMode {
         robot.updateLoop(telemetryData);
     }
     
-    @Override
-    public void end() {
-        Log.v("P", String.valueOf(P));
-        Log.v("I", String.valueOf(I));
-        Log.v("D", String.valueOf(D));
-        Log.v("F", String.valueOf(F));
-        Log.v("posTolerance", String.valueOf(POS_TOLERANCE));
-    }
+//    @Override
+//    public void end() {
+//        Log.v("P", String.valueOf(P));
+//        Log.v("I", String.valueOf(I));
+//        Log.v("D", String.valueOf(D));
+//        Log.v("F", String.valueOf(F));
+//        Log.v("posTolerance", String.valueOf(POS_TOLERANCE));
+//    }
 }
