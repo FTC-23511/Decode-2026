@@ -19,19 +19,19 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 @Config
 @TeleOp(name = "TurretServosTuner", group = "Servo")
 public class TurretServosTuner extends CommandOpMode {
-    public static double P = 0.00;
-    public static double I = 0;
-    public static double D = 0.000;
-    public static double F = 0.000;
+    public static double P = 0.43;
+    public static double I = 0.0;
+    public static double D = 0.0;
+    public static double F = 0.0;
 
-    public static double MIN_OUTPUT = 0.00;
-    public static double SMALL_MAX_OUTPUT = 1.00;
-    public static double LARGE_MAX_OUTPUT = 1.00;
-    public static double OPEN_F = 0.00;
+    public static double MIN_OUTPUT = 0.0;
+    public static double SMALL_MAX_OUTPUT = 1.0;
+    public static double LARGE_MAX_OUTPUT = 1.0;
+    public static double OPEN_F = 0.034;
 
     public static double TARGET_POS = 0.0;
-    public static double POS_TOLERANCE = 0.00;
-    public static double POS_THRESHOLD = 0.00;
+    public static double POS_TOLERANCE = 0.03;
+    public static double POS_THRESHOLD = 0.1;
 
     public static double MIN_INTEGRAL = 0.0;
     public static double MAX_INTEGRAL = 1.0;
@@ -93,6 +93,7 @@ public class TurretServosTuner extends CommandOpMode {
 
         telemetryData.addData("Set Power", power);
         telemetryData.addData("Get Power", robot.turretServos.getSpeeds().toString());
+        telemetryData.addData("atSetPoint", robot.turret.turretController.atSetPoint());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

@@ -107,8 +107,9 @@ public class Constants {
     public static double HOOD_COMPENSATION = 0.0067;
 
     // Turret
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.43, 0.00, 0.0325, 0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.43, 0.0, 0.0, 0.0); // Coefficients for radians
     public static double TURRET_OPEN_F = 0.034;
+    public static double TURRET_VEL_FF = 0;
     public static double TURRET_POS_TOLERANCE = 0.03; // Radians
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY;
     public static double TURRET_THRESHOLD = 0.1; // Radians

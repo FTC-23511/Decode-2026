@@ -137,10 +137,10 @@ public class Turret extends SubsystemBase {
 
                 robot.profiler.start("tr1");
                 power = turretController.calculate(getPosition());
+                power += -robot.drive.getVelocity().omegaRadiansPerSecond * TURRET_VEL_FF;
                 robot.profiler.end("tr1");
 
                 if (turretController.atSetPoint()) {
-                    power = 0;
                     turretController.clearTotalError();
                 }
 
@@ -154,10 +154,10 @@ public class Turret extends SubsystemBase {
                 power = turretController.calculate(getPosition());
 
                 if (turretController.atSetPoint()) {
-                    robot.turretServos.set(0);
-                } else {
-                    robot.turretServos.set(power);
+                    turretController.clearTotalError();
                 }
+
+                robot.turretServos.set(power);
                 break;
 
             case OFF:
