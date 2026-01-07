@@ -78,6 +78,6 @@ public class SquIDFController extends PIDFController {
             totalError = 0;
         }
         // returns u(t)
-        return kP * MathUtils.sqrtWithSig(errorVal_p) + kI * totalError + kD * errorVal_v + kF * setPoint;
+        return kP * (Math.pow(Math.abs(errorVal_p), 0.67) * Math.signum(errorVal_p)) + kI * totalError + kD * errorVal_v + kF * setPoint;
     }
 }

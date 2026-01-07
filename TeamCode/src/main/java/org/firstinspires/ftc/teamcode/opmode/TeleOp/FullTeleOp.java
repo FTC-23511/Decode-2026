@@ -48,7 +48,8 @@ public class FullTeleOp extends CommandOpMode {
     @Override
     public void initialize() {
         // Must have for all opModes
-        Constants.OP_MODE_TYPE = OpModeType.TELEOP;
+        OP_MODE_TYPE = OpModeType.TELEOP;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();

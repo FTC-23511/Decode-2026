@@ -41,6 +41,7 @@ public class TurretServosTuner extends CommandOpMode {
     public void run() {
         if (timer == null) {
             robot.initHasMovement();
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
             timer = new ElapsedTime();
         }
         robot.turret.updateCoefficients(); // this internally updates all the coefficients, do not remove

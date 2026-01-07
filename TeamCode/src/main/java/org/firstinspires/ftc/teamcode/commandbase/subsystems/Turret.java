@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.*;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import com.google.gson.internal.Streams;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
@@ -42,7 +42,7 @@ public class Turret extends SubsystemBase {
     );
 
     public static TurretState turretState = GOAL_LOCK_CONTROL;
-    public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public SquIDFController turretController = new SquIDFController(TURRET_PIDF_COEFFICIENTS);
     public static double targetVel = 0;
 
 //    public CascadeController turretController = new CascadeController(
@@ -56,10 +56,11 @@ public class Turret extends SubsystemBase {
 //                    )
 //    );
 
-    private ArrayList<Double> lastPositions = new ArrayList<>();
-    private final double LAST_POS_ENTRIES = 4;
+    private ArrayList<Double> lastVelocities = new ArrayList<>();
     private final ElapsedTime timer = new ElapsedTime();
     private double vel = 0;
+    private double lastPos = Double.NaN; // for velocity
+    private double lastPosPos = Double.NaN; // for position
 
     public Turret() {
         updateCoefficients();
@@ -114,23 +115,36 @@ public class Turret extends SubsystemBase {
     }
 
     public double getPosition() {
-        return MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false);
+        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false);
+        if ((((Double) lastPosPos).isNaN()) || (Math.abs(newPos - lastPosPos) < TURRET_POS_FILTER)) {
+            lastPosPos = newPos;
+            return newPos;
+        }
+        return lastPosPos;
     }
 
     public void updateVelocity() {
         double position = getPosition();
-        if (lastPositions.isEmpty()) {
-            lastPositions.add(position);
+        if (((Double) lastPos).isNaN()) {
+            lastPos = position;
         }
-        double avgLastPosition = lastPositions.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
 
-        vel = (position - avgLastPosition) / timer.seconds();
+        double rawVel = (position - lastPos) / timer.seconds();
+
+        double oldAvgVel = lastVelocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+        if (Math.abs(rawVel - oldAvgVel) < TURRET_VEL_FILTER) {
+            lastVelocities.add(rawVel);
+            if (lastVelocities.size() > TURRET_LAST_VEL_ENTRIES) {
+                lastVelocities.remove(0);
+            }
+        }
+
+        vel = lastVelocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+        lastPos = position;
         timer.reset();
 
-        lastPositions.add(position);
-        if (lastPositions.size() > LAST_POS_ENTRIES) {
-            lastPositions.remove(0);
-        }
     }
 
     public double getVelocity() {
@@ -154,7 +168,7 @@ public class Turret extends SubsystemBase {
                     double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
 
                     turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
-                    targetVel = -robot.drive.getVelocity().omegaRadiansPerSecond;
+                    targetVel = -robot.drive.swerve.getTargetVelocity().omegaRadiansPerSecond;
                 }
 
                 if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
@@ -168,7 +182,12 @@ public class Turret extends SubsystemBase {
                 power = turretController.calculate(getPosition()); // PIF positional control output
                 double errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
                 power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
-                power += targetVel * TURRET_VEL_FF; // velocity feedforward output
+
+                if (turretController.atSetPoint()) {
+//                    power = 0;
+                }
+
+                power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
 
                 RobotLog.aa("turret power", String.valueOf(power));
                 robot.profiler.end("tr1");

@@ -100,21 +100,24 @@ public class Constants {
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
     public static double LAUNCHER_MAX_BALL_VELOCITY = 100; // Meters/second // TODO: maybe actually deal with this later
 
-    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal // TODO: Check with CAD
+    public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.18; // MUST MATCH WITH VALUE ABOVE
-    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal // TODO: Check with CAD
+    public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
     public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
 
     // Turret
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.43, 0.0, 0.0, 0.0); // Coefficients for radians
-    public static double TURRET_EXTERNAL_D = 0.0; // Coefficient for radians/second
-    public static double TURRET_VEL_FF = 0; // Coefficient for radians/second
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.3, 0.0, 0.0, 0.0); // Coefficients for radians
+    public static double TURRET_EXTERNAL_D = 0.0167; // Coefficient for radians/second
+    public static double TURRET_VEL_FF = 0.054; // Coefficient for radians/second
     public static double TURRET_OPEN_F = 0.034; // Power
-    public static double TURRET_POS_TOLERANCE = 0.03; // Radians
+    public static double TURRET_POS_TOLERANCE = 0.041; // Radians
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second // TODO: figure out if we even need this
+    public static double TURRET_VEL_FILTER = 20; // Radians/second
+    public static double TURRET_LAST_VEL_ENTRIES = 5;
+    public static double TURRET_POS_FILTER = 1.5; // Radians
     public static double TURRET_THRESHOLD = 0.1; // Radians
     public static double TURRET_MIN_OUTPUT = 0.00; // Power
-    public static double TURRET_SMALL_MAX_OUTPUT = 0.067; // Power
+    public static double TURRET_SMALL_MAX_OUTPUT = 0.1; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
 
@@ -125,7 +128,7 @@ public class Constants {
 
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private final double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static double MAX_TURRET_ANGLE = (150.0 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
+    public static double MAX_TURRET_ANGLE = (140.0 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range);
 
     public static float CAMERA_CLOSE_DECIMATION = 3;
     public static float CAMERA_FAR_DECIMATION = 2;
