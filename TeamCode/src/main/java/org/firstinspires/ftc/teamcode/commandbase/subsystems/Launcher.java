@@ -112,18 +112,18 @@ public class Launcher extends SubsystemBase {
     private void setHood(double angle, boolean compensation) {
         if (compensation) { // TODO: fix this code, it is cooked.
             double launchVel = robot.launchEncoder.getCorrectedVelocity();
-            robot.launchMotors.set(flywheelController.calculate(launchVel));
 
             Object[] newHoodAngle = MathFunctions.getHoodAngleFromVelocity(
                     GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
-                    MathFunctions.convertToMetersPerSec(launchVel)
+                    launchVel // TODO: needs a conversion method here
             );
 
             angle = (double) newHoodAngle[0];
             impossible = (boolean) newHoodAngle[1];
+        } else {
+            targetHoodAngle = angle;
         }
 
-//        robot.hoodServo.set(Range.clip(angle, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE));
         robot.hoodServo.set(
                 (angle - MIN_HOOD_ANGLE) / (MAX_HOOD_ANGLE - MIN_HOOD_ANGLE) * (MAX_HOOD_SERVO_POS - MIN_HOOD_SERVO_POS) + MIN_HOOD_SERVO_POS
         );

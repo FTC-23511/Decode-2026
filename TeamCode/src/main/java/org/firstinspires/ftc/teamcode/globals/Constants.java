@@ -106,10 +106,10 @@ public class Constants {
     public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
 
     // Turret
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.3, 0.0, 0.0, 0.0); // Coefficients for radians
-    public static double TURRET_EXTERNAL_D = 0.0167; // Coefficient for radians/second
-    public static double TURRET_VEL_FF = 0.054; // Coefficient for radians/second
-    public static double TURRET_OPEN_F = 0.034; // Power
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.267, 0.0, 0.0, 0.0); // Coefficients for radians
+    public static double TURRET_EXTERNAL_D = 0.01967; // Coefficient for radians/second
+    public static double TURRET_VEL_FF = 0.02467; // Coefficient for radians/second
+    public static double TURRET_OPEN_F = 0.03; // Power
     public static double TURRET_POS_TOLERANCE = 0.041; // Radians
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second // TODO: figure out if we even need this
     public static double TURRET_VEL_FILTER = 20; // Radians/second
@@ -117,14 +117,14 @@ public class Constants {
     public static double TURRET_POS_FILTER = 1.5; // Radians
     public static double TURRET_THRESHOLD = 0.1; // Radians
     public static double TURRET_MIN_OUTPUT = 0.00; // Power
-    public static double TURRET_SMALL_MAX_OUTPUT = 0.1; // Power
+    public static double TURRET_SMALL_MAX_OUTPUT = 0.08; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
 
-    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.NONE;
-    public static double TURRET_MIN_INTEGRAL = -1.0;
-    public static double TURRET_MAX_INTEGRAL = 1.0;
-    public static double TURRET_INTEGRATION_DECAY = 1.0;
+    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
+    public static double TURRET_MIN_INTEGRAL = -0.2;
+    public static double TURRET_MAX_INTEGRAL = 0.2;
+    public static double TURRET_INTEGRATION_DECAY = 0.7;
 
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private final double LIMELIGHT_TURRET_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE

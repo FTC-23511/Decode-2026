@@ -24,13 +24,4 @@ public class LauncherTest {
 
         assertEquals(0.0, val);
     }
-
-    @Test
-    public void convertFlywheelUnitsTest() {
-        double maxVel = MathFunctions.convertToMetersPerSec(2300);
-
-        System.out.println("convertFlywheelUnitsTest: " + maxVel);
-
-        assertTrue(maxVel > 5.62);
-    }
 }

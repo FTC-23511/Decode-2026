@@ -238,6 +238,8 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
+//        telemetryData.addData("Turret Vel", robot.turret.getVelocity());
+
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
 

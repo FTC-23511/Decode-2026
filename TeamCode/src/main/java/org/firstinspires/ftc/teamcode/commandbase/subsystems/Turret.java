@@ -42,7 +42,7 @@ public class Turret extends SubsystemBase {
     );
 
     public static TurretState turretState = GOAL_LOCK_CONTROL;
-    public SquIDFController turretController = new SquIDFController(TURRET_PIDF_COEFFICIENTS);
+    public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
     public static double targetVel = 0;
 
 //    public CascadeController turretController = new CascadeController(
@@ -86,7 +86,6 @@ public class Turret extends SubsystemBase {
         turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
         turretController.setMinOutput(TURRET_MIN_OUTPUT);
-        turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
     }
 
     public void setTurret(TurretState turretState, double value) {
@@ -144,7 +143,6 @@ public class Turret extends SubsystemBase {
 
         lastPos = position;
         timer.reset();
-
     }
 
     public double getVelocity() {
@@ -152,7 +150,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
-        turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
         double power;
 
         switch (turretState) {
@@ -188,6 +185,7 @@ public class Turret extends SubsystemBase {
                 }
 
                 power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
+                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 RobotLog.aa("turret power", String.valueOf(power));
                 robot.profiler.end("tr1");
@@ -205,6 +203,7 @@ public class Turret extends SubsystemBase {
 
             case ANGLE_CONTROL:
                 power = turretController.calculate(getPosition());
+                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 robot.turretServos.set(power);
                 break;
