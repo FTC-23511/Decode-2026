@@ -120,6 +120,7 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.08; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
+    public static double TURRET_ENCODER_2_OFFSET = 0.0; // Radians
 
     public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
     public static double TURRET_MIN_INTEGRAL = -0.2;

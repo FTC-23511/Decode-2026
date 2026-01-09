@@ -98,7 +98,6 @@ public class Turret extends SubsystemBase {
                 break;
             case ANGLE_CONTROL:
                 // value = turret target (radians)
-                turretController.clearTotalError();
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case OFF:
@@ -151,6 +150,7 @@ public class Turret extends SubsystemBase {
 
     public void update() {
         double power;
+        double errorVel;
 
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
@@ -177,11 +177,11 @@ public class Turret extends SubsystemBase {
                 robot.profiler.start("tr1");
 
                 power = turretController.calculate(getPosition()); // PIF positional control output
-                double errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
+                errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
                 power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
 
                 if (turretController.atSetPoint()) {
-//                    power = 0;
+                    power = 0;
                 }
 
                 power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
@@ -202,7 +202,9 @@ public class Turret extends SubsystemBase {
                 break;
 
             case ANGLE_CONTROL:
-                power = turretController.calculate(getPosition());
+                power = turretController.calculate(getPosition()); // PIF positional control output
+                errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
+                power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
                 power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 robot.turretServos.set(power);
