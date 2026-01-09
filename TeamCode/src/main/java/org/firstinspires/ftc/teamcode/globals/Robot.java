@@ -121,10 +121,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // Hardware
         voltageSensor = hwMap.voltageSensor.iterator().next();
 
-        FRmotor = new MotorEx(hwMap, "FR").setCachingTolerance(0.01);
-        FLmotor = new MotorEx(hwMap, "FL").setCachingTolerance(0.01);
-        BLmotor = new MotorEx(hwMap, "BL").setCachingTolerance(0.01);
-        BRmotor = new MotorEx(hwMap, "BR").setCachingTolerance(0.01);
+        FRmotor = new MotorEx(hwMap, "FRM").setCachingTolerance(0.01);
+        FLmotor = new MotorEx(hwMap, "FLM").setCachingTolerance(0.01);
+        BLmotor = new MotorEx(hwMap, "BLM").setCachingTolerance(0.01);
+        BRmotor = new MotorEx(hwMap, "BRM").setCachingTolerance(0.01);
 
         FRmotor.setRunMode(Motor.RunMode.RawPower);
         FLmotor.setRunMode(Motor.RunMode.RawPower);
@@ -136,13 +136,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                         .setCachingTolerance(0.01)
                         .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)
-                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE),
+                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+                        .setInverted(true),
                 new MotorEx(hwMap, "rightIntakeMotor")
                         .setCachingTolerance(0.01)
                         .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)
                         .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
-                        .setInverted(true)
+
         );
 
         launchMotors = new MotorGroup(
@@ -159,16 +160,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
         launchEncoder.setDirection(Motor.Direction.REVERSE);
 
-        FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR").setReversed(true)
+        FRswervo = new CRServoEx(hwMap, "FRS", new AbsoluteAnalogEncoder(hwMap, "FRE").setReversed(true)
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
-        FLswervo = new CRServoEx(hwMap, "FL", new AbsoluteAnalogEncoder(hwMap, "FL").setReversed(true)
+        FLswervo = new CRServoEx(hwMap, "FLS", new AbsoluteAnalogEncoder(hwMap, "FLE").setReversed(true)
                 .zero(FL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
-        BLswervo = new CRServoEx(hwMap, "BL", new AbsoluteAnalogEncoder(hwMap, "BL").setReversed(true)
+        BLswervo = new CRServoEx(hwMap, "BLS", new AbsoluteAnalogEncoder(hwMap, "BLE").setReversed(true)
                 .zero(BL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
-        BRswervo = new CRServoEx(hwMap, "BR", new AbsoluteAnalogEncoder(hwMap, "BR").setReversed(true)
+        BRswervo = new CRServoEx(hwMap, "BRS", new AbsoluteAnalogEncoder(hwMap, "BRE").setReversed(true)
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
         FRswervo.setInverted(true);

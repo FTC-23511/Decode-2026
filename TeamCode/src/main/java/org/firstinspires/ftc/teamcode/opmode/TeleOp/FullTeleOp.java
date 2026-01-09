@@ -81,13 +81,12 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.intake.toggleIntakeMotor())
-                )
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SetIntake(Intake.MotorState.STOP)
+                 Intake.ActiveStopIntake()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
@@ -232,7 +231,6 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
 
         telemetryData.addData("Intake Motor State", Intake.motorState);
-        telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
 
         telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 
