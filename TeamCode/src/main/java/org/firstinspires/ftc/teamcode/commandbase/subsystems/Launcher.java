@@ -28,6 +28,7 @@ public class Launcher extends SubsystemBase {
     private static final long STALL_TIMEOUT_MS = 2500;           // 2.5 seconds before cutting power
 
 
+
     public Launcher() {
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
     }
@@ -44,6 +45,13 @@ public class Launcher extends SubsystemBase {
         flywheelController.setSetPoint(Math.min(vel, LAUNCHER_MAX_VELOCITY));
         targetFlywheelVelocity = vel;
         setActiveControl(setActiveControl);
+    }
+
+    /**
+     * @return the current actual velocity of the flywheel in ticks/second.
+     */
+    public double getFlywheelVelocity() {
+        return robot.launchEncoder.getCorrectedVelocity();
     }
 
 

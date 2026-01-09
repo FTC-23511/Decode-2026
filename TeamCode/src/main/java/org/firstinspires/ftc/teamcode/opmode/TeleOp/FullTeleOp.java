@@ -13,6 +13,8 @@ import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
+
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
@@ -23,6 +25,7 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.commandbase.commands.AlignWithAprilTagCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -95,12 +98,18 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setFlywheel(-600, true)),
-                        new com.seattlesolvers.solverslib.command.WaitCommand(500),
+                        // 1. Set flywheel to reverse (assuming -800 for reverse) and enable control
+                        new InstantCommand(() -> robot.launcher.setFlywheel(-800, true)),
+
+                        // 2. Wait until the PID controller reports the flywheel is at the target velocity
+                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
+
+                        // 3. Start the intake forward
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 )
+
         );
-        
+
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
                  Intake.ActiveStopIntake()
@@ -108,6 +117,10 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
         );
 
 

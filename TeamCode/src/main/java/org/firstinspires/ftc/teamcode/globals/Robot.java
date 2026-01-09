@@ -197,7 +197,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(250);
-        limelight.pipelineSwitch(4);
         limelight.start();
 
         // Subsystems

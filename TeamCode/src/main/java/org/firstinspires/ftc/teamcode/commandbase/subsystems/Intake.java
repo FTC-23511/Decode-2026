@@ -45,7 +45,7 @@ public class Intake extends SubsystemBase {
     public void setIntake(MotorState motorState) {
         // Define the minimum velocity required for the intake to run
         // Adjust this value based on your flywheel's typical operating speed
-        final double MIN_LAUNCHER_VELOCITY = 500.0;
+        final double MIN_LAUNCHER_VELOCITY = 700.0;
 
         // Safety Check: If trying to move game pieces forward/transfer
         // but the flywheel is too slow, force the intake to STOP.
