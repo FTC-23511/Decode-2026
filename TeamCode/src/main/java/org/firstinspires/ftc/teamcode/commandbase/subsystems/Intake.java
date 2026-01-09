@@ -43,6 +43,21 @@ public class Intake extends SubsystemBase {
 
 
     public void setIntake(MotorState motorState) {
+        // Define the minimum velocity required for the intake to run
+        // Adjust this value based on your flywheel's typical operating speed
+        final double MIN_LAUNCHER_VELOCITY = 500.0;
+
+        // Safety Check: If trying to move game pieces forward/transfer
+        // but the flywheel is too slow, force the intake to STOP.
+        if ((motorState == MotorState.FORWARD || motorState == MotorState.TRANSFER)) {
+            // Access the launcher velocity through the Robot singleton
+            double currentFlywheelVel = Math.abs(robot.launcher.getFlywheelVelocity());
+
+            if (currentFlywheelVel < MIN_LAUNCHER_VELOCITY) {
+                motorState = MotorState.STOP;
+            }
+        }
+
         switch (motorState) {
             case STOP:
                 robot.intakeMotors.set(0);
@@ -54,12 +69,14 @@ public class Intake extends SubsystemBase {
                 robot.intakeMotors.set(INTAKE_FORWARD_SPEED);
                 break;
             case REVERSE:
+                // We allow REVERSE even if the flywheel is stopped to clear jams
                 robot.intakeMotors.set(INTAKE_REVERSE_SPEED);
                 break;
         }
 
         Intake.motorState = motorState;
     }
+
 
     public void toggleIntakeMotor() {
             if (motorState.equals(MotorState.FORWARD)) {
