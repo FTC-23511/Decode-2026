@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveDrivetrain;
+import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Translation2d;
@@ -55,6 +56,10 @@ public class Drive extends SubsystemBase {
                 ANGLE_UNIT,
                 XY_TOLERANCE,
                 HEADING_TOLERANCE
+        ).setSlewRateLimiters(
+                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
         );
 
         timer = new ElapsedTime();

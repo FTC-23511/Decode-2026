@@ -95,8 +95,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Turret turret;
     public Camera camera;
 
-    public SensorDigitalDevice frontDistanceSensor;
-    public SensorDigitalDevice backDistanceSensor;
+//    public SensorDigitalDevice frontDistanceSensor;
+//    public SensorDigitalDevice backDistanceSensor;
     public AnalogInput distanceSensor;
 
     public void init(HardwareMap hwMap) {
@@ -292,7 +292,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public void updateLoop(TelemetryData telemetryData) {
         CommandScheduler.getInstance().run();
-        telemetryData.update();
+
+        if (telemetryData != null) {
+            telemetryData.update();
+        }
+
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
     }

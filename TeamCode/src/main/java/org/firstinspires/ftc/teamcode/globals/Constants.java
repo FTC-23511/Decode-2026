@@ -19,14 +19,14 @@ public class Constants {
     public enum AllianceColor {
         BLUE(1), RED(-1);
 
-        private int val;
+        private final int multiplier;
 
         AllianceColor(int multiplier) {
-            val = multiplier;
+            this.multiplier = multiplier;
         }
 
         public int getMultiplier() {
-            return val;
+            return multiplier;
         }
     }
 
@@ -48,6 +48,9 @@ public class Constants {
     public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
     public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
+
+    public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
+    public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
 
     public static double STRAFING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
     public static double TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second

@@ -70,6 +70,10 @@ public class Intake extends SubsystemBase {
     public void update() {
         robot.profiler.start("Intake Update");
 
+        robot.profiler.start("Distance Sensor");
+        updateDistanceSensors();
+        robot.profiler.end("Distance Sensor");
+
         switch (motorState) {
             case FORWARD:
 //                if (transferFull()) {
@@ -78,13 +82,7 @@ public class Intake extends SubsystemBase {
 //                intakeJammed = true;
 //                intakeTimer.reset();
 //                setIntake(MotorState.REVERSE);
-
-                withinDistance = DISTANCE_THRESHOLD >= getDistance();
-
-                if (!withinDistance) {
-                    distanceTimer.reset();
-                }
-
+//
 //                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
 //
 //                }
@@ -121,6 +119,14 @@ public class Intake extends SubsystemBase {
         }
 
         return distance;
+    }
+
+    public void updateDistanceSensors() {
+        withinDistance = DISTANCE_THRESHOLD >= getDistance();
+
+        if (!withinDistance) {
+            distanceTimer.reset();
+        }
     }
 
     public boolean transferFull() {
