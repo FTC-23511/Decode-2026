@@ -32,8 +32,8 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.vision.Camera;
+
+
 
 import java.io.File;
 import java.util.Arrays;
@@ -70,6 +70,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public MotorGroup intakeMotors;
 
     public MotorGroup launchMotors;
+
     public Motor.Encoder launchEncoder;
 
     public CRServoEx FRswervo;
@@ -78,6 +79,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx BRswervo;
 
     public CRServoGroup turretServos;
+
     public AbsoluteAnalogEncoder turretEncoder;
 
     public ServoEx intakePivotServo;
@@ -92,8 +94,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Drive drive;
     public Intake intake;
     public Launcher launcher;
-    public Turret turret;
-    public Camera camera;
+
 
     public SensorDigitalDevice frontDistanceSensor;
     public SensorDigitalDevice backDistanceSensor;
@@ -131,16 +132,17 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
         intakeMotors = new MotorGroup(
-                new MotorEx(hwMap, "backIntakeMotor")
+                new MotorEx(hwMap, "leftIntakeMotor")
                         .setCachingTolerance(0.01)
                         .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)
                         .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE),
-                new MotorEx(hwMap, "frontIntakeMotor")
+                new MotorEx(hwMap, "rightIntakeMotor")
                         .setCachingTolerance(0.01)
                         .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)
                         .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+                        .setInverted(true)
         );
 
         launchMotors = new MotorGroup(
@@ -157,53 +159,39 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
         launchEncoder.setDirection(Motor.Direction.REVERSE);
 
-        FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
+        FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR").setReversed(true)
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
-        FLswervo = new CRServoEx(hwMap, "FL", new AbsoluteAnalogEncoder(hwMap, "FL")
+        FLswervo = new CRServoEx(hwMap, "FL", new AbsoluteAnalogEncoder(hwMap, "FL").setReversed(true)
                 .zero(FL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
-        BLswervo = new CRServoEx(hwMap, "BL", new AbsoluteAnalogEncoder(hwMap, "BL")
+        BLswervo = new CRServoEx(hwMap, "BL", new AbsoluteAnalogEncoder(hwMap, "BL").setReversed(true)
                 .zero(BL_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
-        BRswervo = new CRServoEx(hwMap, "BR", new AbsoluteAnalogEncoder(hwMap, "BR")
+        BRswervo = new CRServoEx(hwMap, "BR", new AbsoluteAnalogEncoder(hwMap, "BR").setReversed(true)
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
+        FRswervo.setInverted(true);
+        FLswervo.setInverted(true);
+        BLswervo.setInverted(true);
+        BRswervo.setInverted(true);
 
-        turretServos = new CRServoGroup(
-                new CRServoEx(hwMap, "leftTurretServo")
-                        .setCachingTolerance(0.01)
-                        .setRunMode(CRServoEx.RunMode.RawPower),
-                new CRServoEx(hwMap, "rightTurretServo")
-                        .setCachingTolerance(0.01)
-                        .setRunMode(CRServoEx.RunMode.RawPower)
-        ).setInverted(true);
 
-        turretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
-                .zero(TURRET_ENCODER_OFFSET)
-                .setReversed(true);
 
-        intakePivotServo = new ServoEx(hwMap, "intakePivotServo")
-                .setInverted(true)
-                .setCachingTolerance(0.01);
-        hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
-                .setInverted(true);
-        rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
-                .setInverted(false);
+
+        hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
                 .setOffsets(-76.32, 152.62, DistanceUnit.MM)
-                .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
+                .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
                 .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
                 .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.CRC)
                 .resetPosAndIMU()
                 .setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS))
                 .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION);
 
-//        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
-//        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
-        distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
+
 
         limelight = hwMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(250);
@@ -214,10 +202,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         drive = new Drive();
         intake = new Intake();
         launcher = new Launcher();
-        turret = new Turret();
 
-        // vision
-        camera = new Camera(hwMap);
+
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
@@ -233,7 +219,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //            }
 //        }
 
-        register(drive, intake, launcher, turret);
+        register(drive, intake, launcher);
 
         if (OP_MODE_TYPE.equals(OpModeType.AUTO)) {
             initHasMovement();
@@ -244,8 +230,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         drive.init();
         intake.init();
         launcher.init();
-        turret.init();
-        camera.initHasMovement();
     }
     
     public double getVoltage() {

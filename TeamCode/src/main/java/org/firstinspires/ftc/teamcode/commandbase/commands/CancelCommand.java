@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class CancelCommand extends CommandBase {
@@ -17,16 +16,14 @@ public class CancelCommand extends CommandBase {
      */
     public CancelCommand() {
         robot = Robot.getInstance();
-        addRequirements(robot.drive, robot.turret, robot.intake, robot.launcher);
+        addRequirements(robot.drive, robot.intake, robot.launcher);
     }
 
     @Override
     public void initialize() {
-        robot.turret.setTurret(Turret.TurretState.OFF, 0);
         robot.intake.setIntake(Intake.MotorState.STOP);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
-        robot.launcher.setRamp(false);
+
     }
 
     @Override

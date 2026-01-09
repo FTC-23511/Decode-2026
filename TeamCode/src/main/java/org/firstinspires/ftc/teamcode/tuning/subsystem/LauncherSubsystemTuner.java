@@ -55,7 +55,6 @@ public class LauncherSubsystemTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        robot.launcher.setRamp(true);
 
         if (USE_RAW_SERVO_POS) {
             SERVO_OUTPUT = Range.clip(SERVO_OUTPUT, 0.0, 1.0);

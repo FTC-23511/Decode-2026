@@ -9,19 +9,18 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 public class SetIntake extends CommandBase {
     private final Robot robot;
     private final Intake.MotorState motorState;
-    private final Intake.PivotState pivotState;
+
     private boolean waitForArtifacts;
 
     private ElapsedTime timer;
 
-    public SetIntake(Intake.MotorState motorState, Intake.PivotState pivotState) {
-        this(motorState, pivotState, false);
+    public SetIntake(Intake.MotorState motorState) {
+        this(motorState, false);
     }
 
-    public SetIntake(Intake.MotorState motorState, Intake.PivotState pivotState, boolean waitForArtifacts) {
+    public SetIntake(Intake.MotorState motorState, boolean waitForArtifacts) {
         robot = Robot.getInstance();
         this.motorState = motorState;
-        this.pivotState = pivotState;
         this.waitForArtifacts = waitForArtifacts;
 
         timer = new ElapsedTime();
@@ -32,7 +31,6 @@ public class SetIntake extends CommandBase {
     @Override
     public void initialize() {
         timer.reset();
-        robot.intake.setPivot(pivotState);
         robot.intake.setIntake(motorState);
     }
 
@@ -48,7 +46,7 @@ public class SetIntake extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        if (waitForArtifacts && robot.intake.transferFull()) {
+        if (waitForArtifacts) {
             return true;
         }
 

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -22,12 +21,10 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -82,9 +79,6 @@ public class Abby extends CommandOpMode {
         robot.init(hardwareMap);
 
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
-        robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -92,7 +86,6 @@ public class Abby extends CommandOpMode {
                 new SequentialCommandGroup(
                         // init
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
@@ -140,7 +133,6 @@ public class Abby extends CommandOpMode {
 
             telemetryData.addData("Heading", robot.drive.getPose().getHeading());
             telemetryData.addData("Robot Pose", robot.drive.getPose());
-            telemetryData.addData("Turret Position", robot.turret.getPosition());
             telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
             telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
             telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
@@ -158,9 +150,7 @@ public class Abby extends CommandOpMode {
         telemetryData.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
         telemetryData.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
 
-        telemetryData.addData("Turret State", Turret.turretState);
-        telemetryData.addData("Turret Target", robot.turret.getTarget());
-        telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
+
 
         telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
@@ -185,15 +175,12 @@ public class Abby extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
+                        new SetIntake(Intake.MotorState.FORWARD).beforeStarting(new WaitCommand(410)),
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true))
                 ),
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0)),
-                new WaitUntilCommand(() -> robot.turret.readyToLaunch()).withTimeout(500),
                 new InstantCommand(() -> robot.readyToLaunch = true),
-                new ClearLaunch(true).alongWith(
-                        new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
+                        new PrepDriveTo(pathPoses.get(pathStartingIndex + 1)
                 )
         );
     }
@@ -201,7 +188,7 @@ public class Abby extends CommandOpMode {
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );

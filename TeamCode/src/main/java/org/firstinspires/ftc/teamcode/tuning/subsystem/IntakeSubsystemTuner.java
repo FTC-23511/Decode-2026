@@ -77,7 +77,7 @@ public class IntakeSubsystemTuner extends CommandOpMode {
         telemetryData.addData("SERVO_POS", SERVO_POS);
         telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
 
-        telemetryData.addData("Distance Threshold", DISTANCE_THRESHOLD);
+
 //        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
 //        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
 

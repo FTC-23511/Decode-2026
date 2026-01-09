@@ -7,7 +7,6 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.teamcode.opmode.TeleOp.FullTeleOpLogging;
 
@@ -93,7 +92,6 @@ public class SolverLogger {
 
         str += ";Heading:Double:" + robot.drive.getPose().getHeading();
         str += ";Robot Pose:Pose2D;" + robot.drive.getPose();
-        str += ";Turret Position:Double;" + robot.turret.getPosition();
         str += ";Flywheel Velocity:Double:" + robot.launchEncoder.getCorrectedVelocity();
         str += ";Intake overCurrent:Boolean:" + ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent();
         str += ";FR Module Target Velocity0:Vector2D:" + robot.drive.swerve.getModules()[0].getTargetVelocity();
@@ -108,11 +106,6 @@ public class SolverLogger {
         str += ";Robot Target:Pose2D:" + robot.drive.follower.getTarget();
         str += ";atTarget:Boolean:" + robot.drive.follower.atTarget();
 
-        str += ";Turret State:String:" + Turret.turretState;
-        str += ";Turret Target:Double:" + robot.turret.getTarget();
-        str += ";Turret readyToLaunch:Boolean:" + robot.turret.readyToLaunch();
-        str += ";turretPose:Pose2D:" + robot.turret.getTurretPose();
-        str += ";Wall Angle:Double:" + robot.turret.angleToWall();
 
         str += ";Flywheel Active Control:Boolean:" + robot.launcher.getActiveControl();
         str += ";Flywheel Target Ball Velocity:Double:" + robot.launcher.getTargetFlywheelVelocity();

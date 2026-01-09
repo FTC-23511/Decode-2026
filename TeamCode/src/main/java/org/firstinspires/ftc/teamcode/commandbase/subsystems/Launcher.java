@@ -14,14 +14,7 @@ import java.util.Arrays;
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    public enum Motif {
-        NOT_FOUND,
-        GPP,
-        PGP,
-        PPG
-    }
 
-    public static Motif motifState = Motif.NOT_FOUND;
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
@@ -40,7 +33,6 @@ public class Launcher extends SubsystemBase {
 
     public void init() {
         if (!TESTING_OP_MODE) {
-            setRamp(OP_MODE_TYPE == OpModeType.AUTO);
             setHood(MIN_HOOD_ANGLE);
         }
         setFlywheel(0, false);
@@ -103,9 +95,6 @@ public class Launcher extends SubsystemBase {
         robot.profiler.end("Launcher Update");
     }
 
-    public void setRamp(boolean engaged) {
-        robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
-    }
 
     public void setHood(double angle) {
         setHood(angle, false);

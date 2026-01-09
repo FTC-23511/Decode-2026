@@ -12,7 +12,6 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -30,7 +29,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double LAUNCHER_TARGET_VEL = 0.0; // ticks/sec
     public static double DISTANCE = 1.5; // meters
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
-    public static Intake.PivotState pivotState = Intake.PivotState.FORWARD;
+
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -60,10 +59,9 @@ public class FullLaunchTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        robot.intake.setPivot(pivotState);
+
         robot.intake.setIntake(motorState);
 
-        robot.launcher.setRamp(true);
 
         if (USE_RAW_SERVO_POS) {
             HOOD_SERVO_OUTPUT = Range.clip(HOOD_SERVO_OUTPUT, 0.0, 1.0);
@@ -72,7 +70,7 @@ public class FullLaunchTuner extends CommandOpMode {
             robot.launcher.setHood(HOOD_SERVO_OUTPUT);
         }
 
-        robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TURRET_POS);
+
 
         robot.launcher.setFlywheelTicks(LAUNCHER_TARGET_VEL);
 
@@ -86,7 +84,6 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Launch Motor Power", robot.launchMotors.get());
         telemetryData.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
-        telemetryData.addData("Turret Pos", robot.turret.getPosition());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

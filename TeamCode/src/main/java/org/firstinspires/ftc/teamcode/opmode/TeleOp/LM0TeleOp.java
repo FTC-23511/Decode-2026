@@ -18,7 +18,6 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -64,14 +63,13 @@ public class LM0TeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD)),
+
                         new InstantCommand(() -> robot.intake.toggleIntakeMotor())
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SetIntake(Intake.MotorState.STOP, Intake.PivotState.HOLD)
+                new SetIntake(Intake.MotorState.STOP)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
@@ -82,12 +80,6 @@ public class LM0TeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(true)).andThen(new WaitCommand(200)),
-                        new ClearLaunch()
-                )
-        );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, true)).alongWith(
@@ -139,8 +131,7 @@ public class LM0TeleOp extends CommandOpMode {
         telemetryData.addData("Heading", robot.drive.getPose().getHeading());
         telemetryData.addData("Robot Pose", robot.drive.getPose());
 
-        telemetryData.addData("Turret Target", robot.turret.getTarget());
-        telemetryData.addData("Turret Position", robot.turret.getPosition());
+
 
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
         telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
