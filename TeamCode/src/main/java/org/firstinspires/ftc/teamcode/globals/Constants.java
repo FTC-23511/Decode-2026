@@ -70,7 +70,7 @@ public class Constants {
     // Intake
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
-    public static double INTAKE_REVERSE_SPEED = -1.0;
+    public static double INTAKE_REVERSE_SPEED = -0.8;
     public static double INTAKE_TRANSFER_SPEED = 0.5;
 
     public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps

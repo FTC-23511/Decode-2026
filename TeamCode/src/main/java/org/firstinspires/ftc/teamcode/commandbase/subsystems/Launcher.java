@@ -25,7 +25,7 @@ public class Launcher extends SubsystemBase {
     private boolean isStalled = false;
     private static final double STALL_VELOCITY_THRESHOLD = 50.0; // ticks/s (very low movement)
     private static final double STALL_POWER_THRESHOLD = 0.6;    // 60% power or higher
-    private static final long STALL_TIMEOUT_MS = 2500;           // 2.5 seconds before cutting power
+    private static final long STALL_TIMEOUT_MS = 1000;           // 1 seconds before cutting power
 
 
 

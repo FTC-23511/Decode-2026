@@ -112,16 +112,73 @@ public class FullTeleOp extends CommandOpMode {
 
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                 Intake.ActiveStopIntake()
+                new SequentialCommandGroup(
+
+                        // 2. Active stop the intake to prepare for the shot
+                        Intake.ActiveStopIntake(),
+
+                        // 3. Wait 100ms after the stop
+                        new com.seattlesolvers.solverslib.command.WaitCommand(100),
+
+                        // 4. Start flywheel and set hood simultaneously
+                        new InstantCommand(() -> robot.launcher.setFlywheel(1200, true)).alongWith(
+                                new InstantCommand(() -> robot.launcher.setHood(28))
+                        ),
+
+                        // 5. Wait until the flywheel is at the target speed
+                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
+
+                        // 6. Start the intake at transfer speed to launch
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
+                )
         );
+
+
+
+
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
+                new SequentialCommandGroup(
+
+                        // 2. Active stop the intake to prepare for the shot
+                        Intake.ActiveStopIntake(),
+
+                        // 3. Wait 100ms after the stop
+                        new com.seattlesolvers.solverslib.command.WaitCommand(100),
+
+                        // 4. Start flywheel and set hood simultaneously
+                        new InstantCommand(() -> robot.launcher.setFlywheel(1700, true)).alongWith(
+                                new InstantCommand(() -> robot.launcher.setHood(10))
+                        ),
+
+                        // 5. Wait until the flywheel is at the target speed
+                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
+
+                        // 6. Start the intake at transfer speed to launch
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
+                )
         );
 
+// Create the group first
+        SequentialCommandGroup oscillationGroup = new SequentialCommandGroup();
+
+        for (int i = 0; i < 5; i++) {
+            oscillationGroup.addCommands(
+                    new InstantCommand(() -> robot.launcher.setHood(45)),
+                    new com.seattlesolvers.solverslib.command.WaitCommand(500),
+                    new InstantCommand(() -> robot.launcher.setHood(0)),
+                    new com.seattlesolvers.solverslib.command.WaitCommand(500)
+            );
+        }
+
+// Then use 'oscillationGroup' inside your Gamepad button assignment:
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
+                new InstantCommand(() -> robot.launcher.setFlywheel(-800, true))
+                        .alongWith(new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE)))
+                        .alongWith(oscillationGroup)
         );
+
+
 
 
 

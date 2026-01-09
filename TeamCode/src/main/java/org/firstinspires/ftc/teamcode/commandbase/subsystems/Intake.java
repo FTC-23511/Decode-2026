@@ -91,7 +91,7 @@ public class Intake extends SubsystemBase {
     public static SequentialCommandGroup ActiveStopIntake() {
         return new SequentialCommandGroup(
                 new SetIntake(MotorState.REVERSE),
-                new WaitCommand(50),
+                new WaitCommand(150),
                 new SetIntake(MotorState.STOP)
         );
     }
