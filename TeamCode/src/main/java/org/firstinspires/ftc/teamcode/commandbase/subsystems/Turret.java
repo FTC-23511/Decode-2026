@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
@@ -113,7 +112,7 @@ public class Turret extends SubsystemBase {
     }
 
     public double getPosition() {
-        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false);
+        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getPosition(), false);
         if ((((Double) lastPosPos).isNaN()) || (Math.abs(newPos - lastPosPos) < TURRET_POS_FILTER)) {
             lastPosPos = newPos;
             return newPos;
