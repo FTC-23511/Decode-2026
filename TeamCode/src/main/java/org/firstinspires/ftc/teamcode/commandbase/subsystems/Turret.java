@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.*;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.controller.SquIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
@@ -18,6 +20,7 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Turret extends SubsystemBase {
@@ -40,6 +43,7 @@ public class Turret extends SubsystemBase {
 
     public static TurretState turretState = GOAL_LOCK_CONTROL;
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public static double targetVel = 0;
 
 //    public CascadeController turretController = new CascadeController(
 //            new PIDFController(TURRET_PIDF_COEFFICIENTS)
@@ -52,14 +56,14 @@ public class Turret extends SubsystemBase {
 //                    )
 //    );
 
-    public Turret() {
-        turretController.setOpenF(TURRET_OPEN_F);
-        turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
-        turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
-        turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
-        turretController.setMinOutput(TURRET_MIN_OUTPUT);
+    private ArrayList<Double> lastVelocities = new ArrayList<>();
+    private final ElapsedTime timer = new ElapsedTime();
+    private double vel = 0;
+    private double lastPos = Double.NaN; // for velocity
+    private double lastPosPos = Double.NaN; // for position
 
+    public Turret() {
+        updateCoefficients();
         goalAdjustmentLUT.createLUT();
     }
 
@@ -76,24 +80,24 @@ public class Turret extends SubsystemBase {
         return turretPose;
     }
 
-    public void setTurret(TurretState turretState, double value) {
-        turretController.setTolerance(TURRET_POS_TOLERANCE, TURRET_VEL_TOLERANCE);
+    public void updateCoefficients() {
+        turretController.setTolerance(TURRET_POS_TOLERANCE);
         turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
         turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
         turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
         turretController.setMinOutput(TURRET_MIN_OUTPUT);
+    }
 
+    public void setTurret(TurretState turretState, double value) {
+        updateCoefficients();
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
-
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
                 double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
                 turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case ANGLE_CONTROL:
                 // value = turret target (radians)
-                turretController.clearTotalError();
                 turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case OFF:
@@ -109,25 +113,60 @@ public class Turret extends SubsystemBase {
     }
 
     public double getPosition() {
-        return MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false);
+        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getCurrentPosition(), false);
+        if ((((Double) lastPosPos).isNaN()) || (Math.abs(newPos - lastPosPos) < TURRET_POS_FILTER)) {
+            lastPosPos = newPos;
+            return newPos;
+        }
+        return lastPosPos;
+    }
+
+    public void updateVelocity() {
+        double position = getPosition();
+        if (((Double) lastPos).isNaN()) {
+            lastPos = position;
+        }
+
+        double rawVel = (position - lastPos) / timer.seconds();
+
+        double oldAvgVel = lastVelocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+        if (Math.abs(rawVel - oldAvgVel) < TURRET_VEL_FILTER) {
+            lastVelocities.add(rawVel);
+            if (lastVelocities.size() > TURRET_LAST_VEL_ENTRIES) {
+                lastVelocities.remove(0);
+            }
+        }
+
+        vel = lastVelocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+        lastPos = position;
+        timer.reset();
+    }
+
+    public double getVelocity() {
+        return vel;
     }
 
     public void update() {
-        turretController.setOpenF(TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()));
         double power;
+        double errorVel;
 
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
                 robot.profiler.start("Turret Read");
+                updateVelocity(); // do not remove, needed for good tracking while bot is moving
 
-                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
-                double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
+                if (TESTING_OP_MODE) { // let the user "hack" the mode and take over what the turret is actually doing
+                    // assume turretController setpoint has been set and targetVel has also been set
+                } else {
+                    // otherwise figure out what those pos and vel setpoints need to be
+                    double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
+                    double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
 
-                robot.profiler.end("Turret Read");
-
-                robot.profiler.start("Turret Write");
-
-                turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                    turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                    targetVel = -robot.drive.swerve.getTargetVelocity().omegaRadiansPerSecond;
+                }
 
                 if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
                     turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
@@ -136,28 +175,39 @@ public class Turret extends SubsystemBase {
                 }
 
                 robot.profiler.start("tr1");
-                power = turretController.calculate(getPosition());
-                robot.profiler.end("tr1");
+
+                power = turretController.calculate(getPosition()); // PIF positional control output
+                errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
+                power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
 
                 if (turretController.atSetPoint()) {
                     power = 0;
-                    turretController.clearTotalError();
                 }
 
+                power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
+                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
+
                 RobotLog.aa("turret power", String.valueOf(power));
-                robot.turretServos.set(power);
+                robot.profiler.end("tr1");
+                robot.profiler.end("Turret Read");
 
-                robot.profiler.end("Turret Write");
-                break;
-
-            case ANGLE_CONTROL:
-                power = turretController.calculate(getPosition());
-
-                if (turretController.atSetPoint()) {
+                robot.profiler.start("Turret Write");
+                if ((Math.abs(getPosition()) > MAX_TURRET_ANGLE) && (Math.signum(power) == Math.signum(getPosition()))) {
+                    // don't push the turret even further in that direction if it is already past the hardware limits
                     robot.turretServos.set(0);
                 } else {
                     robot.turretServos.set(power);
                 }
+                robot.profiler.end("Turret Write");
+                break;
+
+            case ANGLE_CONTROL:
+                power = turretController.calculate(getPosition()); // PIF positional control output
+                errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
+                power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
+                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
+
+                robot.turretServos.set(power);
                 break;
 
             case OFF:

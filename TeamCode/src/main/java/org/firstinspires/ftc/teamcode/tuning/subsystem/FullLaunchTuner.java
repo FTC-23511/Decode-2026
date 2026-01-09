@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -88,6 +89,8 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
         telemetryData.addData("Turret Pos", robot.turret.getPosition());
+        telemetryData.addData("Turret Pos 2", MathUtils.normalizeRadians(robot.turretEncoder2.getCurrentPosition(), false));
+        telemetryData.addData("Turret Power", robot.turretServos.getRawPower());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

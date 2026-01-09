@@ -1,6 +1,8 @@
 package com.seattlesolvers.solverslib.p2p;
 
 import com.seattlesolvers.solverslib.controller.Controller;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
@@ -17,6 +19,10 @@ public class P2PController {
     private Pose2d target;
     private Pose2d current;
     private Transform2d error;
+
+    private SlewRateLimiter xLimiter = null;
+    private SlewRateLimiter yLimiter = null;
+    private SlewRateLimiter hLimiter = null;
 
     /**
      * The constructor for a P2PController object.
@@ -69,7 +75,26 @@ public class P2PController {
         double yVal = yController.calculate(current.getY(), target.getY());
         double headingVal = headingController.calculate(0, MathUtils.normalizeAngle(error.getRotation().getAngle(angleUnit), false, angleUnit));
 
+        if (xLimiter != null) {
+            xVal = xLimiter.calculate(xVal);
+            yVal = yLimiter.calculate(yVal);
+            headingVal = hLimiter.calculate(headingVal);
+        }
+
         return new ChassisSpeeds(xVal, yVal, headingVal);
+    }
+
+    /**
+     * Enables and sets the slew rate limiting for the P2P Controller.
+     * One for x-axis movement, one for y-axis movement, and one for heading
+     * Set any parameters not to be enabled/used as null.
+     * @return this object for chaining purposes
+     */
+    public P2PController setSlewRateLimiters(SlewRateLimiter xLimiter, SlewRateLimiter yLimiter, SlewRateLimiter hLimiter) {
+        this.xLimiter = xLimiter;
+        this.yLimiter = yLimiter;
+        this.hLimiter = hLimiter;
+        return this;
     }
 
     /**

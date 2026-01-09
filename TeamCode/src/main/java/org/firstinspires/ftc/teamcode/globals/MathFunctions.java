@@ -90,37 +90,6 @@ public class MathFunctions {
     }
 
     /**
-     * Converts ticks/sec to meters/sec
-     *
-     * @param ticksPerSec flywheel rotation in ticks/sec
-     * @return flywheel rotation in meters/sec
-     */
-    public static double convertToMetersPerSec(double ticksPerSec) {
-        double cpr = 28; // encoder count per revolution of 6000 rpm bare motor
-        double wheelDiameter = 0.0762; // 3 inches converted to meters
-        double wheelCircumference = Math.PI * wheelDiameter;
-        double distPerTick = wheelCircumference / cpr;
-
-        return ticksPerSec * distPerTick;
-    }
-
-    /**
-     * Converts meters/sec to ticks/sec
-     *
-     * @param metersPerSec flywheel surface velocity in meters/sec
-     * @return flywheel rotation in ticks/sec
-     */
-    public static double convertToTicksPerSec(double metersPerSec) {
-        double cpr = 28; // encoder counts per revolution
-        double wheelDiameter = 0.0762; // 3 inches in meters
-        double wheelCircumference = Math.PI * wheelDiameter;
-        double distPerTick = wheelCircumference / cpr;
-
-        return metersPerSec / distPerTick;
-    }
-
-
-    /**
      * Calculates the required launch parameters (velocity and angle) that
      * use the lowest possible velocity while respecting ALL constraints.
      *

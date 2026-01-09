@@ -48,7 +48,8 @@ public class FullTeleOp extends CommandOpMode {
     @Override
     public void initialize() {
         // Must have for all opModes
-        Constants.OP_MODE_TYPE = OpModeType.TELEOP;
+        OP_MODE_TYPE = OpModeType.TELEOP;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();
@@ -236,6 +237,8 @@ public class FullTeleOp extends CommandOpMode {
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
+
+//        telemetryData.addData("Turret Vel", robot.turret.getVelocity());
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");

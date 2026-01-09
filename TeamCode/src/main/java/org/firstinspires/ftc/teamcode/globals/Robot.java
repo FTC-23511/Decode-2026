@@ -79,6 +79,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public CRServoGroup turretServos;
     public AbsoluteAnalogEncoder turretEncoder;
+    public AbsoluteAnalogEncoder turretEncoder2;
 
     public ServoEx hoodServo;
     public ServoEx rampServo;
@@ -94,8 +95,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Turret turret;
     public Camera camera;
 
-    public SensorDigitalDevice frontDistanceSensor;
-    public SensorDigitalDevice backDistanceSensor;
+//    public SensorDigitalDevice frontDistanceSensor;
+//    public SensorDigitalDevice backDistanceSensor;
     public AnalogInput distanceSensor;
 
     public void init(HardwareMap hwMap) {
@@ -181,6 +182,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
+        turretEncoder2 = new AbsoluteAnalogEncoder(hwMap, "turretEncoder2")
+                .zero(TURRET_ENCODER_2_OFFSET)
+                .setReversed(true);
+
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
@@ -287,7 +292,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public void updateLoop(TelemetryData telemetryData) {
         CommandScheduler.getInstance().run();
-        telemetryData.update();
+
+        if (telemetryData != null) {
+            telemetryData.update();
+        }
+
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
     }

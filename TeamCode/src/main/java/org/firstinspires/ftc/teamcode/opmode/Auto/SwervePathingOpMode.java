@@ -14,6 +14,7 @@ import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
+import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
@@ -32,9 +33,8 @@ import java.util.ArrayList;
 public class SwervePathingOpMode extends CommandOpMode {
     public ElapsedTime timer;
 
-    TelemetryData telemetryData = new TelemetryData(
-            new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())
-    );
+    MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+    TelemetryData telemetryData = new TelemetryData(multipleTelemetry);
 
     private final Robot robot = Robot.getInstance();
     public static boolean FOLLOW_PREPROGRAMMED_PATHS = false;
@@ -59,11 +59,19 @@ public class SwervePathingOpMode extends CommandOpMode {
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
 
+        TESTING_OP_MODE = true;
+
         // Resets the command scheduler
         super.reset();
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        robot.drive.follower.setSlewRateLimiters(
+                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
+        );
 
         // Schedule the full auto
         robot.drive.setPose(pathPoses.get(0));
@@ -92,7 +100,7 @@ public class SwervePathingOpMode extends CommandOpMode {
     @Override
     public void run() {
         // DO NOT REMOVE
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(null);
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
@@ -107,26 +115,31 @@ public class SwervePathingOpMode extends CommandOpMode {
 
             telemetryData.addData("Heading", robot.drive.getPose().getHeading());
             telemetryData.addData("Robot Pose", robot.drive.getPose());
+            telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
+            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
             telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
             telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
             telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
             telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
             telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
 
+            telemetryData.update();
+
             robot.profiler.end("High TelemetryData");
         }
 
         robot.profiler.start("Low TelemetryData");
-        telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
-        telemetryData.addData("atTarget", robot.drive.follower.atTarget());
-        telemetryData.addData("X Error", robot.drive.follower.getError().getTranslation().getX());
-        telemetryData.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
-        telemetryData.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
 
-        telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+        multipleTelemetry.addData("atTarget", robot.drive.follower.atTarget());
+        multipleTelemetry.addData("X Error", robot.drive.follower.getError().getTranslation().getX());
+        multipleTelemetry.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
+        multipleTelemetry.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
+        multipleTelemetry.addData("Loop Times", timer.milliseconds());
+        multipleTelemetry.update();
 
-        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        telemetryData.update();
+        timer.reset();
+
+        robot.profiler.end("Low TelemetryData");
     }
 
     @Override

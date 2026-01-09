@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.junit;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.junit.jupiter.api.Test;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_ANGULAR_VELOCITY;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -20,17 +21,8 @@ public class LauncherTest {
 
         double val = launcherLUT.get(-10.0);
 
-        System.out.println("launcherLut: " + val);
+        System.out.println("launcherLut: " + MAX_ANGULAR_VELOCITY);
 
         assertEquals(0.0, val);
-    }
-
-    @Test
-    public void convertFlywheelUnitsTest() {
-        double maxVel = MathFunctions.convertToMetersPerSec(2300);
-
-        System.out.println("convertFlywheelUnitsTest: " + maxVel);
-
-        assertTrue(maxVel > 5.62);
     }
 }

@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.OFF;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -9,59 +9,43 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.ConditionalCommand;
-import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
-import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
-import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
+import com.seattlesolvers.solverslib.command.*;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
-import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.commands.*;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
-
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Jinu (close gate auto)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Jinu (Close 12 Ball)", preselectTeleOp = "AAAFullTeleOp")
 public class Jinu extends CommandOpMode {
     public ElapsedTime timer;
-
+    public static boolean GATE_OPEN = false;
     TelemetryData telemetryData = new TelemetryData(
             new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())
     );
-
     private final Robot robot = Robot.getInstance();
-
     public ArrayList<Pose2d> pathPoses;
+
     public void generatePath() {
         pathPoses = new ArrayList<>();
-
-        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(53))); // Starting Pose
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 1
-        pathPoses.add(new Pose2d(-55.24400564174894, 12.490832157968967, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-55.65021156558532, 0.7108603667136748, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 5
-        pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-34.1212976022567, -12.490832157968967, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 9
-        pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(20))); // Line 12
-        pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(0))); // Line 13
-
-
+        // Pose 0: Updated starting angle (53 degrees)
+        pathPoses.add(new Pose2d(-48.536741214057514, 58.42811501597444, Math.toRadians(53)));  // 0: Set Pose
+        pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(30))); // 1: Shoot Preload
+        pathPoses.add(new Pose2d(-57.04792332268371, 12.490832157968967, Math.toRadians(0)));   // 2: Spike 1 Intake
+        pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0)));  // 3: Gate Open Move 1
+        pathPoses.add(new Pose2d(-56.65021156558532, 0.5003897763589601, Math.toRadians(0)));   // 4: Gate Open Move 2
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 5: Shoot 2
+        pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0)));  // 6: Spike 2 Intake
+        pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0)));   // 7: Spike 2 Intake
+        pathPoses.add(new Pose2d(-34.1212976022567, -12.490832157968967, Math.toRadians(0)));   // 8: Transition
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 9: Shoot 3
+        pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0)));  // 10: Spike 3 Intake
+        pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0)));  // 11: Spike 3 Intake
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 12: Shoot 4
+        pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(30)));  // 13: Park
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -84,103 +68,104 @@ public class Jinu extends CommandOpMode {
         robot.init(hardwareMap);
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
-        robot.launcher.setRamp(false);
-        robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier());
+        robot.launcher.setRamp(true);
+        robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
         schedule(
                 new SequentialCommandGroup(
-                        // init
+                        // Set starting pose
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier())),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
-                        // preload
-                        pathShoot(1, 3500),
+                        // Score Praload
+                        pathShoot(1, 2500),
 
-                        // spike 1
-                        pathIntake(2, 1867, 0.50),
-                        new DriveTo(pathPoses.get(4)).withTimeout(1000), // gate
-                        pathShoot(5, 2250),
+                        // Spike 1 Sequence
+                        instantPathIntake(2, 2000),
 
-                        // spike 2
-                        new DriveTo(pathPoses.get(6)).withTimeout(1000),
-                        pathIntake(7, 2267, 0.50),
-                        pathShoot(9, 3000),
+                        new ConditionalCommand(
+                                new SequentialCommandGroup(
+                                        new DriveTo(pathPoses.get(3)).withTimeout(800),
+                                        new DriveTo(pathPoses.get(4)).withTimeout(800)
+                                ),
+                                new InstantCommand(),
+                                () -> GATE_OPEN
+                        ),
+                        pathShoot(5, 2000),
 
-                        // spike 3
-                        new DriveTo(pathPoses.get(10)).withTimeout(2267),
-                        pathIntake(11, 2267, 0.50),
-                        pathShoot(12, 2250, false),
-                        
-                        new DriveTo(pathPoses.get(13)), // park
-                        new InstantCommand(() -> END_POSE = robot.drive.getPose())
+                        // Spike 2 Sequence
+                        pathIntake(6, 2250),
+                        new DriveTo(pathPoses.get(8)).withTimeout(800),
+                        pathShoot(9, 2250),
+
+                        // Spike 3 Sequence
+                        pathIntake(10, 1867),
+                        pathShoot(12, 2250),
+
+                        // Park
+                        // new ClearLaunch(true),
+                        new DriveTo(pathPoses.get(13)),
+                        new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
                 )
         );
     }
 
     @Override
     public void initialize_loop() {
-        telemetryData.addData("ALLIANCE_COLOR", ALLIANCE_COLOR);
+        if (gamepad1.cross || gamepad2.cross || gamepad1.triangle || gamepad2.triangle) {
+            GATE_OPEN = false;
+        } else if (gamepad1.circle || gamepad2.circle || gamepad1.square || gamepad2.square) {
+            GATE_OPEN = true;
+        }
+
+        telemetryData.addData("Gate Open", GATE_OPEN);
+        telemetryData.addData("Alliance Color", ALLIANCE_COLOR);
         telemetryData.update();
     }
 
     @Override
     public void run() {
-        // DO NOT REMOVE! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
-
         if (timer == null) {
             timer = new ElapsedTime();
         }
 
-        // Update any constants that are being updated by FTCDash - used for tuning
-        for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
-            module.setSwervoPIDF(SWERVO_PIDF_COEFFICIENTS);
-        }
-        ((PIDFController) robot.drive.follower.xController).setCoefficients(XY_COEFFICIENTS);
-        ((PIDFController) robot.drive.follower.yController).setCoefficients(XY_COEFFICIENTS);
-        ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
-
+        // Always log Loop Time
         telemetryData.addData("Loop Time", timer.milliseconds());
+
         timer.reset();
 
         if (PROBLEMATIC_TELEMETRY) {
-            robot.profiler.start("High TelemetryData");
+            robot.profiler.start("TelemetryData");
 
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
             telemetryData.addData("Robot Pose", robot.drive.getPose());
-            telemetryData.addData("Turret Position", robot.turret.getPosition());
-            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
-            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
-            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
+            telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
+            telemetryData.addData("atTarget", robot.drive.follower.atTarget());
+            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
 
-            robot.profiler.end("High TelemetryData");
+            telemetryData.addData("Turret State", Turret.turretState);
+            telemetryData.addData("Turret Target", robot.turret.getTarget());
+            telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
+            telemetryData.addData("Turret Position", robot.turret.getPosition());
+
+            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
+            telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
+            telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
+            telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
+            telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
+
+            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+
+            robot.profiler.end("TelemetryData");
         }
 
-        robot.profiler.start("Low TelemetryData");
-        telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
-        telemetryData.addData("atTarget", robot.drive.follower.atTarget());
-        telemetryData.addData("X Error", robot.drive.follower.getError().getTranslation().getX());
-        telemetryData.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
-        telemetryData.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
+        robot.profiler.start("Run + Update");
+        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
+        robot.updateLoop(telemetryData);
+        robot.profiler.end("Run + Update");
 
-        telemetryData.addData("Turret State", Turret.turretState);
-        telemetryData.addData("Turret Target", robot.turret.getTarget());
-        telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-
-        telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
-        telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
-        telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-
-        telemetryData.addData("Intake Motor State", Intake.motorState);
-        telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
-
-        telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+        robot.profiler.end("Full Loop");
     }
 
     @Override
@@ -189,38 +174,30 @@ public class Jinu extends CommandOpMode {
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
-        return pathShoot(pathStartingIndex, timeout, true);
-    }
-
-    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean pathShoot) {
         return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new ConditionalCommand(
-                                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                                new InstantCommand(),
-                                () -> pathShoot
-                        ),
-                        new InstantCommand(() -> robot.turret.setTurret(GOAL_LOCK_CONTROL, MAX_TURRET_ANGLE * ALLIANCE_COLOR.getMultiplier())),
-                        new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
-                ),
-//                new FullAim().withTimeout(2000),
-                new InstantCommand(() -> robot.readyToLaunch = true),
-                new ClearLaunch(true).alongWith(
-                        new PrepDriveTo(pathPoses.get(pathStartingIndex + 1))
-                )
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new StationaryAimbotFullLaunch()
         );
     }
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
-        return pathIntake(pathStartingIndex, timeout, 1.0);
+        return new SequentialCommandGroup(
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new ParallelCommandGroup(
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
+                ),
+                new SetIntake(Intake.MotorState.STOP)
+        );
     }
 
-    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
+    public SequentialCommandGroup instantPathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new SetIntake(Intake.MotorState.FORWARD),
-                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.STOP),
-                new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
+                new ParallelCommandGroup(
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout)
+                ),
+                new SetIntake(Intake.MotorState.STOP)
         );
     }
 }
