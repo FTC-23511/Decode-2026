@@ -71,7 +71,7 @@ public class Constants {
 
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -1.0;
-    public static double INTAKE_TRANSFER_SPEED = 1.0;
+    public static double INTAKE_TRANSFER_SPEED = 0.5;
 
     public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
@@ -90,8 +90,8 @@ public class Constants {
     public static final double TARGET_HEIGHT = 1.0; // meters
 
     public static double LAUNCHER_VERY_FAR_VELOCITY = 7.0;
-    public static double LAUNCHER_FAR_VELOCITY = 5.8; // Meters/second
-    public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
+    public static double LAUNCHER_FAR_VELOCITY = 1500; // Ticks/second
+    public static double LAUNCHER_CLOSE_VELOCITY = 1200; // Ticks/second
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
     public static double LAUNCHER_MAX_BALL_VELOCITY = 100; // Meters/second // TODO: maybe actually deal with this later
 

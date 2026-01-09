@@ -63,7 +63,7 @@ public class FullTeleOp extends CommandOpMode {
 
         // Driver controls
         // Reset heading
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new SequentialCommandGroup(
                         new ConditionalCommand(
                                 new InstantCommand(() -> robot.drive.setPose(new Pose2d(robot.drive.getPose().getTranslation(), new Rotation2d(Math.PI)))),
@@ -77,11 +77,24 @@ public class FullTeleOp extends CommandOpMode {
 
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheelTicks(-200))
+                new InstantCommand(() -> robot.launcher.adjustHoodDown())
         );
 
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.launcher.adjustHoodUp())
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.launcher.adjustFlywheelSpeedUp())
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.launcher.adjustFlywheelSpeedDown())
+        );
+
+
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
-                    new InstantCommand(() -> robot.launcher.setFlywheel(-1000, true)).alongWith(
+                    new InstantCommand(() -> robot.launcher.setFlywheel(-500, true)).alongWith(
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD)))
 
         );
@@ -91,41 +104,27 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
         );
 
 
 
-        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new ConditionalCommand(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true))
-                        ),
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true))
-
-                        ),
-                        () -> gamepad1.left_trigger > 0.5
-                )
-        );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
+                new InstantCommand(() -> robot.launcher.setFlywheel(1500, true)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(10))
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
+                new InstantCommand(() -> robot.launcher.setFlywheel(1200, true)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(28))
                 )
         );
 
 
 
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
 
@@ -156,7 +155,7 @@ public class FullTeleOp extends CommandOpMode {
                 robot.drive.swerve.updateWithXLock();
             } else {
                 robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
-                double minSpeed = 0.3; // As a fraction of the max speed of the robot
+                double minSpeed = 0.5; // As a fraction of the max speed of the robot
                 double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
                 Pose2d robotPose = robot.drive.getPose();
@@ -228,6 +227,8 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
         telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
         telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
+        telemetryData.addData("Stalled ", robot.launcher.isStalled());
+        telemetryData.addData("Hood Angle", robot.launcher.getHoodAngle());
 
         telemetryData.addData("Intake Motor State", Intake.motorState);
 
