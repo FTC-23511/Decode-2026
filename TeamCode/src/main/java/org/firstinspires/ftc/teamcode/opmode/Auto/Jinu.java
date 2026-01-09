@@ -31,7 +31,7 @@ public class Jinu extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
-        // Pose 0: Updated starting angle (53 degrees)
+
         pathPoses.add(new Pose2d(-48.536741214057514, 58.42811501597444, Math.toRadians(53)));  // 0: Set Pose
         pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(30))); // 1: Shoot Preload
         pathPoses.add(new Pose2d(-57.04792332268371, 12.490832157968967, Math.toRadians(0)));   // 2: Spike 1 Intake
@@ -71,15 +71,15 @@ public class Jinu extends CommandOpMode {
         robot.launcher.setRamp(true);
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
 
+        // Set starting pose
+        robot.drive.setPose(pathPoses.get(0));
+
         // Schedule the full auto
-        // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
         schedule(
                 new SequentialCommandGroup(
-                        // Set starting pose
                         new InstantCommand(),
-                        new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
-                        // Score Praload
+                        // Score Preload
                         pathShoot(1, 2500),
 
                         // Spike 1 Sequence

@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
-import com.seattlesolvers.solverslib.hardware.SensorDigitalDevice;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
@@ -78,7 +77,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx BRswervo;
 
     public CRServoGroup turretServos;
-    public AbsoluteAnalogEncoder turretEncoder;
+    public Motor.Encoder turretEncoder;
+    public AbsoluteAnalogEncoder turretEncoder1;
     public AbsoluteAnalogEncoder turretEncoder2;
 
     public ServoEx hoodServo;
@@ -179,12 +179,15 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                         .setRunMode(CRServoEx.RunMode.RawPower)
         ).setInverted(true);
 
-        turretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
+        turretEncoder1 = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
         turretEncoder2 = new AbsoluteAnalogEncoder(hwMap, "turretEncoder2")
                 .zero(TURRET_ENCODER_2_OFFSET)
                 .setReversed(true);
+
+        turretEncoder = new Motor(hwMap, "BR").encoder; // TODO: CHECK
+        launchEncoder.setDirection(Motor.Direction.FORWARD); // TODO: CHECK
 
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);

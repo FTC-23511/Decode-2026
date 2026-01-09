@@ -272,15 +272,12 @@ public class MathFunctions {
             public double turretAngle = 0; // radian
             public double hoodAngle = 0; // radian
 
-
             @Override
             public String toString() {
                 return String.format("PredictResults(success=%s, flywheelSpeed=%.03f m/s, turretAngle=%.03f degrees, hoodAngle=%.03f degrees)",
                         success ? "true" : "false", flyWheelSpeed, turretAngle * 180.0 / Math.PI, hoodAngle * 180.0 / Math.PI);
             }
         }
-
-        ;
 
         public ShootingMath(Position target, double ballRadius, double robotHeight) {
             this.target = target;
