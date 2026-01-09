@@ -5,20 +5,15 @@ import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.Turre
 import static org.firstinspires.ftc.teamcode.globals.Constants.AIMBOT_COEFFICIENTS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.DISTANCE_UNIT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -88,8 +83,9 @@ public class MovingAim extends CommandBase {
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
         // set turret angle to robot centric and to radians
         robot.turret.setTurret(ANGLE_CONTROL, MathUtils.normalizeRadians(values.turretAngle, false));
-        RobotLog.aa("robotPose", String.valueOf(robotPose));
-        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
-        RobotLog.aa("PredictResult", String.valueOf(values));
+//        RobotLog.aa("robotPose", String.valueOf(robotPose));
+//        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
+//        RobotLog.aa("PredictResult", String.valueOf(values));
+
     }
 }
