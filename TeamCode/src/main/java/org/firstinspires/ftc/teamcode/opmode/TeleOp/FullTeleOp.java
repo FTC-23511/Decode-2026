@@ -77,11 +77,12 @@ public class FullTeleOp extends CommandOpMode {
 
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
+                new InstantCommand(() -> robot.launcher.setFlywheelTicks(-200))
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+                    new InstantCommand(() -> robot.launcher.setFlywheel(-1000, true)).alongWith(
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD)))
 
         );
 
@@ -89,13 +90,11 @@ public class FullTeleOp extends CommandOpMode {
                  Intake.ActiveStopIntake()
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whileActiveContinuous(
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenReleased(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
-        );
+
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new ConditionalCommand(

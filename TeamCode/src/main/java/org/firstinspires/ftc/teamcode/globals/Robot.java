@@ -148,17 +148,18 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         launchMotors = new MotorGroup(
                 new MotorEx(hwMap, "leftLaunchMotor")
-                        .setCachingTolerance(0.01),
+                        .setCachingTolerance(0.01)
+                        .setInverted(true),
                 new MotorEx(hwMap, "rightLaunchMotor")
                         .setCachingTolerance(0.01)
-                        .setInverted(true)
+
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
         launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
-        launchEncoder.setDirection(Motor.Direction.REVERSE);
+        //launchEncoder.setDirection(Motor.Direction.REVERSE);
 
         FRswervo = new CRServoEx(hwMap, "FRS", new AbsoluteAnalogEncoder(hwMap, "FRE").setReversed(true)
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)

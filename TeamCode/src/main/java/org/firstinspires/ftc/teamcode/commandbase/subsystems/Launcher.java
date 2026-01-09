@@ -39,7 +39,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setFlywheel(double vel, boolean setActiveControl) {
-        flywheelController.setSetPoint(Math.min(launcherVel.get(vel), LAUNCHER_MAX_VELOCITY));
+        flywheelController.setSetPoint(Math.min(vel, LAUNCHER_MAX_VELOCITY));
         targetFlywheelVelocity = vel;
         setActiveControl(setActiveControl);
     }
