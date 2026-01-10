@@ -46,7 +46,7 @@ public class FullAim extends CommandBase {
             robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
         }
 
-        // Preliminary estimate for launcher values (only used for setting flywheel because hood needs to be down)
+        // Preliminary estimate for launcher values
         errorsAngleVelocity = MathFunctions.distanceToLauncherValues(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
         robot.launcher.setFlywheel(errorsAngleVelocity[0], false);
         robot.launcher.setHood(errorsAngleVelocity[1]);

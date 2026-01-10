@@ -68,6 +68,8 @@ public class Turret extends SubsystemBase {
     }
 
     public void init() {
+        resetTurretPose();
+
         if (!TESTING_OP_MODE) {
             setTurret(GOAL_LOCK_CONTROL, 0);
         } else {

@@ -11,6 +11,7 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -49,6 +50,10 @@ public class TurretServosTuner extends CommandOpMode {
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0))
         );
 
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TARGET_POS))
+        );
+
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
         );
@@ -75,7 +80,7 @@ public class TurretServosTuner extends CommandOpMode {
         timer.reset();
 
         telemetryData.addData("Raw Pos", robot.turretEncoder.getPosition());
-        telemetryData.addData("Analog Pos", robot.analogTurretEncoder.getCurrentPosition());
+        telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
         telemetryData.addData("Actual Pos", robot.turret.getPosition());
         telemetryData.addData("Target Pos", TARGET_POS);
