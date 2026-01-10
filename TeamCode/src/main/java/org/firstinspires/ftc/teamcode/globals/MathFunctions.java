@@ -301,9 +301,9 @@ public class MathFunctions {
             final double robotY = robotPose.getY();
             final double inchesPerMeters = 39.3701;
 //
-            RobotLog.aa("OriginalTargetPosition", String.valueOf(target));
+//            RobotLog.aa("OriginalTargetPosition", String.valueOf(target));
 
-            RobotLog.aa("AdjustedTargetPosition", String.format("(%.03f, %.03f, %.03f)", targetX, targetY, targetZ));
+//            RobotLog.aa("AdjustedTargetPosition", String.format("(%.03f, %.03f, %.03f)", targetX, targetY, targetZ));
 
             //mathhhhhh
             final double gravity = GRAVITY * inchesPerMeters;
@@ -318,7 +318,7 @@ public class MathFunctions {
             //angle of shooting
             final double alpha = Math.atan2((targetY - robotY), (targetX - robotX));
 
-            RobotLog.aa("ShootingState", String.format("distance:%.03f, time:%.03f, vh:%.03f, vz:%.03f, alpha:%.03f", distance, time, vh, vz, Math.toDegrees(alpha)));
+//            RobotLog.aa("ShootingState", String.format("distance:%.03f, time:%.03f, vh:%.03f, vz:%.03f, alpha:%.03f", distance, time, vh, vz, Math.toDegrees(alpha)));
 
             //x component of the speed of the ball
             final double vx = Math.cos(alpha) * vh;
@@ -333,7 +333,7 @@ public class MathFunctions {
             //flywheel speed
             final double vf = Math.sqrt(Math.pow(vfh, 2) + Math.pow(vz, 2));
 
-            RobotLog.aa("ShootingState2", String.format("vx:%.03f, vy:%.03f, vfx:%03f, vfy:%.03f, vfh:%.03f, vf:%.03f", vx, vy, vfx, vfy, vfh, vf));
+//            RobotLog.aa("ShootingState2", String.format("vx:%.03f, vy:%.03f, vfx:%03f, vfy:%.03f, vfh:%.03f, vf:%.03f", vx, vy, vfx, vfy, vfh, vf));
 
             //returning turret angle, hood angle, and fly wheel speed
             result.turretAngle = Math.atan2(vfy, vfx) - robotPose.getHeading();
