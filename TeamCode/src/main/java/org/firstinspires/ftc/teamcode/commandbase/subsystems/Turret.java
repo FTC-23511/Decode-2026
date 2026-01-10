@@ -202,7 +202,7 @@ public class Turret extends SubsystemBase {
                     // don't push the turret even further in that direction if it is already past the hardware limits
                     robot.turretServos.set(0);
                 } else {
-//                    robot.turretServos.set(power); // TODO: Uncomment when done
+                    robot.turretServos.set(power);
                 }
                 robot.profiler.end("Turret Write");
                 break;
@@ -223,8 +223,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-//        return turretController.atSetPoint() && !turretState.equals(OFF); // TODO: Uncomment out
-        return !turretState.equals(OFF);
+        return turretController.atSetPoint() && !turretState.equals(OFF);
     }
 
     /**
