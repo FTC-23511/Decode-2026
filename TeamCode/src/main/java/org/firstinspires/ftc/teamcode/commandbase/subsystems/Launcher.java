@@ -64,6 +64,23 @@ public class Launcher extends SubsystemBase {
         setActiveControl(true);
     }
 
+    // Add these inside Launcher.java
+
+    /**
+     * @return the current power being applied to the launch motors (0.0 to 1.0).
+     */
+    public double getPower() {
+        return robot.launchMotors.get();
+    }
+
+    /**
+     * @return the current target velocity set for the PID controller.
+     */
+    public double getTargetVelocity() {
+        return targetFlywheelVelocity;
+    }
+
+
     public double getTargetHoodAngle() {
         return targetHoodAngle;
     }
@@ -99,41 +116,36 @@ public class Launcher extends SubsystemBase {
         robot.profiler.start("Launcher Update");
 
         double currentVelocity = robot.launchEncoder.getCorrectedVelocity();
-        double currentPower = robot.launchMotors.get(); // Assuming your motor wrapper has get()
+        double currentPower = robot.launchMotors.get();
 
-        // --- Stall Detection Logic ---
+        // Stall Logic
         if (activeControl && Math.abs(currentPower) > STALL_POWER_THRESHOLD && Math.abs(currentVelocity) < STALL_VELOCITY_THRESHOLD) {
-            if (stallStartTime == 0) {
-                stallStartTime = System.currentTimeMillis();
-            } else if (System.currentTimeMillis() - stallStartTime > STALL_TIMEOUT_MS) {
-                isStalled = true;
-            }
+            if (stallStartTime == 0) stallStartTime = System.currentTimeMillis();
+            else if (System.currentTimeMillis() - stallStartTime > STALL_TIMEOUT_MS) isStalled = true;
         } else {
             stallStartTime = 0;
-            // Note: We don't automatically set isStalled to false here
-            // so the driver has to manually reset the state.
         }
 
         if (isStalled) {
             robot.launchMotors.set(0);
             activeControl = false;
-            // Optional: Log a warning or send telemetry
         } else if (activeControl) {
-            flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
-            robot.launchMotors.set(
-                    flywheelController.calculate(currentVelocity)
+            flywheelController.setPIDF(
+                    FLYWHEEL_PIDF_COEFFICIENTS.p,
+                    FLYWHEEL_PIDF_COEFFICIENTS.i,
+                    FLYWHEEL_PIDF_COEFFICIENTS.d,
+                    FLYWHEEL_PIDF_COEFFICIENTS.f
             );
 
+            robot.launchMotors.set(flywheelController.calculate(currentVelocity));
             setHood(targetHoodAngle, false);
         } else {
-            if (getFlywheelTarget() == 0) {
-                robot.launchMotors.set(0);
-            } else {
-                robot.launchMotors.set(LAUNCHER_DEFAULT_ON_SPEED);
-            }
+            robot.launchMotors.set(targetFlywheelVelocity == 0 ? 0 : LAUNCHER_DEFAULT_ON_SPEED);
         }
+
         robot.profiler.end("Launcher Update");
     }
+
 
 
 

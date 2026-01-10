@@ -22,7 +22,7 @@ public class CancelCommand extends CommandBase {
     @Override
     public void initialize() {
         robot.intake.setIntake(Intake.MotorState.STOP);
-        robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
+        robot.launcher.setFlywheel(0, false);
 
     }
 

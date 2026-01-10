@@ -134,13 +134,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intakeMotors = new MotorGroup(
                 new MotorEx(hwMap, "leftIntakeMotor")
                         .setCachingTolerance(0.01)
-                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)
                         .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
                         .setInverted(true),
                 new MotorEx(hwMap, "rightIntakeMotor")
                         .setCachingTolerance(0.01)
-                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
                         .setRunMode(Motor.RunMode.RawPower)
                         .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
 
@@ -189,15 +187,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
                 .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.CRC)
                 .resetPosAndIMU()
-                .setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS))
+                .setPosition(Pose2d.convertToPose2D(new Pose2d(0, 0, 0), DistanceUnit.INCH, AngleUnit.RADIANS))
                 .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION);
 
 
-
-
-        limelight = hwMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(250);
-        limelight.start();
 
         // Subsystems
         drive = new Drive();
@@ -233,19 +226,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launcher.init();
     }
     
-    public double getVoltage() {
-//        return 12;
-        // this is chopped for loop times
-        if (voltageTimer == null) {
-            cachedVoltage = voltageSensor.getVoltage();
-        } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
-            cachedVoltage = voltageSensor.getVoltage();
-        }
-        if (((Double) cachedVoltage).isNaN() || cachedVoltage == 0) {
-            cachedVoltage = 12;
-        }
-        return cachedVoltage;
-    }
 
     public void exportProfiler(File file) {
         RobotLog.i("Starting async profiler export to: " + file.getAbsolutePath());
@@ -264,16 +244,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         exportThread.start();
     }
 
-    /* Not needed now that we have pinpoint
-    public void initializeImu(HardwareMap hardwareMap) {
-        // IMU orientation
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP));
-        imu.initialize(parameters);
-    }
-     */
+
 
     public void updateLoop(TelemetryData telemetryData) {
         CommandScheduler.getInstance().run();

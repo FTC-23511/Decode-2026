@@ -8,7 +8,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.globals.Robot;
-import org.firstinspires.ftc.teamcode.opmode.TeleOp.FullTeleOpLogging;
+
 
 import java.io.IOException;
 import java.util.logging.FileHandler;
@@ -54,11 +54,10 @@ public class SolverLogger {
             SimpleFormatter formatter = new SimpleFormatter();
             logFileHandler.setFormatter(formatter);
 
-            logger = Logger.getLogger(FullTeleOpLogging.class.getName());
+
             logger.addHandler(logFileHandler);
             logger.setLevel(Level.INFO);
 
-            logger = Logger.getLogger(FullTeleOpLogging.class.getName());
             // Add the FileHandler to the logger.
             logger.addHandler(logFileHandler);
 

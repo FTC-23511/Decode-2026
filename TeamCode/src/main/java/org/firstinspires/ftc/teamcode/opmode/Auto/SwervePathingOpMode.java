@@ -101,19 +101,6 @@ public class SwervePathingOpMode extends CommandOpMode {
         ((PIDFController) robot.drive.follower.yController).setCoefficients(XY_COEFFICIENTS);
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
 
-        if (PROBLEMATIC_TELEMETRY) {
-            robot.profiler.start("High TelemetryData");
-
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-            telemetryData.addData("Robot Pose", robot.drive.getPose());
-            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
-            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
-
-            robot.profiler.end("High TelemetryData");
-        }
 
         robot.profiler.start("Low TelemetryData");
         telemetryData.addData("Robot Target", robot.drive.follower.getTarget());

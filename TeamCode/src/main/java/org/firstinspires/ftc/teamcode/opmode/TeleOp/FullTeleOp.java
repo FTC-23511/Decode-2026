@@ -1,59 +1,33 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
-import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.CommandScheduler;
-import com.seattlesolvers.solverslib.command.ConditionalCommand;
-import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
-import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
-import com.seattlesolvers.solverslib.command.WaitUntilCommand;
-
-import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
+import com.seattlesolvers.solverslib.command.*;
+import com.seattlesolvers.solverslib.gamepad.*;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.commandbase.commands.AlignWithAprilTagCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @TeleOp(name = "AAAFullTeleOp")
 public class FullTeleOp extends CommandOpMode {
-    public GamepadEx driver;
-    public GamepadEx operator;
-
-    public ElapsedTime timer;
-
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
-
     private final Robot robot = Robot.getInstance();
-
-    public static double MAX_OUTPUT = 1;
+    public GamepadEx driver, operator;
+    public ElapsedTime timer;
+    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     @Override
     public void initialize() {
-        // Must have for all opModes
         Constants.OP_MODE_TYPE = OpModeType.TELEOP;
-
-        // Resets the command scheduler
         super.reset();
-
-        // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
@@ -64,8 +38,39 @@ public class FullTeleOp extends CommandOpMode {
         );
         operator = new GamepadEx(gamepad2);
 
-        // Driver controls
-        // Reset heading
+        // --- SHOOTING SEQUENCES ---
+
+        // SQUARE: Medium Shot (1200 ticks, 28 deg)
+        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+                new SequentialCommandGroup(
+                        Intake.ActiveStopIntake(),
+                        new com.seattlesolvers.solverslib.command.WaitCommand(100),
+                        new InstantCommand(() -> {
+                            robot.launcher.setHood(28);
+                            robot.launcher.setFlywheel(1200, true);
+                        }),
+                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
+                )
+        );
+
+        // TRIANGLE: High Shot (1700 ticks, 10 deg)
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
+                new SequentialCommandGroup(
+                        Intake.ActiveStopIntake(),
+                        new com.seattlesolvers.solverslib.command.WaitCommand(100),
+                        new InstantCommand(() -> {
+                            robot.launcher.setHood(10);
+                            robot.launcher.setFlywheel(1700, true);
+                        }),
+                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
+                )
+        );
+
+        // --- UTILITY CONTROLS ---
+
+        // LEFT STICK: Reset Heading
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new SequentialCommandGroup(
                         new ConditionalCommand(
@@ -77,250 +82,55 @@ public class FullTeleOp extends CommandOpMode {
                 )
         );
 
-
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.adjustHoodDown())
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.launcher.adjustHoodUp())
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> robot.launcher.adjustFlywheelSpeedUp())
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.launcher.adjustFlywheelSpeedDown())
-        );
-
-
-        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
-                new SequentialCommandGroup(
-                        // 1. Set flywheel to reverse (assuming -800 for reverse) and enable control
-                        new InstantCommand(() -> robot.launcher.setFlywheel(-800, true)),
-
-                        // 2. Wait until the PID controller reports the flywheel is at the target velocity
-                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
-
-                        // 3. Start the intake forward
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
-                )
-
-        );
-
-
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SequentialCommandGroup(
-
-                        // 2. Active stop the intake to prepare for the shot
-                        Intake.ActiveStopIntake(),
-
-                        // 3. Wait 100ms after the stop
-                        new com.seattlesolvers.solverslib.command.WaitCommand(100),
-
-                        // 4. Start flywheel and set hood simultaneously
-                        new InstantCommand(() -> robot.launcher.setFlywheel(1200, true)).alongWith(
-                                new InstantCommand(() -> robot.launcher.setHood(28))
-                        ),
-
-                        // 5. Wait until the flywheel is at the target speed
-                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
-
-                        // 6. Start the intake at transfer speed to launch
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
-                )
-        );
-
-
-
-
-
-        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
-                new SequentialCommandGroup(
-
-                        // 2. Active stop the intake to prepare for the shot
-                        Intake.ActiveStopIntake(),
-
-                        // 3. Wait 100ms after the stop
-                        new com.seattlesolvers.solverslib.command.WaitCommand(100),
-
-                        // 4. Start flywheel and set hood simultaneously
-                        new InstantCommand(() -> robot.launcher.setFlywheel(1700, true)).alongWith(
-                                new InstantCommand(() -> robot.launcher.setHood(10))
-                        ),
-
-                        // 5. Wait until the flywheel is at the target speed
-                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
-
-                        // 6. Start the intake at transfer speed to launch
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.TRANSFER))
-                )
-        );
-
-// Create the group first
-        SequentialCommandGroup oscillationGroup = new SequentialCommandGroup();
-
-        for (int i = 0; i < 5; i++) {
-            oscillationGroup.addCommands(
-                    new InstantCommand(() -> robot.launcher.setHood(45)),
-                    new com.seattlesolvers.solverslib.command.WaitCommand(500),
-                    new InstantCommand(() -> robot.launcher.setHood(0)),
-                    new com.seattlesolvers.solverslib.command.WaitCommand(500)
-            );
-        }
-
-// Then use 'oscillationGroup' inside your Gamepad button assignment:
-        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(-800, true))
-                        .alongWith(new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE)))
-                        .alongWith(oscillationGroup)
-        );
-
-
-
-
-
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(1500, true)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(10))
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(1200, true)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(28))
-                )
-        );
-
-
-
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new UninterruptibleCommand(new CancelCommand())
-        );
-
-
-    }
-
-    @Override
-    public void initialize_loop() {
-        robot.drive.setPose(END_POSE);
-        telemetryData.addData("END_POSE", END_POSE);
-        telemetryData.update();
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new UninterruptibleCommand(new CancelCommand()));
     }
 
     @Override
     public void run() {
-        robot.profiler.start("Full Loop");
-        // Keep all the has movement init for until when TeleOp starts
-        // This is like the init but when the program is actually started
         if (timer == null) {
             robot.initHasMovement();
             timer = new ElapsedTime();
         }
 
-        robot.profiler.start("Swerve Drive");
-        if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
-            // Drive the robot
-            if (driver.isDown(GamepadKeys.Button.START)) {
-                robot.drive.swerve.updateWithXLock();
-            } else {
-                robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
-                double minSpeed = 0.5; // As a fraction of the max speed of the robot
-                double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        handleDrive();
 
-                Pose2d robotPose = robot.drive.getPose();
-                Rotation2d robotAngle = robotPose.getRotation();
-                double headingCorrection = 0;
-
-                if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
-                    robot.drive.headingLock = true;
-                    robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
-                } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
-                    robot.drive.headingLock = false;
-                } else if (robot.drive.headingLock) {
-                    headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
-                    if (robot.drive.follower.atTarget()) {
-                        headingCorrection = 0;
-                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
-                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
-                        headingCorrection = 0;
-                    }
-                }
-
-                robot.drive.swerve.updateWithTargetVelocity(
-                        ChassisSpeeds.fromFieldRelativeSpeeds(
-                                driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                                -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
-                                new Rotation2d(robotAngle.getAngle(AngleUnit.RADIANS) + (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? Math.PI : 0))
-                        )
-                );
-            }
-        }
-
-
-
-        robot.profiler.end("Swerve Drive");
-
+        // --- TELEMETRY ---
         telemetryData.addData("Loop Time", timer.milliseconds());
-        timer.reset();
-
-        if (PROBLEMATIC_TELEMETRY) {
-            robot.profiler.start("High TelemetryData");
-
-
-            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
-            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
-            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
-
-            robot.profiler.end("High TelemetryData");
-        }
-
-        robot.profiler.start("Low TelemetryData");
-
-
-
-        telemetryData.addData("unsureXY", robot.drive.unsureXY);
-
-        telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
-        telemetryData.addData("atTarget", robot.drive.follower.atTarget());
-        telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-        telemetryData.addData("Robot Pose", robot.drive.getPose());
-
-
-        try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
-
-        telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
-        telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
-        telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
+        telemetryData.addData("Flywheel Target", robot.launcher.getTargetVelocity()); // Ensure this method exists in Launcher
+        telemetryData.addData("Flywheel Actual", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
-        telemetryData.addData("Stalled ", robot.launcher.isStalled());
-        telemetryData.addData("Hood Angle", robot.launcher.getHoodAngle());
+        // Added Launcher Power check
+        telemetryData.addData("Launcher Power", robot.launcher.getPower());
 
-        telemetryData.addData("Intake Motor State", Intake.motorState);
-
-        telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-
-        telemetryData.addData("Sigma", "Polar");
-        robot.profiler.end("Low TelemetryData");
-
-        robot.profiler.start("Run + Update");
-        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
+        timer.reset();
         robot.updateLoop(telemetryData);
-        robot.profiler.end("Run + Update");
-        robot.profiler.end("Full Loop");
     }
 
-    @Override
-    public void end() {
-        Constants.END_POSE = robot.drive.getPose();
-        robot.exportProfiler(robot.file);
-        telemetryData.update();
+    private void handleDrive() {
+        if (!CommandScheduler.getInstance().isAvailable(robot.drive)) return;
+
+        double speedMultiplier = 0.5 + (0.5 * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
+        Pose2d robotPose = robot.drive.getPose();
+        double headingCorrection = 0;
+
+        if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+            robot.drive.headingLock = true;
+            robot.drive.follower.setTarget(new Pose2d(0, 0, robotPose.getRotation()));
+        } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+            robot.drive.headingLock = false;
+        }
+
+        if (robot.drive.headingLock) {
+            headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotPose.getRotation())).omegaRadiansPerSecond;
+        }
+
+        robot.drive.swerve.updateWithTargetVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        driver.getLeftY() * MAX_DRIVE_VELOCITY * speedMultiplier,
+                        -driver.getLeftX() * MAX_DRIVE_VELOCITY * speedMultiplier,
+                        robot.drive.headingLock ? headingCorrection : -driver.getRightX() * MAX_ANGULAR_VELOCITY * speedMultiplier,
+                        new Rotation2d(robotPose.getRotation().getAngle(AngleUnit.RADIANS) + (ALLIANCE_COLOR == AllianceColor.BLUE ? Math.PI : 0))
+                )
+        );
     }
 }
