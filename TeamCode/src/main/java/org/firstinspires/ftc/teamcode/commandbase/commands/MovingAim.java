@@ -8,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -83,9 +84,9 @@ public class MovingAim extends CommandBase {
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
         // set turret angle to robot centric and to radians
         robot.turret.setTurret(ANGLE_CONTROL, MathUtils.normalizeRadians(values.turretAngle, false));
-//        RobotLog.aa("robotPose", String.valueOf(robotPose));
-//        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
-//        RobotLog.aa("PredictResult", String.valueOf(values));
+        RobotLog.aa("robotPose", String.valueOf(robotPose));
+        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
+        RobotLog.aa("PredictResult", String.valueOf(values));
 
     }
 }
