@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -46,6 +46,12 @@ public class Launcher extends SubsystemBase {
         flywheelController.setSetPoint(Math.min(launcherLUT.get(targetVel), LAUNCHER_MAX_VELOCITY));
         targetFlywheelVelocity = targetVel;
         setActiveControl(setActiveControl);
+    }
+
+    public void setLauncher(Pose2d robotPose) {
+        double[] errorsAngleVelocity = MathFunctions.distanceToLauncherValues(GOAL_POSE().minus(robotPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
+        setFlywheel(errorsAngleVelocity[0], true);
+        setHood(errorsAngleVelocity[1]);
     }
 
     /**

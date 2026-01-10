@@ -123,7 +123,8 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.08; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.58; // Radians
-    public static double TURRET_ENCODER_2_OFFSET = 0.0; // Radians
+    // Quadrature Encoder CPR = 8192, and gear ratio is 180:32 (32t is encoder)
+    public static double TURRET_RADIANS_PER_TICK = (2.0 * Math.PI) / (8192 * (180.0 / 32)); // Radians
 
     public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
     public static double TURRET_MIN_INTEGRAL = -0.2;
@@ -140,6 +141,11 @@ public class Constants {
     public static double TEST_DISTANCE = 80;
     public static double DECIMATION_THRESHOLD = 80; // inches
 
-    public static Pose2d GOAL_POSE() { return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); } // Inches
-    public static Pose2d APRILTAG_POSE() { return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); } // Feet
+    public static Pose2d GOAL_POSE() {
+        return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0);
+    } // Inches
+
+    public static Pose2d APRILTAG_POSE() {
+        return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0);
+    } // Feet
 }

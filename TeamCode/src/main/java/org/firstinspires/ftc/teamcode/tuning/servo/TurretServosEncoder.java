@@ -56,6 +56,11 @@ public class TurretServosEncoder extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
         );
+
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new InstantCommand(() -> robot.turret.resetTurretPose())
+        );
+
     }
 
     @Override

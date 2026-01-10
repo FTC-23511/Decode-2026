@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.junit;
 
-import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.junit.jupiter.api.Test;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_ANGULAR_VELOCITY;
@@ -10,7 +9,7 @@ import com.seattlesolvers.solverslib.util.InterpLUT;
 
 import java.util.Arrays;
 
-public class LauncherTest {
+public class LauncherMathTest {
     @Test
     public void lutTest() {
         InterpLUT launcherLUT = new InterpLUT(

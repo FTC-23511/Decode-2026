@@ -64,6 +64,7 @@ public class Turret extends SubsystemBase {
     public Turret() {
         updateCoefficients();
         goalAdjustmentLUT.createLUT();
+        resetTurretPose();
     }
 
     public void init() {
@@ -72,6 +73,11 @@ public class Turret extends SubsystemBase {
         } else {
             setTurret(TurretState.OFF, 0);
         }
+    }
+
+    public void resetTurretPose() {
+        double analogPosition = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
+        robot.turretEncoder.overridePosition((int) analogPosition);
     }
 
     public Pose2d getTurretPose() {
@@ -112,7 +118,8 @@ public class Turret extends SubsystemBase {
     }
 
     public double getPosition() {
-        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getPosition(), false);
+        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false); // TODO: Use this one
+
         if ((((Double) lastPosPos).isNaN()) || (Math.abs(newPos - lastPosPos) < TURRET_POS_FILTER)) {
             lastPosPos = newPos;
             return newPos;
@@ -195,7 +202,7 @@ public class Turret extends SubsystemBase {
                     // don't push the turret even further in that direction if it is already past the hardware limits
                     robot.turretServos.set(0);
                 } else {
-                    robot.turretServos.set(power);
+//                    robot.turretServos.set(power); // TODO: Uncomment when done
                 }
                 robot.profiler.end("Turret Write");
                 break;
@@ -216,7 +223,8 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint() && !turretState.equals(OFF);
+//        return turretController.atSetPoint() && !turretState.equals(OFF); // TODO: Uncomment out
+        return !turretState.equals(OFF);
     }
 
     /**

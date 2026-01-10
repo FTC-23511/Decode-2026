@@ -88,13 +88,13 @@ public class Motor implements HardwareDevice {
          */
         public int getPosition() {
             int currentPosition = m_position.get();
-            if (currentPosition != lastPosition) {
-                double currentTime = (double) System.nanoTime() / 1E9;
-                double dt = currentTime - lastTimeStamp;
-                veloEstimate = (currentPosition - lastPosition) / dt;
-                lastPosition = currentPosition;
-                lastTimeStamp = currentTime;
-            }
+            double currentTime = (double) System.nanoTime() / 1E9;
+            double dt = currentTime - lastTimeStamp;
+
+            veloEstimate = (currentPosition - lastPosition) / dt;
+            lastPosition = currentPosition;
+            lastTimeStamp = currentTime;
+
             return direction.getMultiplier() * currentPosition - resetVal;
         }
 
@@ -119,6 +119,14 @@ public class Motor implements HardwareDevice {
             resetVal += getPosition();
         }
 
+
+        /**
+         * Sets the encoder position to a custom value.
+         */
+        public void overridePosition(double position) {
+            resetVal = m_position.get() - (int) position;
+        }
+
         /**
          * Sets the distance per pulse of the encoder.
          *
@@ -134,8 +142,9 @@ public class Motor implements HardwareDevice {
          *
          * @param direction the desired direction
          */
-        public void setDirection(Direction direction) {
+        public Encoder setDirection(Direction direction) {
             this.direction = direction;
+            return this;
         }
 
         /**
@@ -150,13 +159,13 @@ public class Motor implements HardwareDevice {
          */
         public double getRawVelocity() {
             double velo = getVelocity();
-            if (velo != lastVelo) {
-                double currentTime = (double) System.nanoTime() / 1E9;
-                double dt = currentTime - lastTimeStamp;
-                accel = (velo - lastVelo) / dt;
-                lastVelo = velo;
-                lastTimeStamp = currentTime;
-            }
+            double currentTime = (double) System.nanoTime() / 1E9;
+            double dt = currentTime - lastTimeStamp;
+
+            accel = (velo - lastVelo) / dt;
+            lastVelo = velo;
+            lastTimeStamp = currentTime;
+
             return velo * direction.getMultiplier();
         }
 

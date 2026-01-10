@@ -78,8 +78,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public CRServoGroup turretServos;
     public Motor.Encoder turretEncoder;
-    public AbsoluteAnalogEncoder turretEncoder1;
-    public AbsoluteAnalogEncoder turretEncoder2;
+    public AbsoluteAnalogEncoder analogTurretEncoder;
 
     public ServoEx hoodServo;
     public ServoEx rampServo;
@@ -179,15 +178,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                         .setRunMode(CRServoEx.RunMode.RawPower)
         ).setInverted(true);
 
-        turretEncoder1 = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
+        analogTurretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
-        turretEncoder2 = new AbsoluteAnalogEncoder(hwMap, "turretEncoder2")
-                .zero(TURRET_ENCODER_2_OFFSET)
-                .setReversed(true);
 
-        turretEncoder = new Motor(hwMap, "BR").encoder; // TODO: CHECK
-        launchEncoder.setDirection(Motor.Direction.FORWARD); // TODO: CHECK
+        turretEncoder = new Motor(hwMap, "BR").encoder
+                .setDirection(Motor.Direction.FORWARD); // TODO: CHECK
 
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);

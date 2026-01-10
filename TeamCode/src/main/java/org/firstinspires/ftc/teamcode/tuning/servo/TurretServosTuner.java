@@ -8,6 +8,9 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -17,6 +20,9 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 @Config
 @TeleOp(name = "TurretServosTuner", group = "Servo")
 public class TurretServosTuner extends CommandOpMode {
+    public GamepadEx driver;
+    public GamepadEx operator;
+
     public static double TARGET_POS = 0.0;
     public static double TARGET_VEL = 0.0;
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
@@ -35,6 +41,21 @@ public class TurretServosTuner extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.resetTurretPose())
+        );
     }
 
     @Override
@@ -52,6 +73,9 @@ public class TurretServosTuner extends CommandOpMode {
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
+
+        telemetryData.addData("Raw Pos", robot.turretEncoder.getPosition());
+        telemetryData.addData("Analog Pos", robot.analogTurretEncoder.getCurrentPosition());
 
         telemetryData.addData("Actual Pos", robot.turret.getPosition());
         telemetryData.addData("Target Pos", TARGET_POS);
