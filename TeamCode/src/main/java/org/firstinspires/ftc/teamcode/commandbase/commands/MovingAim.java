@@ -84,9 +84,9 @@ public class MovingAim extends CommandBase {
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
         // set turret angle to robot centric and to radians
         robot.turret.setTurret(ANGLE_CONTROL, MathUtils.normalizeRadians(values.turretAngle, false));
-        RobotLog.aa("robotPose", String.valueOf(robotPose));
-        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
-        RobotLog.aa("PredictResult", String.valueOf(values));
+//        RobotLog.aa("robotPose", String.valueOf(robotPose));
+//        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
+//        RobotLog.aa("PredictResult", String.valueOf(values));
 
     }
 }
