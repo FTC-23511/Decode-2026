@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Romance (close far auto)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Romance (close 9 auto)", preselectTeleOp = "AAAFullTeleOp")
 public class Romance extends CommandOpMode {
     public ElapsedTime timer;
     public static boolean GATE_OPEN = false;
