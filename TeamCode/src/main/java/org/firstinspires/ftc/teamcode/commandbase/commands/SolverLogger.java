@@ -107,7 +107,6 @@ public class SolverLogger {
 
 
         str += ";Flywheel Active Control:Boolean:" + robot.launcher.getActiveControl();
-        str += ";Flywheel Target Ball Velocity:Double:" + robot.launcher.getTargetFlywheelVelocity();
         str += ";Flywheel Target:Double:" + robot.launcher.getFlywheelTarget();
 
         str += ";Intake Motor State:String:" + Intake.motorState;
