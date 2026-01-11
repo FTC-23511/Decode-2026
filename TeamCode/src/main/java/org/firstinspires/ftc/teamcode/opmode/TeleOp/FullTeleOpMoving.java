@@ -111,20 +111,16 @@ public class FullTeleOpMoving extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new ConditionalCommand(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                                new InstantCommand(() -> robot.launcher.setRamp(true)),
-                                new ClearLaunch(false)
-                        ),
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                                new InstantCommand(() -> robot.launcher.setRamp(true)),
-                                new ClearLaunch(true)
-                        ),
-                        () -> gamepad1.left_trigger > 0.5
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.readyToLaunch = true),
+                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)),
+
+                        new ConditionalCommand(
+                            new ClearLaunch(false),
+                            new ClearLaunch(true),
+                            () -> gamepad1.left_trigger > 0.5
+                        )
                 )
         );
 
