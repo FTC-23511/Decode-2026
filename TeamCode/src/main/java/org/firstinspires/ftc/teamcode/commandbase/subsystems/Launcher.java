@@ -110,18 +110,17 @@ public class Launcher extends SubsystemBase {
             if (flywheelController.atSetPoint()) {
                 impossible = false;
             } else {
-                // hood compensation (WORKS, disabled for event)
-//                double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
-//                        GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
-//                        inverseLauncherLUT.get(flywheelVel)
-//                );
-//                if (Double.isNaN(adjustedHoodAngle)) {
-//                    impossible = true;
-//                } else {
-//                    impossible = false;
-//                    setHood(adjustedHoodAngle, true);
-//                }
-                impossible = true;
+                // hood compensation (WORKS, disable for event)
+                double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
+                        GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
+                        inverseLauncherLUT.get(flywheelVel)
+                );
+                if (Double.isNaN(adjustedHoodAngle)) {
+                    impossible = true;
+                } else {
+                    impossible = false;
+                    setHood(adjustedHoodAngle, true);
+                }
             }
         } else {
             if (getFlywheelTarget() == 0) {

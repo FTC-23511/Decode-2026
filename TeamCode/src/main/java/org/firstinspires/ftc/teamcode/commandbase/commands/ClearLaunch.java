@@ -57,7 +57,7 @@ public class ClearLaunch extends CommandBase {
     public void end(boolean interrupted) {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
-            robot.turret.setTurret(Turret.TurretState.OFF, 0);
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
         } else {
             // TODO: Add distance sensor checking for auto retry command
         }
