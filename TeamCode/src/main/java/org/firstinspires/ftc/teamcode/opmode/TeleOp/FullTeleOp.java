@@ -160,6 +160,7 @@ public class FullTeleOp extends CommandOpMode {
         telemetryData.addData("Flywheel Actual", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
         telemetryData.addData("Launcher Power", robot.launcher.getPower());
+        telemetryData.addData("Hood Position", robot.launcher.getTargetHoodAngle());
 
         timer.reset();
 

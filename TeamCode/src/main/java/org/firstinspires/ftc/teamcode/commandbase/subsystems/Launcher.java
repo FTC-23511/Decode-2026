@@ -71,6 +71,8 @@ public class Launcher extends SubsystemBase {
         return robot.launchEncoder.getCorrectedVelocity();
     }
 
+
+
     /**
      * Internal helper to update PID setpoints directly (used by D-Pad adjustments).
      */
