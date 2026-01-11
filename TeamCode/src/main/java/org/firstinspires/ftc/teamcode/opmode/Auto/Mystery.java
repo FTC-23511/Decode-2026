@@ -31,7 +31,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Mystery (far auto)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Mystery (far 9 Ball)", preselectTeleOp = "AAAFullTeleOp")
 public class Mystery extends CommandOpMode {
     public ElapsedTime timer;
 

@@ -19,8 +19,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Jinu (close 12 Ball)", preselectTeleOp = "AAAFullTeleOp")
-public class Jinu extends CommandOpMode {
+@Autonomous(name = "Baby (far 12+ Ball)", preselectTeleOp = "AAAFullTeleOp")
+public class Baby extends CommandOpMode {
     public ElapsedTime timer;
     public static boolean GATE_OPEN = false;
     TelemetryData telemetryData = new TelemetryData(
@@ -29,23 +29,21 @@ public class Jinu extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
     public ArrayList<Pose2d> pathPoses;
 
+    public static int REPEAT_INTAKE = 3;
+    private boolean togglePath = true;
+
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-48.536741214057514, 58.42811501597444, Math.toRadians(53)));  // 0: Set Pose
-        pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(0)));  // 1: Shoot Preload
-        pathPoses.add(new Pose2d(-57.04792332268371,  12.490832157968967, Math.toRadians(0)));  // 2: Spike 1 Intake
-        pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0)));  // 3: Gate Open Move 1
-        pathPoses.add(new Pose2d(-56.65021156558532,  0.5003897763589601, Math.toRadians(0)));  // 4: Gate Open Move 2
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 5: Shoot 2
-        pathPoses.add(new Pose2d(-24.16925246826516, -13.700832157968967, Math.toRadians(0)));  // 6: Spike 2 Intake
-        pathPoses.add(new Pose2d(-60.9308885754584, -13.700832157968967, Math.toRadians(0)));   // 7: Spike 2 Intake
-        pathPoses.add(new Pose2d(-34.1212976022567, -13.700832157968967, Math.toRadians(0)));   // 8: Transition
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 9: Shoot 3
-        pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0)));  // 10: Spike 3 Intake
-        pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0)));  // 11: Spike 3 Intake
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 12: Shoot 4
-        pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(30)));  // 13: Park
+        pathPoses.add(new Pose2d(-15.182108626198076, -64.63897763578274, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-39.8890839945299, -42.30155979202772, Math.toRadians(-65))); // Line 1
+        pathPoses.add(new Pose2d(-49.87175297199957, -42.30155979202772, Math.toRadians(-65))); // Line 2
+        pathPoses.add(new Pose2d(-13.090909090909083, -53.49216300940439, Math.toRadians(15))); // Line 3
+        pathPoses.add(new Pose2d(-62.068965517241374, -62.746081504702204, Math.toRadians(15))); // Line 4
+        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(15))); // Line 5 (Same as 7)
+        pathPoses.add(new Pose2d(-61.850955744963166, -55.02946273830156, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-12.935877755361787, -53.78162911611784, Math.toRadians(0))); // Line 7 (Same as 5)
+        pathPoses.add(new Pose2d(-20.08777429467085, -33.40438871473354, Math.toRadians(0))); // Line 8
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -79,33 +77,35 @@ public class Jinu extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // Score Preload
-                        pathShoot(1, 2000),
+                        new StationaryAimbotFullLaunch(),
 
                         // Spike 1 Sequence
-                        instantPathIntake(2, 1670),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(1)).withTimeout(1367),
+                        new DriveTo(pathPoses.get(2)).withTimeout(800),
+                        new SetIntake(Intake.MotorState.STOP),
+                        pathShoot(3, 1200),
 
-                        new ConditionalCommand(
+                        // Balls on wall Sequence
+                        instantPathIntake(4, 1200),
+                        pathShoot(5, 1300),
+
+                        // Repeatedly intake + shoot balls
+                        new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        new DriveTo(pathPoses.get(3)).withTimeout(700),
-                                        new DriveTo(pathPoses.get(4)).withTimeout(900)
+                                        new ConditionalCommand(
+                                                instantPathIntake(6, 1300),
+                                                instantPathIntake(6, 1300),
+                                                () -> togglePath
+                                        ),
+                                        new InstantCommand(() -> togglePath = !togglePath),
+                                        pathShoot(5, 1300)
                                 ),
-                                new InstantCommand(),
-                                () -> GATE_OPEN
+                                REPEAT_INTAKE
                         ),
-                        pathShoot(5, 1500),
-
-                        // Spike 2 Sequence
-                        pathIntake(6, 1267),
-                        new DriveTo(pathPoses.get(8)).withTimeout(800),
-                        pathShoot(9, 1500),
-
-                        // Spike 3 Sequence
-                        pathIntake(10, 1741),
-                        pathShoot(12, 1967),
 
                         // Park
-                        // new ClearLaunch(true),
-                        new DriveTo(pathPoses.get(13)).alongWith(
+                        new DriveTo(pathPoses.get(8)).alongWith(
                                 new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
                         )
                 )
