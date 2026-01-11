@@ -6,6 +6,9 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.AIMBOT_COEFFICIEN
 import static org.firstinspires.ftc.teamcode.globals.Constants.DISTANCE_UNIT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TURRET_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,6 +19,7 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -25,7 +29,6 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 public class MovingAim extends CommandBase {
     private enum AimStateType {
         AIMING,
-        TRANSFERRING,
         LAUNCHING,
         FINISHED,
     }
@@ -36,11 +39,9 @@ public class MovingAim extends CommandBase {
     final double BALL_RADIUS = 2.5;
     final int MAX_LAUNCH_TIMES = 3;
     final double MIN_TRANSFER_TIME_MS = 500;
-    final double MAX_LAUNCH_TIME_MS = 1000;
-    final double MAX_EXECUTION_TIME_MS = 10000;
-    final double FLYWHEEL_VELOCITY_LOSS_RATE = 0.01;
+    final double MAX_EXECUTION_TIME_MS = 5000;
+    final double FLYWHEEL_VELOCITY_LOSS_RATE = 0.05;
     final double TURRET_IDLE_VELOCITY = 0.05;
-
     MathFunctions.ShootingMath math;
 
     AimStateType aimState = AimStateType.AIMING;
@@ -49,8 +50,9 @@ public class MovingAim extends CommandBase {
 
     private double endExecutionTime = 0;
     private double transferEndTime = 0;
-    private double launchEndTime = 0;
+    //    private double launchEndTime = 0;
     private double flywheelLaunchVelocity = 0;
+    private boolean launchPossible;
     private int launchTimes = 0;
 
     public MovingAim() {
@@ -69,11 +71,14 @@ public class MovingAim extends CommandBase {
 
 
     public void initialize() {
+        RobotLog.aa("MovingAimState", "Start initialization");
         launchTimes = 0;
         aimState = AimStateType.AIMING;
         endExecutionTime = timer.milliseconds() + MAX_EXECUTION_TIME_MS;
+        launchPossible = false;
 
         robot.intake.setIntake(Intake.MotorState.STOP);
+        robot.launcher.setRamp(false);
 
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
 
@@ -87,25 +92,20 @@ public class MovingAim extends CommandBase {
 
         if (currentState != AimStateType.FINISHED) {
             predictSet();
+        } else if (timer.milliseconds() > endExecutionTime) {
+            RobotLog.aa("MovingAimState", "Aimbot timeout");
+            aimState = AimStateType.FINISHED;
         }
 
         switch (aimState) {
             case AIMING:
                 if (isReadyToLaunch()) {
-                    aimState = AimStateType.TRANSFERRING;
-                    RobotLog.aa("MovingAimState", "Changing state 0: " + currentState + " --> " + aimState);
-                    startTransfer();
-                }
-                break;
-
-            case TRANSFERRING:
-                if (timer.milliseconds() >= transferEndTime && isReadyToLaunch()) {
                     aimState = AimStateType.LAUNCHING;
-                    RobotLog.aa("MovingAimState", "Changing state 1: " + currentState + " --> " + aimState);
+                    RobotLog.aa("MovingAimState", "Changing state 0: " + currentState + " --> " + aimState);
                     startLaunch();
                 }
                 break;
-
+                
             case LAUNCHING:
                 if (hasBallLaunched()) {
                     stopLaunch();
@@ -120,15 +120,16 @@ public class MovingAim extends CommandBase {
                 break;
         }
 
-//        if (currentState != aimState) {
+        if (currentState != aimState) {
             RobotLog.aa("MovingAimState", "Current state = " + currentState + ", Next State = " + aimState + ", Launch Times = " + launchTimes);
-//        }
+        }
     }
 
     public void end(boolean interrupted) {
         RobotLog.aa("MovingAimState", "end: interrupted = " + interrupted);
         robot.turret.setTurret(Turret.TurretState.OFF, 0);
         robot.launcher.setActiveControl(false);
+        robot.launcher.setHood(MIN_HOOD_ANGLE);
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
         robot.launcher.setFlywheel(0, false);
@@ -137,24 +138,11 @@ public class MovingAim extends CommandBase {
     }
 
     public boolean isFinished() {
-        final boolean finished = aimState == AimStateType.FINISHED;
-        final boolean launchedAllBalls = launchTimes >= MAX_LAUNCH_TIME_MS;
-        final boolean timeout = timer.milliseconds() >= endExecutionTime;
-        RobotLog.aa("MovingAimState", "finished = " + finished + ", launchedAllBalls = " + launchedAllBalls + ", timeout = " + timeout);
         return (aimState == AimStateType.FINISHED) || (launchTimes >= MAX_LAUNCH_TIMES) || timer.milliseconds() >= endExecutionTime;
     }
 
     private boolean isReadyToLaunch() {
-        final boolean flywheelReady = robot.launcher.flywheelReady();
-        final boolean turretReady = robot.turret.readyToLaunch();
-        final boolean launchValid = robot.launcher.launchValid();
-
-        RobotLog.aa("MovingAimState", "flywheelReady = " + flywheelReady + ", turrentReady = " + turretReady + ", launchValid = " + launchValid);
-
-        return flywheelReady && turretReady;
-
-//        return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.launchValid() && Math.abs(robot.turretEncoder.getCorrectedVelocity()) <= TURRET_IDLE_VELOCITY;
-        //return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() /*&& robot.launcher.launchValid()*/;
+       return launchPossible && robot.launcher.flywheelReady() && robot.turret.readyToLaunch() /*&& robot.launcher.launchValid()*/;
     }
 
     private void predictSet() {
@@ -162,30 +150,28 @@ public class MovingAim extends CommandBase {
         ChassisSpeeds robotSpeed = robot.drive.swerve.getTargetVelocity();
 
         MathFunctions.ShootingMath.PredictResult values = math.predict(robotPose, robotSpeed);
-        //inch/second to meter to seconds
-        robot.launcher.setFlywheel(values.flyWheelSpeed, true);
+        values.turretAngle = MathUtils.normalizeRadians(values.turretAngle, false);
+
+        launchPossible = (-MAX_TURRET_ANGLE) <= values.turretAngle && values.turretAngle <= MAX_TURRET_ANGLE;
+
         //set hood angle to degrees in the right range
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
+        //inch/second to meter to seconds
+        robot.launcher.setFlywheel(values.flyWheelSpeed, true);
         // set turret angle to robot centric and to radians
-        robot.turret.setTurret(ANGLE_CONTROL, MathUtils.normalizeRadians(values.turretAngle, false));
+        robot.turret.setTurret(ANGLE_CONTROL, values.turretAngle);
 
         // log the aim telemetry
-//        RobotLog.aa("MovingAimStatus", "Robot Pose = " + String.valueOf(robotPose) + ", Robot Speed = ", String.valueOf(robotSpeed) + ", Predict Result = " + String.valueOf(values));
-        RobotLog.aa("MovingAimState", "Robot Pose = " + String.valueOf(robotPose));
-        RobotLog.aa("MovingAimState", "Robot Speed = " + String.valueOf(robotSpeed));
-        RobotLog.aa("MovingAimState", "Predict Result = " + String.valueOf(values));
-    }
-
-    private void startTransfer() {
-        robot.intake.setIntake(Intake.MotorState.TRANSFER);
-        transferEndTime = timer.milliseconds() + MIN_TRANSFER_TIME_MS;
+//        RobotLog.aa("MovingAimState", "Robot Pose = " + String.valueOf(robotPose));
+//        RobotLog.aa("MovingAimState", "Robot Speed = " + String.valueOf(robotSpeed));
+//        RobotLog.aa("MovingAimState", "Predict Result = " + String.valueOf(values));
     }
 
     private void startLaunch() {
         robot.readyToLaunch = true;
         flywheelLaunchVelocity = robot.launchEncoder.getCorrectedVelocity();
-        launchEndTime = timer.milliseconds() + MAX_LAUNCH_TIME_MS;
         robot.launcher.setRamp(true);
+        robot.intake.setIntake(Intake.MotorState.TRANSFER);
     }
 
     private void stopLaunch() {
@@ -196,10 +182,6 @@ public class MovingAim extends CommandBase {
     }
 
     private boolean hasBallLaunched() {
-        if (timer.milliseconds() >= launchEndTime) {
-            return true;
-        }
-
         final double flywheelVelocity = robot.launchEncoder.getCorrectedVelocity();
         if (flywheelVelocity >= flywheelLaunchVelocity) {
             return false;
