@@ -35,10 +35,11 @@ public class MovingAim extends CommandBase {
     final double inchesPerMeters = 39.3701;
     final double BALL_RADIUS = 2.5;
     final int MAX_LAUNCH_TIMES = 3;
-    final double MIN_TRANSFER_TIME_MS = 5;
-    final double MAX_LAUNCH_TIME_MS = 2;
+    final double MIN_TRANSFER_TIME_MS = 50;
+    final double MAX_LAUNCH_TIME_MS = 100;
     final double MAX_EXECUTION_TIME_MS = 2000;
     final double FLYWHEEL_VELOCITY_LOSS_RATE = 0.01;
+    final double TURRET_IDLE_VELOCITY = 0.05;
 
     MathFunctions.ShootingMath math;
 
@@ -94,6 +95,7 @@ public class MovingAim extends CommandBase {
                 break;
 
             case TRANSFERRING:
+                predictSet();
                 if (timer.milliseconds() >= transferEndTime && isReadyToLaunch()) {
                     aimState = AimStateType.LAUNCHING;
                     startLaunch();
@@ -108,6 +110,7 @@ public class MovingAim extends CommandBase {
 
             default:
                 launchTimes = MAX_LAUNCH_TIMES;
+                end(false);
                 break;
         }
 
@@ -131,7 +134,7 @@ public class MovingAim extends CommandBase {
     }
 
     private boolean isReadyToLaunch() {
-        return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.launchValid();
+        return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.launchValid() && Math.abs(robot.turretEncoder.getCorrectedVelocity()) <= TURRET_IDLE_VELOCITY;
     }
 
     private void predictSet() {
