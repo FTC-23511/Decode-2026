@@ -78,8 +78,14 @@ public class Drive extends SubsystemBase {
         }
     }
 
+
     public void init() {
-        follower.setTarget(END_POSE);
+        // Get the actual current position from the pinpoint first
+        Pose2d currentPose = getPose();
+
+        // Set the PID target to where we actually ARE, not where we WERE in Auto
+        follower.setTarget(currentPose);
+
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
             setPose(END_POSE);
             unsureXY = true;

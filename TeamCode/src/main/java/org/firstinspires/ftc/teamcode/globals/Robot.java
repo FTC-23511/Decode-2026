@@ -156,8 +156,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
-        //launchEncoder.setDirection(Motor.Direction.REVERSE);
+        launchEncoder = new Motor(hwMap, "rightLaunchMotor").encoder;
+        launchEncoder.setDirection(Motor.Direction.FORWARD);
 
         FRswervo = new CRServoEx(hwMap, "FRS", new AbsoluteAnalogEncoder(hwMap, "FRE").setReversed(true)
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)

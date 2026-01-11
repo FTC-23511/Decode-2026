@@ -28,11 +28,13 @@ public class Constants {
     // --- DRIVE TRAIN ---
     public static double TRACK_WIDTH = 11.0;
     public static double WHEEL_BASE = 13.5;
-    public static double MAX_DRIVE_VELOCITY = 93.0;
-    public static double MAX_ANGULAR_VELOCITY = 10.0;
+    public static double MAX_DRIVE_VELOCITY = 79.0;
+    public static double MAX_ANGULAR_VELOCITY = 9.0;
     public static double JOYSTICK_DEAD_ZONE = 0.05;
-    public static double FR_ENCODER_OFFSET = 0.0, FL_ENCODER_OFFSET = 0.0, BL_ENCODER_OFFSET = 0.0, BR_ENCODER_OFFSET = 0.0;
-
+    public static double FR_ENCODER_OFFSET = 0.8; // Radians
+    public static double FL_ENCODER_OFFSET = 4.478; // Radians
+    public static double BL_ENCODER_OFFSET = 6.106; // Radians
+    public static double BR_ENCODER_OFFSET = 2.414; // Radians
     // --- DRIVE PID ---
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.01, 0);
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.0, 0, 0.2, 0);
@@ -45,12 +47,12 @@ public class Constants {
 
     // --- LAUNCHER (FLY WHEEL & HOOD) ---
 // Corrected to use PIDFController.PIDFCoefficients
-    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.005, 0, 0.001, 0.0005);
-
+    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0.00001, 0.0001, 0.0005);
+// original is .005 f is 0.0005
     public static double FLYWHEEL_VEL_TOLERANCE = 50.0;
     public static double LAUNCHER_MAX_VELOCITY = 2500.0;
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.5; // Raw power if PID is off
-    public static double MIN_HOOD_ANGLE = 0.0, MAX_HOOD_ANGLE = 40.0;
+    public static double MIN_HOOD_ANGLE = 10.0, MAX_HOOD_ANGLE = 45.0;
     public static double MIN_HOOD_SERVO_POS = 0.0, MAX_HOOD_SERVO_POS = 1.0;
 
     // --- INTAKE ---

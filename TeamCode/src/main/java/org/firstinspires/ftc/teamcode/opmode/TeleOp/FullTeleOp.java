@@ -54,6 +54,18 @@ public class FullTeleOp extends CommandOpMode {
                 )
         );
 
+// CIRCLE: Wait for flywheel to reach reverse speed, then intake
+        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.launcher.setFlywheel(-500, true)),
+                        new WaitUntilCommand(() -> robot.launcher.flywheelReady()),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+                )
+        );
+
+
+
+
         // TRIANGLE: High Shot (1700 ticks, 10 deg)
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
                 new SequentialCommandGroup(
