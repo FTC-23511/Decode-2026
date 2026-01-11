@@ -36,21 +36,25 @@ public class ClearLaunch extends CommandBase {
     @Override
     public void initialize() {
         if (robot.readyToLaunch) {
-//            robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
-            robot.launcher.setRamp(true);
             robot.launcher.setActiveControl(true);
+        }
+        if (!Intake.motorState.equals(Intake.MotorState.TRANSFER)) {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
         }
+
         timer.reset();
     }
 
     @Override
     public void execute() {
-        if (preciseShots && !robot.launcher.flywheelReady()) {
-            robot.intake.setIntake(Intake.MotorState.STOP);
-        } else {
+        if (!preciseShots || robot.launcher.launchValid()) {
+            robot.launcher.setRamp(true);
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
+        } else {
+            robot.launcher.setRamp(false);
+            robot.intake.setIntake(Intake.MotorState.STOP);
         }
+
     }
 
     @Override

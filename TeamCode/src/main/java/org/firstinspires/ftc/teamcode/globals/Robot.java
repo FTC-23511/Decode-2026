@@ -171,10 +171,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         turretServos = new CRServoGroup(
                 new CRServoEx(hwMap, "leftTurretServo")
-                        .setCachingTolerance(0.01)
+                        .setCachingTolerance(0.001)
                         .setRunMode(CRServoEx.RunMode.RawPower),
                 new CRServoEx(hwMap, "rightTurretServo")
-                        .setCachingTolerance(0.01)
+                        .setCachingTolerance(0.001)
                         .setRunMode(CRServoEx.RunMode.RawPower)
         ).setInverted(true);
 

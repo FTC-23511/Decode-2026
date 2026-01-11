@@ -131,7 +131,7 @@ public class MovingAim extends CommandBase {
     }
 
     private boolean isReadyToLaunch() {
-        return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.hoodReady();
+        return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.launchValid();
     }
 
     private void predictSet() {

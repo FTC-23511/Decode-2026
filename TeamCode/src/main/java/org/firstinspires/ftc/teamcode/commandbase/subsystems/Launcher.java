@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
@@ -20,16 +22,26 @@ public class Launcher extends SubsystemBase {
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
-    private boolean impossible = false;
+    private boolean impossible = true;
+
+    private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.76,  5.22,   5.65,   6.06,   6.48,   10.0); // input: velocity (m/s)
+    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1167.0, 1200d, 1500.0, 1667.0, 1790.0, 1967.0, 2000.0); // output: ticks/s
 
     private final InterpLUT launcherLUT = new InterpLUT(
-            Arrays.asList(-0.01, 0.0, 4.29,   4.76,   5.22,   5.65,   6.06,   6.48,   10.0), // input: velocity (m/s)
-            Arrays.asList(0.0,   0.0, 1267.0, 1367.0, 1500.0, 1667.0, 1790.0, 1967.0, 2000.0), // output: ticks/s
+            launcherInput,
+            launcherOutput,
+            true
+    );
+
+    private final InterpLUT inverseLauncherLUT = new InterpLUT(
+            launcherOutput,
+            launcherInput,
             true
     );
 
     public Launcher() {
         launcherLUT.createLUT();
+        inverseLauncherLUT.createLUT();
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
     }
 
@@ -94,7 +106,7 @@ public class Launcher extends SubsystemBase {
                     flywheelController.calculate(robot.launchEncoder.getCorrectedVelocity())
             );
 
-//            setHood(targetHoodAngle, true);
+            setHood(targetHoodAngle, true);
         } else {
             if (getFlywheelTarget() == 0) {
                 robot.launchMotors.set(0);
@@ -102,7 +114,7 @@ public class Launcher extends SubsystemBase {
                 robot.launchMotors.set(LAUNCHER_DEFAULT_ON_SPEED);
             }
 
-            impossible = false;
+            impossible = true;
         }
         robot.profiler.end("Launcher Update");
     }
@@ -119,15 +131,23 @@ public class Launcher extends SubsystemBase {
         if (compensation) { // TODO: fix this code, it is cooked.
             double launchVel = robot.launchEncoder.getCorrectedVelocity();
 
-            Object[] newHoodAngle = MathFunctions.getHoodAngleFromVelocity(
-                    GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
-                    launchVel // TODO: needs a conversion method here
+            double[] newHoodAngle = MathFunctions.distanceToLauncherValues(
+                    GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch
             );
 
-            angle = (double) newHoodAngle[0];
-            impossible = (boolean) newHoodAngle[1];
+            RobotLog.aa("angle", String.valueOf(angle));
+
+            if (Double.isNaN(newHoodAngle[0])) {
+                impossible = true;
+            } else {
+                angle = newHoodAngle[0];
+                impossible = false;
+            }
+            RobotLog.aa("newHoodAngle", String.valueOf(newHoodAngle));
+
         } else {
             targetHoodAngle = angle;
+            impossible = true;
         }
 
         robot.hoodServo.set(
@@ -139,8 +159,8 @@ public class Launcher extends SubsystemBase {
         return activeControl && flywheelController.atSetPoint();
     }
 
-    public boolean hoodReady() {
-        return activeControl && robot.hoodServo.atSetPosition() && !impossible;
+    public boolean launchValid() {
+        return activeControl && !impossible;
     }
 
     @Override

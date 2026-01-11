@@ -32,6 +32,8 @@ public class LaunchMotorTuner extends CommandOpMode {
     public static double POS_TOLERANCE = 0;
 
     private double motorVel = 0;
+    private double LEFT_MOTOR_POWER = 0;
+    private double RIGHT_MOTOR_POWER = 0;
 
     private static final PIDFController launcherPIDF = new PIDFController(P, I, D, F);
 
@@ -81,7 +83,13 @@ public class LaunchMotorTuner extends CommandOpMode {
 
         double power = launcherPIDF.calculate(motorVel, TARGET_VEL);
 
-        robot.launchMotors.set(power);
+        if (LEFT_MOTOR_POWER != 0) {
+            leftMotor.setPower(LEFT_MOTOR_POWER);
+        } else if (RIGHT_MOTOR_POWER != 0) {
+            rightMotor.setPower(RIGHT_MOTOR_POWER);
+        } else {
+            robot.launchMotors.set(power);
+        }
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();

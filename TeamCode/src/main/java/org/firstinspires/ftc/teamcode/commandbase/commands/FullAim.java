@@ -39,6 +39,7 @@ public class FullAim extends CommandBase {
     @Override
     public void initialize() {
         robot.intake.setIntake(Intake.MotorState.STOP);
+        robot.launcher.setRamp(false);
 
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
 
@@ -73,6 +74,7 @@ public class FullAim extends CommandBase {
         if (robot.turret.readyToLaunch()) {
             RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
 //                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
+            robot.intake.setIntake(Intake.MotorState.TRANSFER);
             errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
 
             if (Double.isNaN(errorsAngleVelocity[0])) {

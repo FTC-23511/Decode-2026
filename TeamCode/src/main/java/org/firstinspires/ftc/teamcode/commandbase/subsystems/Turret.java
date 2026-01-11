@@ -68,7 +68,10 @@ public class Turret extends SubsystemBase {
     }
 
     public void init() {
-        resetTurretPose();
+        if (!TURRET_SYNCED) {
+            resetTurretPose();
+            TURRET_SYNCED = true;
+        }
 
         if (!TESTING_OP_MODE) {
             setTurret(GOAL_LOCK_CONTROL, 0);
@@ -99,7 +102,7 @@ public class Turret extends SubsystemBase {
         updateCoefficients();
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
+                double[] driveTurretErrors = Turret.angleToDriveTurretErrors( posesToAngle(getTurretPose(), adjustedGoalPose()));
                 double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
                 turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
@@ -185,17 +188,14 @@ public class Turret extends SubsystemBase {
                 robot.profiler.start("tr1");
 
                 power = turretController.calculate(getPosition()); // PIF positional control output
-                errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
-                power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
 
                 if (turretController.atSetPoint()) {
-                    power = 0;
+//                    power = 0;
                 }
 
                 power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
                 power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
-                RobotLog.aa("turret power", String.valueOf(power));
                 robot.profiler.end("tr1");
                 robot.profiler.end("Turret Read");
 
@@ -211,8 +211,6 @@ public class Turret extends SubsystemBase {
 
             case ANGLE_CONTROL:
                 power = turretController.calculate(getPosition()); // PIF positional control output
-                errorVel = targetVel - getVelocity(); // custom D with smoothed velocity output (part 1)
-                power += errorVel * TURRET_EXTERNAL_D; // custom D with smoothed velocity output (part 2)
                 power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 robot.turretServos.set(power);
@@ -252,7 +250,6 @@ public class Turret extends SubsystemBase {
         getTurretPose();
 
         double offset = -angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
-        RobotLog.aa("offset", String.valueOf(offset));
         double adjustment = goalAdjustmentLUT.get(offset);
         RobotLog.aa("adjustment", String.valueOf(adjustment));
 
@@ -266,6 +263,7 @@ public class Turret extends SubsystemBase {
         adjustedGoal.plus(new Transform2d(goalPoseOffset, new Rotation2d()));
 
         RobotLog.aa("adjustedGoal", adjustedGoal.toString());
+        RobotLog.aa("goalPoseOffset", String.valueOf(goalPoseOffset));
 
         return adjustedGoal;
     }
