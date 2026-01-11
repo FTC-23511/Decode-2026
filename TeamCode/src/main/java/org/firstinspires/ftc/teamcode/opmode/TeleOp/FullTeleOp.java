@@ -94,6 +94,17 @@ public class FullTeleOp extends CommandOpMode {
                 )
         );
 
+        // CROSS: Emergency Stop / Manual Halt for both intake and flywheel
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new ParallelCommandGroup(
+                        // Uses the subsystem's logic to kick balls back slightly then stop
+                        Intake.ActiveStopIntake(),
+                        // Immediately cuts power to the flywheel and disables PID control
+                        new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
+                )
+        );
+
+
         // --- SHOOTER MANUAL ADJUSTMENTS (D-PAD) ---
         // Allows the operator to fine-tune shot parameters during the match.
 
