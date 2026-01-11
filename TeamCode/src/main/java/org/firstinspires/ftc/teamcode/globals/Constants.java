@@ -101,7 +101,7 @@ public class Constants {
     public static double LAUNCHER_FAR_VELOCITY = 5.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
-    public static double LAUNCHER_MAX_BALL_VELOCITY = 100; // Meters/second // TODO: maybe actually deal with this later
+    public static double LAUNCHER_MAX_BALL_VELOCITY = 12; // Meters/second // TODO: tune this to potentially be lower
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.18; // MUST MATCH WITH VALUE ABOVE
@@ -146,6 +146,9 @@ public class Constants {
     public static Pose2d GOAL_POSE() {
         return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0);
     } // Inches
+
+    public static double GOAL_LIP = 0.45; // Meters
+    public static double BACKBOARD_Y_OFFSET = 0.15; // Meters
 
     public static Pose2d APRILTAG_POSE() {
         return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0);

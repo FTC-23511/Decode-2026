@@ -101,12 +101,28 @@ public class Launcher extends SubsystemBase {
     private void update() {
         robot.profiler.start("Launcher Update");
         if (activeControl) {
+            double flywheelVel = robot.launchEncoder.getCorrectedVelocity();
             flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
             robot.launchMotors.set(
-                    flywheelController.calculate(robot.launchEncoder.getCorrectedVelocity())
+                    flywheelController.calculate(flywheelVel)
             );
 
-            setHood(targetHoodAngle, true);
+            if (flywheelController.atSetPoint()) {
+                impossible = false;
+            } else {
+                // hood compensation (WORKS, disabled for event)
+//                double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
+//                        GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
+//                        inverseLauncherLUT.get(flywheelVel)
+//                );
+//                if (Double.isNaN(adjustedHoodAngle)) {
+//                    impossible = true;
+//                } else {
+//                    impossible = false;
+//                    setHood(adjustedHoodAngle, true);
+//                }
+                impossible = true;
+            }
         } else {
             if (getFlywheelTarget() == 0) {
                 robot.launchMotors.set(0);
@@ -128,24 +144,7 @@ public class Launcher extends SubsystemBase {
     }
 
     private void setHood(double angle, boolean compensation) {
-        if (compensation) { // TODO: fix this code, it is cooked.
-            double launchVel = robot.launchEncoder.getCorrectedVelocity();
-
-            double[] newHoodAngle = MathFunctions.distanceToLauncherValues(
-                    GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch
-            );
-
-            RobotLog.aa("angle", String.valueOf(angle));
-
-            if (Double.isNaN(newHoodAngle[0])) {
-                impossible = true;
-            } else {
-                angle = newHoodAngle[0];
-                impossible = false;
-            }
-            RobotLog.aa("newHoodAngle", String.valueOf(newHoodAngle));
-
-        } else {
+        if (!compensation) {
             targetHoodAngle = angle;
             impossible = true;
         }

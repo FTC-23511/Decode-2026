@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_ANGULAR_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.MathFunctions.distanceToLauncherValues;
+import static org.firstinspires.ftc.teamcode.globals.MathFunctions.getHoodAngleFromVelocity;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -37,6 +38,9 @@ public class LauncherMathTest {
                 launcherInput,
                 true
         );
+
+        launcherLUT.createLUT();
+        inverseLauncherLUT.createLUT();
     }
 
     @Test
@@ -48,16 +52,29 @@ public class LauncherMathTest {
         assertEquals(-0.01, val);
     }
 
-//    @Test
-//    public void mathTest() {
-//        double distance = 2.0;
-//        double vel = 1700;
-//
-//        double[] distances = MathFunctions.distanceToLauncherValues(distance);
-//
-//        System.out.println("distances: " + Arrays.toString(distances));
-//        System.out.println("currentBallVel: " + inverseLauncherLUT.get(vel));
-//
-//        assertTrue(inverseLauncherLUT.get(vel) <= distances[0]);
-//    }
+    @Test
+    public void inverseLutTest() {
+        double val = inverseLauncherLUT.get(-10.0);
+
+        System.out.println("launcherLut: " + val);
+
+        assertEquals(-0.01, val);
+    }
+
+    @Test
+    public void mathTest() {
+        double distance = 1.5;
+        double vel = 1400;
+        double ballVel = inverseLauncherLUT.get(vel);
+        double adjustedHoodAngle = getHoodAngleFromVelocity(distance, ballVel);
+
+        double[] distances = MathFunctions.distanceToLauncherValues(distance);
+
+        System.out.println("distance:  " + distance);
+        System.out.println("ideal launcher values: " + Arrays.toString(distances));
+        System.out.println("currentBallVel: " + ballVel);
+        System.out.println("corrected launcher values: " + Arrays.toString(new double[]{ballVel, adjustedHoodAngle}));
+
+        assertTrue(!Double.isNaN(adjustedHoodAngle) && !Double.isNaN(ballVel));
+    }
 }
