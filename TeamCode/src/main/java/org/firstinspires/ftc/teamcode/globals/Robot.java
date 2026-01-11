@@ -113,6 +113,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         FLmotor = new MotorEx(hwMap, "FLM").setCachingTolerance(0.01);
         BLmotor = new MotorEx(hwMap, "BLM").setCachingTolerance(0.01);
         BRmotor = new MotorEx(hwMap, "BRM").setCachingTolerance(0.01);
+        hoodServo = new ServoEx(hwMap, "hoodServo");
 
         // --- INTAKE MOTORS ---
         intakeMotors = new MotorGroup(
