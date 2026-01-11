@@ -26,6 +26,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAim;
 import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -140,7 +141,7 @@ public class FullTeleOpMoving extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new MovingAimbotFullLaunch()
+                new MovingAim()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
@@ -164,7 +165,7 @@ public class FullTeleOpMoving extends CommandOpMode {
         );
 
         operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
-                new MovingAimbotFullLaunch()
+                new MovingAim()
         );
     }
 

@@ -8,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -22,13 +23,34 @@ import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class MovingAim extends CommandBase {
-    final double predictTime = 0.5;
+    private enum AimStateType {
+        AIMING,
+        TRANSFERRING,
+        LAUNCHING,
+        FINISHED,
+    }
+
+
     Robot robot;
     final double inchesPerMeters = 39.3701;
     final double BALL_RADIUS = 2.5;
-    double[] errorsAngleVelocity;
+    final int MAX_LAUNCH_TIMES = 3;
+    final double MIN_TRANSFER_TIME_MS = 5;
+    final double MAX_LAUNCH_TIME_MS = 2;
+    final double MAX_EXECUTION_TIME_MS = 2000;
+    final double FLYWHEEL_VELOCITY_LOSS_RATE = 0.01;
 
     MathFunctions.ShootingMath math;
+
+    AimStateType aimState = AimStateType.AIMING;
+
+    private final ElapsedTime timer;
+
+    private double endExecutionTime = 0;
+    private double transferEndTime = 0;
+    private double launchEndTime = 0;
+    private double flywheelLaunchVelocity = 0;
+    private int launchTimes = 0;
 
     public MovingAim() {
         robot = Robot.getInstance();
@@ -39,11 +61,17 @@ public class MovingAim extends CommandBase {
         Position goalPosition = new Position(DISTANCE_UNIT, goalPose.getX(), goalPose.getY(), TARGET_HEIGHT * inchesPerMeters, 0);
         math = new MathFunctions.ShootingMath(goalPosition, BALL_RADIUS, LAUNCHER_HEIGHT * inchesPerMeters);
 
+        timer = new ElapsedTime();
+        endExecutionTime = timer.milliseconds() + MAX_EXECUTION_TIME_MS;
+
         addRequirements(robot.launcher, robot.turret, robot.drive, robot.intake);
     }
 
 
     public void initialize() {
+        launchTimes = 0;
+        aimState = AimStateType.AIMING;
+
         robot.intake.setIntake(Intake.MotorState.STOP);
 
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(AIMBOT_COEFFICIENTS);
@@ -54,23 +82,56 @@ public class MovingAim extends CommandBase {
     }
 
     public void execute() {
-        predictSet();
-        if (robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.hoodReady()) {
-            robot.readyToLaunch = true;
+        final AimStateType currentState = aimState;
+
+        switch (aimState) {
+            case AIMING:
+                predictSet();
+                if (isReadyToLaunch()) {
+                    aimState = AimStateType.TRANSFERRING;
+                    startTransfer();
+                }
+                break;
+
+            case TRANSFERRING:
+                if (timer.milliseconds() >= transferEndTime && isReadyToLaunch()) {
+                    aimState = AimStateType.LAUNCHING;
+                    startLaunch();
+                }
+
+            case LAUNCHING:
+                if (hasBallLaunched()) {
+                    stopLaunch();
+                    aimState = !isFinished() ? AimStateType.AIMING : AimStateType.FINISHED;
+                }
+                break;
+
+            default:
+                launchTimes = MAX_LAUNCH_TIMES;
+                break;
         }
 
+        if (currentState != aimState) {
+            RobotLog.aa("MovingAimState", "Current state = " + currentState + ", Next State = " + currentState + ", Launch Times = " + launchTimes);
+        }
     }
 
     public void end(boolean interrupted) {
-        if (interrupted) {
-            robot.turret.setTurret(Turret.TurretState.OFF, 0);
-            robot.launcher.setActiveControl(false);
-            robot.readyToLaunch = false;
-        }
+        robot.turret.setTurret(Turret.TurretState.OFF, 0);
+        robot.launcher.setActiveControl(false);
+        robot.intake.setIntake(Intake.MotorState.STOP);
+        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
+        robot.launcher.setFlywheel(0, false);
+
+        robot.readyToLaunch = false;
     }
 
     public boolean isFinished() {
-        return robot.readyToLaunch;
+        return (aimState == AimStateType.FINISHED) || (launchTimes >= MAX_LAUNCH_TIMES) || timer.milliseconds() >= endExecutionTime;
+    }
+
+    private boolean isReadyToLaunch() {
+        return robot.launcher.flywheelReady() && robot.turret.readyToLaunch() && robot.launcher.hoodReady();
     }
 
     private void predictSet() {
@@ -88,5 +149,38 @@ public class MovingAim extends CommandBase {
 //        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
 //        RobotLog.aa("PredictResult", String.valueOf(values));
 
+    }
+
+    private void startTransfer() {
+        robot.intake.setIntake(Intake.MotorState.TRANSFER);
+        transferEndTime = timer.milliseconds() + MIN_TRANSFER_TIME_MS;
+    }
+
+    private void startLaunch() {
+        robot.readyToLaunch = true;
+        flywheelLaunchVelocity = robot.launchEncoder.getCorrectedVelocity();
+        launchEndTime = timer.milliseconds() + MAX_LAUNCH_TIME_MS;
+        robot.launcher.setRamp(true);
+    }
+
+    private void stopLaunch() {
+        robot.launcher.setRamp(false);
+        robot.intake.setIntake(Intake.MotorState.STOP);
+        robot.readyToLaunch = false;
+        launchTimes++;
+    }
+
+    private boolean hasBallLaunched() {
+        if (timer.milliseconds() >= launchEndTime) {
+            return true;
+        }
+
+        final double flywheelVelocity = robot.launchEncoder.getCorrectedVelocity();
+        if (flywheelVelocity >= flywheelLaunchVelocity) {
+            return false;
+        }
+
+        final double rate = (flywheelLaunchVelocity - flywheelVelocity) / flywheelLaunchVelocity;
+        return rate >= FLYWHEEL_VELOCITY_LOSS_RATE;
     }
 }
