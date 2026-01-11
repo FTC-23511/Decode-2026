@@ -85,9 +85,12 @@ public class MovingAim extends CommandBase {
     public void execute() {
         final AimStateType currentState = aimState;
 
+        if (currentState != AimStateType.FINISHED) {
+            predictSet();
+        }
+
         switch (aimState) {
             case AIMING:
-                predictSet();
                 if (isReadyToLaunch()) {
                     aimState = AimStateType.TRANSFERRING;
                     startTransfer();
@@ -95,7 +98,6 @@ public class MovingAim extends CommandBase {
                 break;
 
             case TRANSFERRING:
-                predictSet();
                 if (timer.milliseconds() >= transferEndTime && isReadyToLaunch()) {
                     aimState = AimStateType.LAUNCHING;
                     startLaunch();
@@ -148,9 +150,9 @@ public class MovingAim extends CommandBase {
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
         // set turret angle to robot centric and to radians
         robot.turret.setTurret(ANGLE_CONTROL, MathUtils.normalizeRadians(values.turretAngle, false));
-//        RobotLog.aa("robotPose", String.valueOf(robotPose));
-//        RobotLog.aa("robotSpeed", String.valueOf(robotSpeed));
-//        RobotLog.aa("PredictResult", String.valueOf(values));
+
+        // log the aim telemetry
+        RobotLog.aa("MovingAimStatus", "Robot Pose = " + robotPose + ", Robot Speed = ", robotSpeed + ", Predict Result = " + values);
 
     }
 
