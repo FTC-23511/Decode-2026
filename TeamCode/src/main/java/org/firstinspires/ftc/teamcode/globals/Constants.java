@@ -72,6 +72,8 @@ public class Constants {
     public static double XY_MIN_OUTPUT = 12; // Inches/second
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
+    public static boolean ENABLE_ZONE_CONTROL = true;
+
     // Intake
     public static double INTAKE_FORWARD_SPEED = 1.0;
     public static double INTAKE_REVERSE_SPEED = -1.0;

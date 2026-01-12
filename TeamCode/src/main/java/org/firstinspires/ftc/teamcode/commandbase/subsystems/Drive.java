@@ -15,6 +15,8 @@ import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.p2p.P2PController;
+import com.skeletonarmy.marrow.zones.Point;
+import com.skeletonarmy.marrow.zones.PolygonZone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
@@ -28,6 +30,10 @@ public class Drive extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
+
+    private static final PolygonZone bigLaunchZone = new PolygonZone(new Point(72, 72), new Point(0, 0), new Point(-72, 72));
+    private static final PolygonZone smallLaunchZone = new PolygonZone(new Point(-24, -72), new Point(0, -48), new Point(24, -72));
+    private static final PolygonZone robotZone = new PolygonZone(14.5, 17.5);
 
     public Drive() {
         swerve = new CoaxialSwerveDrivetrain(
@@ -93,6 +99,13 @@ public class Drive extends SubsystemBase {
                         ),
                 turretPose.getRotation()
         );
+    }
+
+    public static boolean robotInZone(Pose2d robotPose) {
+        robotZone.setPosition(robotPose.getX(), robotPose.getY());
+        robotZone.setRotation(robotPose.getHeading());
+
+        return robotZone.isInside(bigLaunchZone) || robotZone.isInside(smallLaunchZone);
     }
 
     @Override

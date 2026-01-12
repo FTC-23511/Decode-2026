@@ -165,6 +165,11 @@ public class Turret extends SubsystemBase {
 
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
+                if (!Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
+                    robot.turretServos.set(0);
+                    break;
+                }
+
                 robot.profiler.start("Turret Read");
                 updateVelocity(); // do not remove, needed for good tracking while bot is moving
 
