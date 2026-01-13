@@ -105,7 +105,8 @@ public class Drive extends SubsystemBase {
         robotZone.setPosition(robotPose.getX(), robotPose.getY());
         robotZone.setRotation(robotPose.getHeading());
 
-        return robotZone.isInside(bigLaunchZone) || robotZone.isInside(smallLaunchZone);
+        return robotZone.distanceTo(bigLaunchZone) < ZONE_TOLERANCE
+            || robotZone.distanceTo(smallLaunchZone) < ZONE_TOLERANCE;
     }
 
     @Override

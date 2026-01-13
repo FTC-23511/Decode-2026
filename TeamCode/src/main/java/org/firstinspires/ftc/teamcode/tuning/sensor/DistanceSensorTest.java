@@ -6,7 +6,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -56,7 +55,7 @@ public class DistanceSensorTest extends CommandOpMode {
     public void run() {
 //        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
 //        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
-        telemetryData.addData("Distance Threshold", DISTANCE_THRESHOLD);
+        telemetryData.addData("Distance Threshold", INTAKE_DISTANCE_THRESHOLD);
         telemetryData.addData("Actual Distance", robot.intake.getDistance());
         telemetryData.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
         telemetryData.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
