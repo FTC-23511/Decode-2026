@@ -20,6 +20,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -47,6 +48,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Disabled
 @TeleOp(name = "AAAEventTeleOp")
 public class EventTeleop extends CommandOpMode {
     public GamepadEx driver;

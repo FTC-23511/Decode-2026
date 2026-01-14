@@ -5,10 +5,14 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.seattlesolvers.solverslib.util.MathUtils;
+
+import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @TeleOp
 public class AlliancePoseSelector extends LinearOpMode {
 //    private ElapsedTime buttonTimer;
+private final Robot robot = Robot.getInstance();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -17,6 +21,9 @@ public class AlliancePoseSelector extends LinearOpMode {
         telemetry.addData("Alliance Color", ALLIANCE_COLOR);
 
         telemetry.update();
+        OP_MODE_TYPE = OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
+        robot.init(hardwareMap);
 
         waitForStart();
 //        buttonTimer = new ElapsedTime();
@@ -29,9 +36,14 @@ public class AlliancePoseSelector extends LinearOpMode {
                 ALLIANCE_COLOR = AllianceColor.RED;
             }
 
+            robot.turret.resetTurretEncoder();
+
             telemetry.addData("Cross / Triangle", "Blue");
             telemetry.addData("Circle / Square", "Red");
             telemetry.addData("Alliance Color", ALLIANCE_COLOR);
+
+            telemetry.addData("Encoder Pos", robot.turret.getPosition());;
+            telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
             telemetry.update();
         }

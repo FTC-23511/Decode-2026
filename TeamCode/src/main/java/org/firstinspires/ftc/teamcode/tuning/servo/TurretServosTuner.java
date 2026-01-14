@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.tuning.servo;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -59,7 +57,7 @@ public class TurretServosTuner extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> robot.turret.resetTurretPose())
+                new InstantCommand(() -> robot.turret.resetTurretEncoder())
         );
     }
 

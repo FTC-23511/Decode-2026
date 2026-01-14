@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.*;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import static java.lang.Thread.sleep;
+
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -25,9 +27,6 @@ import java.util.Arrays;
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    private Pose2d turretPose = null;
-    public static Translation2d goalPoseOffset = new Translation2d();
-
     public enum TurretState {
         GOAL_LOCK_CONTROL,
         ANGLE_CONTROL,
@@ -35,12 +34,14 @@ public class Turret extends SubsystemBase {
     }
 
     public final InterpLUT goalAdjustmentLUT = new InterpLUT(
-            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle formed by lines between robot to goal and far field wall
-            Arrays.asList(-12.0,      -12.0,  0.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
+            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle (radians) formed by lines between robot to goal and far field wall
+            Arrays.asList(-3.0,      -3.0,  -3.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
             true
     );
 
+    private Pose2d turretPose = null;
     public static TurretState turretState = GOAL_LOCK_CONTROL;
+    public static Translation2d goalPoseOffset = new Translation2d();
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
     public static double targetVel = 0;
 
@@ -63,25 +64,24 @@ public class Turret extends SubsystemBase {
     public Turret() {
         updateCoefficients();
         goalAdjustmentLUT.createLUT();
-        resetTurretPose();
     }
 
     public void init() {
-        if (!TURRET_SYNCED) {
-            resetTurretPose();
-            TURRET_SYNCED = true;
-        }
+        resetTurretEncoder();
 
         if (!TESTING_OP_MODE) {
             setTurret(GOAL_LOCK_CONTROL, 0);
         } else {
             setTurret(TurretState.OFF, 0);
+            ENABLE_ZONE_CONTROL = false;
         }
     }
 
-    public void resetTurretPose() {
+    public void resetTurretEncoder() {
         double analogPositionInTicks = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
         robot.turretEncoder.overridePosition((int) analogPositionInTicks);
+
+        TURRET_SYNCED = true;
     }
 
     public Pose2d getTurretPose() {
@@ -101,7 +101,7 @@ public class Turret extends SubsystemBase {
         updateCoefficients();
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                double[] driveTurretErrors = Turret.angleToDriveTurretErrors( posesToAngle(getTurretPose(), adjustedGoalPose()));
+                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
                 double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
                 turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
@@ -122,9 +122,7 @@ public class Turret extends SubsystemBase {
     }
 
     public double getPosition() {
-        double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false); // TODO: Use this one
-
-        return newPos;
+        return MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false);
     }
 
     @Deprecated
@@ -249,7 +247,6 @@ public class Turret extends SubsystemBase {
 
         double offset = -angleToWall(turretPose) * ALLIANCE_COLOR.getMultiplier();
         double adjustment = goalAdjustmentLUT.get(offset);
-        RobotLog.aa("adjustment", String.valueOf(adjustment));
 
         Pose2d adjustedGoal;
         if (adjustment < 0) {
@@ -259,9 +256,6 @@ public class Turret extends SubsystemBase {
         }
 
         adjustedGoal.plus(new Transform2d(goalPoseOffset, new Rotation2d()));
-
-        RobotLog.aa("adjustedGoal", adjustedGoal.toString());
-        RobotLog.aa("goalPoseOffset", String.valueOf(goalPoseOffset));
 
         return adjustedGoal;
     }

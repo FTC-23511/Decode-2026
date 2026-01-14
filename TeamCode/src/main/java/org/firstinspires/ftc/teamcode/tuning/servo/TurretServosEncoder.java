@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -58,7 +57,7 @@ public class TurretServosEncoder extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new InstantCommand(() -> robot.turret.resetTurretPose())
+                new InstantCommand(() -> robot.turret.resetTurretEncoder())
         );
 
     }

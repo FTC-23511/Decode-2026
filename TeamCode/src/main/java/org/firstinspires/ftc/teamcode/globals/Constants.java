@@ -73,7 +73,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     public static boolean ENABLE_ZONE_CONTROL = true;
-    public static double ZONE_TOLERANCE = 2.0;
+    public static double ZONE_TOLERANCE = 10.0;
 
     // Intake
     public static double INTAKE_FORWARD_SPEED = 1.0;

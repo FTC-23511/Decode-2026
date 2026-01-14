@@ -182,6 +182,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
 
+        RobotLog.aa("VERY First Voltage", String.valueOf(analogTurretEncoder.getVoltage()));
+
         turretEncoder = new Motor(hwMap, "BL").encoder
                 .setDirection(Motor.Direction.FORWARD);
 
@@ -204,10 +206,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 
-        limelight = hwMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(250);
-        limelight.pipelineSwitch(4);
-        limelight.start();
+//        limelight = hwMap.get(Limelight3A.class, "limelight");
+//        limelight.setPollRateHz(250);
+//        limelight.pipelineSwitch(4);
+//        limelight.start();
 
         // Subsystems
         drive = new Drive();
