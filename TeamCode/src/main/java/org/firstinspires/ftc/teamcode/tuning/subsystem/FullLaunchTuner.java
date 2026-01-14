@@ -81,8 +81,8 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
-        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
+        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
+        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
         telemetryData.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
         telemetryData.addData("Hood Pos", robot.hoodServo.get());
         telemetryData.addData("Launch Motor Power", robot.launchMotors.get());

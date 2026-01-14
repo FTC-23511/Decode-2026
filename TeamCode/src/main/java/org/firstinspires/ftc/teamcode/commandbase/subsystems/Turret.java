@@ -55,11 +55,10 @@ public class Turret extends SubsystemBase {
 //                    )
 //    );
 
-    private ArrayList<Double> lastVelocities = new ArrayList<>();
+    private final ArrayList<Double> lastVelocities = new ArrayList<>();
     private final ElapsedTime timer = new ElapsedTime();
     private double vel = 0;
     private double lastPos = Double.NaN; // for velocity
-    private double lastPosPos = Double.NaN; // for position
 
     public Turret() {
         updateCoefficients();
@@ -81,8 +80,8 @@ public class Turret extends SubsystemBase {
     }
 
     public void resetTurretPose() {
-        double analogPosition = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
-        robot.turretEncoder.overridePosition((int) analogPosition);
+        double analogPositionInTicks = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
+        robot.turretEncoder.overridePosition((int) analogPositionInTicks);
     }
 
     public Pose2d getTurretPose() {
@@ -125,13 +124,10 @@ public class Turret extends SubsystemBase {
     public double getPosition() {
         double newPos = MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false); // TODO: Use this one
 
-        if ((((Double) lastPosPos).isNaN()) || (Math.abs(newPos - lastPosPos) < TURRET_POS_FILTER)) {
-            lastPosPos = newPos;
-            return newPos;
-        }
-        return lastPosPos;
+        return newPos;
     }
 
+    @Deprecated
     public void updateVelocity() {
         double position = getPosition();
         if (((Double) lastPos).isNaN()) {
@@ -161,7 +157,6 @@ public class Turret extends SubsystemBase {
 
     public void update() {
         double power;
-        double errorVel;
 
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
@@ -171,8 +166,6 @@ public class Turret extends SubsystemBase {
                 }
 
                 robot.profiler.start("Turret Read");
-                updateVelocity(); // do not remove, needed for good tracking while bot is moving
-
                 if (TESTING_OP_MODE) { // let the user "hack" the mode and take over what the turret is actually doing
                     // assume turretController setpoint has been set and targetVel has also been set
                 } else {
@@ -195,7 +188,7 @@ public class Turret extends SubsystemBase {
                 power = turretController.calculate(getPosition()); // PIF positional control output
 
                 if (turretController.atSetPoint()) {
-//                    power = 0;
+                    power = 0;
                 }
 
                 power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
@@ -215,7 +208,7 @@ public class Turret extends SubsystemBase {
                 break;
 
             case ANGLE_CONTROL:
-                power = turretController.calculate(getPosition()); // PIF positional control output
+                power = turretController.calculate(getPosition()); // PIDF positional control output
                 power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 robot.turretServos.set(power);

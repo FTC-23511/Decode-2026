@@ -24,8 +24,8 @@ public class Launcher extends SubsystemBase {
     private double targetFlywheelVelocity = 0.0;
     private boolean impossible = true;
 
-    private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.76,  5.22,   5.65,   6.06,   6.48,   10.0); // input: velocity (m/s)
-    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1167.0, 1200d, 1500.0, 1667.0, 1790.0, 1967.0, 2000.0); // output: ticks/s
+    private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   10.0); // input: velocity (m/s)
+    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1167.0, 1200.0, 1400.0, 1580.0, 1740.0, 1840.0, 1940.0, 2000.0); // output: ticks/s
 
     private final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,

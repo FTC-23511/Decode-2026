@@ -85,7 +85,6 @@ public class TurretServosTuner extends CommandOpMode {
         telemetryData.addData("Actual Pos", robot.turret.getPosition());
         telemetryData.addData("Target Pos", TARGET_POS);
 
-        telemetryData.addData("Smoothed Vel", robot.turret.getVelocity());
         telemetryData.addData("Target Vel", TARGET_VEL);
         telemetryData.addData("Unfiltered Vel", -robot.turret.turretController.getVelocityError()); // TODO: check if this is actually equivalent to unfiltered vel
 

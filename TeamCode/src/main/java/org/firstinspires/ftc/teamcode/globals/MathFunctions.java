@@ -123,8 +123,8 @@ public class MathFunctions {
             double numerator = (deltaYBackboard * Math.pow(xLip, 2)) - (deltaYLip * Math.pow(x, 2));
             double denominator = (x * Math.pow(xLip, 2)) - (xLip * Math.pow(x, 2));
 
-            // Add 1.0 degree safety buffer to ensure we don't graze the rim
-            minLipAngleHoriz = Math.toDegrees(Math.atan(numerator / denominator)) + 1.0;
+            // Add x degree safety buffer to ensure we don't graze the rim
+            minLipAngleHoriz = Math.toDegrees(Math.atan(numerator / denominator)) + LIP_BUFFER;
         }
 
         // --- 3. Determine Final Target Angle ---
@@ -254,13 +254,13 @@ public class MathFunctions {
             // Geometric clearance: (targetY at x) must not be blocked by (TARGET_HEIGHT at xLip)
             double num = (deltaY * xLip * xLip) - (deltaYLip * x * x);
             double den = (x * xLip * xLip) - (xLip * x * x);
-            minLipH = Math.toDegrees(Math.atan(num / den));
+            minLipH = Math.toDegrees(Math.atan(num / den)) + LIP_BUFFER;
         }
 
         // Selection Logic (Priority: Flattest valid solution)
         double epsilon = 1e-7;
         if (isAngleValid(angle1H, minLipH, epsilon)) return 90.0 - angle1H;
-        if (isAngleValid(angle2H, minLipH, epsilon)) return 90.0 - angle2H;
+//        if (isAngleValid(angle2H, minLipH, epsilon)) return 90.0 - angle2H;
 
         return Double.NaN;
     }
@@ -324,9 +324,9 @@ public class MathFunctions {
          * predicts the hood angle, turret angle, and flywheel speed of the robot when aiming while moving
          * uses the robotPose, and robotSpeed.
          */
-        public ShootingMath.PredictResult predict(Pose2d robotPose, ChassisSpeeds robotSpeed) {
+        public PredictResult predict(Pose2d robotPose, ChassisSpeeds robotSpeed) {
             //make a new PredictResult
-            ShootingMath.PredictResult result = new PredictResult();
+            PredictResult result = new PredictResult();
             //variables adjusted with robot height and ball radius
             final double targetX = target.x - Math.signum(target.x) * ballRadius;
             final double targetY = target.y - ballRadius;
@@ -379,5 +379,101 @@ public class MathFunctions {
         }
     }
 
+    /**
+     * Calculates the required launch parameters (velocity and angle) that
+     * use the lowest possible velocity while respecting ALL constraints.
+     *
+     * @param distance The horizontal distance to the target (x) in meters.
+     * @return A 2-item List<Double> containing:
+     * - Index 0: required velocity (m/s)
+     * - Index 1: used launch angle (degrees) measured FROM THE VERTICAL.
+     * Returns [Double.NaN, Double.NaN] if the shot is impossible.
+     */
+    @Deprecated
+    public static double[] legacyDistanceToLauncherValues(double distance) {
+        double g = GRAVITY;
+        double x = distance;
+        double deltaY = TARGET_HEIGHT - LAUNCHER_HEIGHT;
 
+        // --- 1. Calculate the theoretical minimum velocity shot ---
+
+        // v²_min = g * (Δy + sqrt(Δy² + x²))
+        double minVelocitySquared = g * (deltaY + Math.sqrt(Math.pow(deltaY, 2) + Math.pow(x, 2)));
+        double minVelocity = Math.sqrt(minVelocitySquared);
+
+        // Calculate the angle required for this absolute minimum velocity (FROM HORIZONTAL)
+        double tanThetaMin = minVelocitySquared / (g * x);
+        double optimalAngleHoriz = Math.toDegrees(Math.atan(tanThetaMin));
+
+        // Convert optimal angle to the vertical system for checking constraints
+        double optimalAngleVert = 90.0 - optimalAngleHoriz;
+
+        // --- 2. Determine the Final Angle (Vertical) for the solution ---
+        double finalAngleVert = 0; // The angle we will use and return (FROM VERTICAL)
+        double finalAngleHoriz = 0; // The angle used in the physics calculation (FROM HORIZONTAL)
+        boolean forceOverride = false;
+
+        if (distance <= 1) {
+            finalAngleVert = MIN_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MIN_HOOD_ANGLE; // Convert to horizontal system (90-50=40 deg)
+            forceOverride = true;
+        } else if (distance >= 4) {
+            finalAngleVert = MAX_HOOD_ANGLE;
+            finalAngleHoriz = 90.0 - MAX_HOOD_ANGLE;
+            forceOverride = true;
+        } else {
+            // TODO: Find out what edge cases are
+        }
+
+        if (!forceOverride) {
+            if (optimalAngleVert >= MIN_HOOD_ANGLE && optimalAngleVert <= MAX_HOOD_ANGLE) {
+                // Case A: Optimal shot is within vertical angle limits. Use it.
+                finalAngleVert = optimalAngleVert;
+                finalAngleHoriz = optimalAngleHoriz;
+
+                // Check velocity limit for this optimal shot
+                if (minVelocity > LAUNCHER_MAX_BALL_VELOCITY) {
+                    // Even the most efficient shot is too fast. IMPOSSIBLE.
+                    return new double[]{Double.NaN, Double.NaN};
+                }
+
+                // Return the optimal, efficient solution
+                return new double[]{minVelocity, finalAngleVert};
+
+            } else if (optimalAngleVert < MIN_HOOD_ANGLE) {
+                // Case B: Optimal angle is too close to vertical. FORCED to MIN_ANGLE_VERT (16°).
+                finalAngleVert = MIN_HOOD_ANGLE;
+                finalAngleHoriz = 90.0 - MIN_HOOD_ANGLE; // Convert to horizontal system (90-16=74 deg)
+
+            } else { // optimalAngleVert > MAX_ANGLE_VERT
+                // Case C: Optimal angle is too close to horizontal. FORCED to MAX_ANGLE_VERT (50°).
+                finalAngleVert = MAX_HOOD_ANGLE;
+                finalAngleHoriz = 90.0 - MAX_HOOD_ANGLE; // Convert to horizontal system (90-50=40 deg)
+            }
+        }
+
+        // --- 3. Recalculate Velocity for the Forced Angle (Cases B and C) ---
+        double angleToUseRad = Math.toRadians(finalAngleHoriz);
+        double tanTheta = Math.tan(angleToUseRad);
+        double cosTheta = Math.cos(angleToUseRad);
+
+        // v₀² = (g * x²) / (2 * cos²(θ) * (x * tan(θ) - Δy))
+        double denominator = 2 * (cosTheta * cosTheta) * (x * tanTheta - deltaY);
+
+        // Check for physical impossibility (denominator <= 0)
+        if (denominator <= 0) {
+            return new double[]{Double.NaN, Double.NaN};
+        }
+
+        double requiredVelocity = Math.sqrt((g * x * x) / denominator);
+
+        // --- 4. Final Velocity Constraint Check and Return ---\
+        if (requiredVelocity > MAX_DRIVE_VELOCITY) {
+            // The required velocity for the forced angle is too high. IMPOSSIBLE.
+            return new double[]{Double.NaN, Double.NaN};
+        }
+
+        // Return the valid, constrained solution
+        return new double[]{requiredVelocity, finalAngleVert};
+    }
 }

@@ -92,7 +92,7 @@ public class Constants {
     public static double RAMP_ENGAGED = 0.52;
     public static double RAMP_DISENGAGED = 0.26;
 
-    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00052); // Coefficients for ticks
+    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00045); // Coefficients for ticks
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
@@ -112,14 +112,13 @@ public class Constants {
     public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
 
     // Turret
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.48, 0.0, 0.03, 0.0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
     public static double TURRET_VEL_FF = 0.0267; // Coefficient for radians/second
-    public static double TURRET_OPEN_F = 0.031; // Power
+    public static double TURRET_OPEN_F = 0.029; // Power
     public static double TURRET_POS_TOLERANCE = 0.041; // Radians
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second
     public static double TURRET_VEL_FILTER = 20; // Radians/second
     public static double TURRET_LAST_VEL_ENTRIES = 5;
-    public static double TURRET_POS_FILTER = 1.5; // Radians
     public static double TURRET_THRESHOLD = 0.15; // Radians
     public static double TURRET_MIN_OUTPUT = 0.00; // Power
     public static double TURRET_SMALL_MAX_OUTPUT = 0.067; // Power
@@ -151,7 +150,8 @@ public class Constants {
     } // Inches
 
     public static double GOAL_LIP = 0.45; // Meters
-    public static double BACKBOARD_Y_OFFSET = 0.15; // Meters
+    public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
+    public static double LIP_BUFFER = 2.0; // Degrees
 
     public static Pose2d APRILTAG_POSE() {
         return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0);
