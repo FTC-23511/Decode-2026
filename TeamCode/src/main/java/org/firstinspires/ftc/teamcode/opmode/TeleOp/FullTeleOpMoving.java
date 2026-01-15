@@ -27,7 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAim;
-import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAimbotFullLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -70,8 +70,12 @@ public class FullTeleOpMoving extends CommandOpMode {
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 64.75, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 64.75, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 )
         );
@@ -169,6 +173,7 @@ public class FullTeleOpMoving extends CommandOpMode {
     public void initialize_loop() {
         robot.drive.setPose(END_POSE);
         telemetryData.addData("END_POSE", END_POSE);
+        telemetryData.addData("TURRET_SYNCED", TURRET_SYNCED);
         telemetryData.update();
     }
 
@@ -252,6 +257,8 @@ public class FullTeleOpMoving extends CommandOpMode {
             telemetryData.addData("atTarget", robot.drive.follower.atTarget());
             telemetryData.addData("Heading", robot.drive.getPose().getHeading());
             telemetryData.addData("Robot Pose", robot.drive.getPose());
+            telemetryData.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
+            telemetryData.addData("Zone Tolerance", ZONE_TOLERANCE);
 
             telemetryData.addData("Turret State", Turret.turretState);
             telemetryData.addData("Turret Target", robot.turret.getTarget());
