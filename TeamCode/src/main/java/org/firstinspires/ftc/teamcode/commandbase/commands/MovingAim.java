@@ -38,10 +38,9 @@ public class MovingAim extends CommandBase {
     final double inchesPerMeters = 39.3701;
     final double BALL_RADIUS = 2.5;
     final int MAX_LAUNCH_TIMES = 3;
-    final double MIN_TRANSFER_TIME_MS = 500;
+    final double MAX_LAUNCH_TIME_MS = 1000;
     final double MAX_EXECUTION_TIME_MS = 5000;
     final double FLYWHEEL_VELOCITY_LOSS_RATE = 0.05;
-    final double TURRET_IDLE_VELOCITY = 0.05;
     MathFunctions.ShootingMath math;
 
     AimStateType aimState = AimStateType.AIMING;
@@ -49,7 +48,7 @@ public class MovingAim extends CommandBase {
     private final ElapsedTime timer;
 
     private double endExecutionTime = 0;
-    private double transferEndTime = 0;
+    private double launchEndTime = 0;
     //    private double launchEndTime = 0;
     private double flywheelLaunchVelocity = 0;
     private boolean launchPossible;
@@ -111,6 +110,11 @@ public class MovingAim extends CommandBase {
                     stopLaunch();
                     aimState = !isFinished() ? AimStateType.AIMING : AimStateType.FINISHED;
                     RobotLog.aa("MovingAimState", "Changing state 2: " + currentState + " --> " + aimState);
+                } else if (timer.milliseconds() > launchEndTime) {
+                    // no new ball was launched. This suggests that all balls inside the robot has already been launched.
+                    // stop the launcher now
+                    aimState = AimStateType.FINISHED;
+                    RobotLog.aa("MovingAimState", "Stopping launcher as all balls have been launched");
                 }
                 break;
 
@@ -172,6 +176,7 @@ public class MovingAim extends CommandBase {
         flywheelLaunchVelocity = robot.launchEncoder.getCorrectedVelocity();
         robot.launcher.setRamp(true);
         robot.intake.setIntake(Intake.MotorState.TRANSFER);
+        launchEndTime = timer.milliseconds() + MAX_LAUNCH_TIME_MS;
     }
 
     private void stopLaunch() {
