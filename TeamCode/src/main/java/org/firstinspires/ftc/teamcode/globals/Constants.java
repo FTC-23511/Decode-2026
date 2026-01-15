@@ -139,6 +139,7 @@ public class Constants {
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
     public static double MAX_TURRET_ANGLE = (140.0 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range); // TODO: Adjust for min angle
     public static boolean TURRET_SYNCED = false;
+    public static double TURRET_SYNC_OFFSET = 0.0;
 
     public static float CAMERA_CLOSE_DECIMATION = 3;
     public static float CAMERA_FAR_DECIMATION = 2;

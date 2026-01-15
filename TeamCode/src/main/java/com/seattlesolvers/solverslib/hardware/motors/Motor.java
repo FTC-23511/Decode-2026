@@ -121,10 +121,10 @@ public class Motor implements HardwareDevice {
 
 
         /**
-         * Sets the encoder position to a custom value.
+         * Sets the encoder position reset position a custom value.
          */
-        public void overridePosition(int position) {
-            resetVal = m_position.get() - position;
+        public void overrideResetPos(int position) {
+            resetVal = position;
         }
 
         /**

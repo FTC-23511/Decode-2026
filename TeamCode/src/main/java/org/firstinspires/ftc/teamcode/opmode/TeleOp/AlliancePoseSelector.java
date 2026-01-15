@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -36,6 +37,7 @@ private final Robot robot = Robot.getInstance();
                 ALLIANCE_COLOR = AllianceColor.RED;
             }
 
+            robot.turretServos.set(0.01);
             TURRET_SYNCED = false;
             robot.turret.resetTurretEncoder();
 
@@ -47,6 +49,8 @@ private final Robot robot = Robot.getInstance();
             telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
             telemetry.update();
+            PhotonCore.CONTROL_HUB.clearBulkCache();
+            PhotonCore.EXPANSION_HUB.clearBulkCache();
         }
     }
 }

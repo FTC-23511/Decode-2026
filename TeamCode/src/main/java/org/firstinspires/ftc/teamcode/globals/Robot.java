@@ -186,6 +186,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         turretEncoder = new Motor(hwMap, "BL").encoder
                 .setDirection(Motor.Direction.FORWARD);
+        turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
 
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);

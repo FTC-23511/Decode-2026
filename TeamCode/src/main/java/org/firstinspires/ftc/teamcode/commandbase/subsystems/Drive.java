@@ -18,6 +18,7 @@ import com.seattlesolvers.solverslib.p2p.P2PController;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -26,10 +27,10 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
-    public static boolean unsureXY = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
+    public static Rotation2d ANGLE_OFFSET = new Rotation2d();
 
     private static final PolygonZone bigLaunchZone = new PolygonZone(new Point(72, 72), new Point(0, 0), new Point(-72, 72));
     private static final PolygonZone smallLaunchZone = new PolygonZone(new Point(-24, -72), new Point(0, -48), new Point(24, -72));
@@ -76,7 +77,7 @@ public class Drive extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
+        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET.getAngle(AngleUnit.RADIANS));
     }
 
     public ChassisSpeeds getVelocity() {

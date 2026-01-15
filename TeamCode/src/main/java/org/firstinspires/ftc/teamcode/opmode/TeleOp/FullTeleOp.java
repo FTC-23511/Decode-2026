@@ -21,6 +21,7 @@ import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -264,6 +265,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Turret Target", robot.turret.getTarget());
             telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
 //        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
+            telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryData.addData("Wall Angle", robot.turret.angleToWall());
             try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}

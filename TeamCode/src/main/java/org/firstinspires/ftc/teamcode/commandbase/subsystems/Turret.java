@@ -7,7 +7,6 @@ import static java.lang.Thread.sleep;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -67,8 +66,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void init() {
-        resetTurretEncoder();
-
         if (!TESTING_OP_MODE) {
             setTurret(GOAL_LOCK_CONTROL, 0);
         } else {
@@ -79,10 +76,12 @@ public class Turret extends SubsystemBase {
 
     public void resetTurretEncoder() {
         if (!TURRET_SYNCED) {
-            double analogPositionInTicks = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
-            robot.turretEncoder.overridePosition((int) analogPositionInTicks);
+            if (robot.analogTurretEncoder.getVoltage() > 0.001) {
+                TURRET_SYNC_OFFSET = robot.turretEncoder.getPosition() - (MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK);
+                robot.turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
+                TURRET_SYNCED = true;
+            }
         }
-        TURRET_SYNCED = true;
     }
 
     public Pose2d getTurretPose() {

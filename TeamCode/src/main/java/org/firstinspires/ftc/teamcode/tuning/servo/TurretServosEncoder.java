@@ -85,6 +85,7 @@ public class TurretServosEncoder extends CommandOpMode {
 
         telemetryData.addData("Actual Pos", robot.turret.getPosition());
         telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
+        telemetryData.addData("Analog Voltage", robot.analogTurretEncoder.getVoltage());
         telemetryData.addData("Target Pos", servoPos);
 
         telemetryData.addData("Set Power", servoPower);
