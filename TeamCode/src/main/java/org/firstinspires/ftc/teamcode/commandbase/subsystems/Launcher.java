@@ -24,8 +24,8 @@ public class Launcher extends SubsystemBase {
     private double targetFlywheelVelocity = 0.0;
     private boolean impossible = true;
 
-    private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   10.0); // input: velocity (m/s)
-    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1167.0, 1200.0, 1400.0, 1580.0, 1740.0, 1840.0, 1940.0, 2000.0); // output: ticks/s
+    private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   7.2d,   10.0); // input: velocity (m/s)
+    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1167.0, 1200.0, 1400.0, 1580.0, 1740.0, 1840.0, 1940.0, 1980.0, 2100.0); // output: ticks/s
 
     private final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
@@ -110,7 +110,10 @@ public class Launcher extends SubsystemBase {
             if (flywheelController.atSetPoint()) {
                 impossible = false;
             } else {
-                // hood compensation (WORKS, disable for event)
+                // hood compensation
+//                setHood(targetHoodAngle - flywheelController.getPositionError() * HOOD_BS, true);
+//                impossible = true;
+
                 double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
                         GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
                         inverseLauncherLUT.get(flywheelVel)

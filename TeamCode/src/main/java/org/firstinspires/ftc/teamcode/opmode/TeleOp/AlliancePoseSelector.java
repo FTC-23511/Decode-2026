@@ -36,6 +36,7 @@ private final Robot robot = Robot.getInstance();
                 ALLIANCE_COLOR = AllianceColor.RED;
             }
 
+            TURRET_SYNCED = false;
             robot.turret.resetTurretEncoder();
 
             telemetry.addData("Cross / Triangle", "Blue");

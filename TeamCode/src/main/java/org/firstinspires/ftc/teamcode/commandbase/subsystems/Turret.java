@@ -78,9 +78,10 @@ public class Turret extends SubsystemBase {
     }
 
     public void resetTurretEncoder() {
-        double analogPositionInTicks = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
-        robot.turretEncoder.overridePosition((int) analogPositionInTicks);
-
+        if (!TURRET_SYNCED) {
+            double analogPositionInTicks = MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK;
+            robot.turretEncoder.overridePosition((int) analogPositionInTicks);
+        }
         TURRET_SYNCED = true;
     }
 
@@ -122,6 +123,9 @@ public class Turret extends SubsystemBase {
     }
 
     public double getPosition() {
+        if (!TURRET_SYNCED) {
+            resetTurretEncoder();
+        }
         return MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false);
     }
 

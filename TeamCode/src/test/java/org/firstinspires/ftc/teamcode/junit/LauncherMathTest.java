@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_ANGULAR_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.MathFunctions.distanceToLauncherValues;
-import static org.firstinspires.ftc.teamcode.globals.MathFunctions.getHoodAngleFromVelocity;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.seattlesolvers.solverslib.util.InterpLUT;
@@ -63,18 +62,13 @@ public class LauncherMathTest {
 
     @Test
     public void mathTest() {
-        double distance = 1.5;
-        double vel = 1400;
-        double ballVel = inverseLauncherLUT.get(vel);
-        double adjustedHoodAngle = getHoodAngleFromVelocity(distance, ballVel);
+        double distance = 4.0;
 
-        double[] distances = MathFunctions.distanceToLauncherValues(distance);
+        double[] values = MathFunctions.distanceToLauncherValues(distance);
 
-        System.out.println("distance:  " + distance);
-        System.out.println("ideal launcher values: " + Arrays.toString(distances));
-        System.out.println("currentBallVel: " + ballVel);
-        System.out.println("corrected launcher values: " + Arrays.toString(new double[]{ballVel, adjustedHoodAngle}));
+        System.out.println("distance: " + distance);
+        System.out.println("ideal launcher values: " + Arrays.toString(values));
 
-        assertTrue(!Double.isNaN(adjustedHoodAngle) && !Double.isNaN(ballVel));
+        assertTrue(!Double.isNaN(values[0]) && !Double.isNaN(values[1]));
     }
 }

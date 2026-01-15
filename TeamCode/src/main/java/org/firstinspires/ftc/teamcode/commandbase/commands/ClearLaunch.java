@@ -69,6 +69,6 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 1567); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 1267); // TODO: replace with real end condition of the command
     }
 }

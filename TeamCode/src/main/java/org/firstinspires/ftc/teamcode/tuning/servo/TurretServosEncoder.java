@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -83,6 +84,7 @@ public class TurretServosEncoder extends CommandOpMode {
         timer.reset();
 
         telemetryData.addData("Actual Pos", robot.turret.getPosition());
+        telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
         telemetryData.addData("Target Pos", servoPos);
 
         telemetryData.addData("Set Power", servoPower);

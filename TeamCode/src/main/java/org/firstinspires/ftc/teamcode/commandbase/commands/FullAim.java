@@ -58,14 +58,7 @@ public class FullAim extends CommandBase {
 
     @Override
     public void execute() {
-        if (aimIndex < 2 && OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
-            robot.drive.swerve.updateWithTargetVelocity(
-                    ChassisSpeeds.fromFieldRelativeSpeeds(
-                            robot.drive.follower.calculate(robot.drive.getPose()),
-                            robot.drive.getPose().getRotation()
-                    )
-            );
-        } else {
+        if (!OP_MODE_TYPE.equals(OpModeType.AUTO)) {
             robot.drive.swerve.updateWithXLock();
         }
 
@@ -99,6 +92,8 @@ public class FullAim extends CommandBase {
 
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
             ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
+        } else {
+            ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
         }
 
         robot.readyToLaunch = true;

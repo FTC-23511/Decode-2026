@@ -110,6 +110,7 @@ public class Constants {
     public static double MIN_HOOD_SERVO_POS = 0.18; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
     public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double HOOD_BS = 0.01; // Degrees per ticks/second
 
     // Turret
     public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
@@ -151,7 +152,7 @@ public class Constants {
 
     public static double GOAL_LIP = 0.45; // Meters
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
-    public static double LIP_BUFFER = 2.0; // Degrees
+    public static double LIP_BUFFER = 8 * DistanceUnit.mPerInch; // Meters
 
     public static Pose2d APRILTAG_POSE() {
         return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0);

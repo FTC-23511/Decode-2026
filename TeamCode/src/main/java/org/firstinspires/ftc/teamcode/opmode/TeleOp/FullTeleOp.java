@@ -70,8 +70,10 @@ public class FullTeleOp extends CommandOpMode {
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 64.75, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 64.75, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
