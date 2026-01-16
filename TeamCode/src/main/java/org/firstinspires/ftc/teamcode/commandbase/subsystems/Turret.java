@@ -77,6 +77,7 @@ public class Turret extends SubsystemBase {
     public void resetTurretEncoder() {
         if (!TURRET_SYNCED) {
             if (robot.analogTurretEncoder.getVoltage() > 0.001) {
+                robot.turretEncoder.overrideResetPos(0);
                 TURRET_SYNC_OFFSET = robot.turretEncoder.getPosition() - (MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK);
                 robot.turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
                 TURRET_SYNCED = true;
