@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -172,10 +173,19 @@ public class FullTeleOp extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
+        if (gamepad1.right_stick_button) {
+            TURRET_SYNCED = false;
+            robot.turret.resetTurretEncoder();
+            robot.pinpoint.resetPosAndIMU();
+        }
+
         robot.drive.setPose(END_POSE);
         telemetryData.addData("END_POSE", END_POSE);
         telemetryData.addData("TURRET_SYNCED", TURRET_SYNCED);
         telemetryData.update();
+
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
 
     @Override
@@ -228,6 +238,7 @@ public class FullTeleOp extends CommandOpMode {
             }
         }
 
+        /* Gamepad rumble when intake is full
         if (robot.intake.transferFull() && !Intake.motorState.equals(Intake.MotorState.STOP)) {
             gamepad1.rumble(100);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
@@ -235,6 +246,7 @@ public class FullTeleOp extends CommandOpMode {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
+         */
 
         robot.profiler.end("Swerve Drive");
 

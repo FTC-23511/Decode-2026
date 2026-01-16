@@ -35,6 +35,7 @@ public class Constants {
     public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
     public static double DEFAULT_VOLTAGE = 12.67; // Volts
     public static boolean PROBLEMATIC_TELEMETRY = false;
+    public static boolean ALL_TELEMETRY = true;
     public static boolean TESTING_OP_MODE = false;
 
     // Drive
@@ -137,7 +138,8 @@ public class Constants {
 
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static double MAX_TURRET_ANGLE = (140.0 / 360.0) * 2 * Math.PI; // Radians (only for one side of the turret, should be doubled for total range); // TODO: Adjust for min angle
+    public static double MAX_TURRET_ANGLE = 2.65; // Radians (only for one side of the turret)
+    public static double MIN_TURRET_ANGLE = -2.55; // Radians (only for one side of the turret)
     public static boolean TURRET_SYNCED = false;
     public static double TURRET_SYNC_OFFSET = 0.0;
 

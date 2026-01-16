@@ -9,6 +9,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TURRET_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_TURRET_ANGLE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -156,7 +157,7 @@ public class MovingAim extends CommandBase {
         MathFunctions.ShootingMath.PredictResult values = math.predict(robotPose, robotSpeed);
         values.turretAngle = MathUtils.normalizeRadians(values.turretAngle, false);
 
-        launchPossible = (-MAX_TURRET_ANGLE) <= values.turretAngle && values.turretAngle <= MAX_TURRET_ANGLE;
+        launchPossible = (MIN_TURRET_ANGLE) <= values.turretAngle && values.turretAngle <= MAX_TURRET_ANGLE;
 
         //set hood angle to degrees in the right range
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));

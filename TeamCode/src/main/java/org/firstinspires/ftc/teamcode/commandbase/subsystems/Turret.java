@@ -104,11 +104,11 @@ public class Turret extends SubsystemBase {
             case GOAL_LOCK_CONTROL:
                 double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
                 double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
-                turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                turretController.setSetPoint(Range.clip(setPoint, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case ANGLE_CONTROL:
                 // value = turret target (radians)
-                turretController.setSetPoint(Range.clip(value, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                turretController.setSetPoint(Range.clip(value, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case OFF:
                 robot.turretServos.set(0);
@@ -175,7 +175,7 @@ public class Turret extends SubsystemBase {
                     double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
                     double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
 
-                    turretController.setSetPoint(Range.clip(setPoint, -MAX_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                    turretController.setSetPoint(Range.clip(setPoint, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
                     targetVel = -robot.drive.swerve.getTargetVelocity().omegaRadiansPerSecond;
                 }
 
@@ -200,7 +200,7 @@ public class Turret extends SubsystemBase {
                 robot.profiler.end("Turret Read");
 
                 robot.profiler.start("Turret Write");
-                if ((Math.abs(getPosition()) > MAX_TURRET_ANGLE) && (Math.signum(power) == Math.signum(getPosition()))) {
+                if ((getPosition() >= MAX_TURRET_ANGLE || getPosition() <= MIN_TURRET_ANGLE) && (Math.signum(power) == Math.signum(getPosition()))) {
                     // don't push the turret even further in that direction if it is already past the hardware limits
                     robot.turretServos.set(0);
                 } else {
@@ -280,7 +280,7 @@ public class Turret extends SubsystemBase {
         double drivetrainError;
         double turretError;
 
-        if (Math.abs(totalError) <= MAX_TURRET_ANGLE) {
+        if (totalError <= MAX_TURRET_ANGLE && totalError >= MIN_TURRET_ANGLE) {
             // Target is within the usable turret range:
             // Drivetrain stays still, Turret handles the entire rotation.
             drivetrainError = 0;
@@ -291,10 +291,11 @@ public class Turret extends SubsystemBase {
             // Drivetrain handles the remaining overflow (the amount needed to move the target
             // back into the turret's MAX range).
 
-            double sign = Math.signum(totalError);
-
-            // Turret locks to its maximum limit in the correct direction
-            turretError = MAX_TURRET_ANGLE * sign;
+            if (totalError > MAX_TURRET_ANGLE) {
+                turretError = MAX_TURRET_ANGLE;
+            } else {
+                turretError = MIN_TURRET_ANGLE;
+            }
 
             // Drivetrain takes the remainder: Total required - What the turret is doing
             // This is the essential fix from your original code—we return the ERROR delta.
