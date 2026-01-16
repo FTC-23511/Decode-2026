@@ -130,10 +130,10 @@ public class Constants {
     public static double TURRET_RADIANS_PER_TICK = (-1.5636687150596416 - 1.576019942982521) / (-7572 - 7753); // Radians/tick
     // (-1.5636687150596416 - 1.576019942982521) / (-7572 - 7753)
 
-    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
-    public static double TURRET_MIN_INTEGRAL = -0.2;
-    public static double TURRET_MAX_INTEGRAL = 0.2;
-    public static double TURRET_INTEGRATION_DECAY = 0.7;
+//    public static PIDFController.IntegrationBehavior TURRET_INTEGRATION_BEHAVIOR = PIDFController.IntegrationBehavior.CLEAR_AT_SP;
+//    public static double TURRET_MIN_INTEGRAL = -0.2;
+//    public static double TURRET_MAX_INTEGRAL = 0.2;
+//    public static double TURRET_INTEGRATION_DECAY = 0.7;
 
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
@@ -144,18 +144,18 @@ public class Constants {
     public static float CAMERA_CLOSE_DECIMATION = 3;
     public static float CAMERA_FAR_DECIMATION = 2;
     public static boolean USE_CLOSE_DECIMATION = true;
-    public static double TEST_DISTANCE = 80;
-    public static double DECIMATION_THRESHOLD = 80; // inches
+    public static double TEST_DISTANCE = 80; // Inches
+    public static double DECIMATION_THRESHOLD = 80; // Inches
 
     public static Pose2d GOAL_POSE() {
-        return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0);
-    } // Inches
+        return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); // Inches
+    }
 
     public static double GOAL_LIP = 0.45; // Meters
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
     public static double LIP_BUFFER = 8 * DistanceUnit.mPerInch; // Meters
 
     public static Pose2d APRILTAG_POSE() {
-        return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0);
-    } // Feet
+        return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); // Inches
+    }
 }

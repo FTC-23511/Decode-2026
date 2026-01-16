@@ -33,15 +33,15 @@ public class Jinu extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-48.536741214057514, 58.42811501597444, Math.toRadians(53)));  // 0: Set Pose
-        pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(0)));  // 1: Shoot Preload
+        pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(15))); // 1: Shoot Preload
         pathPoses.add(new Pose2d(-57.04792332268371,  12.490832157968967, Math.toRadians(0)));  // 2: Spike 1 Intake
         pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0)));  // 3: Gate Open Move 1
         pathPoses.add(new Pose2d(-56.65021156558532,  0.5003897763589601, Math.toRadians(0)));  // 4: Gate Open Move 2
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 5: Shoot 2
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(15))); // 5: Shoot 2
         pathPoses.add(new Pose2d(-24.16925246826516, -13.700832157968967, Math.toRadians(0)));  // 6: Spike 2 Intake
         pathPoses.add(new Pose2d(-60.9308885754584, -13.700832157968967, Math.toRadians(0)));   // 7: Spike 2 Intake
         pathPoses.add(new Pose2d(-34.1212976022567, -13.700832157968967, Math.toRadians(0)));   // 8: Transition
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 9: Shoot 3
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(15))); // 9: Shoot 3
         pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0)));  // 10: Spike 3 Intake
         pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0)));  // 11: Spike 3 Intake
         pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 12: Shoot 4
@@ -86,8 +86,8 @@ public class Jinu extends CommandOpMode {
 
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        new DriveTo(pathPoses.get(3)).withTimeout(700),
-                                        new DriveTo(pathPoses.get(4)).withTimeout(900)
+                                        new DriveTo(pathPoses.get(3)).withTimeout(1000),
+                                        new DriveTo(pathPoses.get(4)).withTimeout(1000)
                                 ),
                                 new InstantCommand(),
                                 () -> GATE_OPEN

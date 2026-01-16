@@ -94,7 +94,7 @@ public class Turret extends SubsystemBase {
         turretController.setTolerance(TURRET_POS_TOLERANCE);
         turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
         turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
+//        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
         turretController.setMinOutput(TURRET_MIN_OUTPUT);
     }
 
