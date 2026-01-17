@@ -10,6 +10,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
 import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.SWERVO_PIDF_COEFFICIENTS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.XY_COEFFICIENTS;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -40,7 +41,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Romance (close 9 auto)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Romance (close 9 auto)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Romance extends CommandOpMode {
     public ElapsedTime timer;
     public static boolean GATE_OPEN = false;
@@ -81,6 +82,7 @@ public class Romance extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();

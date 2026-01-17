@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "SwerveTeleOp")
+@TeleOp(name = "SwerveTeleOp", group = "TeleOp")
 public class SwerveTeleOp extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;

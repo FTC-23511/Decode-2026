@@ -156,25 +156,6 @@ public class EventTeleop extends CommandOpMode {
                 new UninterruptibleCommand(new CancelCommand())
         );
 
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, 1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, -1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(-1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
-                new StationaryAimbotFullLaunch()
-        );
     }
 
     @Override

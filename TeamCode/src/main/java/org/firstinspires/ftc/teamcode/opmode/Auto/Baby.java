@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Baby (far 12+ Ball)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Baby (far 12+ Ball)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Baby extends CommandOpMode {
     public ElapsedTime timer;
     public static boolean GATE_OPEN = false;
@@ -58,6 +58,7 @@ public class Baby extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();

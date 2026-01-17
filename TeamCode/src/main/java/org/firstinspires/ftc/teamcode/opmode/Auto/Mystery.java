@@ -31,7 +31,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Mystery (far 9 Ball)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Mystery (far 9 Ball)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Mystery extends CommandOpMode {
     public ElapsedTime timer;
 
@@ -69,6 +69,7 @@ public class Mystery extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();

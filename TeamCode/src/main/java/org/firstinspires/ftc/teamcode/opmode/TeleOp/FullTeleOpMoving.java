@@ -33,7 +33,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-@TeleOp(name = "AAAFullTeleOpMoving")
+@TeleOp(name = "FullTeleOpMoving", group = "TeleOp")
 public class FullTeleOpMoving extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
@@ -146,22 +146,6 @@ public class FullTeleOpMoving extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, 1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, -1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(-1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(1, 0)))
         );
 
         operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(

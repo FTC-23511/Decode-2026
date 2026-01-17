@@ -7,10 +7,9 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-public class
-StationaryAimbotFullLaunch extends SequentialCommandGroup {
+public class StationaryAimbotFullLaunch extends SequentialCommandGroup {
     public StationaryAimbotFullLaunch() {
-        Robot robot = Robot.getInstance();
+        final Robot robot = Robot.getInstance();
         addCommands(
                 new FullAim(),
                 new WaitCommand(250),

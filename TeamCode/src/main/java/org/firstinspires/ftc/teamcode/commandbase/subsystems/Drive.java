@@ -30,7 +30,7 @@ public class Drive extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
-    public static Rotation2d ANGLE_OFFSET = new Rotation2d();
+    public static double ANGLE_OFFSET = 0;
 
     private static final PolygonZone bigLaunchZone = new PolygonZone(new Point(72, 72), new Point(0, 0), new Point(-72, 72));
     private static final PolygonZone smallLaunchZone = new PolygonZone(new Point(-24, -72), new Point(0, -48), new Point(24, -72));
@@ -77,7 +77,7 @@ public class Drive extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET.getAngle(AngleUnit.RADIANS));
+        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
     }
 
     public ChassisSpeeds getVelocity() {

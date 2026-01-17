@@ -9,7 +9,9 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.*;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -18,9 +20,10 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @Config
-@Autonomous(name = "Jinu (close 12 Ball)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Jinu (close 12 Ball)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Jinu extends CommandOpMode {
     public ElapsedTime timer;
     public static boolean GATE_OPEN = false;
@@ -32,20 +35,20 @@ public class Jinu extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
-
+        // 47.42, 59.14, 126
         pathPoses.add(new Pose2d(-48.536741214057514, 58.42811501597444, Math.toRadians(53)));  // 0: Set Pose
-        pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(5))); // 1: Shoot Preload
+        pathPoses.add(new Pose2d(-13.607898448419048, 12.490832157968967, Math.toRadians(0))); // 1: Shoot Preload
         pathPoses.add(new Pose2d(-57.04792332268371,  12.490832157968967, Math.toRadians(0)));  // 2: Spike 1 Intake
         pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0)));  // 3: Gate Open Move 1
-        pathPoses.add(new Pose2d(-56.65021156558532,  0.5003897763589601, Math.toRadians(0)));  // 4: Gate Open Move 2
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(5))); // 5: Shoot 2
+        pathPoses.add(new Pose2d(-58.05021156558532,  0.5003897763589601, Math.toRadians(0)));  // 4: Gate Open Move 2
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0))); // 5: Shoot 2
         pathPoses.add(new Pose2d(-24.16925246826516, -13.700832157968967, Math.toRadians(0)));  // 6: Spike 2 Intake
         pathPoses.add(new Pose2d(-60.9308885754584, -13.700832157968967, Math.toRadians(0)));   // 7: Spike 2 Intake
         pathPoses.add(new Pose2d(-34.1212976022567, -13.700832157968967, Math.toRadians(0)));   // 8: Transition
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(5))); // 9: Shoot 3
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0))); // 9: Shoot 3
         pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0)));  // 10: Spike 3 Intake
         pathPoses.add(new Pose2d(-63.774330042313125, -36.86318758815233, Math.toRadians(0)));  // 11: Spike 3 Intake
-        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(5)));  // 12: Shoot 4
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(0)));  // 12: Shoot 4
         pathPoses.add(new Pose2d(-23.96614950634697, 0.7108603667136748, Math.toRadians(0)));  // 13: Park
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -61,6 +64,7 @@ public class Jinu extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();
@@ -87,8 +91,8 @@ public class Jinu extends CommandOpMode {
 
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        new DriveTo(pathPoses.get(3)).withTimeout(1000),
-                                        new DriveTo(pathPoses.get(4)).withTimeout(1000)
+                                        new DriveTo(pathPoses.get(3)).withTimeout(767),
+                                        new DriveTo(pathPoses.get(4)).withTimeout(767)
                                 ),
                                 new InstantCommand(),
                                 () -> GATE_OPEN

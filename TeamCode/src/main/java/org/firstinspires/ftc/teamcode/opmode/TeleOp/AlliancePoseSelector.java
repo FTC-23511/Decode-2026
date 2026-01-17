@@ -10,10 +10,10 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-@TeleOp
+@TeleOp(group = "AAATeleOp")
 public class AlliancePoseSelector extends LinearOpMode {
 //    private ElapsedTime buttonTimer;
-private final Robot robot = Robot.getInstance();
+    private final Robot robot = Robot.getInstance();
 
     @Override
     public void runOpMode() throws InterruptedException {

@@ -11,6 +11,7 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -68,7 +69,7 @@ public class FullAim extends CommandBase {
             RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
 //                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
-            errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);
+            errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch + Launcher.DISTANCE_OFFSET);
 
             if (Double.isNaN(errorsAngleVelocity[0])) {
                 impossible = true;

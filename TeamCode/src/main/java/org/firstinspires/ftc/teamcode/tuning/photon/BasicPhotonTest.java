@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.globals.GoBildaPinpointDriver;
 import java.util.List;
 
 @Config
-@TeleOp
+@TeleOp(group = "Photon")
 public class BasicPhotonTest extends LinearOpMode {
     private ElapsedTime timer = new ElapsedTime();
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));

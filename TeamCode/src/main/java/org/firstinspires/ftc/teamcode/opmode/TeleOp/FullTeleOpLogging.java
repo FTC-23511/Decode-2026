@@ -27,6 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.globals.SolverLogger;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -35,7 +36,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 
-@TeleOp(name = "AAAFullTeleOpWithLogging")
+@TeleOp(name = "FullTeleOpWithLogging", group = "TeleOp")
 public class FullTeleOpLogging extends CommandOpMode {
     SolverLogger robotLogging = new SolverLogger("FullTeleopLogging.log");
     public GamepadEx driver;
@@ -151,25 +152,6 @@ public class FullTeleOpLogging extends CommandOpMode {
                 new UninterruptibleCommand(new CancelCommand())
         );
 
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, 1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, -1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(-1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
-                new StationaryAimbotFullLaunch()
-        );
         robotLogging.init();
     }
 

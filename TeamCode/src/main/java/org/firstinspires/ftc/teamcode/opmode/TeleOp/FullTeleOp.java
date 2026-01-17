@@ -31,11 +31,12 @@ import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-@TeleOp(name = "AAAFullTeleOp")
+@TeleOp(name = "FullTeleOp", group = "AAATeleOp")
 public class FullTeleOp extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
@@ -60,6 +61,8 @@ public class FullTeleOp extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
+        Drive.ANGLE_OFFSET = 0;
+
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
                 new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
                 new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
@@ -79,6 +82,8 @@ public class FullTeleOp extends CommandOpMode {
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                ).andThen(
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0)
                 )
         );
 
@@ -149,26 +154,6 @@ public class FullTeleOp extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, 1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(0, -1)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(-1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> Turret.goalPoseOffset.plus(new Translation2d(1, 0)))
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
-                new StationaryAimbotFullLaunch()
-        );
     }
 
     @Override
@@ -196,6 +181,21 @@ public class FullTeleOp extends CommandOpMode {
         if (timer == null) {
             robot.initHasMovement();
             timer = new ElapsedTime();
+        }
+
+        if (gamepad2.dpadRightWasPressed()) {
+            Drive.ANGLE_OFFSET += Math.toRadians(5);
+        }
+        if (gamepad2.dpadLeftWasPressed()) {
+            Drive.ANGLE_OFFSET -= Math.toRadians(5);
+        }
+
+        if (gamepad2.dpadUpWasPressed()) {
+            Launcher.DISTANCE_OFFSET += 0.1;
+        }
+        if (gamepad2.dpadDownWasPressed()) {
+            Launcher.DISTANCE_OFFSET -= 0.1;
+            Launcher.DISTANCE_OFFSET = Math.max(0, Launcher.DISTANCE_OFFSET);
         }
 
         robot.profiler.start("Swerve Drive");
@@ -239,14 +239,14 @@ public class FullTeleOp extends CommandOpMode {
         }
 
         /* Gamepad rumble when intake is full
-        if (robot.intake.transferFull() && !Intake.motorState.equals(Intake.MotorState.STOP)) {
+        if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(100);
-            gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
-        } else {
+            gamepad1.setLedColor(255, 0, 0, 100);
+        } else if (gamepad1.isRumbling() && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
-         */
+        */
 
         robot.profiler.end("Swerve Drive");
 
@@ -277,6 +277,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Turret Target", robot.turret.getTarget());
             telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
 //        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
+            telemetryData.addData("Angle Offset", Drive.ANGLE_OFFSET);
             telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryData.addData("Wall Angle", robot.turret.angleToWall());

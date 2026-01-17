@@ -85,7 +85,7 @@ public class Constants {
     public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
 
     public static double INTAKE_DISTANCE_THRESHOLD = 6.867; // cm
-    public static double INTAKE_DISTANCE_TIME = 267; // milliseconds
+    public static double INTAKE_DISTANCE_TIME = 441; // milliseconds
 //    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 //    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 

@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "SwervePathingOpMode")
+@Autonomous(name = "SwervePathingOpMode", group = "Auto")
 public class SwervePathingOpMode extends CommandOpMode {
     public ElapsedTime timer;
 
@@ -58,7 +58,6 @@ public class SwervePathingOpMode extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
-
         TESTING_OP_MODE = true;
 
         // Resets the command scheduler

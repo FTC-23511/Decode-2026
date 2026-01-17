@@ -7,6 +7,7 @@ import static java.lang.Thread.sleep;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -40,7 +41,6 @@ public class Turret extends SubsystemBase {
 
     private Pose2d turretPose = null;
     public static TurretState turretState = GOAL_LOCK_CONTROL;
-    public static Translation2d goalPoseOffset = new Translation2d();
     public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
     public static double targetVel = 0;
 
@@ -258,8 +258,6 @@ public class Turret extends SubsystemBase {
         } else {
             adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
         }
-
-        adjustedGoal.plus(new Transform2d(goalPoseOffset, new Rotation2d()));
 
         return adjustedGoal;
     }
