@@ -279,6 +279,7 @@ public class FullTeleOp extends CommandOpMode {
 //        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
             telemetryData.addData("Angle Offset", Drive.ANGLE_OFFSET);
             telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
+            telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryData.addData("Wall Angle", robot.turret.angleToWall());
             try { telemetryData.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
