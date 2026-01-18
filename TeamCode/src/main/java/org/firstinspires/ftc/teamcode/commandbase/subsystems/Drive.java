@@ -30,7 +30,7 @@ public class Drive extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
-    public static double ANGLE_OFFSET = 0;
+    public static double ANGLE_OFFSET = 0.0;
 
     private static final PolygonZone bigLaunchZone = new PolygonZone(new Point(72, 72), new Point(0, 0), new Point(-72, 72));
     private static final PolygonZone smallLaunchZone = new PolygonZone(new Point(-24, -72), new Point(0, -48), new Point(24, -72));
@@ -127,5 +127,6 @@ public class Drive extends SubsystemBase {
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
             setPose(END_POSE);
         }
+        ANGLE_OFFSET = -0.07 * ALLIANCE_COLOR.getMultiplier();
     }
 }

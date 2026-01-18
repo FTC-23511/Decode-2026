@@ -9,6 +9,7 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.opencv.core.Point;
 
 public class MathFunctions {
@@ -92,6 +93,7 @@ public class MathFunctions {
      * @return { velocity (m/s), angleFromVertical (deg) }
      */
     public static double[] distanceToLauncherValues(double distance) {
+        distance += Launcher.DISTANCE_OFFSET;
         double g = GRAVITY;
         double x = distance;
         double xLip = x - GOAL_LIP;
