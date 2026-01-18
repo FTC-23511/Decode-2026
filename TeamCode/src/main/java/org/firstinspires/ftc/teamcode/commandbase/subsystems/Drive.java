@@ -63,11 +63,12 @@ public class Drive extends SubsystemBase {
                 ANGLE_UNIT,
                 XY_TOLERANCE,
                 HEADING_TOLERANCE
-        ).setSlewRateLimiters(
-                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
-                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
-                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
         );
+//        .setSlewRateLimiters(
+//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+//                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
+//        );
 
         timer = new ElapsedTime();
 

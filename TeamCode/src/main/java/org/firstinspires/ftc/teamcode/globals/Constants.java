@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.globals;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -114,10 +113,11 @@ public class Constants {
     public static double HOOD_BS = 0.01; // Degrees per ticks/second
 
     // Turret
-    public static PIDFCoefficients TURRET_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.267, 0.0, 0.019, 0.0); // Coefficients for radians
     public static double TURRET_VEL_FF = 0.0267; // Coefficient for radians/second
     public static double TURRET_OPEN_F = 0.029; // Power
-    public static double TURRET_POS_TOLERANCE = 0.041; // Radians
+    public static double TURRET_POS_TOLERANCE = 0.0167; // Radians
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second
     public static double TURRET_VEL_FILTER = 20; // Radians/second
     public static double TURRET_LAST_VEL_ENTRIES = 5;

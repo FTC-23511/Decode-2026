@@ -75,15 +75,16 @@ public class FullTeleOp extends CommandOpMode {
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 64.75, Math.PI))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 64.75, 0))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 55.25, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 55.25, 0))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
-                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0)
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0),
+                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0)
                 )
         );
 
@@ -278,7 +279,6 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
 //        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
             telemetryData.addData("Angle Offset", Drive.ANGLE_OFFSET);
-            telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryData.addData("Wall Angle", robot.turret.angleToWall());

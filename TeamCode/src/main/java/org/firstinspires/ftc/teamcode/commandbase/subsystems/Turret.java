@@ -11,13 +11,12 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Transform2d;
-import com.seattlesolvers.solverslib.geometry.Translation2d;
+import com.seattlesolvers.solverslib.geometry.Twist2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -34,22 +33,22 @@ public class Turret extends SubsystemBase {
     }
 
     public final InterpLUT goalAdjustmentLUT = new InterpLUT(
-            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1, 0.25), // input: angle (radians) formed by lines between robot to goal and far field wall
-            Arrays.asList(-3.0,      -3.0,  -3.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
+            Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1,  0.25), // input: angle (radians) formed by lines between robot to goal and far field wall
+            Arrays.asList(-3.0,       -3.0,  -3.0,  0.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
             true
     );
 
     private Pose2d turretPose = null;
     public static TurretState turretState = GOAL_LOCK_CONTROL;
-    public PIDFController turretController = new PIDFController(TURRET_PIDF_COEFFICIENTS);
+    public PIDFController turretController = new PIDFController(TURRET_LARGE_PIDF_COEFFICIENTS);
     public static double targetVel = 0;
 
 //    public CascadeController turretController = new CascadeController(
-//            new PIDFController(TURRET_PIDF_COEFFICIENTS)
+//            new PIDFController(TURRET_LARGE_PIDF_COEFFICIENTS)
 //                    .setIntegrationControl(
 //                            new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL)
 //                    ),
-//            new PIDFController(TURRET_PIDF_COEFFICIENTS)
+//            new PIDFController(TURRET_SMALL_PIDF_COEFFICIENTS)
 //                    .setIntegrationControl(
 //                            new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL)
 //                    )
@@ -92,7 +91,6 @@ public class Turret extends SubsystemBase {
 
     public void updateCoefficients() {
         turretController.setTolerance(TURRET_POS_TOLERANCE);
-        turretController.setCoefficients(TURRET_PIDF_COEFFICIENTS);
         turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
 //        turretController.setIntegrationControl(new PIDFController.IntegrationControl(TURRET_INTEGRATION_BEHAVIOR, TURRET_INTEGRATION_DECAY, TURRET_MIN_INTEGRAL, TURRET_MAX_INTEGRAL));
         turretController.setMinOutput(TURRET_MIN_OUTPUT);
@@ -108,9 +106,11 @@ public class Turret extends SubsystemBase {
                 break;
             case ANGLE_CONTROL:
                 // value = turret target (radians)
+                turretController.setCoefficients(TURRET_LARGE_PIDF_COEFFICIENTS);
                 turretController.setSetPoint(Range.clip(value, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 break;
             case OFF:
+                turretController.setCoefficients(TURRET_LARGE_PIDF_COEFFICIENTS);
                 robot.turretServos.set(0);
                 break;
         }
@@ -179,9 +179,15 @@ public class Turret extends SubsystemBase {
                     targetVel = -robot.drive.swerve.getTargetVelocity().omegaRadiansPerSecond;
                 }
 
+//                double distance = GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch;
+//                TURRET_THRESHOLD = distance * magic;
+
                 if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
                     turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                } else {
+                    turretController.setCoefficients(TURRET_LARGE_PIDF_COEFFICIENTS);
+                }
+                else {
+                    turretController.setCoefficients(TURRET_SMALL_PIDF_COEFFICIENTS);
                     turretController.setMaxOutput(TURRET_SMALL_MAX_OUTPUT);
                 }
 
@@ -258,6 +264,8 @@ public class Turret extends SubsystemBase {
         } else {
             adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
         }
+
+        RobotLog.vv("Adjusted Goal Pose", adjustedGoal.toString());
 
         return adjustedGoal;
     }

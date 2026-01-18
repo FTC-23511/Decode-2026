@@ -77,7 +77,11 @@ public class P2PController {
 
         if (xLimiter != null) {
             xVal = xLimiter.calculate(xVal);
+        }
+        if (xLimiter != null) {
             yVal = yLimiter.calculate(yVal);
+        }
+        if (hLimiter != null) {
             headingVal = hLimiter.calculate(headingVal);
         }
 

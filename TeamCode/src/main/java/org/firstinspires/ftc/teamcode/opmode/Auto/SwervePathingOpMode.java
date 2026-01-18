@@ -66,11 +66,11 @@ public class SwervePathingOpMode extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        robot.drive.follower.setSlewRateLimiters(
-                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
-                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
-                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
-        );
+//        robot.drive.follower.setSlewRateLimiters(
+//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+//                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
+//        );
 
         // Schedule the full auto
         robot.drive.setPose(pathPoses.get(0));
