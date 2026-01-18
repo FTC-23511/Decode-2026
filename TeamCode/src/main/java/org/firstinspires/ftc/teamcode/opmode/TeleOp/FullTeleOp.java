@@ -192,11 +192,24 @@ public class FullTeleOp extends CommandOpMode {
         }
 
         if (gamepad2.dpadUpWasPressed()) {
-            Launcher.DISTANCE_OFFSET += 0.1;
+            Launcher.DISTANCE_OFFSET += 0.2;
         }
         if (gamepad2.dpadDownWasPressed()) {
+            Launcher.DISTANCE_OFFSET -= 0.2;
+        }
+
+        if (gamepad2.circleWasPressed()) {
+            Drive.ANGLE_OFFSET += Math.toRadians(2);
+        }
+        if (gamepad2.squareWasPressed()) {
+            Drive.ANGLE_OFFSET -= Math.toRadians(2);
+        }
+
+        if (gamepad2.triangleWasPressed()) {
+            Launcher.DISTANCE_OFFSET += 0.1;
+        }
+        if (gamepad2.crossWasPressed()) {
             Launcher.DISTANCE_OFFSET -= 0.1;
-            Launcher.DISTANCE_OFFSET = Math.max(0, Launcher.DISTANCE_OFFSET);
         }
 
         robot.profiler.start("Swerve Drive");
