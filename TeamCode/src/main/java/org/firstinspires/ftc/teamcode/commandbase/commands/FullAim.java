@@ -88,7 +88,6 @@ public class FullAim extends CommandBase {
             // TODO: Come up with a better way to deal with this
             robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
             robot.launcher.setHood(MIN_HOOD_ANGLE);
-            robot.turret.setTurret(Turret.TurretState.OFF, 0);
         }
 
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
@@ -97,11 +96,13 @@ public class FullAim extends CommandBase {
             ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
         }
 
+        robot.turret.setTurret(Turret.TurretState.OFF, 0);
+
         robot.readyToLaunch = true;
     }
 
     @Override
     public boolean isFinished() {
-        return impossible || (aimIndex == 2 && robot.launcher.flywheelReady());
+        return impossible || (aimIndex == 2 && robot.launcher.flywheelReady() && robot.turret.readyToLaunch());
     }
 }

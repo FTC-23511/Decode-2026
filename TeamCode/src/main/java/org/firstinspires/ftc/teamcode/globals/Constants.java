@@ -114,10 +114,13 @@ public class Constants {
 
     // Turret
     public static PIDFCoefficients TURRET_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
-    public static PIDFCoefficients TURRET_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.267, 0.0, 0.019, 0.0); // Coefficients for radians
+    public static PIDFCoefficients TURRET_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
     public static double TURRET_VEL_FF = 0.0267; // Coefficient for radians/second
     public static double TURRET_OPEN_F = 0.029; // Power
     public static double TURRET_POS_TOLERANCE = 0.0167; // Radians
+    public static double TURRET_TOLERANCE_SCALING(double distance) {
+        return 1.0 / (10 * (distance + 1));
+    }
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second
     public static double TURRET_VEL_FILTER = 20; // Radians/second
     public static double TURRET_LAST_VEL_ENTRIES = 5;

@@ -10,6 +10,7 @@ import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.*;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @Config
 @Autonomous(name = "Jinu (close 12 Ball)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
@@ -148,12 +150,12 @@ public class Jinu extends CommandOpMode {
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
 //
-//            telemetryData.addData("Robot Pose", robot.drive.getPose());
-//            telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
-//            telemetryData.addData("atTarget", robot.drive.follower.atTarget());
-//            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-//            telemetryData.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
-//            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+            telemetryData.addData("Robot Pose", robot.drive.getPose());
+            telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
+            telemetryData.addData("atTarget", robot.drive.follower.atTarget());
+            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
+            telemetryData.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
+            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 //
             telemetryData.addData("Turret State", Turret.turretState);
             telemetryData.addData("Turret Target", robot.turret.getTarget());

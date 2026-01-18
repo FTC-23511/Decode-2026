@@ -179,8 +179,8 @@ public class Turret extends SubsystemBase {
                     targetVel = -robot.drive.swerve.getTargetVelocity().omegaRadiansPerSecond;
                 }
 
-//                double distance = GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch;
-//                TURRET_THRESHOLD = distance * magic;
+                double distance = GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch;
+                turretController.setTolerance(TURRET_TOLERANCE_SCALING(distance));
 
                 if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
                     turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
@@ -194,13 +194,13 @@ public class Turret extends SubsystemBase {
                 robot.profiler.start("tr1");
 
                 power = turretController.calculate(getPosition()); // PIF positional control output
+                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 if (turretController.atSetPoint()) {
                     power = 0;
                 }
 
                 power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
-                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
 
                 robot.profiler.end("tr1");
                 robot.profiler.end("Turret Read");
