@@ -77,6 +77,14 @@ public class Drive extends SubsystemBase {
         }
     }
 
+    public void init() {
+        follower.setTarget(END_POSE);
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
+            setPose(END_POSE);
+        }
+        ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
+    }
+
     public Pose2d getPose() {
         return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
     }
@@ -122,11 +130,4 @@ public class Drive extends SubsystemBase {
         robot.profiler.end("Drive Update");
     }
 
-    public void init() {
-        follower.setTarget(END_POSE);
-        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
-            setPose(END_POSE);
-        }
-        ANGLE_OFFSET = -0.07 * ALLIANCE_COLOR.getMultiplier();
-    }
 }

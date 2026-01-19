@@ -59,7 +59,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     private double cachedVoltage;
     private ElapsedTime voltageTimer;
 
-    public boolean readyToLaunch = false;
+    public boolean readyToLaunch = true;
 
     public MotorEx FRmotor;
     public MotorEx FLmotor;

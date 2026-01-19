@@ -13,7 +13,9 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.*;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
@@ -35,15 +37,16 @@ public class Baby extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-15.182108626198076, -64.63897763578274, Math.toRadians(90))); // Starting Pose
-        pathPoses.add(new Pose2d(-39.8890839945299, -42.30155979202772, Math.toRadians(-65))); // Line 1
-        pathPoses.add(new Pose2d(-49.87175297199957, -42.30155979202772, Math.toRadians(-65))); // Line 2
-        pathPoses.add(new Pose2d(-13.090909090909083, -53.49216300940439, Math.toRadians(15))); // Line 3
-        pathPoses.add(new Pose2d(-62.068965517241374, -62.746081504702204, Math.toRadians(15))); // Line 4
-        pathPoses.add(new Pose2d(-12.865203761755485, -53.71786833855799, Math.toRadians(15))); // Line 5 (Same as 7)
-        pathPoses.add(new Pose2d(-61.850955744963166, -55.02946273830156, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-12.935877755361787, -53.78162911611784, Math.toRadians(0))); // Line 7 (Same as 5)
-        pathPoses.add(new Pose2d(-20.08777429467085, -33.40438871473354, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-15.25, -64.5, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-22.08306709265176, -37.035143769968045, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-64.10862619808307, -35.884984025559106, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-66.327447833065804, -53.97110754414126, Math.toRadians(15))); // Line 5
+        pathPoses.add(new Pose2d(-66.327447833065804, -62.746081504702204, Math.toRadians(15))); // Line 6
+        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-66.798722044728436, -53.82747603833866, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-20.08777429467085, -33.40438871473354, Math.toRadians(0))); // Line 9
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -66,6 +69,8 @@ public class Baby extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
+        Launcher.DISTANCE_OFFSET = 0.15;
+
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(false);
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
@@ -78,35 +83,32 @@ public class Baby extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // Score Preload
-                        new StationaryAimbotFullLaunch(),
+                        pathShoot(1, 750),
 
                         // Spike 1 Sequence
-                        new SetIntake(Intake.MotorState.FORWARD),
-                        new DriveTo(pathPoses.get(1)).withTimeout(1367),
-                        new DriveTo(pathPoses.get(2)).withTimeout(800),
-                        new SetIntake(Intake.MotorState.STOP),
-                        pathShoot(3, 1200),
+                        pathIntake(2, 1000),
+                        pathShoot(4, 1200),
 
                         // Balls on wall Sequence
-                        instantPathIntake(4, 1200),
-                        pathShoot(5, 1300),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(5)).withTimeout(1300),
+                        new DriveTo(pathPoses.get(5)).withTimeout(750),
+                        new SetIntake(Intake.MotorState.STOP),
+                        pathShoot(7, 1300),
 
                         // Repeatedly intake + shoot balls
-                        new RepeatCommand(
-                                new SequentialCommandGroup(
-                                        new ConditionalCommand(
-                                                instantPathIntake(6, 1300),
-                                                instantPathIntake(6, 1300),
-                                                () -> togglePath
-                                        ),
-                                        new InstantCommand(() -> togglePath = !togglePath),
-                                        pathShoot(5, 1300)
-                                ),
-                                REPEAT_INTAKE
+                        new SequentialCommandGroup(
+                                instantPathIntake(8, 1600),
+                                pathShoot(7, 1300)
+                        ),
+
+                        new SequentialCommandGroup(
+                                instantPathIntake(8, 1600),
+                                pathShoot(7, 1300)
                         ),
 
                         // Park
-                        new DriveTo(pathPoses.get(8)).alongWith(
+                        new DriveTo(pathPoses.get(9)).alongWith(
                                 new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
                         )
                 )
@@ -179,17 +181,24 @@ public class Baby extends CommandOpMode {
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).alongWith(
                         new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex)))
                 ),
-
-                new StationaryAimbotFullLaunch()
+                new FullAim().withTimeout(1000),
+                new WaitCommand(250),
+                new ClearLaunch(true).alongWith(
+                        new InstantCommand(
+                                () -> robot.drive.swerve.updateWithXLock() // Lock the drivetrain wheel to an X shape reduce how much we can be pushed)
+                        )
+                ),
+                new WaitCommand(300)
         );
     }
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new InstantCommand(() -> robot.launcher.setRamp(false)),
                 new ParallelCommandGroup(
                         new SetIntake(Intake.MotorState.FORWARD),
-                        new DriveTo(pathPoses.get(pathStartingIndex + 1)).withTimeout(1367)
+                        new DriveTo(pathPoses.get(pathStartingIndex + 1), 0.67).withTimeout(1500)
                 ),
                 new SetIntake(Intake.MotorState.STOP)
         );
@@ -197,9 +206,10 @@ public class Baby extends CommandOpMode {
 
     public SequentialCommandGroup instantPathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
+                new InstantCommand(() -> robot.launcher.setRamp(false)),
                 new ParallelCommandGroup(
                         new SetIntake(Intake.MotorState.FORWARD),
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout)
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.5).withTimeout(timeout)
                 ),
                 new SetIntake(Intake.MotorState.STOP)
         );

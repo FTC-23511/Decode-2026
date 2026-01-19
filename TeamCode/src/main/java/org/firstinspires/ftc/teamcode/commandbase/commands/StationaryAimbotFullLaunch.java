@@ -14,12 +14,7 @@ public class StationaryAimbotFullLaunch extends SequentialCommandGroup {
         addCommands(
                 new FullAim(),
                 new WaitCommand(250),
-                new ClearLaunch(true).raceWith(
-                        new RepeatCommand(
-                                new InstantCommand(() -> robot.drive.swerve.updateWithXLock()), // Lock the drivetrain wheel to an X shape reduce how much we can be pushed)
-                                () -> false
-                        )
-                )
+                new ClearLaunch(true)
         );
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commandbase.commands;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -46,12 +47,12 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void execute() {
+//        RobotLog.ww("ClearLaunch", "Running");
         if (!preciseShots || robot.launcher.launchValid()) {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
         } else {
             robot.intake.setIntake(Intake.MotorState.STOP);
         }
-
     }
 
     @Override
@@ -63,13 +64,15 @@ public class ClearLaunch extends CommandBase {
             // TODO: Add distance sensor checking for auto retry command
         }
 
+//        RobotLog.ww("ClearLaunch done, interrupted", String.valueOf(interrupted));
+
         robot.launcher.setRamp(false);
         robot.launcher.setActiveControl(false);
-        robot.readyToLaunch = false;
+        robot.readyToLaunch = true;
     }
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 1367); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 1467); // TODO: replace with real end condition of the command
     }
 }

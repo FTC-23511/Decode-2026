@@ -23,7 +23,7 @@ public class Launcher extends SubsystemBase {
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
     private boolean impossible = true;
-    public static double DISTANCE_OFFSET = 0;
+    public static double DISTANCE_OFFSET = -0.267;
 
     private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   7.2,    10.0); // input: velocity (m/s)
     private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1480.0, 1620.0, 1780.0, 1940.0, 1980.0, 2100.0); // output: ticks/s
