@@ -22,6 +22,7 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
@@ -157,7 +158,7 @@ public class MovingAim extends CommandBase {
         MathFunctions.ShootingMath.PredictResult values = math.predict(robotPose, robotSpeed);
         values.turretAngle = MathUtils.normalizeRadians(values.turretAngle, false);
 
-        launchPossible = (MIN_TURRET_ANGLE) <= values.turretAngle && values.turretAngle <= MAX_TURRET_ANGLE;
+        launchPossible = (MIN_TURRET_ANGLE) <= values.turretAngle && values.turretAngle <= MAX_TURRET_ANGLE && Drive.robotInZone(robotPose);
 
         //set hood angle to degrees in the right range
         robot.launcher.setHood(90 - Math.toDegrees(values.hoodAngle));
