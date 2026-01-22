@@ -70,7 +70,7 @@ public class ParallelDeadlineGroup extends CommandGroupBase {
         for (Command command : commands) {
             if (!Collections.disjoint(command.getRequirements(), m_requirements)) {
                 throw new IllegalArgumentException("Multiple commands in a parallel group cannot"
-                        + "require the same subsystems");
+                        + " require the same subsystems");
             }
             m_commands.put(command, false);
             m_requirements.addAll(command.getRequirements());
