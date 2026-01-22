@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -10,8 +12,8 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -35,6 +37,7 @@ public class LauncherSubsystemTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -69,8 +72,8 @@ public class LauncherSubsystemTuner extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Math Output Required Ball Vel", Launcher.distanceToLauncherValues(DISTANCE)[0]);
-        telemetryData.addData("Math Output Required Hood Angle", Launcher.distanceToLauncherValues(DISTANCE)[1]);
+        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
+        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
         telemetryData.addData("SERVO_OUTPUT", SERVO_OUTPUT);
         telemetryData.addData("Hood Pos", robot.hoodServo.get());
         telemetryData.addData("Motor Power", robot.launchMotors.get());

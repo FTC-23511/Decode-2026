@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.commandbase.commands;
+package org.firstinspires.ftc.teamcode.globals;
 
 import android.os.Environment;
 
@@ -8,7 +8,6 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
-import org.firstinspires.ftc.teamcode.globals.Robot;
 import org.firstinspires.ftc.teamcode.opmode.TeleOp.FullTeleOpLogging;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.util.logging.SimpleFormatter;
 
 
 public class SolverLogger {
-
     String logFileName;
     private FileHandler logFileHandler;
 
@@ -29,9 +27,7 @@ public class SolverLogger {
 
     public GamepadEx driver;
 
-
     private final Robot robot = Robot.getInstance();
-
 
     public SolverLogger(String fileName)  {
         logFileName = fileName;

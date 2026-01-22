@@ -6,7 +6,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -24,7 +23,7 @@ public class DistanceSensorTest extends CommandOpMode {
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
-    private final Robot robot = Robot.getInstance();;
+    private final Robot robot = Robot.getInstance();
     private GamepadEx driver;
 
     @Override
@@ -44,12 +43,10 @@ public class DistanceSensorTest extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).toggleWhenPressed(
                 new ParallelCommandGroup(
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.FORWARD))
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 ),
                 new ParallelCommandGroup(
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP)),
-                        new InstantCommand(() -> robot.intake.setPivot(Intake.PivotState.TRANSFER))
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
                 )
         );
     }
@@ -58,7 +55,7 @@ public class DistanceSensorTest extends CommandOpMode {
     public void run() {
 //        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
 //        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
-        telemetryData.addData("Distance Threshold", DISTANCE_THRESHOLD);
+        telemetryData.addData("Distance Threshold", INTAKE_DISTANCE_THRESHOLD);
         telemetryData.addData("Actual Distance", robot.intake.getDistance());
         telemetryData.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
         telemetryData.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());

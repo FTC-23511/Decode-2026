@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -8,12 +10,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -30,7 +33,6 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double LAUNCHER_TARGET_VEL = 0.0; // ticks/sec
     public static double DISTANCE = 1.5; // meters
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
-    public static Intake.PivotState pivotState = Intake.PivotState.FORWARD;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -40,6 +42,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -60,7 +63,6 @@ public class FullLaunchTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        robot.intake.setPivot(pivotState);
         robot.intake.setIntake(motorState);
 
         robot.launcher.setRamp(true);
@@ -79,14 +81,17 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Math Output Required Ball Vel", Launcher.distanceToLauncherValues(DISTANCE)[0]);
-        telemetryData.addData("Math Output Required Hood Angle", Launcher.distanceToLauncherValues(DISTANCE)[1]);
+        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
+        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
         telemetryData.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
         telemetryData.addData("Hood Pos", robot.hoodServo.get());
         telemetryData.addData("Launch Motor Power", robot.launchMotors.get());
         telemetryData.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
         telemetryData.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
-        telemetryData.addData("Turret Pos", robot.turret.getPosition());
+        telemetryData.addData("Turret Encoder Pos", robot.turret.getPosition());
+        telemetryData.addData("Turret Pos 1", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
+//        telemetryData.addData("Turret Pos 2", MathUtils.normalizeRadians(robot.turretEncoder2.getCurrentPosition(), false));
+        telemetryData.addData("Turret Power", robot.turretServos.getRawPower());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

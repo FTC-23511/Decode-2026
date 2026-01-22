@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
-import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -32,7 +31,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Mystery (far auto)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Mystery (far 9 Ball)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Mystery extends CommandOpMode {
     public ElapsedTime timer;
 
@@ -70,6 +69,7 @@ public class Mystery extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();
@@ -79,8 +79,7 @@ public class Mystery extends CommandOpMode {
 
         robot.launcher.setHood(MIN_HOOD_SERVO_POS);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
-        robot.turret.setTurret(ANGLE_CONTROL, 0.8 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -181,7 +180,7 @@ public class Mystery extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.HOLD).beforeStarting(new WaitCommand(410)),
+                        new SetIntake(Intake.MotorState.FORWARD).beforeStarting(new WaitCommand(410)),
                         new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                         new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, true))
                 ),
@@ -201,7 +200,7 @@ public class Mystery extends CommandOpMode {
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1), maxPower).withTimeout(2467)
         );

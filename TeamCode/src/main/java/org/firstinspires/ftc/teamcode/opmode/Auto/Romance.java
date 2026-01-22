@@ -5,14 +5,12 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
 import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.HEADING_COEFFICIENTS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_SERVO_POS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
 import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.SWERVO_PIDF_COEFFICIENTS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.XY_COEFFICIENTS;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -25,8 +23,6 @@ import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
-import com.seattlesolvers.solverslib.command.WaitCommand;
-import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
@@ -36,7 +32,6 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
-import org.firstinspires.ftc.teamcode.commandbase.commands.PrepDriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -46,7 +41,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Romance (close far auto)", preselectTeleOp = "AAAFullTeleOp")
+@Autonomous(name = "Romance (close 9 auto)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Romance extends CommandOpMode {
     public ElapsedTime timer;
     public static boolean GATE_OPEN = false;
@@ -61,18 +56,17 @@ public class Romance extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-47.40, 58.31, Math.toRadians(324))); // Starting Pose
-        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 1
-        pathPoses.add(new Pose2d(-16.7, 14.0, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-52.41, 14.0, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-49.15, -2.67, Math.toRadians(0))); // Line 4 - pre-gate
-        pathPoses.add(new Pose2d(-57.41, -2.67, Math.toRadians(0))); // Line 5 - gate pose
-        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 6
-        pathPoses.add(new Pose2d(-12.7, -13.5, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-58.0, -13.5, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-32.0, -13.5, Math.toRadians(0))); // Line 9
-        pathPoses.add(new Pose2d(-15.0, 16.0, Math.toRadians(50))); // Line 10
-        pathPoses.add(new Pose2d(-30.0, 52.37, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-48.947813822284914, 57.98589562764457, Math.toRadians(90))); // Starting Pose
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 1
+        pathPoses.add(new Pose2d(-55.24400564174894, 12.490832157968967, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-49.150916784203105, 1.1170662905500706, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-55.65021156558532, 0.7108603667136748, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 5
+        pathPoses.add(new Pose2d(-24.16925246826516, -12.490832157968967, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-60.9308885754584, -12.490832157968967, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-34.1212976022567, -12.490832157968967, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-13.607898448519048, 12.490832157968967, Math.toRadians(30))); // Line 9
+        pathPoses.add(new Pose2d(-25.184767277856132, -36.86318758815233, Math.toRadians(0))); // Line 10
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -88,6 +82,7 @@ public class Romance extends CommandOpMode {
 
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.AUTO;
+        TESTING_OP_MODE = false;
 
         // Resets the command scheduler
         super.reset();
@@ -97,7 +92,6 @@ public class Romance extends CommandOpMode {
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(true);
-        robot.intake.setPivot(Intake.PivotState.HOLD);
         robot.turret.setTurret(ANGLE_CONTROL, 0);
 
         // Schedule the full auto
@@ -224,7 +218,7 @@ public class Romance extends CommandOpMode {
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD, Intake.PivotState.FORWARD),
+                new SetIntake(Intake.MotorState.FORWARD),
 
                 new DriveTo(pathPoses.get(pathStartingIndex+1)).withTimeout(2467)
         );

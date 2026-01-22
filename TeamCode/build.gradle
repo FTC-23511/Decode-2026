@@ -82,12 +82,17 @@ dependencies {
     implementation "gay.zharel.fateweaver:ftc:0.3.3"
 
     //noinspection GradleDependency, could be 0.43 but haven't tested it out yet
-    implementation('org.ejml:ejml-simple:0.39') {
-        exclude group: 'org.ejml', module: 'ejml-all'
+    //noinspection NewerVersionAvailable
+    implementation("org.ejml:ejml-simple:0.39") {
+        exclude group: "org.ejml", module: "ejml-all"
     }
-\
 
-    // JUnit 6
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:6.0.1'
+    // Marrow (for Zones)
+    implementation 'com.skeletonarmyftc.marrow:core:1.0.0'
+
+    // JUnit 5
+    //noinspection NewerVersionAvailable
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.3"
+    //noinspection NewerVersionAvailable
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.3"
 }

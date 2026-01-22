@@ -1,10 +1,26 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -26,19 +42,15 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.globals.SolverLogger;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-
-@TeleOp(name = "FullTeleOpWithLogging", group = "TeleOp")
-public class FullTeleOpLogging extends CommandOpMode {
-    SolverLogger robotLogging = new SolverLogger("FullTeleopLogging.log");
+@Disabled
+@TeleOp(name = "AAAEventTeleOp")
+public class EventTeleop extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -48,7 +60,7 @@ public class FullTeleOpLogging extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
-    public static double MAX_OUTPUT = 1;
+    public static double MAX_OUTPUT = 0.5;
 
     @Override
     public void initialize() {
@@ -115,20 +127,16 @@ public class FullTeleOpLogging extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new ConditionalCommand(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                                new InstantCommand(() -> robot.launcher.setRamp(true)),
-                                new ClearLaunch(false)
-                        ),
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                                new InstantCommand(() -> robot.launcher.setRamp(true)),
-                                new ClearLaunch(true)
-                        ),
-                        () -> gamepad1.left_trigger > 0.5
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.readyToLaunch = true),
+                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)),
+
+                        new ConditionalCommand(
+                            new ClearLaunch(false),
+                            new ClearLaunch(true),
+                            () -> gamepad1.left_trigger > 0.5
+                        )
                 )
         );
 
@@ -144,15 +152,10 @@ public class FullTeleOpLogging extends CommandOpMode {
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new StationaryAimbotFullLaunch()
-        );
-
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
 
-        robotLogging.init();
     }
 
     @Override
@@ -221,15 +224,15 @@ public class FullTeleOpLogging extends CommandOpMode {
         }
 
         robot.profiler.end("Swerve Drive");
-        robotLogging.log();
+
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        if (PROBLEMATIC_TELEMETRY) {
-            robot.profiler.start("High TelemetryData");
+//        telemetryData.addData("Turret Vel", robot.turret.getVelocity());
 
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-            telemetryData.addData("Robot Pose", robot.drive.getPose());
+        if (PROBLEMATIC_TELEMETRY) {
+            robot.profiler.start("TelemetryData");
+
             telemetryData.addData("Turret Position", robot.turret.getPosition());
             telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
             telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
@@ -275,7 +278,6 @@ public class FullTeleOpLogging extends CommandOpMode {
 
     @Override
     public void end() {
-        robotLogging.deinit();
         Constants.END_POSE = robot.drive.getPose();
         robot.exportProfiler(robot.file);
         telemetryData.update();

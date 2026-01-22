@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.tuning.sensor;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -14,9 +15,9 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.Arrays;
@@ -38,6 +39,7 @@ public class CameraAngle extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -96,7 +98,7 @@ public class CameraAngle extends CommandOpMode {
                     }
                     telemetryData.addData("offset", offset);
                     telemetryData.addData("adjusted goal", adjustedGoal);
-                    double globalHeadingTarget = Turret.posesToAngle(lastKnownPose, robot.turret.adjustedGoalPose(lastKnownPose));
+                    double globalHeadingTarget = Turret.posesToAngle(lastKnownPose, robot.turret.adjustedGoalPose());
                     telemetryData.addData("globalHeadingTarget", globalHeadingTarget);
                     double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(globalHeadingTarget);
                     telemetryData.addData("errorsDriveTurret", Arrays.toString(errorsDriveTurret));
@@ -107,7 +109,7 @@ public class CameraAngle extends CommandOpMode {
                 telemetryData.addData("bot pose", lastKnownPose);
                 double distance = Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch;
                 telemetryData.addData("Distance (m)", distance);
-                telemetryData.addData("Launcher Math Values", Arrays.toString(Launcher.distanceToLauncherValues(distance)));
+                telemetryData.addData("Launcher Math Values", Arrays.toString(MathFunctions.distanceToLauncherValues(distance)));
             } else {
                 telemetryData.addData("Median Wall Angle", "medianWallAngle is Empty");
             }

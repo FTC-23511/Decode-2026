@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 //@Config
 @Disabled
-//@TeleOp
+//@TeleOp(group = "TeleOp")
 public class ExampleTeleOp extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;

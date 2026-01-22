@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commandbase.commands;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -36,21 +37,21 @@ public class ClearLaunch extends CommandBase {
     @Override
     public void initialize() {
         if (robot.readyToLaunch) {
-//            robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, robot.turret.getPosition());
-            robot.launcher.setRamp(true);
             robot.launcher.setActiveControl(true);
-            robot.intake.setIntake(Intake.MotorState.TRANSFER);
-            robot.intake.setPivot(Intake.PivotState.TRANSFER);
         }
+        robot.launcher.setRamp(true);
+        robot.turret.setTurret(Turret.TurretState.OFF, 0);
+
         timer.reset();
     }
 
     @Override
     public void execute() {
-        if (preciseShots && !robot.launcher.flywheelReady()) {
-            robot.intake.setIntake(Intake.MotorState.STOP);
-        } else {
+//        RobotLog.ww("ClearLaunch", "Running");
+        if (!preciseShots || robot.launcher.launchValid()) {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
+        } else {
+            robot.intake.setIntake(Intake.MotorState.STOP);
         }
     }
 
@@ -58,18 +59,20 @@ public class ClearLaunch extends CommandBase {
     public void end(boolean interrupted) {
         if (Constants.OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
             robot.intake.setIntake(Intake.MotorState.STOP);
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
         } else {
             // TODO: Add distance sensor checking for auto retry command
         }
 
+//        RobotLog.ww("ClearLaunch done, interrupted", String.valueOf(interrupted));
+
         robot.launcher.setRamp(false);
-        robot.turret.setTurret(Turret.TurretState.OFF, 0);
         robot.launcher.setActiveControl(false);
-        robot.readyToLaunch = false;
+        robot.readyToLaunch = true;
     }
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 1567); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 1467); // TODO: replace with real end condition of the command
     }
 }

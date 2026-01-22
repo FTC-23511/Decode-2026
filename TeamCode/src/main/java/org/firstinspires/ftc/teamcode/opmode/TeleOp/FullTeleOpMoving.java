@@ -26,19 +26,15 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.commands.MovingAim;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.globals.SolverLogger;
-import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-
-@TeleOp(name = "FullTeleOpWithLogging", group = "TeleOp")
-public class FullTeleOpLogging extends CommandOpMode {
-    SolverLogger robotLogging = new SolverLogger("FullTeleopLogging.log");
+@TeleOp(name = "FullTeleOpMoving", group = "TeleOp")
+public class FullTeleOpMoving extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -74,8 +70,12 @@ public class FullTeleOpLogging extends CommandOpMode {
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 64.75, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 64.75, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 )
         );
@@ -115,20 +115,16 @@ public class FullTeleOpLogging extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new ConditionalCommand(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                                new InstantCommand(() -> robot.launcher.setRamp(true)),
-                                new ClearLaunch(false)
-                        ),
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> robot.readyToLaunch = true),
-                                new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                                new InstantCommand(() -> robot.launcher.setRamp(true)),
-                                new ClearLaunch(true)
-                        ),
-                        () -> gamepad1.left_trigger > 0.5
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.readyToLaunch = true),
+                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)),
+
+                        new ConditionalCommand(
+                            new ClearLaunch(false),
+                            new ClearLaunch(true),
+                            () -> gamepad1.left_trigger > 0.5
+                        )
                 )
         );
 
@@ -145,20 +141,23 @@ public class FullTeleOpLogging extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new StationaryAimbotFullLaunch()
+                new MovingAim()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
 
-        robotLogging.init();
+        operator.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
+                new MovingAim()
+        );
     }
 
     @Override
     public void initialize_loop() {
         robot.drive.setPose(END_POSE);
         telemetryData.addData("END_POSE", END_POSE);
+        telemetryData.addData("TURRET_SYNCED", TURRET_SYNCED);
         telemetryData.update();
     }
 
@@ -221,15 +220,15 @@ public class FullTeleOpLogging extends CommandOpMode {
         }
 
         robot.profiler.end("Swerve Drive");
-        robotLogging.log();
+
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        if (PROBLEMATIC_TELEMETRY) {
-            robot.profiler.start("High TelemetryData");
+//        telemetryData.addData("Turret Vel", robot.turret.getVelocity());
 
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-            telemetryData.addData("Robot Pose", robot.drive.getPose());
+        if (PROBLEMATIC_TELEMETRY) {
+            robot.profiler.start("TelemetryData");
+
             telemetryData.addData("Turret Position", robot.turret.getPosition());
             telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
             telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
@@ -242,6 +241,8 @@ public class FullTeleOpLogging extends CommandOpMode {
             telemetryData.addData("atTarget", robot.drive.follower.atTarget());
             telemetryData.addData("Heading", robot.drive.getPose().getHeading());
             telemetryData.addData("Robot Pose", robot.drive.getPose());
+            telemetryData.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
+            telemetryData.addData("Zone Tolerance", ZONE_TOLERANCE);
 
             telemetryData.addData("Turret State", Turret.turretState);
             telemetryData.addData("Turret Target", robot.turret.getTarget());
@@ -275,7 +276,6 @@ public class FullTeleOpLogging extends CommandOpMode {
 
     @Override
     public void end() {
-        robotLogging.deinit();
         Constants.END_POSE = robot.drive.getPose();
         robot.exportProfiler(robot.file);
         telemetryData.update();

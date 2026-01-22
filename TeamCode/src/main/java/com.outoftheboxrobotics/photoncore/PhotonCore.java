@@ -69,7 +69,7 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
 
     public static class ExperimentalParameters{
         private final AtomicBoolean singlethreadedOptimized = new AtomicBoolean(true);
-        private final AtomicInteger maximumParallelCommands = new AtomicInteger(4);
+        private final AtomicInteger maximumParallelCommands = new AtomicInteger(8);
 
         public void setSinglethreadedOptimized(boolean state){
             this.singlethreadedOptimized.set(state);
@@ -174,11 +174,13 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
     }
 
     protected static boolean shouldParallelize(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand ||
+                command instanceof LynxSetServoPulseWidthCommand);
     }
 
     protected static boolean shouldAckImmediately(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand ||
+                command instanceof LynxSetServoPulseWidthCommand);
     }
 
     private boolean isSimilar(LynxRespondable respondable1, LynxRespondable respondable2){

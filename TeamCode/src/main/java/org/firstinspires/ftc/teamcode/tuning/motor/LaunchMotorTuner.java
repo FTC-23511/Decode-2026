@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.tuning.motor;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_SERVO_POS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -28,6 +32,8 @@ public class LaunchMotorTuner extends CommandOpMode {
     public static double POS_TOLERANCE = 0;
 
     private double motorVel = 0;
+    private double LEFT_MOTOR_POWER = 0;
+    private double RIGHT_MOTOR_POWER = 0;
 
     private static final PIDFController launcherPIDF = new PIDFController(P, I, D, F);
 
@@ -42,9 +48,12 @@ public class LaunchMotorTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         leftMotor = hardwareMap.get(DcMotorEx.class, "leftLaunchMotor");
         rightMotor = hardwareMap.get(DcMotorEx.class, "rightLaunchMotor");
+
+        robot.launcher.setHood(MAX_HOOD_ANGLE);
 
         launcherPIDF.setTolerance(POS_TOLERANCE, 0);
 
@@ -74,7 +83,13 @@ public class LaunchMotorTuner extends CommandOpMode {
 
         double power = launcherPIDF.calculate(motorVel, TARGET_VEL);
 
-        robot.launchMotors.set(power);
+        if (LEFT_MOTOR_POWER != 0) {
+            leftMotor.setPower(LEFT_MOTOR_POWER);
+        } else if (RIGHT_MOTOR_POWER != 0) {
+            rightMotor.setPower(RIGHT_MOTOR_POWER);
+        } else {
+            robot.launchMotors.set(power);
+        }
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();

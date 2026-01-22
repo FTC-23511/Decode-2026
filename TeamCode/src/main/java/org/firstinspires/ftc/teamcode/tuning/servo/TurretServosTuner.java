@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode.tuning.servo;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -17,17 +19,11 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 @Config
 @TeleOp(name = "TurretServosTuner", group = "Servo")
 public class TurretServosTuner extends CommandOpMode {
-    public static double P = 0.00;
-    public static double I = 0;
-    public static double D = 0.000;
-    public static double F = 0.000;
-    public static double MIN_OUTPUT = 0.15;
+    public GamepadEx driver;
+    public GamepadEx operator;
 
     public static double TARGET_POS = 0.0;
-    public static double POS_TOLERANCE = 0.03;
-    public static double MIN_INTEGRAL = 0.0;
-    public static double MAX_INTEGRAL = 1.0;
-
+    public static double TARGET_VEL = 0.0;
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public ElapsedTime timer;
     private final Robot robot = Robot.getInstance();
@@ -36,57 +32,73 @@ public class TurretServosTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
-        Turret.turretState = Turret.TurretState.OFF;
+        Constants.TESTING_OP_MODE = true;
+        Turret.turretState = Turret.TurretState.GOAL_LOCK_CONTROL;
 
         // Resets the command scheduler
         super.reset();
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TARGET_POS))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> robot.turret.resetTurretEncoder())
+        );
     }
 
     @Override
     public void run() {
         if (timer == null) {
-            Turret.turretState = Turret.TurretState.OFF;
+            robot.initHasMovement();
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
             timer = new ElapsedTime();
         }
-        Turret.turretState = Turret.TurretState.OFF;
-        double servoPos = robot.turret.getPosition();
+        robot.turret.updateCoefficients(); // this internally updates all the coefficients, do not remove
 
-        robot.turret.turretController.setPIDF(P, I, D, F);
-        robot.turret.turretController.setTolerance(POS_TOLERANCE);
-        robot.turret.turretController.setMinOutput(MIN_OUTPUT);
-        robot.turret.turretController.integrationControl.setIntegrationBounds(MIN_INTEGRAL, MAX_INTEGRAL);
-
-        double power = robot.turret.turretController.calculate(servoPos, TARGET_POS);
-
-        if (robot.turret.turretController.atSetPoint()) {
-            robot.turretServos.set(0);
-            robot.turret.turretController.clearTotalError();
-        } else {
-            robot.turretServos.set(power);
-        }
+        // update pos and vel targets
+        robot.turret.turretController.setSetPoint(TARGET_POS);
+        Turret.targetVel = TARGET_VEL;
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Actual Pos", servoPos);
+        telemetryData.addData("Raw Pos", robot.turretEncoder.getPosition());
+        telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
+
+        telemetryData.addData("Actual Pos", robot.turret.getPosition());
         telemetryData.addData("Target Pos", TARGET_POS);
 
-        telemetryData.addData("Set Power", power);
+        telemetryData.addData("Target Vel", TARGET_VEL);
+        telemetryData.addData("Unfiltered Vel", -robot.turret.turretController.getVelocityError()); // TODO: check if this is actually equivalent to unfiltered vel
+
         telemetryData.addData("Get Power", robot.turretServos.getSpeeds().toString());
+        telemetryData.addData("atSetPoint", robot.turret.turretController.atSetPoint());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
     }
     
-    @Override
-    public void end() {
-        Log.v("P", String.valueOf(P));
-        Log.v("I", String.valueOf(I));
-        Log.v("D", String.valueOf(D));
-        Log.v("F", String.valueOf(F));
-        Log.v("posTolerance", String.valueOf(POS_TOLERANCE));
-    }
+//    @Override
+//    public void end() {
+//        Log.v("P", String.valueOf(P));
+//        Log.v("I", String.valueOf(I));
+//        Log.v("D", String.valueOf(D));
+//        Log.v("F", String.valueOf(F));
+//        Log.v("posTolerance", String.valueOf(POS_TOLERANCE));
+//    }
 }

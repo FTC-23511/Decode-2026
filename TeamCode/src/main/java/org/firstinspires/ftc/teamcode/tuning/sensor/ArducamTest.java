@@ -70,7 +70,7 @@ public class ArducamTest extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.TX_CONTROL, 0))
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0))
         );
     }
 
@@ -110,7 +110,7 @@ public class ArducamTest extends CommandOpMode {
 
     @Override
     public void run() {
-        if (!Turret.turretState.equals(Turret.TurretState.TX_CONTROL)) {
+        if (Turret.turretState.equals(Turret.TurretState.GOAL_LOCK_CONTROL)) {
             robot.camera.updateCameraResult(3);
             robot.camera.writeCameraTelemetry(telemetry);
         }

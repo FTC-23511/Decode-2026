@@ -7,23 +7,34 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveDrivetrain;
+import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.p2p.P2PController;
+import com.skeletonarmy.marrow.zones.Point;
+import com.skeletonarmy.marrow.zones.PolygonZone;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
-    public static boolean unsureXY = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
+    public static double ANGLE_OFFSET = 0.0;
+
+    private static final PolygonZone bigLaunchZone = new PolygonZone(new Point(72, 72), new Point(0, 0), new Point(-72, 72));
+    private static final PolygonZone smallLaunchZone = new PolygonZone(new Point(-24, -72), new Point(0, -48), new Point(24, -72));
+    private static final PolygonZone robotZone = new PolygonZone(14.5, 17.5);
 
     public Drive() {
         swerve = new CoaxialSwerveDrivetrain(
@@ -53,6 +64,11 @@ public class Drive extends SubsystemBase {
                 XY_TOLERANCE,
                 HEADING_TOLERANCE
         );
+//        .setSlewRateLimiters(
+//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
+//                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
+//        );
 
         timer = new ElapsedTime();
 
@@ -61,8 +77,24 @@ public class Drive extends SubsystemBase {
         }
     }
 
+    public void init() {
+        follower.setTarget(END_POSE);
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
+            setPose(END_POSE);
+        }
+        ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
+    }
+
     public Pose2d getPose() {
-        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
+        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
+    }
+
+    public ChassisSpeeds getVelocity() {
+        return new ChassisSpeeds(
+                robot.pinpoint.getVelX(DistanceUnit.INCH),
+                robot.pinpoint.getVelY(DistanceUnit.INCH),
+                robot.pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS)
+        );
     }
 
     public void setPose(Pose2d pose) {
@@ -79,19 +111,23 @@ public class Drive extends SubsystemBase {
         );
     }
 
+    public static boolean robotInZone(Pose2d robotPose) {
+        robotZone.setPosition(robotPose.getX(), robotPose.getY());
+        robotZone.setRotation(robotPose.getHeading());
+
+        return robotZone.distanceTo(bigLaunchZone) <= Math.max(0, ZONE_TOLERANCE)
+            || robotZone.distanceTo(smallLaunchZone) <= Math.max(0, ZONE_TOLERANCE);
+    }
+
     @Override
     public void periodic() {
 //        swerve.update(); // Not needed as we are using updateWithTargetVelocity() in the opModes
+        robot.profiler.start("Drive Update");
         if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : PINPOINT_TELEOP_POLLING_RATE))) {
             robot.pinpoint.update();
+            timer.reset();
         }
+        robot.profiler.end("Drive Update");
     }
 
-    public void init() {
-        follower.setTarget(END_POSE);
-        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
-            setPose(END_POSE);
-            unsureXY = true;
-        }
-    }
 }

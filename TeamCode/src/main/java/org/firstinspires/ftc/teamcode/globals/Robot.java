@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
-import com.seattlesolvers.solverslib.hardware.SensorDigitalDevice;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
@@ -60,7 +59,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     private double cachedVoltage;
     private ElapsedTime voltageTimer;
 
-    public boolean readyToLaunch = false;
+    public boolean readyToLaunch = true;
 
     public MotorEx FRmotor;
     public MotorEx FLmotor;
@@ -78,9 +77,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx BRswervo;
 
     public CRServoGroup turretServos;
-    public AbsoluteAnalogEncoder turretEncoder;
+    public Motor.Encoder turretEncoder;
+    public AbsoluteAnalogEncoder analogTurretEncoder;
 
-    public ServoEx intakePivotServo;
     public ServoEx hoodServo;
     public ServoEx rampServo;
 
@@ -95,8 +94,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Turret turret;
     public Camera camera;
 
-    public SensorDigitalDevice frontDistanceSensor;
-    public SensorDigitalDevice backDistanceSensor;
+//    public SensorDigitalDevice frontDistanceSensor;
+//    public SensorDigitalDevice backDistanceSensor;
     public AnalogInput distanceSensor;
 
     public void init(HardwareMap hwMap) {
@@ -145,16 +144,16 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         launchMotors = new MotorGroup(
                 new MotorEx(hwMap, "leftLaunchMotor")
-                        .setCachingTolerance(0.01),
+                        .setCachingTolerance(0.01)
+                        .setInverted(true),
                 new MotorEx(hwMap, "rightLaunchMotor")
                         .setCachingTolerance(0.01)
-                        .setInverted(true)
         );
 
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new Motor(hwMap, "leftLaunchMotor").encoder;
+        launchEncoder = new Motor(hwMap, "FL").encoder;
         launchEncoder.setDirection(Motor.Direction.REVERSE);
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
@@ -172,43 +171,46 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         turretServos = new CRServoGroup(
                 new CRServoEx(hwMap, "leftTurretServo")
-                        .setCachingTolerance(0.01)
+                        .setCachingTolerance(0.001)
                         .setRunMode(CRServoEx.RunMode.RawPower),
                 new CRServoEx(hwMap, "rightTurretServo")
-                        .setCachingTolerance(0.01)
+                        .setCachingTolerance(0.001)
                         .setRunMode(CRServoEx.RunMode.RawPower)
         ).setInverted(true);
 
-        turretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
+        analogTurretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
 
-        intakePivotServo = new ServoEx(hwMap, "intakePivotServo")
-                .setInverted(true)
-                .setCachingTolerance(0.01);
+        RobotLog.aa("VERY First Voltage", String.valueOf(analogTurretEncoder.getVoltage()));
+
+        turretEncoder = new Motor(hwMap, "BL").encoder
+                .setDirection(Motor.Direction.FORWARD);
+        turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
+
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
                 .setInverted(false);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
-                .setOffsets(-76.32, 152.62, DistanceUnit.MM)
+                .setOffsets(-76.32, 152.50, DistanceUnit.MM)
                 .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
                 .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
                 .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.CRC)
                 .resetPosAndIMU()
                 .setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS))
-                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION);
+                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION, GoBildaPinpointDriver.Register.X_VELOCITY, GoBildaPinpointDriver.Register.Y_VELOCITY, GoBildaPinpointDriver.Register.H_VELOCITY);
 
 //        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
 //        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
         distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 
-        limelight = hwMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(250);
-        limelight.pipelineSwitch(4);
-        limelight.start();
+//        limelight = hwMap.get(Limelight3A.class, "limelight");
+//        limelight.setPollRateHz(250);
+//        limelight.pipelineSwitch(4);
+//        limelight.start();
 
         // Subsystems
         drive = new Drive();
@@ -216,8 +218,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launcher = new Launcher();
         turret = new Turret();
 
-        // vision
-        camera = new Camera(hwMap);
+        // Camera for vision
+//        camera = new Camera(hwMap);
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
@@ -233,7 +235,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //            }
 //        }
 
-        register(drive, intake, launcher, turret);
+//        register(drive, intake, launcher, turret); // not needed bc SubsystemBase registers it anyways 💀
 
         if (OP_MODE_TYPE.equals(OpModeType.AUTO)) {
             initHasMovement();
@@ -245,7 +247,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intake.init();
         launcher.init();
         turret.init();
-        camera.initHasMovement();
+//        camera.initHasMovement();
     }
     
     public double getVoltage() {
@@ -292,7 +294,11 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public void updateLoop(TelemetryData telemetryData) {
         CommandScheduler.getInstance().run();
-        telemetryData.update();
+
+        if (telemetryData != null) {
+            telemetryData.update();
+        }
+
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
