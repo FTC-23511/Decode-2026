@@ -22,6 +22,7 @@ import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
+import com.seattlesolvers.solverslib.hardware.servos.ServoExGroup;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -76,7 +77,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx BLswervo;
     public CRServoEx BRswervo;
 
-    public CRServoGroup turretServos;
+    public ServoExGroup turretServos;
     public Motor.Encoder turretEncoder;
     public AbsoluteAnalogEncoder analogTurretEncoder;
 
@@ -169,14 +170,15 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
 
-        turretServos = new CRServoGroup(
-                new CRServoEx(hwMap, "leftTurretServo")
+        turretServos = new ServoExGroup(
+                new ServoEx(hwMap, "leftTurretServo")
+                        .setCachingTolerance(0.001),
+                new ServoEx(hwMap, "rightTurretServo")
                         .setCachingTolerance(0.001)
-                        .setRunMode(CRServoEx.RunMode.RawPower),
-                new CRServoEx(hwMap, "rightTurretServo")
-                        .setCachingTolerance(0.001)
-                        .setRunMode(CRServoEx.RunMode.RawPower)
+
         ).setInverted(true);
+
+        turretServos.set(0.5);
 
         analogTurretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)

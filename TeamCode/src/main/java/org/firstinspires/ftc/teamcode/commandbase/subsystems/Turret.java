@@ -166,8 +166,7 @@ public class Turret extends SubsystemBase {
                     robot.turretServos.set(0);
                     break;
                 }
-
-                robot.profiler.start("Turret Read");
+                robot.profiler.end("Turret Write");
                 if (TESTING_OP_MODE) { // let the user "hack" the mode and take over what the turret is actually doing
                     // assume turretController setpoint has been set and targetVel has also been set
                 } else {
@@ -175,43 +174,9 @@ public class Turret extends SubsystemBase {
                     double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
                     double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
 
-                    turretController.setSetPoint(Range.clip(setPoint, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
-                    targetVel = -robot.drive.swerve.getTargetVelocity().omegaRadiansPerSecond;
+                    robot.turretServos.set(Range.clip(setPoint, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
                 }
 
-                double distance = GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch;
-                turretController.setTolerance(TURRET_TOLERANCE_SCALING(distance));
-
-                if (Math.abs(turretController.getPositionError()) > TURRET_THRESHOLD) {
-                    turretController.setMaxOutput(TURRET_LARGE_MAX_OUTPUT);
-                    turretController.setCoefficients(TURRET_LARGE_PIDF_COEFFICIENTS);
-                }
-                else {
-                    turretController.setCoefficients(TURRET_SMALL_PIDF_COEFFICIENTS);
-                    turretController.setMaxOutput(TURRET_SMALL_MAX_OUTPUT);
-                }
-
-                robot.profiler.start("tr1");
-
-                power = turretController.calculate(getPosition()); // PIF positional control output
-                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
-
-                if (turretController.atSetPoint()) {
-                    power = 0;
-                }
-
-                power += targetVel * TURRET_VEL_FF * (DEFAULT_VOLTAGE / robot.getVoltage()); // velocity feedforward output
-
-                robot.profiler.end("tr1");
-                robot.profiler.end("Turret Read");
-
-                robot.profiler.start("Turret Write");
-                if ((getPosition() >= MAX_TURRET_ANGLE || getPosition() <= MIN_TURRET_ANGLE) && (Math.signum(power) == Math.signum(getPosition()))) {
-                    // don't push the turret even further in that direction if it is already past the hardware limits
-                    robot.turretServos.set(0);
-                } else {
-                    robot.turretServos.set(power);
-                }
                 robot.profiler.end("Turret Write");
                 break;
 

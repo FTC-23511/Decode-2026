@@ -86,7 +86,6 @@ public class TurretServosTuner extends CommandOpMode {
         telemetryData.addData("Target Vel", TARGET_VEL);
         telemetryData.addData("Unfiltered Vel", -robot.turret.turretController.getVelocityError()); // TODO: check if this is actually equivalent to unfiltered vel
 
-        telemetryData.addData("Get Power", robot.turretServos.getSpeeds().toString());
         telemetryData.addData("atSetPoint", robot.turret.turretController.atSetPoint());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

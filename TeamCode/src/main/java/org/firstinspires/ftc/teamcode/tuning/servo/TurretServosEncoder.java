@@ -89,7 +89,6 @@ public class TurretServosEncoder extends CommandOpMode {
         telemetryData.addData("Target Pos", servoPos);
 
         telemetryData.addData("Set Power", servoPower);
-        telemetryData.addData("Get Power", robot.turretServos.getSpeeds().toString());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

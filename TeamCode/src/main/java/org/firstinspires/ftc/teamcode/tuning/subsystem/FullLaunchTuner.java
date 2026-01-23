@@ -91,7 +91,6 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryData.addData("Turret Encoder Pos", robot.turret.getPosition());
         telemetryData.addData("Turret Pos 1", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 //        telemetryData.addData("Turret Pos 2", MathUtils.normalizeRadians(robot.turretEncoder2.getCurrentPosition(), false));
-        telemetryData.addData("Turret Power", robot.turretServos.getRawPower());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
