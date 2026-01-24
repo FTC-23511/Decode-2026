@@ -97,6 +97,10 @@ public class Turret extends SubsystemBase {
         switch (turretState) {
             case ANGLE_CONTROL:
                 setTurretPos(value);
+            case GOAL_LOCK_CONTROL:
+                if (TESTING_OP_MODE) {
+                    setTurretPos(value);
+                }
         }
 
         Turret.turretState = turretState;
@@ -108,8 +112,7 @@ public class Turret extends SubsystemBase {
             value = MathFunctions.convertRadianToServoPos(value);
         }
 
-        value = Range.clip(value + TURRET_SERVO_OFFSET, 0, 1);
-//        value = Range.clip(value + TURRET_SERVO_OFFSET, MathFunctions.convertRadianToServoPos(MIN_TURRET_ANGLE), MathFunctions.convertRadianToServoPos(MAX_TURRET_ANGLE));
+        value = Range.clip(value + TURRET_SERVO_OFFSET, MathFunctions.convertRadianToServoPos(MIN_TURRET_ANGLE), MathFunctions.convertRadianToServoPos(MAX_TURRET_ANGLE));
         robot.turretServos.set(value);
     }
 

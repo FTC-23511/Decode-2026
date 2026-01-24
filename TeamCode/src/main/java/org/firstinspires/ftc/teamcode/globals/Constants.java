@@ -58,7 +58,7 @@ public class Constants {
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
-    public static double FR_ENCODER_OFFSET = 3.602; // Radians
+    public static double FR_ENCODER_OFFSET = 4.002; // Radians
     public static double FL_ENCODER_OFFSET = 3.753; // Radians
     public static double BL_ENCODER_OFFSET = 2.0; // Radians
     public static double BR_ENCODER_OFFSET = 1.12; // Radians
@@ -127,7 +127,7 @@ public class Constants {
     public static double TURRET_MIN_OUTPUT = 0.00; // Power
     public static double TURRET_SMALL_MAX_OUTPUT = 0.067; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
-    public static double TURRET_ENCODER_OFFSET = 3.60; // Radians
+    public static double TURRET_ENCODER_OFFSET = 3.28; // Radians
     public static double TURRET_SERVO_OFFSET = 0.03; // Servo Pos
     public static double TURRET_SERVO_ROTATION = 320;
     // Quadrature Encoder CPR = 8192, and gear ratio is 180:32 (32t is encoder)
@@ -142,8 +142,8 @@ public class Constants {
 
     public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static double MAX_TURRET_ANGLE = 2.65; // Radians (only for one side of the turret)
-    public static double MIN_TURRET_ANGLE = -2.55; // Radians (only for one side of the turret)
+    public static double MAX_TURRET_ANGLE = 2.6; // Radians (only for one side of the turret)
+    public static double MIN_TURRET_ANGLE = -2.6; // Radians (only for one side of the turret)
     public static boolean TURRET_SYNCED = false;
     public static double TURRET_SYNC_OFFSET = 0.0;
 
