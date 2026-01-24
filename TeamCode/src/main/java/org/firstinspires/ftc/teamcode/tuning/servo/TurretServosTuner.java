@@ -14,6 +14,7 @@ import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -76,7 +77,9 @@ public class TurretServosTuner extends CommandOpMode {
 
         telemetryData.addData("Encoder Pos", robot.turret.getPosition());
         telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
+
         telemetryData.addData("SDK Get Pos", robot.turretServos.get());
+        telemetryData.addData("SDK Get Pos (Radians)", MathFunctions.convertServoPoseToRadian(robot.turretServos.get()));
 
         telemetryData.addData("Target Angle", TARGET_ANGLE);
 

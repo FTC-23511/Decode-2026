@@ -112,7 +112,7 @@ public class Turret extends SubsystemBase {
             value = MathFunctions.convertRadianToServoPos(value);
         }
 
-        value = Range.clip(value + TURRET_SERVO_OFFSET, MathFunctions.convertRadianToServoPos(MIN_TURRET_ANGLE), MathFunctions.convertRadianToServoPos(MAX_TURRET_ANGLE));
+        value = Range.clip(value, MathFunctions.convertRadianToServoPos(MIN_TURRET_ANGLE), MathFunctions.convertRadianToServoPos(MAX_TURRET_ANGLE)) + TURRET_SERVO_OFFSET;
         robot.turretServos.set(value);
     }
 
@@ -157,7 +157,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        double servoPos = MathUtils.normalizeRadians(MathFunctions.convertServoPoseToRadian(robot.turretServos.get()), false);
+        double servoPos = MathFunctions.convertServoPoseToRadian(robot.turretServos.get() - TURRET_SERVO_OFFSET);
         if (Double.isNaN(servoPos)) {
             return false;
         }
