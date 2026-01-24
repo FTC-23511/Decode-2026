@@ -18,6 +18,7 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ public class Turret extends SubsystemBase {
     private Pose2d turretPose = null;
     public static TurretState turretState = GOAL_LOCK_CONTROL;
     public PIDFController turretController = new PIDFController(TURRET_LARGE_PIDF_COEFFICIENTS);
-    public static double targetVel = 0;
 
 //    public CascadeController turretController = new CascadeController(
 //            new PIDFController(TURRET_LARGE_PIDF_COEFFICIENTS)
@@ -54,19 +54,16 @@ public class Turret extends SubsystemBase {
 //                    )
 //    );
 
-    private final ArrayList<Double> lastVelocities = new ArrayList<>();
     private final ElapsedTime timer = new ElapsedTime();
-    private double vel = 0;
-    private double lastPos = Double.NaN; // for velocity
 
     public Turret() {
-        updateCoefficients();
         goalAdjustmentLUT.createLUT();
     }
 
     public void init() {
         if (!TESTING_OP_MODE) {
             setTurret(GOAL_LOCK_CONTROL, 0);
+            ENABLE_ZONE_CONTROL = true;
         } else {
             setTurret(TurretState.OFF, 0);
             ENABLE_ZONE_CONTROL = false;
@@ -97,25 +94,27 @@ public class Turret extends SubsystemBase {
     }
 
     public void setTurret(TurretState turretState, double value) {
-        updateCoefficients();
         switch (turretState) {
-            case GOAL_LOCK_CONTROL:
-                double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
-                double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
-                turretController.setSetPoint(Range.clip(setPoint, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
-                break;
             case ANGLE_CONTROL:
-                // value = turret target (radians)
-                turretController.setCoefficients(TURRET_LARGE_PIDF_COEFFICIENTS);
-                turretController.setSetPoint(Range.clip(value, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
-                break;
-            case OFF:
-                turretController.setCoefficients(TURRET_LARGE_PIDF_COEFFICIENTS);
-                robot.turretServos.set(0);
-                break;
+                setTurretPos(value);
         }
 
         Turret.turretState = turretState;
+    }
+
+    public void setTurretPos(double value, boolean useRawPos) {
+        if (!useRawPos) {
+            value = Range.clip(value, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE);
+            value = MathFunctions.convertRadianToServoPos(value);
+        }
+
+        value = Range.clip(value + TURRET_SERVO_OFFSET, 0, 1);
+//        value = Range.clip(value + TURRET_SERVO_OFFSET, MathFunctions.convertRadianToServoPos(MIN_TURRET_ANGLE), MathFunctions.convertRadianToServoPos(MAX_TURRET_ANGLE));
+        robot.turretServos.set(value);
+    }
+
+    public void setTurretPos(double angle) {
+        setTurretPos(angle, false);
     }
 
     public double getTarget() {
@@ -129,64 +128,25 @@ public class Turret extends SubsystemBase {
         return MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false);
     }
 
-    @Deprecated
-    public void updateVelocity() {
-        double position = getPosition();
-        if (((Double) lastPos).isNaN()) {
-            lastPos = position;
-        }
-
-        double rawVel = (position - lastPos) / timer.seconds();
-
-        double oldAvgVel = lastVelocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-
-        if (Math.abs(rawVel - oldAvgVel) < TURRET_VEL_FILTER) {
-            lastVelocities.add(rawVel);
-            if (lastVelocities.size() > TURRET_LAST_VEL_ENTRIES) {
-                lastVelocities.remove(0);
-            }
-        }
-
-        vel = lastVelocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-
-        lastPos = position;
-        timer.reset();
-    }
-
-    public double getVelocity() {
-        return vel;
-    }
-
     public void update() {
-        double power;
-
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                if (!Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
-                    robot.turretServos.set(0);
-                    break;
-                }
                 robot.profiler.end("Turret Write");
                 if (TESTING_OP_MODE) { // let the user "hack" the mode and take over what the turret is actually doing
-                    // assume turretController setpoint has been set and targetVel has also been set
-                } else {
+
+                } else if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
                     // otherwise figure out what those pos and vel setpoints need to be
                     double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
                     double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
 
-                    robot.turretServos.set(Range.clip(setPoint, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
+                    setTurretPos(setPoint);
                 }
 
                 robot.profiler.end("Turret Write");
                 break;
 
             case ANGLE_CONTROL:
-                power = turretController.calculate(getPosition()); // PIDF positional control output
-                power += TURRET_OPEN_F * (DEFAULT_VOLTAGE / robot.getVoltage()) * Math.signum(power); // kstatic feedforward output
-
-                robot.turretServos.set(power);
                 break;
-
             case OFF:
                 // We already set turret power to 0, so do nothing in the update
                 break;
@@ -194,7 +154,12 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        return turretController.atSetPoint() && !turretState.equals(OFF);
+        double servoPos = MathUtils.normalizeRadians(MathFunctions.convertServoPoseToRadian(robot.turretServos.get()), false);
+        if (Double.isNaN(servoPos)) {
+            return false;
+        }
+
+        return (Math.abs(getPosition() - servoPos) <= TURRET_POS_TOLERANCE) && !turretState.equals(OFF);
     }
 
     /**

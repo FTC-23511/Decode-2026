@@ -10,6 +10,7 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 public class MathFunctions {
@@ -82,6 +83,22 @@ public class MathFunctions {
         double m = (y2 - y1) / (x2 - x1);
 
         return m * (x - x1) + y1;
+    }
+
+    public static double convertRadianToServoPos(double radians) {
+        if (Double.isNaN(radians)) {
+            return Double.NaN;
+        }
+
+        return (radians + (Math.toRadians(TURRET_SERVO_ROTATION) / 2.0)) / Math.toRadians(TURRET_SERVO_ROTATION);
+    }
+
+    public static double convertServoPoseToRadian(double pos) {
+        if (Double.isNaN(pos)) {
+            return Double.NaN;
+        }
+
+        return (pos * Math.toRadians(TURRET_SERVO_ROTATION)) - (Math.toRadians(TURRET_SERVO_ROTATION) / 2.0);
     }
 
     /**

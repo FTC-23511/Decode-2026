@@ -9,8 +9,8 @@
             <goBILDA5202SeriesMotor name="FR" port="2"/>
             <goBILDA5202SeriesMotor name="BR" port="3"/>
 
-            <ContinuousRotationServo name="leftTurretServo" port="0"/>
-            <ContinuousRotationServo name="rightTurretServo" port="1"/>
+            <Servo name="leftTurretServo" port="0"/>
+            <Servo name="rightTurretServo" port="1"/>
             <ContinuousRotationServo name="BR" port="2"/>
             <ContinuousRotationServo name="FR" port="3"/>
             <ContinuousRotationServo name="BL" port="4"/>

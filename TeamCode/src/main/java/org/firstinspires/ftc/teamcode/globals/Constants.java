@@ -128,6 +128,8 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.067; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.60; // Radians
+    public static double TURRET_SERVO_OFFSET = 0.03; // Servo Pos
+    public static double TURRET_SERVO_ROTATION = 320;
     // Quadrature Encoder CPR = 8192, and gear ratio is 180:32 (32t is encoder)
 //    public static double TURRET_RADIANS_PER_TICK = (2.0 * Math.PI) / (8192 * (180.0 / 32)); // Radians
     public static double TURRET_RADIANS_PER_TICK = (-1.5636687150596416 - 1.576019942982521) / (-7572 - 7753); // Radians/tick
