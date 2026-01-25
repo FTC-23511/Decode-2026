@@ -71,7 +71,7 @@ public class Intake extends SubsystemBase {
         robot.profiler.start("Intake Update");
 
         robot.profiler.start("Distance Sensor");
-//        updateDistanceSensors();
+        updateDistanceSensors();
         robot.profiler.end("Distance Sensor");
 
         switch (motorState) {
@@ -106,17 +106,22 @@ public class Intake extends SubsystemBase {
 
     public double getDistance() {
         double distance;
+        double voltage = robot.distanceSensor.getVoltage();
+
+        if (Double.isNaN(voltage) || voltage == 0.0) {
+            return -1;
+        }
 
         switch (distanceState) {
             case FOV_20:
-                distance = (robot.distanceSensor.getVoltage() * 48.7) - 4.9;
+                distance = (voltage * 48.7) - 4.9;
                 break;
             case FOV_27:
-                distance = (robot.distanceSensor. getVoltage() * 78.1) - 10.2;
+                distance = (voltage * 78.1) - 10.2;
                 break;
             case FOV_15:
             default:
-                distance = (robot.distanceSensor.getVoltage() * 32.5) - 2.6;
+                distance = (voltage * 32.5) - 2.6;
                 break;
         }
 
@@ -125,7 +130,8 @@ public class Intake extends SubsystemBase {
 
     public void updateDistanceSensors() {
         if (motorState.equals(MotorState.FORWARD)) {
-            withinDistance = INTAKE_DISTANCE_THRESHOLD >= getDistance();
+            double distance = getDistance();
+            withinDistance = distance > 0 && INTAKE_DISTANCE_THRESHOLD >= distance;
 
             if (!withinDistance) {
                 distanceTimer.reset();

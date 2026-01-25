@@ -1,4 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
+import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
+import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -147,7 +149,11 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new StationaryAimbotFullLaunch()
+                new ConditionalCommand(
+                        new StationaryAimbotFullLaunch(false),
+                        new StationaryAimbotFullLaunch(true),
+                        () -> gamepad1.left_trigger > 0.5
+                )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
@@ -250,7 +256,7 @@ public class FullTeleOp extends CommandOpMode {
             }
         }
 
-        /* Gamepad rumble when intake is full
+//        /* Gamepad rumble when intake is full
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
@@ -258,7 +264,7 @@ public class FullTeleOp extends CommandOpMode {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
-        */
+//        */
 
         robot.profiler.end("Swerve Drive");
 

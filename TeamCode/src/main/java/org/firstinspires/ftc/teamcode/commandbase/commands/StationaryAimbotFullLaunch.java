@@ -10,11 +10,15 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class StationaryAimbotFullLaunch extends SequentialCommandGroup {
     public StationaryAimbotFullLaunch() {
+        this(true);
+    }
+
+    public StationaryAimbotFullLaunch(boolean preciseShots) {
         final Robot robot = Robot.getInstance();
         addCommands(
                 new FullAim(),
                 new WaitCommand(250),
-                new ClearLaunch(true)
+                new ClearLaunch(preciseShots)
         );
     }
 }

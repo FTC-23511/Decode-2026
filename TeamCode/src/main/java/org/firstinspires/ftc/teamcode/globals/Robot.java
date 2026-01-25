@@ -257,10 +257,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // this is chopped for loop times
         if (voltageTimer == null) {
             cachedVoltage = voltageSensor.getVoltage();
+            voltageTimer = new ElapsedTime();
+            voltageTimer.reset();
         } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
             cachedVoltage = voltageSensor.getVoltage();
         }
-        if (((Double) cachedVoltage).isNaN() || cachedVoltage == 0) {
+        if (Double.isNaN(cachedVoltage) || cachedVoltage <= 0) {
             cachedVoltage = 12;
         }
         return cachedVoltage;

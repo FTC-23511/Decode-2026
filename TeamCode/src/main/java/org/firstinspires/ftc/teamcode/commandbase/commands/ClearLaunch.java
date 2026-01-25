@@ -40,7 +40,6 @@ public class ClearLaunch extends CommandBase {
             robot.launcher.setActiveControl(true);
         }
         robot.launcher.setRamp(true);
-        robot.turret.setTurret(Turret.TurretState.OFF, 0);
 
         timer.reset();
     }
