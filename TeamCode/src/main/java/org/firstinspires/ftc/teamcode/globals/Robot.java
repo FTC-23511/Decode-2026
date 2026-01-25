@@ -101,12 +101,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public AnalogInput distanceSensor;
 
     public void init(HardwareMap hwMap) {
-        File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
-        if (!logsFolder.exists()) logsFolder.mkdirs();
+        File profilerFolder = new File(AppUtil.FIRST_FOLDER, "logs");
+        File logcatFolder = new File(AppUtil.FIRST_FOLDER, "logcat");
+        if (!profilerFolder.exists()) profilerFolder.mkdirs();
+        if (!logcatFolder.exists()) logcatFolder.mkdirs();
 
         long timestamp = System.currentTimeMillis();
-        profilerFile = new File(logsFolder, "profiler-" + timestamp + ".csv");
-        logCatFile = new File(logsFolder, "logcat_" + System.currentTimeMillis() + ".txt");
+        profilerFile = new File(profilerFolder, "profiler-" + timestamp + ".csv");
+        logCatFile = new File(profilerFolder, "logcat_" + timestamp + ".txt");
 
         profiler = Profiler.builder()
                 .factory(new BasicProfilerEntryFactory())
@@ -278,8 +280,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 profiler.export();
                 profiler.shutdown();
             } catch (Exception e) {
-                Log.e("An error occurred", e.toString());
-                Log.e(e.toString(), Arrays.toString(e.getStackTrace()));
+                RobotLog.e("An error occurred", e.toString());
+                RobotLog.e(e.toString(), Arrays.toString(e.getStackTrace()));
             }
 
             try {
