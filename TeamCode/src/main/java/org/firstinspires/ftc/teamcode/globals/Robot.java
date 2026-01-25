@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
-import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
@@ -36,6 +35,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.vision.Camera;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import dev.nullftc.profiler.Profiler;
@@ -50,7 +50,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
 
     public Profiler profiler;
-    public File file;
+    public File profilerFile;
+    public File logCatFile;
 
 //    public LynxModule controlHub;
 //    public LynxModule expansionHub;
@@ -104,11 +105,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         if (!logsFolder.exists()) logsFolder.mkdirs();
 
         long timestamp = System.currentTimeMillis();
-        file = new File(logsFolder, "profiler-" + timestamp + ".csv");
+        profilerFile = new File(logsFolder, "profiler-" + timestamp + ".csv");
+        logCatFile = new File(logsFolder, "logcat_" + System.currentTimeMillis() + ".txt");
 
         profiler = Profiler.builder()
                 .factory(new BasicProfilerEntryFactory())
-                .exporter(new CSVProfilerExporter(file))
+                .exporter(new CSVProfilerExporter(profilerFile))
                 .debugLog(false) // Log EVERYTHING
                 .build();
 
@@ -268,8 +270,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         return cachedVoltage;
     }
 
-    public void exportProfiler(File file) {
-        RobotLog.i("Starting async profiler export to: " + file.getAbsolutePath());
+    public void exportProfiler(File profilerFile, File logCatFile) {
+        RobotLog.i("Starting async profiler and Logcat export to: " + profilerFile.getAbsolutePath());
 
         Thread exportThread = new Thread(() -> {
             try {
@@ -278,6 +280,20 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             } catch (Exception e) {
                 Log.e("An error occurred", e.toString());
                 Log.e(e.toString(), Arrays.toString(e.getStackTrace()));
+            }
+
+            try {
+                Process process = Runtime.getRuntime().exec("logcat -d -f " + logCatFile.getAbsolutePath());
+
+                int exitCode = process.waitFor();
+
+                if (exitCode == 0) {
+                    RobotLog.i("Logcat export successful to " + logCatFile.getAbsolutePath());
+                } else {
+                    RobotLog.w("Logcat export failed with exit code: " + exitCode);
+                }
+            } catch (IOException | InterruptedException e) {
+                RobotLog.i("Logcat export Error", e.getMessage());
             }
         });
 

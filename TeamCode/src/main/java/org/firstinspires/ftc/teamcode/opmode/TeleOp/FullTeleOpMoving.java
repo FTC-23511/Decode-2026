@@ -18,7 +18,6 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
@@ -277,7 +276,7 @@ public class FullTeleOpMoving extends CommandOpMode {
     @Override
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
-        robot.exportProfiler(robot.file);
+        robot.exportProfiler(robot.profilerFile, robot.logCatFile);
         telemetryData.update();
     }
 }

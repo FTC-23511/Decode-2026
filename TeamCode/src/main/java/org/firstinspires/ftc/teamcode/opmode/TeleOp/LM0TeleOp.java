@@ -169,7 +169,7 @@ public class LM0TeleOp extends CommandOpMode {
     @Override
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
-        robot.exportProfiler(robot.file);
+        robot.exportProfiler(robot.profilerFile, robot.logCatFile);
         telemetryData.update();
     }
 }
