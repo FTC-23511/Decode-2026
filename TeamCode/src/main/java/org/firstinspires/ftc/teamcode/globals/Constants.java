@@ -33,6 +33,8 @@ public class Constants {
     public static AllianceColor ALLIANCE_COLOR = AllianceColor.BLUE;
     public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
     public static double DEFAULT_VOLTAGE = 12.67; // Volts
+    public static double MIN_VOLTAGE = 12.00; //volts
+    public static double MAX_VOLTAGE = 15.00; //volts
     public static boolean PROBLEMATIC_TELEMETRY = false;
     public static boolean ALL_TELEMETRY = true;
     public static boolean TESTING_OP_MODE = false;
