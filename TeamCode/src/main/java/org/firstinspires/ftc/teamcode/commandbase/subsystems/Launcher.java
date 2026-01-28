@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -62,7 +63,14 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setLauncher(Pose2d robotPose) {
-        double[] errorsAngleVelocity = MathFunctions.distanceToLauncherValues(GOAL_POSE().minus(robotPose).getTranslation().getNorm() * DistanceUnit.mPerInch);
+        double[] errorsAngleVelocity = MathFunctions.distanceToLauncherValues(
+                MathFunctions.VirtualGoalSolver.solve(
+                        robotPose,
+                        new Vector2d(),
+                        0,
+                        GOAL_POSE()
+                ).effectiveDistance
+        );
         setFlywheel(errorsAngleVelocity[0], true);
         setHood(errorsAngleVelocity[1]);
     }
@@ -107,8 +115,8 @@ public class Launcher extends SubsystemBase {
             if (Double.isNaN(targetLauncherValues[0])) {
                 impossible = true;
             } else {
-                robot.launcher.setFlywheel(targetLauncherValues[0], true);
-                robot.launcher.setHood(targetLauncherValues[1]);
+                setFlywheel(targetLauncherValues[0], true);
+                setHood(targetLauncherValues[1]);
             }
         }
 

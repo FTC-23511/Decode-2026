@@ -257,14 +257,6 @@ public class FullTeleOp extends CommandOpMode {
             }
         }
 
-        if (CommandScheduler.getInstance().isAvailable(robot.intake)) {
-            if (gamepad1.left_trigger > 0.5) {
-                robot.intake.setIntake(Intake.MotorState.FORWARD);
-            } else {
-                robot.intake.setIntake(Intake.MotorState.STOP);
-            }
-        }
-
 //        /* Gamepad rumble when intake is full
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
@@ -315,6 +307,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
             telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
             telemetryData.addData("Flywheel Impossible", robot.launcher.impossible);
+            telemetryData.addData("Launch Valid", robot.launcher.launchValid());
 
             telemetryData.addData("Intake Motor State", Intake.motorState);
             telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
