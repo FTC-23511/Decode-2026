@@ -112,7 +112,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
         long timestamp = System.currentTimeMillis();
         profilerFile = new File(profilerFolder, "profiler-" + timestamp + ".csv");
-        logCatFile = new File(profilerFolder, "logcat_" + timestamp + ".txt");
+        logCatFile = new File(logcatFolder, "logcat_" + timestamp + ".txt");
 
         profiler = Profiler.builder()
                 .factory(new BasicProfilerEntryFactory())

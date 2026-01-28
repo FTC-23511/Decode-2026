@@ -72,7 +72,9 @@ public class Intake extends SubsystemBase {
         robot.profiler.start("Intake Update");
 
         robot.profiler.start("Distance Sensor");
-        updateDistanceSensors();
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            updateDistanceSensors();
+        }
         robot.profiler.end("Distance Sensor");
 
         switch (motorState) {

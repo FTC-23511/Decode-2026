@@ -76,6 +76,7 @@ public class TurretServosTuner extends CommandOpMode {
         timer.reset();
 
         telemetryData.addData("Encoder Pos", robot.turret.getPosition());
+        telemetryData.addData("Encoder Raw Pos", robot.turretEncoder.getPosition());
         telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
         telemetryData.addData("SDK Get Pos", robot.turretServos.get());

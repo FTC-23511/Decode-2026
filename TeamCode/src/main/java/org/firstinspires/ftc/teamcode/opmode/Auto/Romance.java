@@ -40,7 +40,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
 
-@Config
+//@Config
+@Deprecated
 @Autonomous(name = "Romance (close 9 auto)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Romance extends CommandOpMode {
     public ElapsedTime timer;

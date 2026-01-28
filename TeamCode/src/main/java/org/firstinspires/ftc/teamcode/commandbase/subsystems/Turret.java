@@ -97,10 +97,12 @@ public class Turret extends SubsystemBase {
         switch (turretState) {
             case ANGLE_CONTROL:
                 setTurretPos(value);
+                break;
             case GOAL_LOCK_CONTROL:
                 if (TESTING_OP_MODE || OP_MODE_TYPE.equals(OpModeType.AUTO)) {
                     setTurretPos(value);
                 }
+                break;
         }
 
         Turret.turretState = turretState;
@@ -151,7 +153,6 @@ public class Turret extends SubsystemBase {
 
                 robot.profiler.end("Turret Write");
                 break;
-
             case ANGLE_CONTROL:
                 break;
             case OFF:
