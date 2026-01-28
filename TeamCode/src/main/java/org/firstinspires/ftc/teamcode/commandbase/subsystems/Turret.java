@@ -138,11 +138,15 @@ public class Turret extends SubsystemBase {
                 if (TESTING_OP_MODE) { // let the user "hack" the mode and take over what the turret is actually doing
 
                 } else if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
-                    // otherwise figure out what those pos and vel setpoints need to be
-                    double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
-                    double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
+                    double turretTarget = robot.getShotSolution().turretGlobalHeading.minus(robot.drive.getPose().getRotation()).getRadians();
+                    turretTarget += robot.getShotSolution().turretAngularVelocity * TURRET_VEL_LAG;
+                    setTurretPos(turretTarget);
 
-                    setTurretPos(setPoint);
+                    // otherwise figure out what those pos and vel setpoints need to be
+//                    double[] driveTurretErrors = Turret.angleToDriveTurretErrors(posesToAngle(getTurretPose(), adjustedGoalPose()));
+//                    double setPoint = driveTurretErrors[0] + driveTurretErrors[1];
+//
+//                    setTurretPos(setPoint);
                 }
 
                 robot.profiler.end("Turret Write");

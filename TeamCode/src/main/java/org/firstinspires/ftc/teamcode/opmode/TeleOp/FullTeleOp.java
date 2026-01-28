@@ -4,6 +4,7 @@ import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -35,6 +36,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Config
 @TeleOp(name = "FullTeleOp", group = "AAATeleOp")
 public class FullTeleOp extends CommandOpMode {
     public GamepadEx driver;
@@ -46,7 +48,8 @@ public class FullTeleOp extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
-    public static double MAX_OUTPUT = 1;
+    public static double MIN_OUTPUT = 0.3; // As a fraction of the max speed of the robot
+    public static double MAX_OUTPUT = 1; // As a fraction of the max speed of the robot
 
     @Override
     public void initialize() {
@@ -107,9 +110,8 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
                 )
         );
 
@@ -122,28 +124,24 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new UninterruptibleCommand(new CancelCommand())
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.readyToLaunch = true),
                         new InstantCommand(() -> robot.launcher.setActiveControl(true)),
                         new InstantCommand(() -> robot.launcher.setRamp(true)),
-
-                        new ConditionalCommand(
-                            new ClearLaunch(false),
-                            new ClearLaunch(true),
-                            () -> gamepad1.left_trigger > 0.5
-                        )
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
+                        new ClearLaunch(false)
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.readyToLaunch = true),
+                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)),
+                        new ClearLaunch(true)
                 )
         );
 
@@ -153,10 +151,6 @@ public class FullTeleOp extends CommandOpMode {
                         new StationaryAimbotFullLaunch(true),
                         () -> gamepad1.left_trigger > 0.5
                 )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
-                new UninterruptibleCommand(new CancelCommand())
         );
     }
 
@@ -222,8 +216,7 @@ public class FullTeleOp extends CommandOpMode {
                 robot.drive.swerve.updateWithXLock();
             } else {
                 robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
-                double minSpeed = 0.3; // As a fraction of the max speed of the robot
-                double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+                double speedMultiplier = MIN_OUTPUT + (1 - MIN_OUTPUT) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
                 Pose2d robotPose = robot.drive.getPose();
                 Rotation2d robotAngle = robotPose.getRotation();
@@ -252,6 +245,14 @@ public class FullTeleOp extends CommandOpMode {
                                 new Rotation2d(robotAngle.getAngle(AngleUnit.RADIANS) + (ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? Math.PI : 0))
                         )
                 );
+            }
+        }
+
+        if (CommandScheduler.getInstance().isAvailable(robot.intake)) {
+            if (gamepad1.left_trigger > 0.5) {
+                robot.intake.setIntake(Intake.MotorState.FORWARD);
+            } else {
+                robot.intake.setIntake(Intake.MotorState.STOP);
             }
         }
 

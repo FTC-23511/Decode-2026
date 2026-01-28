@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.globals;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -33,8 +34,9 @@ public class Constants {
     public static AllianceColor ALLIANCE_COLOR = AllianceColor.BLUE;
     public static double VOLTAGE_SENSOR_POLLING_RATE = 5; // Hertz
     public static double DEFAULT_VOLTAGE = 12.67; // Volts
-    public static double MIN_VOLTAGE = 12.00; //volts
-    public static double MAX_VOLTAGE = 15.00; //volts
+    public static double MIN_VOLTAGE = 8.00; // Volts
+    public static double MAX_VOLTAGE = 15.00; // Volts
+    public static double BALL_TRANSFER_TIME = 0.15; // Seconds
     public static boolean PROBLEMATIC_TELEMETRY = false;
     public static boolean ALL_TELEMETRY = true;
     public static boolean TESTING_OP_MODE = false;
@@ -50,6 +52,7 @@ public class Constants {
     public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
     public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
+    public static double DRIVE_VEL_PREDICT_ALPHA = 0.5; // Tune between 0 and 1
 
     public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
     public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
@@ -116,7 +119,7 @@ public class Constants {
     // Turret
     public static PIDFCoefficients TURRET_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
     public static PIDFCoefficients TURRET_SMALL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
-    public static double TURRET_VEL_FF = 0.0267; // Coefficient for radians/second
+    public static double TURRET_VEL_LAG = 0.067; // Seconds
     public static double TURRET_OPEN_F = 0.029; // Power
     public static double TURRET_POS_TOLERANCE = 0.0467; // Radians
     public static double TURRET_TOLERANCE_SCALING(double distance) {
@@ -142,7 +145,7 @@ public class Constants {
 //    public static double TURRET_MAX_INTEGRAL = 0.2;
 //    public static double TURRET_INTEGRATION_DECAY = 0.7;
 
-    public static double TURRET_OFF_CENTER_FRONT_BACK = 2.186; // Inches
+    public static Vector2d TURRET_PHYSICAL_OFFSET = new Vector2d(1.95977, 0); // Inches
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
     public static double MAX_TURRET_ANGLE = 2.6; // Radians (only for one side of the turret)
     public static double MIN_TURRET_ANGLE = -2.6; // Radians (only for one side of the turret)

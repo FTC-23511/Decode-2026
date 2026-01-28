@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
@@ -22,6 +24,7 @@ import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import com.seattlesolvers.solverslib.hardware.servos.ServoExGroup;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -99,6 +102,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //    public SensorDigitalDevice frontDistanceSensor;
 //    public SensorDigitalDevice backDistanceSensor;
     public AnalogInput distanceSensor;
+    private MathFunctions.VirtualGoalSolver.ShotSolution shotSolution;
 
     public void init(HardwareMap hwMap) {
         File profilerFolder = new File(AppUtil.FIRST_FOLDER, "logs");
@@ -314,8 +318,49 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
      */
 
+    public MathFunctions.VirtualGoalSolver.ShotSolution getShotSolution() {
+        if (shotSolution == null) {
+            // 1. Get raw data
+            Pose2d robotPose = drive.getPose();
+            Rotation2d robotRotation = robotPose.getRotation();
+
+            // Sensor velocity (Already Field-Centric from Pinpoint/Odometry)
+            ChassisSpeeds robotVelField = drive.getVelocity();
+
+            // Driver intent (Robot-Centric from joysticks, needs conversion)
+            ChassisSpeeds targetVelRobot = drive.swerve.getTargetVelocity();
+            ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(targetVelRobot, robotRotation);
+
+            // 2. Predict Linear Velocity (Interpolate in Inches/Second)
+            // We are finding the "expected" velocity during the ball's transition
+            double predictedVx = robotVelField.vxMetersPerSecond +
+                    (targetVelField.vxMetersPerSecond - robotVelField.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            double predictedVy = robotVelField.vyMetersPerSecond +
+                    (targetVelField.vyMetersPerSecond - robotVelField.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            Vector2d predictedLinearVelIps = new Vector2d(predictedVx, predictedVy);
+
+            // 3. Predict Angular Velocity (Radians/sec)
+            double predictedOmegaRadPerSec = robotVelField.omegaRadiansPerSecond +
+                    (targetVelField.omegaRadiansPerSecond - robotVelField.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            // 4. Solve
+            shotSolution = MathFunctions.VirtualGoalSolver.solve(
+                    robotPose,
+                    predictedLinearVelIps,
+                    predictedOmegaRadPerSec,
+                    GOAL_POSE()
+            );
+        }
+
+        return shotSolution;
+    }
+
     public void updateLoop(TelemetryData telemetryData) {
         CommandScheduler.getInstance().run();
+
+        shotSolution = null;
 
         if (telemetryData != null) {
             telemetryData.update();

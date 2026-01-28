@@ -278,7 +278,7 @@ public class FullTeleOpLogging extends CommandOpMode {
         timer.reset();
 
         double voltage = robot.getVoltage();
-        if(MIN_VOLTAGE>voltage || MAX_VOLTAGE<voltage|| voltage == 0.0 || voltage == NaN){
+        if (MIN_VOLTAGE > voltage || MAX_VOLTAGE < voltage || voltage == 0.0 || Double.isNaN(voltage)){
             robotLogging.log();
         }
 

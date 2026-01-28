@@ -101,6 +101,17 @@ public class Launcher extends SubsystemBase {
 
     private void update() {
         robot.profiler.start("Launcher Update");
+        if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
+            double[] targetLauncherValues = MathFunctions.distanceToLauncherValues(robot.getShotSolution().effectiveDistance);
+
+            if (Double.isNaN(targetLauncherValues[0])) {
+                impossible = true;
+            } else {
+                robot.launcher.setFlywheel(targetLauncherValues[0], true);
+                robot.launcher.setHood(targetLauncherValues[1]);
+            }
+        }
+
         if (activeControl) {
             double flywheelVel = robot.launchEncoder.getCorrectedVelocity();
 //            robot.launcher.flywheelController.setPIDF(
@@ -112,13 +123,11 @@ public class Launcher extends SubsystemBase {
 
             if (flywheelController.atSetPoint()) {
                 impossible = false;
+                setHood(targetHoodAngle);
             } else if (!TESTING_OP_MODE) {
                 // hood compensation
-//                setHood(targetHoodAngle - flywheelController.getPositionError() * HOOD_BS, true);
-//                impossible = true;
-
                 double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
-                        GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm() * DistanceUnit.mPerInch,
+                        robot.getShotSolution().effectiveDistance,
                         inverseLauncherLUT.get(flywheelVel)
                 );
                 if (Double.isNaN(adjustedHoodAngle)) {

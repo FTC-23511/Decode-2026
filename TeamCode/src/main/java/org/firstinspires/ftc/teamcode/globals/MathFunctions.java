@@ -5,8 +5,11 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
@@ -494,5 +497,122 @@ public class MathFunctions {
 
         // Return the valid, constrained solution
         return new double[]{requiredVelocity, finalAngleVert};
+    }
+
+    public static class VirtualGoalSolver {
+
+        public static class ShotSolution {
+            public final Rotation2d turretGlobalHeading; // Field-relative aiming angle
+            public final double effectiveDistance;       // Distance to feed the shooter map
+            public final double turretAngularVelocity;   // Feedforward velocity (rad/s)
+
+            public ShotSolution(Rotation2d heading, double dist, double angVel) {
+                this.turretGlobalHeading = heading;
+                this.effectiveDistance = dist;
+                this.turretAngularVelocity = angVel;
+            }
+        }
+
+        /**
+         * Iteratively solves for the virtual goal to account for robot motion.
+         *
+         * @param robotPose      Current (or Predicted) Field-Centric Pose
+         * @param robotVel       Current Field-Centric Velocity (vx, vy) in m/s
+         * @param robotOmega     Current Robot Angular Velocity (rad/s)
+         * @param goalPose       Field-Centric Goal Pose (we only use X and Y)
+         * @return ShotSolution containing aimed heading and effective distance
+         */
+        /**
+         * Calculates the turret target heading and velocity feedforward.
+         * @param robotPose Current robot field position
+         * @param robotVel Current robot field velocity
+         * @param robotOmega Current robot angular velocity (rad/s)
+         * @param goalPose Goal position
+         * @return ShotSolution containing target heading and feedforward
+         */
+        public static ShotSolution solve(Pose2d robotPose, Vector2d robotVel, double robotOmega, Pose2d goalPose) {
+            double robotHeadingDegrees = robotPose.getRotation().getDegrees();
+            Vector2d turretOffsetField = Constants.TURRET_PHYSICAL_OFFSET.rotateBy(robotHeadingDegrees);
+
+            // 1. Calculate Turret-Base Velocity (Linear + Tangential)
+            double tanVx = -robotOmega * turretOffsetField.getY();
+            double tanVy = robotOmega * turretOffsetField.getX();
+
+            Vector2d turretBaseVel = new Vector2d(
+                    robotVel.getX() + tanVx,
+                    robotVel.getY() + tanVy
+            );
+
+            Vector2d robotPosVec = new Vector2d(robotPose.getX(), robotPose.getY());
+            Vector2d turretPosVec = robotPosVec.plus(turretOffsetField);
+            Vector2d goalVec = new Vector2d(goalPose.getX(), goalPose.getY());
+            Vector2d virtualGoal = goalVec;
+
+            double currentDistInches = goalVec.minus(turretPosVec).magnitude();
+
+            // 2. Iterative Convergence Loop
+            for (int i = 0; i < 5; i++) {
+                double distMeters = currentDistInches * 0.0254;
+                double[] shotParams = distanceToLauncherValues(distMeters);
+
+                double shotVelIps = shotParams[0] * 39.3701;
+                double timeOfFlight = calculateTimeOfFlight(currentDistInches, shotVelIps, shotParams[1]);
+
+                // Total drift = Robot Velocity * (Mechanical Delay + Flight Time)
+                double totalDriftTime = BALL_TRANSFER_TIME + timeOfFlight;
+
+                // Shift the target opposite to our velocity
+                virtualGoal = goalVec.minus(turretBaseVel.scale(totalDriftTime));
+                currentDistInches = virtualGoal.minus(turretPosVec).magnitude();
+            }
+
+            // 3. Final Calculations
+            Vector2d turretToVirtual = virtualGoal.minus(turretPosVec);
+            Rotation2d targetHeading = new Rotation2d(Math.atan2(turretToVirtual.getY(), turretToVirtual.getX()));
+
+            // 4. Feedforward Calculation
+            double distSq = turretToVirtual.magnitude() * turretToVirtual.magnitude();
+            double turretOmegaField = 0.0;
+
+            if (distSq > 0.1) {
+                // Cross product for angular velocity tracking
+                turretOmegaField = (turretBaseVel.getY() * turretToVirtual.getX() - turretBaseVel.getX() * turretToVirtual.getY()) / distSq;
+            }
+
+            // Return relative feedforward (Field Tracking Speed - Robot Rotation Speed)
+            return new ShotSolution(targetHeading, currentDistInches * 0.0254, turretOmegaField - robotOmega);
+        }
+
+        private static double calculateTimeOfFlight(double distance, double velocity, double angleFromVerticalDeg) {
+            double angleRad = Math.toRadians(angleFromVerticalDeg);
+            double horizontalVel = velocity * Math.sin(angleRad);
+
+            // Prevent divide by zero
+            if (Math.abs(horizontalVel) < 0.01) return 0.0;
+
+            return distance / horizontalVel;
+        }
+    }
+
+    /**
+     * Projects the robot's pose forward in time to account for system latency.
+     * * @param currentPose Current Pose from Odometry
+     * @param velocity    Current Field-Centric Velocity Vector
+     * @param omega       Current Angular Velocity (rad/s)
+     * @param latencySec  Latency to compensate for (e.g., 0.05 for 50ms)
+     * @return Predicted Pose2d
+     */
+    public static Pose2d compensateLatency(Pose2d currentPose, Vector2d velocity, double omega, double latencySec) {
+        // 1. Project X and Y
+        double predictedX = currentPose.getX() + (velocity.getX() * latencySec);
+        double predictedY = currentPose.getY() + (velocity.getY() * latencySec);
+
+        // 2. Project Heading (Critical for Turrets!)
+        // We get the current heading in radians, add the rotation that will happen,
+        // and create a new Rotation2d which handles the wrapping (-PI to PI) automatically.
+        double currentHeadingRad = currentPose.getRotation().getRadians();
+        double predictedHeadingRad = currentHeadingRad + (omega * latencySec);
+
+        return new Pose2d(predictedX, predictedY, new Rotation2d(predictedHeadingRad));
     }
 }

@@ -101,16 +101,6 @@ public class Drive extends SubsystemBase {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
     }
 
-    public Pose2d turretPoseToDrivePose(Pose2d turretPose) {
-        return new Pose2d(
-                turretPose.getTranslation()
-                        .plus(new Translation2d(-TURRET_OFF_CENTER_FRONT_BACK, 0)
-                                .rotateBy(new Rotation2d(robot.turret.getPosition()))
-                        ),
-                turretPose.getRotation()
-        );
-    }
-
     public static boolean robotInZone(Pose2d robotPose) {
         robotZone.setPosition(robotPose.getX(), robotPose.getY());
         robotZone.setRotation(robotPose.getHeading());

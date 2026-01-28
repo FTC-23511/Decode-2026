@@ -1,0 +1,44 @@
+<Robot type="FirstInspires-FTC">
+    <!-- Config for 2026 robot -->
+    <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.31" port="0" ipAddress="172.29.0.1" />
+
+    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Control Hub" port="173">
+            <goBILDA5202SeriesMotor name="FL" port="0"/>
+            <goBILDA5202SeriesMotor name="BL" port="1"/>
+            <goBILDA5202SeriesMotor name="FR" port="2"/>
+            <goBILDA5202SeriesMotor name="BR" port="3"/>
+
+            <ContinuousRotationServo name="leftTurretServo" port="0"/>
+            <ContinuousRotationServo name="rightTurretServo" port="1"/>
+            <ContinuousRotationServo name="BR" port="2"/>
+            <Servo name="hoodServo" port="3"/>
+            <ContinuousRotationServo name="BL" port="4"/>
+            <ContinuousRotationServo name="FL" port="5"/>
+
+            <AnalogInput name="BL" port="0"/>
+            <AnalogInput name="FL" port="1"/>
+            <AnalogInput name="BR" port="2"/>
+            <AnalogInput name="FR" port="3"/>
+
+            <goBILDAPinpoint name="pinpoint" port="0" bus="1"/>
+        </LynxModule>
+    </LynxUsbDevice>
+
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2F3UGC" parentModuleAddress="2">
+        <LynxModule name="Expansion Hub 2" port="2">
+            <goBILDA5202SeriesMotor name="rightLaunchMotor" port="0"/>
+            <goBILDA5202SeriesMotor name="frontIntakeMotor" port="1"/>
+            <goBILDA5202SeriesMotor name="leftLaunchMotor" port="2"/>
+            <goBILDA5202SeriesMotor name="backIntakeMotor" port="3"/>
+
+            <AnalogInput name="distanceSensor" port="0"/>
+            <AnalogInput name="turretEncoder2" port="2"/>
+            <AnalogInput name="turretEncoder" port="3"/>
+
+            <ContinuousRotationServo name="FR" port="3"/>
+            <Servo name="rampServo" port="5"/>
+        </LynxModule>
+    </LynxUsbDevice>
+    <Webcam name="Webcam 1" serialNumber="UC762" />
+</Robot>
