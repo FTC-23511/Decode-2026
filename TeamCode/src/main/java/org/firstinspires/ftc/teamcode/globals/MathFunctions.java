@@ -514,15 +514,6 @@ public class MathFunctions {
         }
 
         /**
-         * Iteratively solves for the virtual goal to account for robot motion.
-         *
-         * @param robotPose      Current (or Predicted) Field-Centric Pose
-         * @param robotVel       Current Field-Centric Velocity (vx, vy) in m/s
-         * @param robotOmega     Current Robot Angular Velocity (rad/s)
-         * @param goalPose       Field-Centric Goal Pose (we only use X and Y)
-         * @return ShotSolution containing aimed heading and effective distance
-         */
-        /**
          * Calculates the turret target heading and velocity feedforward.
          * @param robotPose Current robot field position
          * @param robotVel Current robot field velocity
@@ -546,14 +537,32 @@ public class MathFunctions {
             Vector2d robotPosVec = new Vector2d(robotPose.getX(), robotPose.getY());
             Vector2d turretPosVec = robotPosVec.plus(turretOffsetField);
             Vector2d goalVec = new Vector2d(goalPose.getX(), goalPose.getY());
-            Vector2d virtualGoal = goalVec;
 
+            // Start by assuming the target is the real goal
+            Vector2d virtualGoal = goalVec;
             double currentDistInches = goalVec.minus(turretPosVec).magnitude();
 
             // 2. Iterative Convergence Loop
             for (int i = 0; i < 5; i++) {
                 double distMeters = currentDistInches * 0.0254;
                 double[] shotParams = distanceToLauncherValues(distMeters);
+
+                // --- SAFETY CHECK: IMPOSSIBLE SHOT ---
+                // If the lookup table returns NaN (too close/too far), abort prediction.
+                if (Double.isNaN(shotParams[0]) || Double.isNaN(shotParams[1])) {
+                    // Calculate vector to the REAL goal (no lead)
+                    Vector2d turretToRealGoal = goalVec.minus(turretPosVec);
+
+                    // Just face the goal directly
+                    Rotation2d fallbackHeading = new Rotation2d(Math.atan2(turretToRealGoal.getY(), turretToRealGoal.getX()));
+
+                    // Return Safe State:
+                    // Heading: Face Goal
+                    // Distance: Current real distance
+                    // FF: -robotOmega (Cancels out robot rotation so turret stays world-locked)
+                    return new ShotSolution(fallbackHeading, distMeters, -robotOmega);
+                }
+                // -------------------------------------
 
                 double shotVelIps = shotParams[0] * 39.3701;
                 double timeOfFlight = calculateTimeOfFlight(currentDistInches, shotVelIps, shotParams[1]);
@@ -566,7 +575,7 @@ public class MathFunctions {
                 currentDistInches = virtualGoal.minus(turretPosVec).magnitude();
             }
 
-            // 3. Final Calculations
+            // 3. Final Calculations (Only runs if shot was valid)
             Vector2d turretToVirtual = virtualGoal.minus(turretPosVec);
             Rotation2d targetHeading = new Rotation2d(Math.atan2(turretToVirtual.getY(), turretToVirtual.getX()));
 

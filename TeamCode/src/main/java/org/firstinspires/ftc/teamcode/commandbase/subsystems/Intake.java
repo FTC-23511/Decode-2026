@@ -25,6 +25,7 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean intakeJammed = false;
+    public static boolean keepIntakeOn = false;
     private final ElapsedTime intakeTimer;
     public final ElapsedTime distanceTimer;
     public boolean withinDistance = false;

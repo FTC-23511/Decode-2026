@@ -102,14 +102,23 @@ public class FullTeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
         );
 
+        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> Intake.keepIntakeOn = false),
+                        new InstantCommand(() -> robot.launcher.setRamp(false)),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                )
+        );
+
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
+                        new InstantCommand(() -> Intake.keepIntakeOn = true),
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
                         new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
                 )
@@ -123,7 +132,7 @@ public class FullTeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
 
@@ -305,6 +314,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
             telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
             telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
+            telemetryData.addData("Flywheel Impossible", robot.launcher.impossible);
 
             telemetryData.addData("Intake Motor State", Intake.motorState);
             telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);

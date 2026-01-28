@@ -22,7 +22,7 @@ public class Launcher extends SubsystemBase {
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
-    private boolean impossible = true;
+    public boolean impossible = true;
     public static double DISTANCE_OFFSET = 0;
 
     private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   7.2,    10.0); // input: velocity (m/s)
@@ -168,6 +168,8 @@ public class Launcher extends SubsystemBase {
         );
     }
 
+    // use launchValid() instead as it accounts for hood compensation
+    @Deprecated
     public boolean flywheelReady() {
         return activeControl && flywheelController.atSetPoint();
     }
