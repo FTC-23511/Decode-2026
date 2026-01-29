@@ -35,12 +35,18 @@ public class DriveTo extends CommandBase {
             robot.drive.swerve.setMaxSpeed(maxPower);
         }
 
-        robot.drive.swerve.updateWithTargetVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        robot.drive.follower.calculate(robot.drive.getPose()),
-                        robot.drive.getPose().getRotation()
-                )
+        // 1. Get FIELD-RELATIVE speeds (X=Global X, Y=Global Y)
+        ChassisSpeeds fieldSpeeds = robot.drive.follower.calculate(robot.drive.getPose());
+
+        // 2. Convert to ROBOT-RELATIVE speeds (X=Forward, Y=Left)
+        // This requires the current robot heading.
+        ChassisSpeeds robotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                fieldSpeeds,
+                robot.drive.getPose().getRotation()
         );
+
+        // 3. Send to Swerve
+        robot.drive.swerve.updateWithTargetVelocity(robotSpeeds);
     }
 
     @Override

@@ -162,8 +162,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new Motor(hwMap, "FL").encoder;
-        launchEncoder.setDirection(Motor.Direction.REVERSE);
+        launchEncoder = new Motor(hwMap, "FL").encoder.
+                setDirection(Motor.Direction.FORWARD);
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
@@ -195,8 +195,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         RobotLog.aa("VERY First Voltage", String.valueOf(analogTurretEncoder.getVoltage()));
 
         turretEncoder = new Motor(hwMap, "BL").encoder
-                .setDirection(Motor.Direction.FORWARD);
-        turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
+                .setDirection(Motor.Direction.FORWARD)
+                .overrideResetPos((int) TURRET_SYNC_OFFSET);
 
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);

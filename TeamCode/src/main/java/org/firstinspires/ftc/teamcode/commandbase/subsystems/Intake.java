@@ -93,11 +93,11 @@ public class Intake extends SubsystemBase {
             case TRANSFER:
                 break;
             case REVERSE:
-                if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
-                    setIntake(MotorState.FORWARD);
-                    intakeJammed = false;
-                    intakeTimer.reset();
-                }
+//                if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
+//                    setIntake(MotorState.FORWARD);
+//                    intakeJammed = false;
+//                    intakeTimer.reset();
+//                }
                 break;
             case STOP:
                 // No point of setting intakeMotor to 0 again

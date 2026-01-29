@@ -60,7 +60,6 @@ repositories {
 
 dependencies {
     implementation project(':FtcRobotController')
-    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
     // SolversLib
 //    implementation "org.solverslib:core:0.3.3" // core
@@ -76,10 +75,10 @@ dependencies {
 //    implementation "dev.nullftc:Profiler:SNAPSHOT-daa44e3"
 
     // AdvantageScope Lite
-    implementation "page.j5155.AdvantageScope:lite:v26.0.0"
+//    implementation "page.j5155.AdvantageScope:lite:v26.0.0"
 
     // FateWeaver
-    implementation "gay.zharel.fateweaver:ftc:0.3.3"
+//    implementation "gay.zharel.fateweaver:ftc:0.3.3"
 
     //noinspection GradleDependency, could be 0.43 but haven't tested it out yet
     //noinspection NewerVersionAvailable

@@ -58,7 +58,6 @@ public class Drive extends SubsystemBase {
 
         follower = new P2PController(
                 new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
-                new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
                 (OP_MODE_TYPE.equals(OpModeType.TELEOP) ? new PIDFController(TELEOP_HEADING_COEFFICIENTS) : new PIDFController(HEADING_COEFFICIENTS)).setMinOutput(HEADING_MIN_OUTPUT),
                 ANGLE_UNIT,
                 XY_TOLERANCE,

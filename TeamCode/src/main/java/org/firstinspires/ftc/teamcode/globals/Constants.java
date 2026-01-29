@@ -50,7 +50,7 @@ public class Constants {
     public static double WHEEL_BASE = 11.50976; // Inches
     public static double MAX_DRIVE_VELOCITY = 7.75 * 12; // Inches/second
     public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
-    public static double PINPOINT_TELEOP_POLLING_RATE = 10; // Hertz
+    public static double PINPOINT_TELEOP_POLLING_RATE = 100; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
     public static double DRIVE_VEL_PREDICT_ALPHA = 0.5; // Tune between 0 and 1
 
@@ -63,9 +63,9 @@ public class Constants {
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
-    public static double FR_ENCODER_OFFSET = 4.002; // Radians
-    public static double FL_ENCODER_OFFSET = 3.753; // Radians
-    public static double BL_ENCODER_OFFSET = 2.0; // Radians
+    public static double FR_ENCODER_OFFSET = 4.20; // Radians
+    public static double FL_ENCODER_OFFSET = 3.85; // Radians
+    public static double BL_ENCODER_OFFSET = 2.49; // Radians
     public static double BR_ENCODER_OFFSET = 1.12; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
@@ -112,9 +112,9 @@ public class Constants {
     public static double LAUNCHER_MAX_BALL_VELOCITY = 12; // Meters/second // TODO: tune this to potentially be lower
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
-    public static double MIN_HOOD_SERVO_POS = 0.18; // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_HOOD_SERVO_POS = 0.025; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
-    public static double MAX_HOOD_SERVO_POS = 0.82; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_SERVO_POS = 0.67; // Position // MUST MATCH WITH VALUE ABOVE
 
     // Turret
     public static PIDFCoefficients TURRET_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians

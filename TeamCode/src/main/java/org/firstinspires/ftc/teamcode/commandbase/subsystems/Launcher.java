@@ -109,7 +109,7 @@ public class Launcher extends SubsystemBase {
 
     private void update() {
         robot.profiler.start("Launcher Update");
-        if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
+        if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL && !TESTING_OP_MODE) {
             double[] targetLauncherValues = MathFunctions.distanceToLauncherValues(robot.getShotSolution().effectiveDistance);
 
             if (Double.isNaN(targetLauncherValues[0])) {
@@ -168,7 +168,6 @@ public class Launcher extends SubsystemBase {
     private void setHood(double angle, boolean compensation) {
         if (!compensation) {
             targetHoodAngle = angle;
-            impossible = true;
         }
 
         robot.hoodServo.set(

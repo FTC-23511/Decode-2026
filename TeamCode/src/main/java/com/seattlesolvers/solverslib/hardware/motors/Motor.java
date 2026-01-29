@@ -123,8 +123,9 @@ public class Motor implements HardwareDevice {
         /**
          * Sets the encoder position reset position a custom value.
          */
-        public void overrideResetPos(int position) {
+        public Encoder overrideResetPos(int position) {
             resetVal = position;
+            return this;
         }
 
         /**

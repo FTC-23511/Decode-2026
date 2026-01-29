@@ -233,7 +233,7 @@ public class GwiMa extends CommandOpMode {
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD),
                 new ParallelRaceGroup(
-                        new WaitCommand(1670)
+                        new WaitCommand(4670)
 //                                new WaitUntilCommand(() -> robot.intake.transferFull())
                 )
         );
@@ -243,7 +243,7 @@ public class GwiMa extends CommandOpMode {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         new SetIntake(Intake.MotorState.FORWARD),
-                        new DriveTo(pathPoses.get(pathStartingIndex), 0.5).withTimeout(timeout)
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.75).withTimeout(timeout)
                 ),
                 new SetIntake(Intake.MotorState.STOP)
         );
