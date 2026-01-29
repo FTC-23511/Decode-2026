@@ -62,9 +62,10 @@ public class GwiMa extends CommandOpMode {
         pathPoses.add(new Pose2d(-23.536231884057976, 12.637681159420286, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-56.23188405797101, 12.637681159420286, Math.toRadians(0))); // Line 10
         pathPoses.add(new Pose2d(-23.536231884057976, 12.637681159420286, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-58.18083216456287, -10.799812996727443, Math.toRadians(-30))); // Line 12
-        pathPoses.add(new Pose2d(-23.806638616175785, 17.30341280972417, Math.toRadians(-30))); // Line 13
-        pathPoses.add(new Pose2d(-34.02599345488546, 13.122767648433847, Math.toRadians(-45))); // Line 14
+        pathPoses.add(new Pose2d(-36.89428330128899, -6.613518197573654, Math.toRadians(-30))); // Line 12
+        pathPoses.add(new Pose2d(-58.35702160284879, -10.856152512998289, Math.toRadians(-30))); // Line 13
+        pathPoses.add(new Pose2d(-23.806638616175785, 17.30341280972417, Math.toRadians(0))); // Line 14
+        pathPoses.add(new Pose2d(-39.38995054565642, 8.360485268630846, Math.toRadians(0))); // Line 15
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -124,8 +125,9 @@ public class GwiMa extends CommandOpMode {
                         // gate cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        gateIntake(12, 1467),
-                                        pathShoot(13, 1600)
+                                        new DriveTo(pathPoses.get(12), 1267),
+                                        gateIntake(13, 1267),
+                                        pathShoot(14, 1600)
                                 ),
                                 REPEAT_TIMES
                         ),
