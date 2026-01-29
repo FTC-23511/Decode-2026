@@ -20,14 +20,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
-import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
+import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
+import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
@@ -51,21 +53,23 @@ public class GwiMa extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
         pathPoses.add(new Pose2d(-43.24023076923076, 54.670769233076923, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-23.536231884057976, 12.869565217391301, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-22.464000000000002, 12.787199999999999, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-26.550724637681157, -13.492753623188406, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-63.00420289855072, -13.492753623188406, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-33.55072463768116, -13.565217391304344, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-15.65217391304348, 9.623188405797105, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-35.13043478260869, -10.782608695652172, Math.toRadians(-35))); // Line 6
-        pathPoses.add(new Pose2d(-57.31884057971015, -11.782608695652172, Math.toRadians(-35))); // Line 7
-        pathPoses.add(new Pose2d(-35.13043478260869, -10.782608695652172, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-23.536231884057976, 12.637681159420286, Math.toRadians(0))); // Line 9
-        pathPoses.add(new Pose2d(-56.23188405797101, 12.637681159420286, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-23.536231884057976, 12.637681159420286, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-36.89428330128899, -6.613518197573654, Math.toRadians(-30))); // Line 12
-        pathPoses.add(new Pose2d(-58.35702160284879, -10.856152512998289, Math.toRadians(-30))); // Line 13
-        pathPoses.add(new Pose2d(-23.806638616175785, 17.30341280972417, Math.toRadians(0))); // Line 14
-        pathPoses.add(new Pose2d(-39.38995054565642, 8.360485268630846, Math.toRadians(0))); // Line 15
+        pathPoses.add(new Pose2d(-35.13043478260869, -10.782608695652172, Math.toRadians(-27.5))); // Line 6
+        pathPoses.add(new Pose2d(-58.8672109875109, -10.252800000000008, Math.toRadians(-27.5))); // Line 7
+        pathPoses.add(new Pose2d(-58.636799999999994, -15.782400000000006, Math.toRadians(-27.5))); // Line 8
+        pathPoses.add(new Pose2d(-35.13043478260869, -10.782608695652172, Math.toRadians(0))); // Line 9
+        pathPoses.add(new Pose2d(-23.536231884057976, 12.637681159420286, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-56.23188405797101, 12.637681159420286, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-23.615999999999993, 12.787199999999999, Math.toRadians(0))); // Line 12
+        pathPoses.add(new Pose2d(-36.89428330128899, -6.613518197573654, Math.toRadians(-27.5))); // Line 13
+        pathPoses.add(new Pose2d(-58.86741298749122, -10.252800000000008, Math.toRadians(-27.5))); // Line 14
+        pathPoses.add(new Pose2d(-58.636799999999994, -15.782400000000006, Math.toRadians(-27.5))); // Line 15
+        pathPoses.add(new Pose2d(-23.806638616175785, 17.30341280972417, Math.toRadians(0))); // Line 16
+        pathPoses.add(new Pose2d(-39.38995054565642, 8.360485268630846, Math.toRadians(0))); // Line 17
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -102,32 +106,36 @@ public class GwiMa extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // preload
-                        pathShoot(1, 2000),
+                        pathShoot(1, 1600),
 
                         // 2nd spike mark
-                        new DriveTo(pathPoses.get(2)).withTimeout(1267),
+                        new DriveTo(pathPoses.get(2)).withTimeout(1167),
                         pathIntake(3, 1200),
 
-                        new DriveTo(pathPoses.get(4)).withTimeout(1267),
-                        pathShoot(5, 1500),
+                        new DriveTo(pathPoses.get(4)).withTimeout(1067),
+                        pathShoot(5, 1250),
 
                         // gate intake 1
-                        new DriveTo(pathPoses.get(6)).withTimeout(1267),
-                        gateIntake(7, 1267),
+                        new DriveTo(pathPoses.get(6)).withTimeout(1167),
+                        new DriveTo(pathPoses.get(7), 0.67).withTimeout(967),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        gateIntake(8, 967),
 
-                        new DriveTo(pathPoses.get(8)).withTimeout(1267),
-                        pathShoot(9, 1500),
+                        new DriveTo(pathPoses.get(9)).withTimeout(1100),
+                        pathShoot(10, 1400),
 
                         // 1st spike mark
-                        pathIntake(10, 1400),
-                        pathShoot(11, 1600),
+                        pathIntake(11, 1167),
+                        pathShoot(12, 1667),
 
                         // gate cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        new DriveTo(pathPoses.get(12), 1267),
-                                        gateIntake(13, 1267),
-                                        pathShoot(14, 1600)
+                                        new DriveTo(pathPoses.get(13)).withTimeout(1067),
+                                        new DriveTo(pathPoses.get(14), 0.67).withTimeout(1067),
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        gateIntake(15, 967),
+                                        pathShoot(16, 1400)
                                 ),
                                 REPEAT_TIMES
                         ),
@@ -199,9 +207,6 @@ public class GwiMa extends CommandOpMode {
             robot.profiler.end("TelemetryData");
         }
 
-        telemetryData.addData("Swerve Target Vel", robot.drive.swerve.getTargetVelocity());
-        telemetryData.addData("Robot Pose", robot.drive.getPose());
-
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);
@@ -221,12 +226,20 @@ public class GwiMa extends CommandOpMode {
                         new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex)))
                 ),
 
-                new StationaryAimbotFullLaunch().raceWith(
-                        new RepeatCommand(
-                                new InstantCommand(() -> robot.drive.swerve.updateWithXLock())
-                        ),
-                        new WaitCommand(3000)
-                )
+                new ClearLaunch(true).raceWith(
+                        new RunCommand(
+                                () -> {
+                                        robot.drive.swerve.updateWithTargetVelocity(
+                                                ChassisSpeeds.fromFieldRelativeSpeeds(
+                                                        robot.drive.follower.calculate(robot.drive.getPose()),
+                                                        robot.drive.getPose().getRotation()
+                                                )
+                                        );
+                                }
+                        )
+                ),
+
+                new InstantCommand(() -> robot.launcher.setRamp(false))
         );
     }
 
@@ -234,10 +247,7 @@ public class GwiMa extends CommandOpMode {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD),
-                new ParallelRaceGroup(
-                        new WaitCommand(4670)
-//                                new WaitUntilCommand(() -> robot.intake.transferFull())
-                )
+                new WaitCommand(1000)
         );
     }
 
