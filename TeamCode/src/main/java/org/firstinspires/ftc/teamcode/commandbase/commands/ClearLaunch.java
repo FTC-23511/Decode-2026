@@ -36,9 +36,7 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public void initialize() {
-        if (robot.readyToLaunch) {
-            robot.launcher.setActiveControl(true);
-        }
+        robot.launcher.setActiveControl(true);
         robot.launcher.setRamp(true);
 
         timer.reset();
@@ -47,11 +45,17 @@ public class ClearLaunch extends CommandBase {
     @Override
     public void execute() {
 //        RobotLog.ww("ClearLaunch", "Running");
-        if (!preciseShots || robot.launcher.launchValid()) {
-            robot.intake.setIntake(Intake.MotorState.TRANSFER);
-        } else {
+        if (preciseShots && ((int) timer.milliseconds() % 400) > 200) {
             robot.intake.setIntake(Intake.MotorState.STOP);
+        } else {
+            robot.intake.setIntake(Intake.MotorState.TRANSFER);
         }
+
+//        if (!preciseShots || robot.launcher.launchValid()) {
+//            robot.intake.setIntake(Intake.MotorState.TRANSFER);
+//        } else {
+//            robot.intake.setIntake(Intake.MotorState.STOP);
+//        }
     }
 
     @Override
