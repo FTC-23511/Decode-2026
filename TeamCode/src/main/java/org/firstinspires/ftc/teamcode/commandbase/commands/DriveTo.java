@@ -52,8 +52,6 @@ public class DriveTo extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        if (maxPower != previousMaxPower) {
-            robot.drive.swerve.setMaxSpeed(previousMaxPower);
-        }
+        robot.drive.swerve.setMaxSpeed(previousMaxPower);
     }
 }

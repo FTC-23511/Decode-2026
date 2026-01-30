@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.*;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.*;
@@ -70,7 +71,7 @@ public class Baby extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        Launcher.DISTANCE_OFFSET = 0.0;
+        Launcher.DISTANCE_OFFSET = -0.2;
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(false);
@@ -84,20 +85,21 @@ public class Baby extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
 
                         // Score Preload
-                        new WaitCommand(2000),
+                        new WaitCommand(1000),
                         new ClearLaunch(true).raceWith(
                                 new RunCommand(
                                         () -> robot.drive.swerve.updateWithXLock()
                                 )
                         ),
+                        new InstantCommand(() -> robot.launcher.setRamp(false)),
 
                         // Spike 1 Sequence
                         new DriveTo(pathPoses.get(1)),
                         pathIntake(2, 1200, 0.5, true),
-                        pathShoot(3, 1200),
+                        pathShoot(3, 2000),
 
                         // Balls on wall Sequence
-                        pathIntake(4, 3000, 0.5, false),
+                        pathIntake(4, 3000, 0.5, true),
                         new DriveTo(pathPoses.get(5)).withTimeout(500),
                         pathIntake(6, 1000, 0.5, true),
                         pathShoot(7, 1300),
@@ -186,9 +188,12 @@ public class Baby extends CommandOpMode {
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(pathTimeout),
                 new ClearLaunch(true).raceWith(
                         new RunCommand(
-                                () -> robot.drive.swerve.updateWithXLock()
+                                () -> robot.drive.swerve.updateWithTargetVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+                                        robot.drive.follower.calculate(robot.drive.getPose()),
+                                        robot.drive.getPose().getRotation()))
                         )
-                )
+                ),
+                new InstantCommand(() -> robot.launcher.setRamp(false))
         );
     }
 
