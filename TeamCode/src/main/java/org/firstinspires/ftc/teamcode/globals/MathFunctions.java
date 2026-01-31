@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.globals;
 
-import static com.sun.tools.doclint.Entity.pi;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.RobotLog;

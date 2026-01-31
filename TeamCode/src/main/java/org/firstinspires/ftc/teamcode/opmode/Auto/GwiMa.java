@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.OFF;
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
 import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
@@ -24,10 +26,12 @@ import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.Timing;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
@@ -38,11 +42,13 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @Config
 @Autonomous(name = "Gwi-Ma (playoffs close 18 Ball)", preselectTeleOp = "FullTeleOp", group = "Auto")
 public class GwiMa extends CommandOpMode {
     public ElapsedTime timer;
+    public ElapsedTime autoTimer;
     public static int REPEAT_TIMES = 2;
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -51,24 +57,24 @@ public class GwiMa extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(-43.24023076923076, 54.670769233076923, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-44.90023076923076, 55.830769233076923, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-19.82608695652174, 12.637681159420286, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-26.550724637681157, -13.492753623188406, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-63.00420289855072, -13.492753623188406, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-33.55072463768116, -13.565217391304344, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-15.65217391304348, 9.623188405797105, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-36.52173913043478, -15.652173913043484, Math.toRadians(-27.5))); // Line 6
-        pathPoses.add(new Pose2d(-58.8672, -10.252800000000008, Math.toRadians(-27.5))); // Line 7
+        pathPoses.add(new Pose2d(-56.23188405797101, -7.7681159420289845, Math.toRadians(-27.5))); // Line 7
         pathPoses.add(new Pose2d(-58.636799999999994, -15.782400000000006, Math.toRadians(-35))); // Line 8
         pathPoses.add(new Pose2d(-35.13043478260869, -10.782608695652172, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-23.536231884057976, 12.637681159420286, Math.toRadians(0))); // Line 10
         pathPoses.add(new Pose2d(-52.52173913043479, 12.637681159420286, Math.toRadians(0))); // Line 11
         pathPoses.add(new Pose2d(-23.615999999999993, 12.787199999999999, Math.toRadians(0))); // Line 12
         pathPoses.add(new Pose2d(-49.507246376811594, -10.086956521739125, Math.toRadians(-27.5))); // Line 13
-        pathPoses.add(new Pose2d(-58.8672, -10.252800000000008, Math.toRadians(-27.5))); // Line 14
+        pathPoses.add(new Pose2d(-56.23188405797101, -7.536231884057969, Math.toRadians(-27.5))); // Line 14
         pathPoses.add(new Pose2d(-58.636799999999994, -15.782400000000006, Math.toRadians(-35))); // Line 15
         pathPoses.add(new Pose2d(-22.84057971014493, 11.710144927536223, Math.toRadians(0))); // Line 16
-        pathPoses.add(new Pose2d(-22.376811594202906, -0.3478260869565304, Math.toRadians(0))); // Line 17
+        pathPoses.add(new Pose2d(-31.42028985507247, 5.217391304347821, Math.toRadians(0))); // Line 17
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -95,7 +101,7 @@ public class GwiMa extends CommandOpMode {
         robot.launcher.setRamp(false);
 
         robot.drive.setPose(pathPoses.get(0));
-        robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
+        robot.turret.setTurret(GOAL_LOCK_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         schedule(
@@ -118,6 +124,7 @@ public class GwiMa extends CommandOpMode {
                         new DriveTo(pathPoses.get(6)).withTimeout(500),
                         new DriveTo(pathPoses.get(7), 0.67).withTimeout(700),
                         new SetIntake(Intake.MotorState.FORWARD),
+                        new WaitCommand(300),
                         gateIntake(8, 767),
 
                         new DriveTo(pathPoses.get(9)).withTimeout(1100),
@@ -133,13 +140,16 @@ public class GwiMa extends CommandOpMode {
                                         new DriveTo(pathPoses.get(13)).withTimeout(1067),
                                         new DriveTo(pathPoses.get(14), 0.67).withTimeout(1067),
                                         new SetIntake(Intake.MotorState.FORWARD),
+                                        new WaitCommand(300),
                                         gateIntake(15, 967),
                                         pathShoot(16, 1400)
                                 ),
                                 REPEAT_TIMES
-                        ),
+                        ).interruptOn(() -> autoTimer.seconds() > 29.0),
 
-                        // park
+                        // park + end
+                        new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP)),
                         new DriveTo(pathPoses.get(pathPoses.size() - 1))
                 )
         );
@@ -173,6 +183,7 @@ public class GwiMa extends CommandOpMode {
     public void run() {
         if (timer == null) {
             timer = new ElapsedTime();
+            autoTimer = new ElapsedTime();
         }
 
         // Always log Loop Time
@@ -218,6 +229,8 @@ public class GwiMa extends CommandOpMode {
     @Override
     public void end() {
         END_POSE = robot.drive.getPose();
+        robot.turret.setTurretPos(0.5, true);
+        robot.intake.setIntake(Intake.MotorState.STOP);
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
@@ -247,7 +260,7 @@ public class GwiMa extends CommandOpMode {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.FORWARD),
-                new WaitCommand(800)
+                new WaitCommand(700)
         );
     }
 
