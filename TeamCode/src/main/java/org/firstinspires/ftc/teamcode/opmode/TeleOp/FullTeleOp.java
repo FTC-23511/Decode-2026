@@ -171,6 +171,7 @@ public class FullTeleOp extends CommandOpMode {
             robot.pinpoint.resetPosAndIMU();
         }
 
+        Launcher.DISTANCE_OFFSET = 0;
         robot.drive.setPose(END_POSE);
         telemetryData.addData("END_POSE", END_POSE);
         telemetryData.addData("TURRET_SYNCED", TURRET_SYNCED);

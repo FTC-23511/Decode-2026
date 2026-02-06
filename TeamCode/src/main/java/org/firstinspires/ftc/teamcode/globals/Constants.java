@@ -52,7 +52,7 @@ public class Constants {
     public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
     public static double PINPOINT_TELEOP_POLLING_RATE = 100; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
-    public static double DRIVE_VEL_PREDICT_ALPHA = 0.3; // Tune between 0 and 1
+    public static double DRIVE_VEL_PREDICT_ALPHA = 0.2; // Tune between 0 and 1
 
     public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
     public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
@@ -63,13 +63,13 @@ public class Constants {
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
-    public static double FR_ENCODER_OFFSET = 4.20; // Radians
+    public static double FR_ENCODER_OFFSET = 4.00; // Radians
     public static double FL_ENCODER_OFFSET = 3.85; // Radians
     public static double BL_ENCODER_OFFSET = 2.49; // Radians
     public static double BR_ENCODER_OFFSET = 1.12; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
-    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(5, 0, 0.3, 0); // Coefficients for radians
+    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(5.67, 0, 0.3, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static PIDFCoefficients AIMBOT_COEFFICIENTS = new PIDFCoefficients(3.5, 0, 0, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.41; // Inches

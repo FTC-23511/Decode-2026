@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
 import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
@@ -22,11 +23,13 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -93,7 +96,7 @@ public class Romance extends CommandOpMode {
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(true);
-        robot.turret.setTurret(ANGLE_CONTROL, 0);
+        robot.turret.setTurret(GOAL_LOCK_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
 
         // Schedule the full auto
         // TODO: FIGURE OUT WHY WE NEED A BURNER INSTANT COMMAND
@@ -134,6 +137,10 @@ public class Romance extends CommandOpMode {
             GATE_OPEN = false;
         } else if (gamepad1.circle || gamepad2.circle || gamepad1.square || gamepad2.square) {
             GATE_OPEN = true;
+        }
+
+        if (gamepad1.right_stick_button) {
+            robot.pinpoint.resetPosAndIMU();
         }
 
         telemetryData.addData("Cross / Triangle", "false");
@@ -207,11 +214,19 @@ public class Romance extends CommandOpMode {
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)),
-                        new InstantCommand(() -> robot.turret.setTurret(ANGLE_CONTROL, (Math.PI/2) * ALLIANCE_COLOR.getMultiplier()))
-                ).withTimeout(timeout),
-                new StationaryAimbotFullLaunch()
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                new ClearLaunch().raceWith(
+                        new RunCommand(
+                                () -> robot.drive.swerve.updateWithTargetVelocity(
+                                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                                robot.drive.follower.calculate(robot.drive.getPose()),
+                                                robot.drive.getPose().getRotation()
+                                        )
+                                )
+                        )
+                ),
+
+                new InstantCommand(() -> robot.launcher.setRamp(false))
         );
     }
 

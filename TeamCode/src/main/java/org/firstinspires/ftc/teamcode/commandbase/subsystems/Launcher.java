@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.Arrays;
 import java.util.List;
 
+@Config
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
@@ -27,7 +29,7 @@ public class Launcher extends SubsystemBase {
     public static double DISTANCE_OFFSET = 0;
 
     private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   7.2,    10.0); // input: velocity (m/s)
-    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1480.0, 1620.0, 1780.0, 1940.0, 1980.0, 2100.0); // output: ticks/s
+    private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1480.0, 1620.0, 1840.0, 2020.0, 2060.0, 2100.0); // output: ticks/s
 
     private final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
