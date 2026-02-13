@@ -178,6 +178,39 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
 
     /**
+     * Updates the robot's global position using the Pinpoint odometry computer.
+     * This should be called every loop.
+     */
+    public void updateOdometry() {
+        pinpoint.update();
+    }
+
+    /**
+     * Gets the current pose estimate from the Pinpoint computer.
+     * @return Pose2d containing X, Y, and Heading.
+     */
+    public Pose2d getPose() {
+        return new Pose2d(
+                pinpoint.getPosX(DISTANCE_UNIT),
+                pinpoint.getPosY(DISTANCE_UNIT),
+                pinpoint.getHeading(ANGLE_UNIT)
+        );
+    }
+
+    /**
+     * Retrieves the battery voltage with simple caching to prevent
+     * excessive I/O reads within a single loop.
+     */
+    public double getVoltage() {
+        if (voltageTimer == null || voltageTimer.milliseconds() > 100) {
+            cachedVoltage = voltageSensor.getVoltage();
+            voltageTimer = new ElapsedTime();
+        }
+        return cachedVoltage;
+    }
+
+
+    /**
      * Safely exports the profiler data to a file on a background thread
      * to prevent blocking the main robot loop during a match.
      */
@@ -195,6 +228,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         exportThread.start();
     }
 
+
+
     /**
      * Main control loop logic.
      * 1. Runs the Command Scheduler
@@ -209,4 +244,63 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
+
+    // --- SYSID DATA LOGGING ---
+    private boolean sysIdActive = false;
+    private final ElapsedTime sysIdTimer = new ElapsedTime();
+
+    /**
+     * Starts a Quasistatic SysId test.
+     * The flywheel power will slowly ramp up (Voltage/Time).
+     */
+    public void runSysIdQuasistatic(double rampRate) {
+        if (!sysIdActive) {
+            sysIdTimer.reset();
+            sysIdActive = true;
+        }
+
+        // Calculate power based on time elapsed
+        double power = sysIdTimer.seconds() * rampRate;
+
+        if (power <= 1.0) {
+            launchMotors.set(power);
+            logSysIdData(power);
+        } else {
+            stopSysId();
+        }
+    }
+
+    /**
+     * Starts a Dynamic SysId test.
+     * Applies a constant step-voltage to measure acceleration.
+     */
+    public void runSysIdDynamic(double stepVoltage) {
+        if (!sysIdActive) {
+            sysIdTimer.reset();
+            sysIdActive = true;
+        }
+
+        launchMotors.set(stepVoltage);
+        logSysIdData(stepVoltage);
+    }
+
+    public void stopSysId() {
+        launchMotors.set(0);
+        sysIdActive = false;
+    }
+
+    private void logSysIdData(double power) {
+        // Log to Android Logcat or CSV for analysis
+        // Columns: Time (s), Voltage (V), Velocity (Ticks/s)
+        double voltage = power * voltageSensor.getVoltage();
+        double velocity = launchEncoder.getCorrectedVelocity();
+
+        Log.i("SYSID_DATA", String.format("%.4f, %.4f, %.4f",
+                sysIdTimer.seconds(), voltage, velocity));
+
+        // Also add to dashboard if needed
+        RobotLog.dd("SysId", "Time: %.4f, Volts: %.4f, Vel: %.4f",
+                sysIdTimer.seconds(), voltage, velocity);
+    }
+
 }
