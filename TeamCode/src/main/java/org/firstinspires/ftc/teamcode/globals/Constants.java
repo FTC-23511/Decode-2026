@@ -151,8 +151,11 @@ public class Constants {
     public static double TEST_DISTANCE = 80; // Inches
     public static double DECIMATION_THRESHOLD = 80; // Inches
 
+    public static double TARGET_OFFSET_X = 0;
+    public static double TARGET_OFFSET_Y = 0;
+
     public static Pose2d GOAL_POSE() {
-        return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72, 0); // Inches
+        return new Pose2d(-72 * ALLIANCE_COLOR.getMultiplier() + TARGET_OFFSET_X, 72 + TARGET_OFFSET_Y, 0); // Inches
     }
 
     public static double GOAL_LIP = 0.45; // Meters

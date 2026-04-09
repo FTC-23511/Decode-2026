@@ -1,18 +1,24 @@
-package org.firstinspires.ftc.teamcode.commandbase.subsystems.vision;
+package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.posesToAngle;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.CameraConstants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.DriveConstants.END_POSE;
 
 import android.util.Log;
 import android.util.Size;
 
 import androidx.annotation.NonNull;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Transform2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -23,6 +29,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.vision.AprilTagProcessor;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.vision.RectProcessor;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -33,9 +41,11 @@ import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-public class Camera {
+public class Camera extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public boolean enabled = false;
     public static Motif motifState = Motif.NOT_FOUND;
@@ -43,9 +53,12 @@ public class Camera {
     public AprilTagProcessor aprilTagProcessor;
     public RectProcessor rectProcessor;
     public VisionPortal visionPortal;
+    public Transform2d relocalizationChange;
 
     public double cameraY = -1;
     public double cameraH = -1;
+
+    public boolean relocalize = false;
 
     private final ArrayList<Pose2d> cameraPoseEstimates = new ArrayList<>();
 
@@ -55,6 +68,15 @@ public class Camera {
             true
     );
 
+    private final TreeMap<Double, Pose2d> pinpointHistory = new TreeMap<>();
+    private static final double HISTORY_LIFESPAN_SECONDS = 1.5;
+
+    public static double KALMAN_GAIN_POS = 0.1;
+    public static double KALMAN_GAIN_HEADING = 0.1;
+
+    private double lastCorrectionX = 0, lastCorrectionY = 0, lastCorrectionHeading = 0;
+    private double lastStaleness = 0;
+
     public enum Motif {
         NOT_FOUND,
         GPP,
@@ -62,12 +84,14 @@ public class Camera {
         PPG
     }
 
-    public Camera(HardwareMap hwMap) {
-        roiYOffsetLUT.createLUT();
-        init(hwMap);
+    // For Testing
+    public Camera() {
+
     }
 
-    public void init(HardwareMap hwMap) {
+    public Camera(HardwareMap hwMap) {
+        enabled = true;
+        roiYOffsetLUT.createLUT();
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setDrawTagID(false)
 //                .setDrawAxes(true)
@@ -86,17 +110,15 @@ public class Camera {
 
         aprilTagProcessor.setDecimation(CAMERA_CLOSE_DECIMATION); // increases fps, but reduces range
 
+        rectProcessor = new RectProcessor()
+                .setRoi(new Rect(0, 0, 640, 480));
+
         VisionPortal.Builder builder = new VisionPortal.Builder()
                 .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .addProcessor(aprilTagProcessor);
-
-        if (TESTING_OP_MODE) {
-            rectProcessor = new RectProcessor();
-            rectProcessor.setRoi(new Rect(0, 0, 640, 480));
-            builder.addProcessor(rectProcessor);
-        }
+                .addProcessor(aprilTagProcessor)
+                .addProcessor(rectProcessor);
 
         visionPortal = builder.build();
 
@@ -110,6 +132,63 @@ public class Camera {
         } catch (Exception e) {
             Log.wtf("WHAT A TERRIBLE FAILURE.", "Camera Exposure/Gain Control got fried \n" + e);
         }
+
+    }
+
+    public void init() {
+        if (!TESTING_OP_MODE) {
+            if (OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
+                updateROI(END_POSE);
+            } else {
+                updateROI(robot.drive.getPose());
+            }
+        }
+    }
+
+    public void addPose(double timestamp, Pose2d pose) {
+        pinpointHistory.put(timestamp, pose);
+        while (!pinpointHistory.isEmpty() && pinpointHistory.firstKey() < timestamp - HISTORY_LIFESPAN_SECONDS) {
+            pinpointHistory.pollFirstEntry();
+        }
+    }
+
+    public void updateFilter(double cameraTimestamp, Pose2d cameraPose) {
+        Map.Entry<Double, Pose2d> historicalPinpointEntry = pinpointHistory.floorEntry(cameraTimestamp);
+
+        if (historicalPinpointEntry == null) {
+            return;
+        }
+
+        Pose2d historicalPinpointPose = historicalPinpointEntry.getValue();
+
+        double translationErrorX = cameraPose.getX() - historicalPinpointPose.getX();
+        double translationErrorY = cameraPose.getY() - historicalPinpointPose.getY();
+        double headingError = MathUtils.normalizeRadians(cameraPose.getHeading() - historicalPinpointPose.getHeading(), false);
+
+        double correctionX = translationErrorX * KALMAN_GAIN_POS;
+        double correctionY = translationErrorY * KALMAN_GAIN_POS;
+        double correctionHeading = headingError * KALMAN_GAIN_HEADING;
+
+        lastCorrectionX = correctionX;
+        lastCorrectionY = correctionY;
+        lastCorrectionHeading = correctionHeading;
+
+        Pose2d currentPose = robot.drive.getPose();
+        Pose2d correctedPose = new Pose2d(
+                currentPose.getX() + correctionX,
+                currentPose.getY() + correctionY,
+                MathUtils.normalizeRadians(currentPose.getHeading() + correctionHeading, false)
+        );
+
+
+        robot.drive.setPose(correctedPose);
+        relocalizationChange = currentPose.minus(correctedPose);
+
+        Log.d("Kalman", "Correction X: " + correctionX + " Y: " + correctionY);
+    }
+
+    public void undoRelocalization() {
+        robot.drive.setPose(robot.drive.getPose().plus(relocalizationChange));
     }
 
     public void initHasMovement() {
@@ -122,29 +201,64 @@ public class Camera {
      * Updates internal camera result
      * @param n max number of times to attempt reading to get a valid result
      */
-    public void updateCameraResult(int n) {
-        detections = null;
-        updateROI(robot.drive.getPose());
-        updateDecimation(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
-        for (int i = n; i > 0; i--) {
-            detections = aprilTagProcessor.getDetections();
+    public void updateArducam(int n) {
+        if (enabled) {
+            detections = null;
+            updateROI(robot.drive.getPose());
+            if (!TESTING_OP_MODE) {
+                updateDecimation(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+            }
+            for (int i = n; i > 0; i--) {
+                detections = aprilTagProcessor.getDetections();
 
-            if (detections != null && !detections.isEmpty()) {
-                Pose2d cameraPose = getCameraPose();
+                if (detections != null && !detections.isEmpty()) {
+                    Pose2d cameraPose = getCameraPose();
 
-                if (cameraPose != null) {
-                    updateCameraPoseReadings(cameraPose);
+                    if (cameraPose != null) {
+                        updateCameraPoseReadings(cameraPose);
+                    }
+
+                    break;
                 }
-
-                break;
             }
         }
     }
 
+    /**
+     * Relocalizes the robot using Arducam detections.
+     * @return true if relocalization was successful, false otherwise.
+     */
+    public boolean relocalizeArducam() {
+        if (detections != null && !detections.isEmpty()) {
+            Pose2d cameraPose = getCameraPose();
+            if (cameraPose != null) {
+                Pose2d avgPose = getAverageCameraPose(cameraPose);
+                updateFilter(System.nanoTime() / 1e9, avgPose);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Updates Arducam detections and then relocalizes the robot.
+     * @param n max number of times to attempt reading to get a valid result
+     * @return true if relocalization was successful, false otherwise.
+     */
+    public boolean relocalizeArducam(int n) {
+        updateArducam(n);
+        return relocalizeArducam();
+    }
+
     public void updateROI(Pose2d robotPose) {
         if (robotPose == null) return;
-
-        double distance = APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
+        double distance;
+        if (TESTING_OP_MODE) {
+            distance = TEST_DISTANCE;
+        }
+        else {
+            distance = APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
+        }
 
         int finalY = (int) roiYOffsetLUT.get(distance);
         int finalH = (int) MathFunctions.mapEquation(distance, 30.0, 240.0, 144.0, 96.0);
@@ -200,7 +314,6 @@ public class Camera {
         return null;
     }
 
-
     public Pose2d getCameraPose() {
         if (detections != null && !detections.isEmpty()) {
             AprilTagDetection detection = cleanDetection(detections);
@@ -218,6 +331,27 @@ public class Camera {
             }
         }
 
+        return null;
+    }
+
+    @Deprecated
+    public Pose2d getLimelightPose(LLResult result) {
+        robot.limelight.updateRobotOrientation(Math.toDegrees(robot.drive.getPose().getHeading()));
+        Pose3D botPose = result.getBotpose_MT2();
+
+        if (botPose != null) {
+            double x = botPose.getPosition().x;
+            double y = botPose.getPosition().y;
+            double yaw = botPose.getOrientation().getYaw();
+
+            x = DistanceUnit.INCH.fromMeters(x);
+            y = DistanceUnit.INCH.fromMeters(y);
+            yaw = Math.toRadians(yaw);
+
+            if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(yaw)) {
+                return new Pose2d(x, y, yaw);
+            }
+        }
         return null;
     }
 
@@ -259,6 +393,40 @@ public class Camera {
         }
 
         return -1;
+    }
+
+    public double getTagID() {
+        if (detections != null && !detections.isEmpty()) {
+            AprilTagDetection detection = cleanDetection(detections);
+
+            if (detection != null) {
+                return detection.id;
+            }
+        }
+
+        return -1;
+    }
+
+    public Motif getMotif() {
+        aprilTagProcessor.setRegionOfInterest(null);
+        detections = aprilTagProcessor.getDetections();
+
+        if (detections != null && !detections.isEmpty()) {
+            AprilTagDetection detection = cleanDetection(detections);
+
+            if (detection != null) {
+                switch (detection.id) {
+                    case 17:
+                        return Motif.GPP;
+                    case 18:
+                        return Motif.PGP;
+                    case 19:
+                        return Motif.PPG;
+                }
+            }
+        }
+
+        return Motif.NOT_FOUND;
     }
 
     public void writeCameraTelemetry(Telemetry telemetry) {
@@ -305,5 +473,36 @@ public class Camera {
             visionPortal.close();
         }
     }
-}
 
+    @Deprecated
+    public void updateLimelight() {
+        if (enabled) {
+            LLResult result = robot.limelight.getLatestResult();
+            if (result != null && result.isValid()) {
+                Pose2d aprilTagPose = getLimelightPose(result);
+                if (aprilTagPose != null) {
+                    double timestamp = (System.nanoTime() / 1e9) - result.getStaleness() / 1000.0;
+                    lastStaleness = result.getStaleness();
+                    updateFilter(timestamp, aprilTagPose);
+                    relocalize = false;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void periodic() {
+        if (TESTING_OP_MODE) {
+            return;
+        }
+
+        updateArducam(5); // Only done in CameraLocalization
+    }
+
+    public void updateCameraTelemetry(TelemetryEx telemetryEx) {
+        telemetryEx.addData("Camera: Last Staleness", lastStaleness);
+        telemetryEx.addData("Camera: Last Correction X", lastCorrectionX);
+        telemetryEx.addData("Camera: Last Correction Y", lastCorrectionY);
+        telemetryEx.addData("Camera: Last Correction H", lastCorrectionHeading);
+    }
+}
