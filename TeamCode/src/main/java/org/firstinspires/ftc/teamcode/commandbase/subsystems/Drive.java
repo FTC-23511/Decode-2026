@@ -108,6 +108,31 @@ public class Drive extends SubsystemBase {
             || robotZone.distanceTo(smallLaunchZone) <= Math.max(0, ZONE_TOLERANCE);
     }
 
+    public void applyVirtualTargetShift() {
+        Pose2d robotPose = getPose(); // Current pose with ANGLE_OFFSET
+        MathFunctions.VirtualGoalSolver.ShotSolution solution = robot.getShotSolution();
+
+        double thetaAim = solution.turretGlobalHeading.getRadians();
+        // Launcher.DISTANCE_OFFSET is in METERS in MathFunctions.distanceToLauncherValues
+        double distPerceived = solution.effectiveDistance + Launcher.DISTANCE_OFFSET;
+
+        Vector2d robotPosVec = new Vector2d(robotPose.getX(), robotPose.getY());
+        Vector2d turretOffsetField = Constants.TURRET_PHYSICAL_OFFSET.rotateBy(robotPose.getRotation().getDegrees());
+        Vector2d turretPosVec = robotPosVec.plus(turretOffsetField);
+
+        double distPerceivedInches = distPerceived / 0.0254;
+
+        Vector2d aimPoint = turretPosVec.plus(new Vector2d(Math.cos(thetaAim) * distPerceivedInches, Math.sin(thetaAim) * distPerceivedInches));
+
+        // Original static target (without current TARGET_OFFSET)
+        Vector2d baseTarget = new Vector2d(-72 * ALLIANCE_COLOR.getMultiplier(), 72);
+
+        TARGET_OFFSET = aimPoint.minus(baseTarget);
+
+        ANGLE_OFFSET = 0;
+        Launcher.DISTANCE_OFFSET = 0;
+    }
+
     @Override
     public void periodic() {
 //        swerve.update(); // Not needed as we are using updateWithTargetVelocity() in the opModes

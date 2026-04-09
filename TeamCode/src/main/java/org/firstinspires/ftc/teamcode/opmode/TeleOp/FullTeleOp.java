@@ -161,6 +161,10 @@ public class FullTeleOp extends CommandOpMode {
                         () -> gamepad1.left_trigger > 0.5
                 )
         );
+
+        operator.getGamepadButton(GamepadKeys.Button.START).whenPressed(
+                new InstantCommand(() -> robot.drive.applyVirtualTargetShift())
+        );
     }
 
     @Override
@@ -298,6 +302,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
 //        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
             telemetryData.addData("Angle Offset", Drive.ANGLE_OFFSET);
+            telemetryData.addData("Target Offset", Constants.TARGET_OFFSET);
             telemetryData.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryData.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryData.addData("Wall Angle", robot.turret.angleToWall());
