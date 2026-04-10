@@ -22,8 +22,9 @@ public class RectProcessor implements VisionProcessor {
     }
 
     // Call this method from your updateROI() function!
-    public void setRoi(Rect roi) {
+    public RectProcessor setRoi(Rect roi) {
         this.currentRoi = roi;
+        return this;
     }
 
     @Override
