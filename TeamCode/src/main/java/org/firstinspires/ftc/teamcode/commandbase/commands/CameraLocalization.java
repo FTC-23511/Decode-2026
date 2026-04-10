@@ -8,30 +8,30 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 public class CameraLocalization extends CommandBase {
     private final Robot robot;
-    private final int n;
-    private boolean finished = false;
 
-    public CameraLocalization(int n) {
+    public CameraLocalization(double n) {
         robot = Robot.getInstance();
-        this.n = n;
 
-        addRequirements(robot.camera);
+        addRequirements(); // TODO: replace with requirements of the command
     }
 
     @Override
     public void initialize() {
-        finished = false;
+
     }
 
     @Override
     public void execute() {
-        if (robot.camera.relocalizeArducam(n)) {
-            finished = true;
-        }
+
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+
     }
 
     @Override
     public boolean isFinished() {
-        return finished;
+        return true; // TODO: replace with end condition of the command
     }
 }

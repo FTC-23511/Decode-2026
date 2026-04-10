@@ -84,14 +84,8 @@ public class FullTeleOp extends CommandOpMode {
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
                         new InstantCommand(() -> Drive.ANGLE_OFFSET = 0),
-                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
-                        new InstantCommand(() -> TARGET_OFFSET_X = 0),
-                        new InstantCommand(() -> TARGET_OFFSET_Y = 0)
+                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0)
                 )
-        );
-
-        operator.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new InstantCommand(robot.drive::applyVirtualTargetShift)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(

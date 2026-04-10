@@ -32,7 +32,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Camera;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.vision.Camera;
 
 import java.io.File;
 import java.util.Arrays;
