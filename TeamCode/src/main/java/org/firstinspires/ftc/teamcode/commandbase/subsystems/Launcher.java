@@ -52,9 +52,15 @@ public class Launcher extends SubsystemBase {
             true
     );
 
+    private final InterpLUT timeOfFlightLUT = new InterpLUT(
+            launcherDistance,
+            shootingTime,
+            true
+    );
     public Launcher() {
         launcherLUT.createLUT();
         inverseLauncherLUT.createLUT();
+        timeOfFlightLUT.createLUT();
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
         transferController.setTolerance(TRANSFER_VEL_TOLERANCE);
     }
@@ -85,7 +91,8 @@ public class Launcher extends SubsystemBase {
                         robotPose,
                         new Vector2d(),
                         0,
-                        GOAL_POSE()
+                        GOAL_POSE(),
+                        timeOfFlightLUT // <--- Pass the table here
                 ).effectiveDistance
         );
         setFlywheel(errorsAngleVelocity[0], true);

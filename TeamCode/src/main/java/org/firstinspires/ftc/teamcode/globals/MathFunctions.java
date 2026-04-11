@@ -7,6 +7,7 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
+import com.seattlesolvers.solverslib.util.InterpLUT;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -520,7 +521,7 @@ public class MathFunctions {
          * @param goalPose Goal position
          * @return ShotSolution containing target heading and feedforward
          */
-        public static ShotSolution solve(Pose2d robotPose, Vector2d robotVel, double robotOmega, Pose2d goalPose) {
+        public static ShotSolution solve(Pose2d robotPose, Vector2d robotVel, double robotOmega, Pose2d goalPose, InterpLUT timeOfFlightLUT) {
             double robotHeadingDegrees = robotPose.getRotation().getDegrees();
             Vector2d turretOffsetField = Constants.TURRET_PHYSICAL_OFFSET.rotateBy(robotHeadingDegrees);
 
@@ -564,7 +565,13 @@ public class MathFunctions {
                 // -------------------------------------
 
                 double shotVelIps = shotParams[0] * 39.3701;
-                double timeOfFlight = calculateTimeOfFlight(currentDistInches, shotVelIps, shotParams[1]);
+                double timeOfFlight;
+
+                if (USE_INTERPLUT) {
+                    timeOfFlight = timeOfFlightLUT.get(distMeters);
+                } else {
+                    timeOfFlight = calculateTimeOfFlight(currentDistInches, shotVelIps, shotParams[1]);
+                }
 
                 // Total drift = Robot Velocity * (Mechanical Delay + Flight Time)
                 double totalDriftTime = BALL_TRANSFER_TIME + timeOfFlight;

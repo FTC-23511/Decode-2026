@@ -176,6 +176,8 @@ public class Constants {
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
     public static double LIP_BUFFER = 8 * DistanceUnit.mPerInch; // Meters
 
+    public static boolean USE_INTERPLUT = true;
+
     public static Pose2d APRILTAG_POSE() {
         return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); // Inches
     }
