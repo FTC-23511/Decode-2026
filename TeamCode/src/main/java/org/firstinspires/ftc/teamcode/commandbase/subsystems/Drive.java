@@ -115,6 +115,9 @@ public class Drive extends SubsystemBase {
         if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : PINPOINT_TELEOP_POLLING_RATE))) {
             robot.pinpoint.update();
             timer.reset();
+            if (robot.camera != null) {
+                robot.camera.addPose(System.nanoTime() / 1e9, getPose());
+            }
         }
         robot.profiler.end("Drive Update");
     }

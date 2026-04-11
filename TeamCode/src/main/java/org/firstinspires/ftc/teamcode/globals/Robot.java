@@ -244,7 +244,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         turret = new Turret();
 
         // Camera for vision
-//        camera = new Camera(hwMap);
+        camera = new Camera(hwMap);
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);
@@ -272,7 +272,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intake.init();
         launcher.init();
         turret.init();
-//        camera.initHasMovement();
+        camera.initHasMovement();
     }
     
     public double getVoltage() {

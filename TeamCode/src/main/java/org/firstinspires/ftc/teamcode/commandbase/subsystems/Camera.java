@@ -56,7 +56,11 @@ public class Camera extends SubsystemBase {
     public double cameraY = -1;
     public double cameraH = -1;
 
-    public boolean relocalize = false;
+    private boolean recordReadings = false;
+
+    public void setRecordReadings(boolean recordReadings) {
+        this.recordReadings = recordReadings;
+    }
 
     private final ArrayList<Pose2d> cameraPoseEstimates = new ArrayList<>();
 
@@ -151,6 +155,10 @@ public class Camera extends SubsystemBase {
     }
 
     public void updateFilter(double cameraTimestamp, Pose2d cameraPose) {
+        updateFilter(cameraTimestamp, cameraPose, KALMAN_GAIN_POS, KALMAN_GAIN_HEADING);
+    }
+
+    public void updateFilter(double cameraTimestamp, Pose2d cameraPose, double gainPos, double gainHeading) {
         Map.Entry<Double, Pose2d> historicalPinpointEntry = pinpointHistory.floorEntry(cameraTimestamp);
 
         if (historicalPinpointEntry == null) {
@@ -163,9 +171,9 @@ public class Camera extends SubsystemBase {
         double translationErrorY = cameraPose.getY() - historicalPinpointPose.getY();
         double headingError = MathUtils.normalizeRadians(cameraPose.getHeading() - historicalPinpointPose.getHeading(), false);
 
-        double correctionX = translationErrorX * KALMAN_GAIN_POS;
-        double correctionY = translationErrorY * KALMAN_GAIN_POS;
-        double correctionHeading = headingError * KALMAN_GAIN_HEADING;
+        double correctionX = translationErrorX * gainPos;
+        double correctionY = translationErrorY * gainPos;
+        double correctionHeading = headingError * gainHeading;
 
         lastCorrectionX = correctionX;
         lastCorrectionY = correctionY;
@@ -193,6 +201,20 @@ public class Camera extends SubsystemBase {
         if (!Constants.TESTING_OP_MODE) {
             visionPortal.stopLiveView();
         }
+    }
+
+    /**
+     * Gets the exact timestamp of the best AprilTag detection in seconds.
+     * @return the timestamp in seconds, or -1 if no detection is found.
+     */
+    public double getDetectionTimestamp() {
+        if (detections != null && !detections.isEmpty()) {
+            AprilTagDetection detection = cleanDetection(detections);
+            if (detection != null && detection.robotPose != null) {
+                return detection.frameAcquisitionNanoTime / 1e9;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -229,9 +251,27 @@ public class Camera extends SubsystemBase {
     public boolean relocalizeArducam() {
         if (detections != null && !detections.isEmpty()) {
             Pose2d cameraPose = getCameraPose();
-            if (cameraPose != null) {
+            double timestamp = getDetectionTimestamp();
+            if (cameraPose != null && timestamp != -1) {
                 Pose2d avgPose = getAverageCameraPose(cameraPose);
-                updateFilter(System.nanoTime() / 1e9, avgPose);
+                updateFilter(timestamp, avgPose);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Relocalizes the robot accurately using all current readings from the Kalman filter.
+     * @return true if relocalization was successful, false otherwise.
+     */
+    public boolean relocalizeAccurately() {
+        if (detections != null && !detections.isEmpty()) {
+            Pose2d cameraPose = getCameraPose();
+            double timestamp = getDetectionTimestamp();
+            if (cameraPose != null && timestamp != -1) {
+                Pose2d avgPose = getAverageCameraPose(cameraPose);
+                updateFilter(timestamp, avgPose, 1.0, 1.0);
                 return true;
             }
         }
@@ -461,7 +501,6 @@ public class Camera extends SubsystemBase {
                     double timestamp = (System.nanoTime() / 1e9) - result.getStaleness() / 1000.0;
                     lastStaleness = result.getStaleness();
                     updateFilter(timestamp, aprilTagPose);
-                    relocalize = false;
                 }
             }
         }
@@ -473,7 +512,16 @@ public class Camera extends SubsystemBase {
             return;
         }
 
-        updateArducam(5); // Only done in CameraLocalization
+        if (recordReadings) {
+            updateArducam(1);
+            if (detections != null && !detections.isEmpty()) {
+                Pose2d cameraPose = getCameraPose();
+                double timestamp = getDetectionTimestamp();
+                if (cameraPose != null && timestamp != -1) {
+                    updateFilter(timestamp, cameraPose);
+                }
+            }
+        }
     }
 
     public void updateCameraTelemetry(TelemetryEx telemetryEx) {
