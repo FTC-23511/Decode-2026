@@ -405,27 +405,6 @@ public class Camera extends SubsystemBase {
         return -1;
     }
 
-    public Motif getMotif() {
-        aprilTagProcessor.setRegionOfInterest(null);
-        detections = aprilTagProcessor.getDetections();
-
-        if (detections != null && !detections.isEmpty()) {
-            AprilTagDetection detection = cleanDetection(detections);
-
-            if (detection != null) {
-                switch (detection.id) {
-                    case 17:
-                        return Motif.GPP;
-                    case 18:
-                        return Motif.PGP;
-                    case 19:
-                        return Motif.PPG;
-                }
-            }
-        }
-
-        return Motif.NOT_FOUND;
-    }
 
     public void writeCameraTelemetry(Telemetry telemetry) {
         if (detections != null && !detections.isEmpty()) {

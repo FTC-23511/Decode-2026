@@ -81,7 +81,6 @@ public class ArducamTest extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-//        robot.camera.updateCameraResult(3);
         robot.camera.writeCameraTelemetry(telemetry);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
