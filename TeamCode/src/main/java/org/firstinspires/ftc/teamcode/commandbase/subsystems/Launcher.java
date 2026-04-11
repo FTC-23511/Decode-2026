@@ -197,6 +197,10 @@ public class Launcher extends SubsystemBase {
         robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
     }
 
+    public InterpLUT getTimeOfFlightLUT() {
+        return timeOfFlightLUT;
+    }
+
     public void setHood(double angle) {
         setHood(angle, false);
     }

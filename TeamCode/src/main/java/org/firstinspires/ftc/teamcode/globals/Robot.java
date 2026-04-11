@@ -365,7 +365,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                     robotPose,
                     predictedLinearVelIps,
                     predictedOmegaRadPerSec,
-                    turret.adjustedGoalPose()
+                    turret.adjustedGoalPose(),
+                    launcher.getTimeOfFlightLUT()
             );
         }
 
