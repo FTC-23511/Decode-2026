@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 
@@ -28,8 +28,7 @@ public class SwerveModeTuner extends OpMode {
     public static double SERVO_POS = 0.0;
     Servo swervo;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
-
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     
     @Override
     public void init() {
@@ -39,7 +38,6 @@ public class SwerveModeTuner extends OpMode {
 
         swervo = hardwareMap.get(Servo.class, "hoodServo");
 
-        // 2. Cast to ServoImplEx and set the range to 500-2500
         if (swervo instanceof ServoImplEx) {
             ((ServoImplEx) swervo).setPwmRange(new PwmControl.PwmRange(500, 2500));
         }
@@ -56,12 +54,12 @@ public class SwerveModeTuner extends OpMode {
         SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
         swervo.setPosition(SERVO_POS);
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("SERVO_POS", SERVO_POS);
+        telemetryEx.addData("SERVO_POS", SERVO_POS);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        telemetryData.update();
+        telemetryEx.update();
     }
 }
