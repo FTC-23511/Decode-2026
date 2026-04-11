@@ -1,11 +1,10 @@
-package org.firstinspires.ftc.teamcode.tuning.servo;
+package org.firstinspires.ftc.teamcode.tuning.intake;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -20,14 +19,14 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "HoodServoTuner", group = "Servo")
-public class HoodServoTuner extends CommandOpMode {
+@TeleOp(name = "IntakeMotorTuner", group = "Motor")
+public class IntakeMotorTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
     public ElapsedTime timer;
 
-    public static double SERVO_POS = 0.0;
+    public static double MOTOR_POWER = 0.0;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -64,15 +63,16 @@ public class HoodServoTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
-        robot.hoodServo.set(SERVO_POS);
+        MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
+        robot.intakeMotors.set(MOTOR_POWER);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("SERVO_POS", SERVO_POS);
+        telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        super.run();
+        telemetryData.update();
     }
 }

@@ -1,15 +1,11 @@
-package org.firstinspires.ftc.teamcode.tuning.servo;
+package org.firstinspires.ftc.teamcode.tuning.launcher;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.PwmControl;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -17,50 +13,58 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "SwerveModeTuner", group = "Servo")
-public class SwerveModeTuner extends OpMode {
+@TeleOp(name = "HoodServoTuner", group = "Servo")
+public class HoodServoTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
     public ElapsedTime timer;
 
     public static double SERVO_POS = 0.0;
-    Servo swervo;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
+    private final Robot robot = Robot.getInstance();
     
     @Override
-    public void init() {
+    public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         TESTING_OP_MODE = true;
 
-        swervo = hardwareMap.get(Servo.class, "hoodServo");
+        // Resets the command scheduler
+        super.reset();
 
-        // 2. Cast to ServoImplEx and set the range to 500-2500
-        if (swervo instanceof ServoImplEx) {
-            ((ServoImplEx) swervo).setPwmRange(new PwmControl.PwmRange(500, 2500));
-        }
+        // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
+        robot.init(hardwareMap);
+
+        driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
+
+        // Driver controls
+        // Reset heading
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
+        );
     }
 
     @Override
-    public void loop() {
+    public void run() {
         // Keep all the has movement init for until when TeleOp starts
         // This is like the init but when the program is actually started
         if (timer == null) {
+            robot.initHasMovement();
             timer = new ElapsedTime();
         }
 
         SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
-        swervo.setPosition(SERVO_POS);
+        robot.hoodServo.set(SERVO_POS);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
@@ -68,6 +72,6 @@ public class SwerveModeTuner extends OpMode {
         telemetryData.addData("SERVO_POS", SERVO_POS);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
     }
 }
