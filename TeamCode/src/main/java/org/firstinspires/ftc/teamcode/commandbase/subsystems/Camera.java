@@ -372,26 +372,7 @@ public class Camera extends SubsystemBase {
         return null;
     }
 
-    @Deprecated
-    public Pose2d getLimelightPose(LLResult result) {
-        robot.limelight.updateRobotOrientation(Math.toDegrees(robot.drive.getPose().getHeading()));
-        Pose3D botPose = result.getBotpose_MT2();
 
-        if (botPose != null) {
-            double x = botPose.getPosition().x;
-            double y = botPose.getPosition().y;
-            double yaw = botPose.getOrientation().getYaw();
-
-            x = DistanceUnit.INCH.fromMeters(x);
-            y = DistanceUnit.INCH.fromMeters(y);
-            yaw = Math.toRadians(yaw);
-
-            if (x > -72 && x < 72 && y > -72 && y < 72 && !Double.isNaN(yaw)) {
-                return new Pose2d(x, y, yaw);
-            }
-        }
-        return null;
-    }
 
     private void updateCameraPoseReadings(Pose2d cameraPose) {
         cameraPoseEstimates.add(cameraPose);
@@ -491,20 +472,7 @@ public class Camera extends SubsystemBase {
         }
     }
 
-    @Deprecated
-    public void updateLimelight() {
-        if (enabled) {
-            LLResult result = robot.limelight.getLatestResult();
-            if (result != null && result.isValid()) {
-                Pose2d aprilTagPose = getLimelightPose(result);
-                if (aprilTagPose != null) {
-                    double timestamp = (System.nanoTime() / 1e9) - result.getStaleness() / 1000.0;
-                    lastStaleness = result.getStaleness();
-                    updateFilter(timestamp, aprilTagPose);
-                }
-            }
-        }
-    }
+
 
     @Override
     public void periodic() {
