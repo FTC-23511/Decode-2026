@@ -244,34 +244,27 @@ public class Camera extends SubsystemBase {
         }
     }
 
-    /**
-     * Relocalizes the robot using Arducam detections.
-     * @return true if relocalization was successful, false otherwise.
-     */
-    public boolean relocalizeArducam() {
-        if (detections != null && !detections.isEmpty()) {
-            Pose2d cameraPose = getCameraPose();
-            double timestamp = getDetectionTimestamp();
-            if (cameraPose != null && timestamp != -1) {
-                Pose2d avgPose = getAverageCameraPose(cameraPose);
-                updateFilter(timestamp, avgPose);
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
-     * Relocalizes the robot accurately using all current readings from the Kalman filter.
+     * Relocalizes the robot using Arducam detections.
+     * @param hardReset If true, trusts the camera 100% (use when stopped). If false, smoothly filters 10% (use when moving).
      * @return true if relocalization was successful, false otherwise.
      */
-    public boolean relocalizeAccurately() {
+    public boolean relocalizeArducam(boolean hardReset) {
         if (detections != null && !detections.isEmpty()) {
             Pose2d cameraPose = getCameraPose();
             double timestamp = getDetectionTimestamp();
             if (cameraPose != null && timestamp != -1) {
                 Pose2d avgPose = getAverageCameraPose(cameraPose);
-                updateFilter(timestamp, avgPose, 1.0, 1.0);
+
+                if (hardReset) {
+                    // Robot is stopped: 100% Trust in Camera
+                    updateFilter(timestamp, avgPose, 1.0, 1.0);
+                } else {
+                    // Robot is moving: 10% Smooth Filter
+                    updateFilter(timestamp, avgPose);
+                }
+
                 return true;
             }
         }
@@ -281,11 +274,12 @@ public class Camera extends SubsystemBase {
     /**
      * Updates Arducam detections and then relocalizes the robot.
      * @param n max number of times to attempt reading to get a valid result
+     * @param hardReset true for 100% instant snap, false for 10% smooth filter
      * @return true if relocalization was successful, false otherwise.
      */
-    public boolean relocalizeArducam(int n) {
+    public boolean relocalizeArducam(int n, boolean hardReset) {
         updateArducam(n);
-        return relocalizeArducam();
+        return relocalizeArducam(hardReset);
     }
 
     public void updateROI(Pose2d robotPose) {
@@ -481,14 +475,8 @@ public class Camera extends SubsystemBase {
         }
 
         if (recordReadings) {
-            updateArducam(1);
-            if (detections != null && !detections.isEmpty()) {
-                Pose2d cameraPose = getCameraPose();
-                double timestamp = getDetectionTimestamp();
-                if (cameraPose != null && timestamp != -1) {
-                    updateFilter(timestamp, cameraPose);
-                }
-            }
+            // Automatically updates the camera 1 time, and uses the 10% smooth filter
+            relocalizeArducam(1, false);
         }
     }
 
