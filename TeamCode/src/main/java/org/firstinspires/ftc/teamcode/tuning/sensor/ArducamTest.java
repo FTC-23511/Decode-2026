@@ -81,7 +81,6 @@ public class ArducamTest extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        robot.camera.updateCameraResult(3);
         robot.camera.writeCameraTelemetry(telemetry);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
@@ -111,7 +110,6 @@ public class ArducamTest extends CommandOpMode {
     @Override
     public void run() {
         if (Turret.turretState.equals(Turret.TurretState.GOAL_LOCK_CONTROL)) {
-            robot.camera.updateCameraResult(3);
             robot.camera.writeCameraTelemetry(telemetry);
         }
 
