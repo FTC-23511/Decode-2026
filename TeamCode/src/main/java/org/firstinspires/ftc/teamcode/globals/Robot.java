@@ -15,13 +15,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
-import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
+import com.seattlesolvers.solverslib.hardware.servos.ServoExGroup;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -35,6 +38,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Camera;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import dev.nullftc.profiler.Profiler;
@@ -49,7 +53,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
 
     public Profiler profiler;
-    public File file;
+    public File profilerFile;
+    public File logCatFile;
 
 //    public LynxModule controlHub;
 //    public LynxModule expansionHub;
@@ -76,7 +81,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx BLswervo;
     public CRServoEx BRswervo;
 
-    public CRServoGroup turretServos;
+    public ServoExGroup turretServos;
     public Motor.Encoder turretEncoder;
     public AbsoluteAnalogEncoder analogTurretEncoder;
 
@@ -97,17 +102,21 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //    public SensorDigitalDevice frontDistanceSensor;
 //    public SensorDigitalDevice backDistanceSensor;
     public AnalogInput distanceSensor;
+    private MathFunctions.VirtualGoalSolver.ShotSolution shotSolution;
 
     public void init(HardwareMap hwMap) {
-        File logsFolder = new File(AppUtil.FIRST_FOLDER, "logs");
-        if (!logsFolder.exists()) logsFolder.mkdirs();
+        File profilerFolder = new File(AppUtil.FIRST_FOLDER, "logs");
+        File logcatFolder = new File(AppUtil.FIRST_FOLDER, "logcat");
+        if (!profilerFolder.exists()) profilerFolder.mkdirs();
+        if (!logcatFolder.exists()) logcatFolder.mkdirs();
 
         long timestamp = System.currentTimeMillis();
-        file = new File(logsFolder, "profiler-" + timestamp + ".csv");
+        profilerFile = new File(profilerFolder, "profiler-" + timestamp + ".csv");
+        logCatFile = new File(logcatFolder, "logcat_" + timestamp + ".txt");
 
         profiler = Profiler.builder()
                 .factory(new BasicProfilerEntryFactory())
-                .exporter(new CSVProfilerExporter(file))
+                .exporter(new CSVProfilerExporter(profilerFile))
                 .debugLog(false) // Log EVERYTHING
                 .build();
 
@@ -153,8 +162,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchMotors.setRunMode(Motor.RunMode.RawPower);
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
-        launchEncoder = new Motor(hwMap, "FL").encoder;
-        launchEncoder.setDirection(Motor.Direction.REVERSE);
+        launchEncoder = new Motor(hwMap, "FL").encoder.
+                setDirection(Motor.Direction.FORWARD);
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
@@ -169,14 +178,15 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .zero(BR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
 
-        turretServos = new CRServoGroup(
-                new CRServoEx(hwMap, "leftTurretServo")
+        turretServos = new ServoExGroup(
+                new ServoEx(hwMap, "leftTurretServo")
+                        .setCachingTolerance(0.001),
+                new ServoEx(hwMap, "rightTurretServo")
                         .setCachingTolerance(0.001)
-                        .setRunMode(CRServoEx.RunMode.RawPower),
-                new CRServoEx(hwMap, "rightTurretServo")
-                        .setCachingTolerance(0.001)
-                        .setRunMode(CRServoEx.RunMode.RawPower)
+
         ).setInverted(true);
+
+        turretServos.set(0.5);
 
         analogTurretEncoder = new AbsoluteAnalogEncoder(hwMap, "turretEncoder")
                 .zero(TURRET_ENCODER_OFFSET)
@@ -185,8 +195,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         RobotLog.aa("VERY First Voltage", String.valueOf(analogTurretEncoder.getVoltage()));
 
         turretEncoder = new Motor(hwMap, "BL").encoder
-                .setDirection(Motor.Direction.FORWARD);
-        turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
+                .setDirection(Motor.Direction.FORWARD)
+                .overrideResetPos((int) TURRET_SYNC_OFFSET);
 
         hoodServo = new ServoEx(hwMap, "hoodServo").setCachingTolerance(0.001)
                 .setInverted(true);
@@ -255,25 +265,41 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         // this is chopped for loop times
         if (voltageTimer == null) {
             cachedVoltage = voltageSensor.getVoltage();
+            voltageTimer = new ElapsedTime();
+            voltageTimer.reset();
         } else if (voltageTimer.milliseconds() > (1.0 / VOLTAGE_SENSOR_POLLING_RATE) * 1000) {
             cachedVoltage = voltageSensor.getVoltage();
         }
-        if (((Double) cachedVoltage).isNaN() || cachedVoltage == 0) {
+        if (Double.isNaN(cachedVoltage) || cachedVoltage <= 0) {
             cachedVoltage = 12;
         }
         return cachedVoltage;
     }
 
-    public void exportProfiler(File file) {
-        RobotLog.i("Starting async profiler export to: " + file.getAbsolutePath());
+    public void exportProfiler(File profilerFile, File logCatFile) {
+        RobotLog.i("Starting async profiler and Logcat export to: " + profilerFile.getAbsolutePath());
 
         Thread exportThread = new Thread(() -> {
             try {
                 profiler.export();
                 profiler.shutdown();
             } catch (Exception e) {
-                Log.e("An error occurred", e.toString());
-                Log.e(e.toString(), Arrays.toString(e.getStackTrace()));
+                RobotLog.e("An error occurred", e.toString());
+                RobotLog.e(e.toString(), Arrays.toString(e.getStackTrace()));
+            }
+
+            try {
+                Process process = Runtime.getRuntime().exec("logcat -d -f " + logCatFile.getAbsolutePath());
+
+                int exitCode = process.waitFor();
+
+                if (exitCode == 0) {
+                    RobotLog.i("Logcat export successful to " + logCatFile.getAbsolutePath());
+                } else {
+                    RobotLog.w("Logcat export failed with exit code: " + exitCode);
+                }
+            } catch (IOException | InterruptedException e) {
+                RobotLog.i("Logcat export Error", e.getMessage());
             }
         });
 
@@ -292,8 +318,49 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
      */
 
+    public MathFunctions.VirtualGoalSolver.ShotSolution getShotSolution() {
+        if (shotSolution == null) {
+            // 1. Get raw data
+            Pose2d robotPose = drive.getPose();
+            Rotation2d robotRotation = robotPose.getRotation();
+
+            // Sensor velocity (Already Field-Centric from Pinpoint/Odometry)
+            ChassisSpeeds robotVelField = drive.getVelocity();
+
+            // Driver intent (Robot-Centric from joysticks, needs conversion)
+            ChassisSpeeds targetVelRobot = drive.swerve.getTargetVelocity();
+            ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(targetVelRobot, robotRotation);
+
+            // 2. Predict Linear Velocity (Interpolate in Inches/Second)
+            // We are finding the "expected" velocity during the ball's transition
+            double predictedVx = robotVelField.vxMetersPerSecond +
+                    (targetVelField.vxMetersPerSecond - robotVelField.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            double predictedVy = robotVelField.vyMetersPerSecond +
+                    (targetVelField.vyMetersPerSecond - robotVelField.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            Vector2d predictedLinearVelIps = new Vector2d(predictedVx, predictedVy);
+
+            // 3. Predict Angular Velocity (Radians/sec)
+            double predictedOmegaRadPerSec = robotVelField.omegaRadiansPerSecond +
+                    (targetVelField.omegaRadiansPerSecond - robotVelField.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            // 4. Solve
+            shotSolution = MathFunctions.VirtualGoalSolver.solve(
+                    robotPose,
+                    predictedLinearVelIps,
+                    predictedOmegaRadPerSec,
+                    turret.adjustedGoalPose()
+            );
+        }
+
+        return shotSolution;
+    }
+
     public void updateLoop(TelemetryData telemetryData) {
         CommandScheduler.getInstance().run();
+
+        shotSolution = null;
 
         if (telemetryData != null) {
             telemetryData.update();

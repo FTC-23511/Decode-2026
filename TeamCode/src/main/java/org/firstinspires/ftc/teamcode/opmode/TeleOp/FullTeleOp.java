@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
-
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
+import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -19,7 +20,6 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.MathUtils;
@@ -36,6 +36,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Config
 @TeleOp(name = "FullTeleOp", group = "AAATeleOp")
 public class FullTeleOp extends CommandOpMode {
     public GamepadEx driver;
@@ -47,7 +48,8 @@ public class FullTeleOp extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
-    public static double MAX_OUTPUT = 1;
+    public static double MIN_OUTPUT = 0.3; // As a fraction of the max speed of the robot
+    public static double MAX_OUTPUT = 1; // As a fraction of the max speed of the robot
 
     @Override
     public void initialize() {
@@ -100,17 +102,25 @@ public class FullTeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
         );
 
+        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> Intake.keepIntakeOn = false),
+                        new InstantCommand(() -> robot.launcher.setRamp(false)),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                )
+        );
+
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
+                        new InstantCommand(() -> Intake.keepIntakeOn = true),
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
                 )
         );
 
@@ -122,38 +132,34 @@ public class FullTeleOp extends CommandOpMode {
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
+                new UninterruptibleCommand(new CancelCommand())
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.readyToLaunch = true),
                         new InstantCommand(() -> robot.launcher.setActiveControl(true)),
                         new InstantCommand(() -> robot.launcher.setRamp(true)),
-
-                        new ConditionalCommand(
-                            new ClearLaunch(false),
-                            new ClearLaunch(true),
-                            () -> gamepad1.left_trigger > 0.5
-                        )
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
+                        new ClearLaunch(false)
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.readyToLaunch = true),
+                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
+                        new InstantCommand(() -> robot.launcher.setRamp(true)),
+                        new ClearLaunch(true)
                 )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new StationaryAimbotFullLaunch()
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
-                new UninterruptibleCommand(new CancelCommand())
+                new ConditionalCommand(
+                        new StationaryAimbotFullLaunch(false),
+                        new StationaryAimbotFullLaunch(true),
+                        () -> gamepad1.left_trigger > 0.5
+                )
         );
     }
 
@@ -165,6 +171,7 @@ public class FullTeleOp extends CommandOpMode {
             robot.pinpoint.resetPosAndIMU();
         }
 
+        Launcher.DISTANCE_OFFSET = 0;
         robot.drive.setPose(END_POSE);
         telemetryData.addData("END_POSE", END_POSE);
         telemetryData.addData("TURRET_SYNCED", TURRET_SYNCED);
@@ -219,8 +226,7 @@ public class FullTeleOp extends CommandOpMode {
                 robot.drive.swerve.updateWithXLock();
             } else {
                 robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
-                double minSpeed = 0.3; // As a fraction of the max speed of the robot
-                double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+                double speedMultiplier = MIN_OUTPUT + (1 - MIN_OUTPUT) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
                 Pose2d robotPose = robot.drive.getPose();
                 Rotation2d robotAngle = robotPose.getRotation();
@@ -252,15 +258,15 @@ public class FullTeleOp extends CommandOpMode {
             }
         }
 
-        /* Gamepad rumble when intake is full
+//        /* Gamepad rumble when intake is full
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
-            gamepad1.rumble(100);
-            gamepad1.setLedColor(255, 0, 0, 100);
+            gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
+            gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
         } else if (gamepad1.isRumbling() && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
-        */
+//        */
 
         robot.profiler.end("Swerve Drive");
 
@@ -301,6 +307,8 @@ public class FullTeleOp extends CommandOpMode {
             telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
             telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
             telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
+            telemetryData.addData("Flywheel Impossible", robot.launcher.impossible);
+            telemetryData.addData("Launch Valid", robot.launcher.launchValid());
 
             telemetryData.addData("Intake Motor State", Intake.motorState);
             telemetryData.addData("Intake Jammed", robot.intake.intakeJammed);
@@ -322,7 +330,7 @@ public class FullTeleOp extends CommandOpMode {
     @Override
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
-        robot.exportProfiler(robot.file);
+        robot.exportProfiler(robot.profilerFile, robot.logCatFile);
         telemetryData.update();
     }
 }

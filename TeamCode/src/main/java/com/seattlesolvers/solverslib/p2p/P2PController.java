@@ -1,9 +1,9 @@
 package com.seattlesolvers.solverslib.p2p;
 
 import com.seattlesolvers.solverslib.controller.Controller;
-import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.MathUtils;
@@ -11,34 +11,20 @@ import com.seattlesolvers.solverslib.util.MathUtils;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class P2PController {
-    public final Controller xController;
-    public final Controller yController;
+    public final Controller translationalController;
     public final Controller headingController;
     public final AngleUnit angleUnit;
 
     private Pose2d target;
     private Pose2d current;
+
     private Transform2d error;
 
-    private SlewRateLimiter xLimiter = null;
-    private SlewRateLimiter yLimiter = null;
+    private SlewRateLimiter magnitudeLimiter = null;
     private SlewRateLimiter hLimiter = null;
 
-    /**
-     * The constructor for a P2PController object.
-     *
-     * @param xController the controller for x axis movement (field-centric)
-     * @param yController the controller for y axis movement (field-centric)
-     * @param headingController the controller for robot heading
-     * @param angleUnit the angle of the heading controller and positions being passed to this object
-     * @param start the starting pose of the robot
-     * @param target the first target pose of the robot
-     * @param positionalTolerance the positional tolerance allowed for this controller at which the robot is considered to be at the target
-     * @param angularTolerance the positional tolerance allowed for this controller at which the robot is considered to be at the target, in the units specified in the constructor
-     */
-    public P2PController(Controller xController, Controller yController, Controller headingController, AngleUnit angleUnit, Pose2d start, Pose2d target, double positionalTolerance, double angularTolerance) {
-        this.xController = xController;
-        this.yController = yController;
+    public P2PController(Controller translationalController, Controller headingController, AngleUnit angleUnit, Pose2d start, Pose2d target, double positionalTolerance, double angularTolerance) {
+        this.translationalController = translationalController;
         this.headingController = headingController;
         this.angleUnit = angleUnit;
         this.current = start;
@@ -47,18 +33,8 @@ public class P2PController {
         setTolerance(positionalTolerance, angularTolerance);
     }
 
-    /**
-     * A simplified constructor for a P2PController object.
-     *
-     * @param xController the controller for x axis movement (field-centric)
-     * @param yController the controller for y axis movement (field-centric)
-     * @param headingController the controller for robot heading
-     * @param angleUnit the angle of the heading controller and positions being passed to this object
-     * @param positionalTolerance the positional tolerance allowed for this controller at which the robot is considered to be at the target
-     * @param angularTolerance the positional tolerance allowed for this controller at which the robot is considered to be at the target, in the units specified in the constructor
-     */
-    public P2PController(Controller xController, Controller yController, Controller headingController, AngleUnit angleUnit, double positionalTolerance, double angularTolerance) {
-        this(xController, yController, headingController, angleUnit, new Pose2d(), new Pose2d(), positionalTolerance, angularTolerance);
+    public P2PController(Controller translationalController, Controller headingController, AngleUnit angleUnit, double positionalTolerance, double angularTolerance) {
+        this(translationalController, headingController, angleUnit, new Pose2d(), new Pose2d(), positionalTolerance, angularTolerance);
     }
 
     /**
@@ -67,20 +43,50 @@ public class P2PController {
      * @return field-centric chassis speeds/power
      */
     public ChassisSpeeds calculate(Pose2d pv) {
-        // Update internal variables
         current = pv;
-        getError();
 
-        double xVal = xController.calculate(current.getX(), target.getX());
-        double yVal = yController.calculate(current.getY(), target.getY());
-        double headingVal = headingController.calculate(0, MathUtils.normalizeAngle(error.getRotation().getAngle(angleUnit), false, angleUnit));
+        // 1. Calculate Global Coordinate Error (No rotation applied yet)
+        double errorX = target.getX() - current.getX();
+        double errorY = target.getY() - current.getY();
 
-        if (xLimiter != null) {
-            xVal = xLimiter.calculate(xVal);
+        // Update the error object just for telemetry use
+        error = new Transform2d(new Pose2d(errorX, errorY, new Rotation2d(0)), new Pose2d());
+
+        // 2. Vector Math
+        double distanceToTarget = Math.hypot(errorX, errorY);
+        double errorAngle = Math.atan2(errorY, errorX);
+
+        // 3. Magnitude Calculation (PID on distance)
+        // Setpoint is 0 (distance remaining), Measurement is current distance
+        // NOTE: Depending on your PID logic, you might need to swap these or negate the result.
+        // Usually: Output = Kp * (Setpoint - Measurement).
+        // If Setpoint=0 and Measurement=10, Error=-10. Output is negative.
+        // But we need positive magnitude to move forward.
+        // So we calculate: target=0, input=distance -> returns negative?
+        // EASIER WAY: calculate(distance, 0) -> Error = 0 - distance = -distance.
+        // Let's assume calculate(current, target) -> Kp * (Target - Current).
+        // calculate(0, distance) -> Kp * (distance - 0) -> Positive Magnitude.
+        double magnitudeVal = translationalController.calculate(0, distanceToTarget);
+
+        // 4. Slew Rate on Magnitude
+        if (magnitudeLimiter != null) {
+            magnitudeVal = magnitudeLimiter.calculate(magnitudeVal);
         }
-        if (xLimiter != null) {
-            yVal = yLimiter.calculate(yVal);
-        }
+
+        // 5. Decompose back to Field-Centric X/Y
+        double xVal = magnitudeVal * Math.cos(errorAngle);
+        double yVal = magnitudeVal * Math.sin(errorAngle);
+
+        // 6. Heading Calculation
+        double currentHeading = current.getRotation().getAngle(angleUnit);
+        double targetHeading = target.getRotation().getAngle(angleUnit);
+
+        // Use MathUtils to normalize the error to [-PI, PI] or [-180, 180]
+        double headingError = MathUtils.normalizeAngle(targetHeading - currentHeading, false, angleUnit);
+
+        // We feed 0 as current and error as target so the PID acts on the error directly
+        double headingVal = headingController.calculate(0, headingError);
+
         if (hLimiter != null) {
             headingVal = hLimiter.calculate(headingVal);
         }
@@ -88,15 +94,8 @@ public class P2PController {
         return new ChassisSpeeds(xVal, yVal, headingVal);
     }
 
-    /**
-     * Enables and sets the slew rate limiting for the P2P Controller.
-     * One for x-axis movement, one for y-axis movement, and one for heading
-     * Set any parameters not to be enabled/used as null.
-     * @return this object for chaining purposes
-     */
-    public P2PController setSlewRateLimiters(SlewRateLimiter xLimiter, SlewRateLimiter yLimiter, SlewRateLimiter hLimiter) {
-        this.xLimiter = xLimiter;
-        this.yLimiter = yLimiter;
+    public P2PController setSlewRateLimiters(SlewRateLimiter magnitudeLimiter, SlewRateLimiter hLimiter) {
+        this.magnitudeLimiter = magnitudeLimiter;
         this.hLimiter = hLimiter;
         return this;
     }
@@ -124,8 +123,7 @@ public class P2PController {
      * @param angularTolerance Angular error which is tolerable, in the angle unit specified.
      */
     public void setTolerance(double positionTolerance, double angularTolerance) {
-        xController.setTolerance(positionTolerance);
-        yController.setTolerance(positionTolerance);
+        translationalController.setTolerance(positionTolerance);
         headingController.setTolerance(angularTolerance);
     }
 
@@ -133,7 +131,7 @@ public class P2PController {
      * @return the positional and angular tolerances of the controller respectively
      */
     public double[] getTolerance() {
-        return new double[]{xController.getTolerance()[0], headingController.getTolerance()[0]};
+        return new double[]{translationalController.getTolerance()[0], headingController.getTolerance()[0]};
     }
 
     /**
@@ -142,7 +140,7 @@ public class P2PController {
      * @return Whether the error is within the acceptable bounds.
      */
     public boolean atTarget() {
-        return xController.atSetPoint() && yController.atSetPoint() && headingController.atSetPoint();
+        return translationalController.atSetPoint() && headingController.atSetPoint();
     }
 
     /**
@@ -151,7 +149,12 @@ public class P2PController {
      * @return the positional and angular error
      */
     public Transform2d getError() {
-        error = target.minus(current);
+        // Re-calculate simply for accessors
+        double errorX = target.getX() - current.getX();
+        double errorY = target.getY() - current.getY();
+        double errorH = MathUtils.normalizeAngle(target.getRotation().getAngle(angleUnit) - current.getRotation().getAngle(angleUnit), false, angleUnit);
+
+        error = new Transform2d(new Pose2d(errorX, errorY, new Rotation2d(errorH)), new Pose2d());
         return error;
     }
 }

@@ -26,10 +26,8 @@ public class AlliancePoseSelector extends LinearOpMode {
         TESTING_OP_MODE = true;
         robot.init(hardwareMap);
 
-        robot.turretServos.set(0.01);
 
         waitForStart();
-//        buttonTimer = new ElapsedTime();
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
@@ -39,11 +37,10 @@ public class AlliancePoseSelector extends LinearOpMode {
                 ALLIANCE_COLOR = AllianceColor.RED;
             }
 
-            robot.turretServos.set(0.01);
-
             if (gamepad1.right_stick_button) {
                 TURRET_SYNCED = false;
                 robot.turret.resetTurretEncoder();
+                robot.pinpoint.resetPosAndIMU();
             }
 
             telemetry.addData("Cross / Triangle", "Blue");
@@ -57,7 +54,5 @@ public class AlliancePoseSelector extends LinearOpMode {
             PhotonCore.CONTROL_HUB.clearBulkCache();
             PhotonCore.EXPANSION_HUB.clearBulkCache();
         }
-
-        robot.turretServos.set(0.0);
     }
 }

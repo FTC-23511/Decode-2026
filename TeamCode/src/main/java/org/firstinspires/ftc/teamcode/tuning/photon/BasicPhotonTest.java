@@ -20,8 +20,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.GoBildaPinpointDriver;
 
-import java.util.List;
-
 @Config
 @TeleOp(group = "Photon")
 public class BasicPhotonTest extends LinearOpMode {

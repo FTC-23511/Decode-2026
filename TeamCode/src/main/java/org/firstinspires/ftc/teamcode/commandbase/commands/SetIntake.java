@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 public class SetIntake extends CommandBase {
     private final Robot robot;
     private final Intake.MotorState motorState;
-    private boolean waitForArtifacts;
+    private final boolean waitForArtifacts;
 
     private ElapsedTime timer;
 

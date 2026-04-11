@@ -58,7 +58,6 @@ public class Drive extends SubsystemBase {
 
         follower = new P2PController(
                 new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
-                new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
                 (OP_MODE_TYPE.equals(OpModeType.TELEOP) ? new PIDFController(TELEOP_HEADING_COEFFICIENTS) : new PIDFController(HEADING_COEFFICIENTS)).setMinOutput(HEADING_MIN_OUTPUT),
                 ANGLE_UNIT,
                 XY_TOLERANCE,
@@ -82,7 +81,7 @@ public class Drive extends SubsystemBase {
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
             setPose(END_POSE);
         }
-        ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
+//        ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
     }
 
     public Pose2d getPose() {
@@ -99,16 +98,6 @@ public class Drive extends SubsystemBase {
 
     public void setPose(Pose2d pose) {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
-    }
-
-    public Pose2d turretPoseToDrivePose(Pose2d turretPose) {
-        return new Pose2d(
-                turretPose.getTranslation()
-                        .plus(new Translation2d(-TURRET_OFF_CENTER_FRONT_BACK, 0)
-                                .rotateBy(new Rotation2d(robot.turret.getPosition()))
-                        ),
-                turretPose.getRotation()
-        );
     }
 
     public static boolean robotInZone(Pose2d robotPose) {

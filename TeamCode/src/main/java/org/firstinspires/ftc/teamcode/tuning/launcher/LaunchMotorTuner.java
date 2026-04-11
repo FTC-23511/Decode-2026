@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.tuning.motor;
+package org.firstinspires.ftc.teamcode.tuning.launcher;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_SERVO_POS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import android.util.Log;
@@ -16,7 +15,6 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -50,6 +48,9 @@ public class LaunchMotorTuner extends CommandOpMode {
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         TESTING_OP_MODE = true;
 
+        // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
+        robot.init(hardwareMap);
+
         leftMotor = hardwareMap.get(DcMotorEx.class, "leftLaunchMotor");
         rightMotor = hardwareMap.get(DcMotorEx.class, "rightLaunchMotor");
 
@@ -59,9 +60,6 @@ public class LaunchMotorTuner extends CommandOpMode {
 
         // Resets the command scheduler
         super.reset();
-
-        // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
-        robot.init(hardwareMap);
     }
 
     @Override
@@ -100,6 +98,7 @@ public class LaunchMotorTuner extends CommandOpMode {
         telemetryData.addData("sdk topMotor velocity", leftMotor.getVelocity());
         telemetryData.addData("sdk bottomMotor velocity", rightMotor.getVelocity());
         telemetryData.addData("encoder position", robot.launchEncoder.getPosition());
+        telemetryData.addData("raw vel", robot.launchEncoder.getRawVelocity());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryData);

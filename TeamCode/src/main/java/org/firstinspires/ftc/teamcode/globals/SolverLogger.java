@@ -17,7 +17,8 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 
-public class SolverLogger {
+public class
+SolverLogger {
     String logFileName;
     private FileHandler logFileHandler;
 
@@ -122,6 +123,9 @@ public class SolverLogger {
 
         logger.info(str);
     }
-
+    public void logEssencial(){
+        String str = "";
+        str+="Disconnect";
+    }
 
 }

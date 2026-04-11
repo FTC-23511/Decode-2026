@@ -1,30 +1,46 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.command.*;
+import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.RunCommand;
+import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
+import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.teamcode.commandbase.commands.*;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
+import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
+
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "Baby (far 9+ Ball)", preselectTeleOp = "FullTeleOp", group = "Auto")
-public class Baby extends CommandOpMode {
+@Autonomous(name = "ElimsAuto (far)", preselectTeleOp = "FullTeleOp", group = "Auto")
+public class ElimsAuto extends CommandOpMode {
     public ElapsedTime timer;
+    public ElapsedTime autoTimer;
     public static boolean GATE_OPEN = false;
     TelemetryData telemetryData = new TelemetryData(
             new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())
@@ -32,23 +48,22 @@ public class Baby extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
     public ArrayList<Pose2d> pathPoses;
 
-    public static int REPEAT_INTAKE = 3;
     private boolean togglePath = true;
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-16.75, -63.25, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-16.75, -63.25, Math.toRadians(4))); // Starting Pose
         pathPoses.add(new Pose2d(-32, -43.69565217391305, Math.toRadians(-30))); // Line 1
         pathPoses.add(new Pose2d(-59.78120617110799, -40.69565217391305, Math.toRadians(-30))); // Line 2
-        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-65.03225806451613, -63, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-50.490883590462836, -63, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-65.03225806451613, -63, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-65.03225806451613, -48.54072790294629, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(0))); // Line 9
-        pathPoses.add(new Pose2d(-24.16638035501517, -42.551126516464464, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(3))); // Line 3
+        pathPoses.add(new Pose2d(-65.03225806451613, -63, Math.toRadians(4))); // Line 4
+        pathPoses.add(new Pose2d(-45.490883590462836, -63, Math.toRadians(4))); // Line 5
+        pathPoses.add(new Pose2d(-65.03225806451613, -63, Math.toRadians(4))); // Line 6
+        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(4))); // Line 7
+        pathPoses.add(new Pose2d(-65.03225806451613, -48.54072790294629, Math.toRadians(4))); // Line 8
+        pathPoses.add(new Pose2d(-16.332268370607025, -58.58785942492013, Math.toRadians(4))); // Line 9
+        pathPoses.add(new Pose2d(-24.16638035501517, -42.551126516464464, Math.toRadians(4))); // Line 10
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -71,7 +86,7 @@ public class Baby extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        Launcher.DISTANCE_OFFSET = 0.8;
+        Launcher.DISTANCE_OFFSET = 0.75;
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(false);
@@ -86,17 +101,8 @@ public class Baby extends CommandOpMode {
 
                         // Score Preload
                         new WaitCommand(1000),
-                        new ClearLaunch(true).raceWith(
-                                new RunCommand(
-                                        () -> robot.drive.swerve.updateWithXLock()
-                                )
-                        ),
+                        new ClearLaunch(true),
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
-
-                        // Spike 1 Sequence
-                        new DriveTo(pathPoses.get(1)),
-                        pathIntake(2, 1200, 0.5, true),
-                        pathShoot(3, 2000),
 
                         // Balls on wall Sequence
                         pathIntake(4, 3000, 0.5, false),
@@ -104,12 +110,8 @@ public class Baby extends CommandOpMode {
                         pathIntake(6, 1000, 0.5, true),
                         pathShoot(7, 1500),
 
-                        // Repeatedly intake + shoot balls
-                        pathIntake(8, 1400, 0.75, false),
-                        new WaitCommand(400),
-                        pathShoot(9, 1500),
+                        new WaitCommand(3000),
 
-                        // Balls on wall sequence
                         pathIntake(4, 3000, 0.5, false),
                         new DriveTo(pathPoses.get(5)).withTimeout(500),
                         pathIntake(6, 1000, 0.5, true),
@@ -140,10 +142,12 @@ public class Baby extends CommandOpMode {
     public void run() {
         if (timer == null) {
             timer = new ElapsedTime();
+            autoTimer = new ElapsedTime();
         }
 
         // Always log Loop Time
         telemetryData.addData("Loop Time", timer.milliseconds());
+        Drive.ANGLE_OFFSET = (autoTimer.seconds() / 30) * 0.15 * ALLIANCE_COLOR.getMultiplier();
 
         timer.reset();
 
@@ -189,7 +193,7 @@ public class Baby extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long pathTimeout) {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(pathTimeout),
-                new ClearLaunch(true).raceWith(
+                new ClearLaunch(true, false).raceWith(
                         new RunCommand(
                                 () -> robot.drive.swerve.updateWithTargetVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
                                         robot.drive.follower.calculate(robot.drive.getPose()),

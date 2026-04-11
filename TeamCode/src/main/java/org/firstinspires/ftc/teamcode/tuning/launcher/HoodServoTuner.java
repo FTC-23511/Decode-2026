@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode.tuning.motor;
+package org.firstinspires.ftc.teamcode.tuning.launcher;
+
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -18,14 +19,14 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "IntakeMotorTuner", group = "Motor")
-public class IntakeMotorTuner extends CommandOpMode {
+@TeleOp(name = "HoodServoTuner", group = "Servo")
+public class HoodServoTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
     public ElapsedTime timer;
 
-    public static double MOTOR_POWER = 0.0;
+    public static double SERVO_POS = 0.0;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -35,6 +36,7 @@ public class IntakeMotorTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -61,16 +63,15 @@ public class IntakeMotorTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotors.set(MOTOR_POWER);
+        SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
+        robot.hoodServo.set(SERVO_POS);
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
+        telemetryData.addData("SERVO_POS", SERVO_POS);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        telemetryData.update();
+        robot.updateLoop(telemetryData);
     }
 }

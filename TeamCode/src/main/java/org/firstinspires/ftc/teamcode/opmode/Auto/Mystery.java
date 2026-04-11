@@ -30,7 +30,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
 
-@Config
+//@Config
+@Deprecated
 @Autonomous(name = "Mystery (far 9 Ball)", preselectTeleOp = "AAAFullTeleOp", group = "Auto")
 public class Mystery extends CommandOpMode {
     public ElapsedTime timer;
@@ -123,8 +124,7 @@ public class Mystery extends CommandOpMode {
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
             module.setSwervoPIDF(SWERVO_PIDF_COEFFICIENTS);
         }
-        ((PIDFController) robot.drive.follower.xController).setCoefficients(XY_COEFFICIENTS);
-        ((PIDFController) robot.drive.follower.yController).setCoefficients(XY_COEFFICIENTS);
+        ((PIDFController) robot.drive.follower.translationalController).setCoefficients(XY_COEFFICIENTS);
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
 
         telemetryData.addData("Loop Time", timer.milliseconds());

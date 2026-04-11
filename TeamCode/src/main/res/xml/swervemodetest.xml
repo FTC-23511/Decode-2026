@@ -9,10 +9,10 @@
             <goBILDA5202SeriesMotor name="FR" port="2"/>
             <goBILDA5202SeriesMotor name="BR" port="3"/>
 
-            <Servo name="leftTurretServo" port="0"/>
-            <Servo name="rightTurretServo" port="1"/>
+            <ContinuousRotationServo name="leftTurretServo" port="0"/>
+            <ContinuousRotationServo name="rightTurretServo" port="1"/>
             <ContinuousRotationServo name="BR" port="2"/>
-            <ContinuousRotationServo name="FR" port="3"/>
+            <Servo name="hoodServo" port="3"/>
             <ContinuousRotationServo name="BL" port="4"/>
             <ContinuousRotationServo name="FL" port="5"/>
 
@@ -36,7 +36,7 @@
             <AnalogInput name="turretEncoder2" port="2"/>
             <AnalogInput name="turretEncoder" port="3"/>
 
-            <Servo name="hoodServo" port="3"/>
+            <ContinuousRotationServo name="FR" port="3"/>
             <Servo name="rampServo" port="5"/>
         </LynxModule>
     </LynxUsbDevice>
