@@ -13,7 +13,7 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -28,7 +28,7 @@ public class IntakeMotorTuner extends CommandOpMode {
 
     public static double MOTOR_POWER = 0.0;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
     
@@ -66,13 +66,13 @@ public class IntakeMotorTuner extends CommandOpMode {
         MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
         robot.intakeMotors.set(MOTOR_POWER);
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("MOTOR_POWER", MOTOR_POWER);
+        telemetryEx.addData("MOTOR_POWER", MOTOR_POWER);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();
-        telemetryData.update();
+        telemetryEx.update();
     }
 }

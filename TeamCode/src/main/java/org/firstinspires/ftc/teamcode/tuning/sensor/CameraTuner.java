@@ -13,7 +13,7 @@ import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.util.MathUtils;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
@@ -29,7 +29,7 @@ public class CameraTuner extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    private final TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    private final TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
 
@@ -86,25 +86,25 @@ public class CameraTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        telemetryData.addData("Turret Set Point", robot.turret.turretController.getSetPoint());
-        telemetryData.addData("Turret Enum", Turret.turretState);
-        telemetryData.addData("Angle Mode Value", angleVal);
+        telemetryEx.addData("Turret Set Point", robot.turret.turretController.getSetPoint());
+        telemetryEx.addData("Turret Enum", Turret.turretState);
+        telemetryEx.addData("Angle Mode Value", angleVal);
 
         double robotPose = robot.drive.getPose().getRotation().getDegrees();
         double turretPos = Math.toDegrees(robot.turret.getPosition());
 
-        telemetryData.addData("Robot Pose", robotPose);
-        telemetryData.addData("turretPos", turretPos);
+        telemetryEx.addData("Robot Pose", robotPose);
+        telemetryEx.addData("turretPos", turretPos);
 
-        telemetryData.addData("Robot Full Angle", (
+        telemetryEx.addData("Robot Full Angle", (
                 robotPose + turretPos - 90.0)
         );
-        telemetryData.addData("Robot Full Corrected Angle", MathUtils.normalizeDegrees(
+        telemetryEx.addData("Robot Full Corrected Angle", MathUtils.normalizeDegrees(
                 robotPose + turretPos - 90.0, false)
         );
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 
     @Override

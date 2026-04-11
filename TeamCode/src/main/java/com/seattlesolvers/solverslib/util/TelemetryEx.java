@@ -7,12 +7,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TelemetryData {
+public class TelemetryEx {
     private final Telemetry telemetry;
 
     private final Map<String, String> dataMap = new HashMap<>();
 
-    public TelemetryData(Telemetry telemetry) {
+    public TelemetryEx(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
 

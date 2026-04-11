@@ -14,16 +14,13 @@ import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
-import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.ArrayList;
@@ -34,7 +31,7 @@ public class SwervePathingOpMode extends CommandOpMode {
     public ElapsedTime timer;
 
     MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-    TelemetryData telemetryData = new TelemetryData(multipleTelemetry);
+    TelemetryEx telemetryEx = new TelemetryEx(multipleTelemetry);
 
     private final Robot robot = Robot.getInstance();
     public static boolean FOLLOW_PREPROGRAMMED_PATHS = false;
@@ -92,8 +89,8 @@ public class SwervePathingOpMode extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
-        telemetryData.addData("ALLIANCE_COLOR", ALLIANCE_COLOR);
-        telemetryData.update();
+        telemetryEx.addData("ALLIANCE_COLOR", ALLIANCE_COLOR);
+        telemetryEx.update();
     }
 
     @Override
@@ -111,17 +108,17 @@ public class SwervePathingOpMode extends CommandOpMode {
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("High TelemetryData");
 
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-            telemetryData.addData("Robot Pose", robot.drive.getPose());
-            telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
-            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-            telemetryData.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
-            telemetryData.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
-            telemetryData.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
-            telemetryData.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
-            telemetryData.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
+            telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
+            telemetryEx.addData("Robot Pose", robot.drive.getPose());
+            telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
+            telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+            telemetryEx.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+            telemetryEx.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
+            telemetryEx.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
+            telemetryEx.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
+            telemetryEx.addData("BR Module", robot.drive.swerve.getModules()[3].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[3].getPowerTelemetry());
 
-            telemetryData.update();
+            telemetryEx.update();
 
             robot.profiler.end("High TelemetryData");
         }

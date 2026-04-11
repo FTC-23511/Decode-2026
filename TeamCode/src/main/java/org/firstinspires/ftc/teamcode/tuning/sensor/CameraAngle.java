@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -30,7 +30,7 @@ public class CameraAngle extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    private final TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    private final TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
     private Pose2d lastKnownPose = new Pose2d();
@@ -72,21 +72,21 @@ public class CameraAngle extends CommandOpMode {
             lastKnownPose = robotPose;
         }
 
-        robot.camera.updateCameraResult(5);
+//        robot.camera.updateCameraResult(5);
 
-        telemetryData.addData("loop time", timer.milliseconds());
+        telemetryEx.addData("loop time", timer.milliseconds());
         timer.reset();
 
         if (lastKnownPose == null) {
-            telemetryData.addData("bot pose", null);
+            telemetryEx.addData("bot pose", null);
         } else {
             Pose2d cameraPose = robot.camera.getCameraPose();
 
             if (cameraPose != null) {
                 double angle = robot.turret.angleToWall(cameraPose);
-                telemetryData.addData("Median Wall Angle", angle);
+                telemetryEx.addData("Median Wall Angle", angle);
                 try {
-                    telemetryData.addData("tY Offset", robot.camera.getTxOffset(lastKnownPose));
+                    telemetryEx.addData("tY Offset", robot.camera.getTxOffset(lastKnownPose));
                     double offset = -robot.turret.angleToWall(cameraPose) * ALLIANCE_COLOR.getMultiplier();
                     double adjustment = robot.turret.goalAdjustmentLUT.get(offset);
 
@@ -96,27 +96,27 @@ public class CameraAngle extends CommandOpMode {
                     } else {
                         adjustedGoal = new Pose2d(GOAL_POSE().getX(), GOAL_POSE().getY() - adjustment, GOAL_POSE().getHeading());
                     }
-                    telemetryData.addData("offset", offset);
-                    telemetryData.addData("adjusted goal", adjustedGoal);
+                    telemetryEx.addData("offset", offset);
+                    telemetryEx.addData("adjusted goal", adjustedGoal);
                     double globalHeadingTarget = Turret.posesToAngle(lastKnownPose, robot.turret.adjustedGoalPose());
-                    telemetryData.addData("globalHeadingTarget", globalHeadingTarget);
+                    telemetryEx.addData("globalHeadingTarget", globalHeadingTarget);
                     double[] errorsDriveTurret = Turret.angleToDriveTurretErrors(globalHeadingTarget);
-                    telemetryData.addData("errorsDriveTurret", Arrays.toString(errorsDriveTurret));
+                    telemetryEx.addData("errorsDriveTurret", Arrays.toString(errorsDriveTurret));
                 } catch (Exception ignored) {
-                    telemetryData.addData("tY Offset", "out of bounds error");
+                    telemetryEx.addData("tY Offset", "out of bounds error");
                 }
-                telemetryData.addData("turret position", robot.turret.getPosition());
-                telemetryData.addData("bot pose", lastKnownPose);
+                telemetryEx.addData("turret position", robot.turret.getPosition());
+                telemetryEx.addData("bot pose", lastKnownPose);
                 double distance = Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch;
-                telemetryData.addData("Distance (m)", distance);
-                telemetryData.addData("Launcher Math Values", Arrays.toString(MathFunctions.distanceToLauncherValues(distance)));
+                telemetryEx.addData("Distance (m)", distance);
+                telemetryEx.addData("Launcher Math Values", Arrays.toString(MathFunctions.distanceToLauncherValues(distance)));
             } else {
-                telemetryData.addData("Median Wall Angle", "medianWallAngle is Empty");
+                telemetryEx.addData("Median Wall Angle", "medianWallAngle is Empty");
             }
         }
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 
     @Override

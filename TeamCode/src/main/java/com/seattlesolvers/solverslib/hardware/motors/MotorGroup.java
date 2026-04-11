@@ -43,6 +43,20 @@ public class MotorGroup extends Motor implements Iterable<Motor> {
     }
 
     /**
+     * Set the speed for each motor in the group
+     *
+     * @param velocity The speed to set. Value should be between -1.0 and 1.0.
+     */
+    public void setVelocity(double velocity) {
+        if ((group[0] instanceof MotorEx)) {
+            ((MotorEx) group[0]).setVelocity(velocity);
+            for (int i = 1; i < group.length; i++) {
+                group[i].set(group[0].get());
+            }
+        }
+    }
+
+    /**
      * @return The speed as a percentage of output
      */
     @Override
@@ -227,7 +241,4 @@ public class MotorGroup extends Motor implements Iterable<Motor> {
     public Motor getMotor() {
         return group[0];
     }
-
-
-
 }

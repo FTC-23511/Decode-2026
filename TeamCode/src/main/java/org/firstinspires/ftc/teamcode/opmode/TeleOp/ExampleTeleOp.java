@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -20,7 +20,7 @@ public class ExampleTeleOp extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
 
@@ -56,11 +56,11 @@ public class ExampleTeleOp extends CommandOpMode {
 
         // TODO: Add robot drive movement here
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 
     @Override

@@ -16,7 +16,7 @@ import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -32,7 +32,7 @@ public class ArducamTest extends CommandOpMode {
 
     public static double angleVal = 0.0;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
 
@@ -81,28 +81,28 @@ public class ArducamTest extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        robot.camera.updateCameraResult(3);
+//        robot.camera.updateCameraResult(3);
         robot.camera.writeCameraTelemetry(telemetry);
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
 
         Pose2d cameraPose = robot.camera.getCameraPose();
         double[] targetDegrees = robot.camera.getTargetDegrees();
 
-        telemetryData.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
-        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
-        telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
-        telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
-        telemetryData.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
-        telemetryData.addData("test distance", TEST_DISTANCE);
-        telemetryData.addData("tag height (px)", robot.camera.getTagHeight());
-        telemetryData.addData("roi cameraH (px)", robot.camera.cameraH);
-        telemetryData.addData("roi cameraY (px)", robot.camera.cameraY);
-        telemetryData.addData("turret state", Turret.turretState);
+        telemetryEx.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
+        telemetryEx.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+        telemetryEx.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
+        telemetryEx.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
+        telemetryEx.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+        telemetryEx.addData("test distance", TEST_DISTANCE);
+        telemetryEx.addData("tag height (px)", robot.camera.getTagHeight());
+        telemetryEx.addData("roi cameraH (px)", robot.camera.cameraH);
+        telemetryEx.addData("roi cameraY (px)", robot.camera.cameraY);
+        telemetryEx.addData("turret state", Turret.turretState);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        telemetryData.update();
+        telemetryEx.update();
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
         robot.pinpoint.update();
@@ -111,7 +111,7 @@ public class ArducamTest extends CommandOpMode {
     @Override
     public void run() {
         if (Turret.turretState.equals(Turret.TurretState.GOAL_LOCK_CONTROL)) {
-            robot.camera.updateCameraResult(3);
+//            robot.camera.updateCameraResult(3);
             robot.camera.writeCameraTelemetry(telemetry);
         }
 
@@ -122,25 +122,25 @@ public class ArducamTest extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
 
         Pose2d cameraPose = robot.camera.getCameraPose();
         double[] targetDegrees = robot.camera.getTargetDegrees();
 
-        telemetryData.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
-        telemetryData.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
-        telemetryData.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
-        telemetryData.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
-        telemetryData.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
-        telemetryData.addData("test distance", TEST_DISTANCE);
-        telemetryData.addData("tag height (px)", robot.camera.getTagHeight());
-        telemetryData.addData("roi cameraH (px)", robot.camera.cameraH);
-        telemetryData.addData("roi cameraY (px)", robot.camera.cameraY);
+        telemetryEx.addData("camera pose", cameraPose == null ? "null" : cameraPose.toString());
+        telemetryEx.addData("tX", targetDegrees == null ? "null" : targetDegrees[0]);
+        telemetryEx.addData("tX Offset", targetDegrees == null ? "null" : robot.camera.getTxOffset(robot.turret.getTurretPose()));
+        telemetryEx.addData("tY", targetDegrees == null ? "null" : targetDegrees[1]);
+        telemetryEx.addData("distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
+        telemetryEx.addData("test distance", TEST_DISTANCE);
+        telemetryEx.addData("tag height (px)", robot.camera.getTagHeight());
+        telemetryEx.addData("roi cameraH (px)", robot.camera.cameraH);
+        telemetryEx.addData("roi cameraY (px)", robot.camera.cameraY);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         CommandScheduler.getInstance().run();
-        telemetryData.update();
+        telemetryEx.update();
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
         robot.pinpoint.update();

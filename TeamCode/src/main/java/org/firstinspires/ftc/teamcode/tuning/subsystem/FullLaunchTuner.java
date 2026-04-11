@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.MathUtils;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -35,7 +35,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double DISTANCE = 1.5; // meters
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
 
@@ -79,21 +79,21 @@ public class FullLaunchTuner extends CommandOpMode {
 
         robot.launcher.setFlywheelTicks(LAUNCHER_TARGET_VEL);
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
-        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
-        telemetryData.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
-        telemetryData.addData("Hood Pos", robot.hoodServo.get());
-        telemetryData.addData("Launch Motor Power", robot.launchMotors.get());
-        telemetryData.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
-        telemetryData.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
-        telemetryData.addData("Turret Encoder Pos", robot.turret.getPosition());
-        telemetryData.addData("Flywheel F", robot.launcher.flywheelController.getF());
-//        telemetryData.addData("Turret Pos 2", MathUtils.normalizeRadians(robot.turretEncoder2.getCurrentPosition(), false));
+
+        telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
+        telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
+        telemetryEx.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
+        telemetryEx.addData("Hood Pos", robot.hoodServo.get());
+        telemetryEx.addData("Launch Motor Power", robot.launchMotors.get());
+        telemetryEx.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
+        telemetryEx.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
+        telemetryEx.addData("Turret Encoder Pos", robot.turret.getPosition());
+        telemetryEx.addData("Turret Pos 1", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 }

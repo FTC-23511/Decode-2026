@@ -14,7 +14,7 @@ import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 @TeleOp(name = "DistanceSensorTest", group = "Sensor")
 public class DistanceSensorTest extends CommandOpMode {
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
     private GamepadEx driver;
@@ -64,19 +64,13 @@ public class DistanceSensorTest extends CommandOpMode {
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
 
-//        telemetryData.addData("Front Threshold", FRONT_DISTANCE_THRESHOLD);
-//        telemetryData.addData("Back Threshold", BACK_DISTANCE_THRESHOLD);
-        telemetryData.addData("Distance Threshold", INTAKE_DISTANCE_THRESHOLD);
-        telemetryData.addData("Actual Distance", robot.intake.getDistance());
-        telemetryData.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
-        telemetryData.addData("transferFull", robot.intake.transferFull());
-        telemetryData.addData("Raw Voltage", robot.distanceSensor.getVoltage());
-//        telemetryData.addData("withinDistance", robot.intake.withinDistance);
-//        telemetryData.addData("distanceTimer (ms)", robot.intake.distanceTimer.milliseconds());
 
-//        telemetryData.addData("Threshold Met", robot.frontDistanceSensor.isActive());
-//        telemetryData.addData("Back Threshold Met", robot.backDistanceSensor.isActive());
+        telemetryEx.addData("Distance Threshold", INTAKE_DISTANCE_THRESHOLD);
+        telemetryEx.addData("Actual Distance", robot.intake.getDistance());
+        telemetryEx.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
+        telemetryEx.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
+        telemetryEx.addData("transferFull", robot.intake.transferFull());
 
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 }

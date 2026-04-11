@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.MathUtils;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -31,7 +31,7 @@ public class LimelightTest extends CommandOpMode {
 
     public static boolean USE_PINPOINT_HEADING = false;
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
 
@@ -82,7 +82,7 @@ public class LimelightTest extends CommandOpMode {
                 // Obelisk PPG ID = 23
                 // Red ID = 24
 
-                telemetryData.addData("Tag ID", id);
+                telemetryEx.addData("Tag ID", id);
 
                 if ((Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) && id == 20)
                         || (Constants.ALLIANCE_COLOR.equals(Constants.AllianceColor.RED) && id == 24)) {
@@ -123,16 +123,16 @@ public class LimelightTest extends CommandOpMode {
                         telemetry.addData("MT2 Location", "null");
                     }
 
-                    telemetryData.addData("txPixels", fiducial.getTargetXPixels());
-                    telemetryData.addData("tyPixels", fiducial.getTargetYPixels());
-                    telemetryData.addData("txDegrees", fiducial.getTargetXDegrees());
-                    telemetryData.addData("tyDegrees", fiducial.getTargetYDegrees());
+                    telemetryEx.addData("txPixels", fiducial.getTargetXPixels());
+                    telemetryEx.addData("tyPixels", fiducial.getTargetYPixels());
+                    telemetryEx.addData("txDegrees", fiducial.getTargetXDegrees());
+                    telemetryEx.addData("tyDegrees", fiducial.getTargetYDegrees());
 
-                    telemetryData.addData("robotPoseTargetSpace", fiducial.getRobotPoseTargetSpace()); // Robot pose relative it the AprilTag Coordinate System (Most Useful)
-                    telemetryData.addData("cameraPoseTargetSpace", fiducial.getCameraPoseTargetSpace()); // Camera pose relative to the AprilTag (useful)
-                    telemetryData.addData("robotPoseFieldSpace", fiducial.getRobotPoseFieldSpace()); // Robot pose in the field coordinate system based on this tag alone (useful)
-                    telemetryData.addData("targetPoseCameraSpace", fiducial.getTargetPoseCameraSpace()); // AprilTag pose in the camera's coordinate system (not very useful)
-                    telemetryData.addData("targetPoseRobotSpace", fiducial.getTargetPoseRobotSpace()); // AprilTag pose in the robot's coordinate system (not very useful)
+                    telemetryEx.addData("robotPoseTargetSpace", fiducial.getRobotPoseTargetSpace()); // Robot pose relative it the AprilTag Coordinate System (Most Useful)
+                    telemetryEx.addData("cameraPoseTargetSpace", fiducial.getCameraPoseTargetSpace()); // Camera pose relative to the AprilTag (useful)
+                    telemetryEx.addData("robotPoseFieldSpace", fiducial.getRobotPoseFieldSpace()); // Robot pose in the field coordinate system based on this tag alone (useful)
+                    telemetryEx.addData("targetPoseCameraSpace", fiducial.getTargetPoseCameraSpace()); // AprilTag pose in the camera's coordinate system (not very useful)
+                    telemetryEx.addData("targetPoseRobotSpace", fiducial.getTargetPoseRobotSpace()); // AprilTag pose in the robot's coordinate system (not very useful)
                 }
                 else if (id == 21) {
                     telemetry.addData("Obelisk location:", "GPP");
@@ -146,12 +146,12 @@ public class LimelightTest extends CommandOpMode {
             }
         }
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
-        telemetryData.addData("Heading", heading);
+        telemetryEx.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Heading", heading);
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 
     @Override

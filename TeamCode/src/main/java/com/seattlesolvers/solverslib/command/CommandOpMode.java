@@ -47,7 +47,8 @@ public abstract class CommandOpMode extends LinearOpMode {
             while (opModeInInit()) {
                 initialize_loop();
             }
-            while (!isStopRequested() && opModeIsActive()) {
+            startOnce();
+            while (opModeIsActive()) {
                 run();
             }
         } finally {
@@ -64,9 +65,16 @@ public abstract class CommandOpMode extends LinearOpMode {
     /**
      * Runs at the end (when opMode is no longer active) of CommandOpMode
      */
-
     public void end() { }
-    
+
+    /**
+     * Runs at the end (when opMode is no longer active) of CommandOpMode
+     */
+    public void startOnce() { }
+
+    /**
+     * Runs repeatedly after initialized, similarly to LinearOpMode's init_loop()
+     */
     public void initialize_loop() { }
 
     public static void disable() {

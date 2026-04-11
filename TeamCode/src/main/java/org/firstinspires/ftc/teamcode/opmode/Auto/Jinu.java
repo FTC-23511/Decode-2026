@@ -30,8 +30,8 @@ import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
-import com.seattlesolvers.solverslib.util.TelemetryData;
 import com.seattlesolvers.solverslib.util.Timing;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
@@ -48,9 +48,12 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "Jinu (quals close 15 Ball)", preselectTeleOp = "FullTeleOp", group = "Auto")
 public class Jinu extends CommandOpMode {
     public ElapsedTime timer;
+
     public ElapsedTime autoTimer;
     public static int REPEAT_TIMES = 2;
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+
+    public static boolean GATE_OPEN = false;
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
     public ArrayList<Pose2d> pathPoses;
@@ -163,10 +166,11 @@ public class Jinu extends CommandOpMode {
             robot.pinpoint.resetPosAndIMU();
         }
 
-        telemetryData.addData("TURRET_SYNCED", TURRET_SYNCED);
-        telemetryData.addData("Alliance Color", ALLIANCE_COLOR);
-        telemetryData.addData("REPEAT_TIMES", REPEAT_TIMES);
-        telemetryData.update();
+        telemetryEx.addData("Gate Open", GATE_OPEN);
+        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
+        telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
+        telemetryEx.update();
+
 
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
@@ -180,25 +184,25 @@ public class Jinu extends CommandOpMode {
         }
 
         // Always log Loop Time
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
 
         timer.reset();
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
 //
-            telemetryData.addData("Robot Pose", robot.drive.getPose());
-            telemetryData.addData("Robot Target", robot.drive.follower.getTarget());
-            telemetryData.addData("atTarget", robot.drive.follower.atTarget());
-            telemetryData.addData("Heading", robot.drive.getPose().getHeading());
-            telemetryData.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
-            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
+            telemetryEx.addData("Robot Pose", robot.drive.getPose());
+            telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
+            telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
+            telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
+            telemetryEx.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
+            telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 //
-            telemetryData.addData("Turret State", Turret.turretState);
-            telemetryData.addData("Turret Target", robot.turret.getTarget());
-            telemetryData.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-            telemetryData.addData("Turret Position", robot.turret.getPosition());
-            telemetryData.update();
+            telemetryEx.addData("Turret State", Turret.turretState);
+            telemetryEx.addData("Turret Target", robot.turret.getTarget());
+            telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
+            telemetryEx.addData("Turret Position", robot.turret.getPosition());
+            telemetryEx.update();
 
 //            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
 //            telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
@@ -213,7 +217,7 @@ public class Jinu extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
         robot.profiler.end("Run + Update");
 
         robot.profiler.end("Full Loop");

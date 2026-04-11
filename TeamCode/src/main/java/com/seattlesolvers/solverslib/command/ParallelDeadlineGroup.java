@@ -70,7 +70,7 @@ public class ParallelDeadlineGroup extends CommandGroupBase {
         for (Command command : commands) {
             if (!Collections.disjoint(command.getRequirements(), m_requirements)) {
                 throw new IllegalArgumentException("Multiple commands in a parallel group cannot"
-                        + " require the same subsystems");
+                        + "require the same subsystems");
             }
             m_commands.put(command, false);
             m_requirements.addAll(command.getRequirements());
@@ -93,7 +93,7 @@ public class ParallelDeadlineGroup extends CommandGroupBase {
                 continue;
             }
             commandRunning.getKey().execute();
-            if (commandRunning.getKey().isFinished()) {
+            if (commandRunning.getKey() != m_deadline && commandRunning.getKey().isFinished()) {
                 commandRunning.getKey().end(false);
                 commandRunning.setValue(false);
             }
@@ -103,7 +103,10 @@ public class ParallelDeadlineGroup extends CommandGroupBase {
     @Override
     public void end(boolean interrupted) {
         for (Map.Entry<Command, Boolean> commandRunning : m_commands.entrySet()) {
-            if (commandRunning.getValue()) {
+            if (commandRunning.getKey() == m_deadline) {
+                commandRunning.getKey().end(interrupted);
+            }
+            else if (commandRunning.getValue()) {
                 commandRunning.getKey().end(true);
             }
         }

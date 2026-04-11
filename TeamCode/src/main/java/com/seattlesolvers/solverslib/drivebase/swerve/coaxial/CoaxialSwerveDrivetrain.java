@@ -1,7 +1,6 @@
 package com.seattlesolvers.solverslib.drivebase.swerve.coaxial;
 
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.drivebase.RobotDrive;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -21,20 +22,23 @@ import java.util.List;
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-    public PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
+
+    private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
+    private final PIDFController transferController = new PIDFController(TRANSFER_PIDF_COEFFICIENTS);
+
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
-    public boolean impossible = true;
-    public static double DISTANCE_OFFSET = 0;
+    private double targetTransferVelocity = 0.0;
+    private boolean impossible = true;
+    public static double DISTANCE_OFFSET = -0.0; // -0.267
+
 
     private final List<Double> launcherInput  = Arrays.asList(-0.01, 0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.44,   6.86,   7.2,    10.0); // input: velocity (m/s)
     private final List<Double> launcherOutput = Arrays.asList(-0.01, 0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1480.0, 1620.0, 1840.0, 2020.0, 2060.0, 2100.0); // output: ticks/s
 
     private final List<Double> launcherDistance  = Arrays.asList(-0.01, 0.0); // distance from ball leaving robot to when it touches goal for first time
     private final List<Double> shootingTime  = Arrays.asList(-0.01, 0.0); // time it takes for ball to leave robot to start of goal
-
-
 
     private final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
@@ -52,6 +56,7 @@ public class Launcher extends SubsystemBase {
         launcherLUT.createLUT();
         inverseLauncherLUT.createLUT();
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
+        transferController.setTolerance(TRANSFER_VEL_TOLERANCE);
     }
 
     public void init() {
@@ -64,9 +69,14 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
-        flywheelController.setSetPoint(Math.min(launcherLUT.get(targetVel), LAUNCHER_MAX_VELOCITY));
-        targetFlywheelVelocity = targetVel;
+        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, TRANSFER_MAX_VELOCITY));
+        targetFlywheelVelocity = flywheelController.getSetPoint();
         setActiveControl(setActiveControl);
+    }
+
+    public void setTransfer(double targetVel) {
+        transferController.setSetPoint(Range.clip(targetVel, 0, TRANSFER_MAX_VELOCITY));
+        targetTransferVelocity = transferController.getSetPoint();
     }
 
     public void setLauncher(Pose2d robotPose) {
@@ -129,12 +139,22 @@ public class Launcher extends SubsystemBase {
 
         if (activeControl) {
             double flywheelVel = robot.launchEncoder.getCorrectedVelocity();
+
 //            robot.launcher.flywheelController.setPIDF(
 //                    FLYWHEEL_PIDF_COEFFICIENTS.p, FLYWHEEL_PIDF_COEFFICIENTS.i, FLYWHEEL_PIDF_COEFFICIENTS.d,
 //                    FLYWHEEL_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
             robot.launchMotors.set(
                     flywheelController.calculate(flywheelVel)
             );
+
+            double transferVel = robot.transferMotor.getCorrectedVelocity();
+
+            flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
+            transferController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
+
+            robot.launchMotors.set(flywheelController.calculate(flywheelVel));
+            robot.transferMotor.set(transferController.calculate(transferVel));
+
 
             if (flywheelController.atSetPoint()) {
                 impossible = false;
@@ -155,8 +175,10 @@ public class Launcher extends SubsystemBase {
         } else {
             if (getFlywheelTarget() == 0) {
                 robot.launchMotors.set(0);
+                robot.transferMotor.set(0);
             } else {
                 robot.launchMotors.set(LAUNCHER_DEFAULT_ON_SPEED);
+                robot.transferMotor.set(TRANSFER_DEFAULT_ON_SPEED);
             }
 
             impossible = true;
@@ -185,7 +207,7 @@ public class Launcher extends SubsystemBase {
     // use launchValid() instead as it accounts for hood compensation
     @Deprecated
     public boolean flywheelReady() {
-        return activeControl && flywheelController.atSetPoint();
+        return activeControl && flywheelController.atSetPoint() && transferController.atSetPoint();
     }
 
     public boolean launchValid() {

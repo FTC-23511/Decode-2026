@@ -25,7 +25,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import com.seattlesolvers.solverslib.hardware.servos.ServoExGroup;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -75,6 +75,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public MotorGroup launchMotors;
     public Motor.Encoder launchEncoder;
+
+    public MotorEx transferMotor;
+    public Motor.Encoder transferEncoder;
+    public ServoEx stopperServo;
 
     public CRServoEx FRswervo;
     public CRServoEx FLswervo;
@@ -165,6 +169,15 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchEncoder = new Motor(hwMap, "FL").encoder.
                 setDirection(Motor.Direction.FORWARD);
 
+        transferMotor = new MotorEx(hwMap, "transferMotor")
+                .setCachingTolerance(0.01);
+        transferMotor.setRunMode(Motor.RunMode.RawPower)
+                .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+                .setInverted(true);
+
+        transferEncoder = new Motor(hwMap, "FL").encoder // TODO: Check
+                .setDirection(Motor.Direction.FORWARD);
+
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
                 .setCachingTolerance(0.02);
@@ -202,6 +215,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
                 .setInverted(false);
+        stopperServo = new ServoEx(hwMap, "stopperServo").setCachingTolerance(0.001)
+                .setInverted(true);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
                 .setOffsets(-76.32, 152.50, DistanceUnit.MM)
@@ -357,13 +372,13 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         return shotSolution;
     }
 
-    public void updateLoop(TelemetryData telemetryData) {
-        CommandScheduler.getInstance().run();
+    public void updateLoop(TelemetryEx telemetryEx) {
+        super.run();
 
         shotSolution = null;
 
-        if (telemetryData != null) {
-            telemetryData.update();
+        if (telemetryEx != null) {
+            telemetryEx.update();
         }
 
         PhotonCore.CONTROL_HUB.clearBulkCache();

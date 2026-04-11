@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-import com.seattlesolvers.solverslib.controller.PController;
-import com.seattlesolvers.solverslib.controller.PIDController;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.seattlesolvers.solverslib.hardware.HardwareDevice;
 
@@ -88,13 +87,13 @@ public class Motor implements HardwareDevice {
          */
         public int getPosition() {
             int currentPosition = m_position.get();
-            double currentTime = (double) System.nanoTime() / 1E9;
-            double dt = currentTime - lastTimeStamp;
-
-            veloEstimate = (currentPosition - lastPosition) / dt;
-            lastPosition = currentPosition;
-            lastTimeStamp = currentTime;
-
+            if (currentPosition != lastPosition) {
+                double currentTime = (double) System.nanoTime() / 1E9;
+                double dt = currentTime - lastTimeStamp;
+                veloEstimate = (currentPosition - lastPosition) / dt;
+                lastPosition = currentPosition;
+                lastTimeStamp = currentTime;
+            }
             return direction.getMultiplier() * currentPosition - resetVal;
         }
 
@@ -162,11 +161,11 @@ public class Motor implements HardwareDevice {
             double velo = getVelocity();
             double currentTime = (double) System.nanoTime() / 1E9;
             double dt = currentTime - lastTimeStamp;
-
-            accel = (velo - lastVelo) / dt;
-            lastVelo = velo;
-            lastTimeStamp = currentTime;
-
+            if (dt > 1E-4) {
+                accel = (velo - lastVelo) / dt;
+                lastVelo = velo;
+                lastTimeStamp = currentTime;
+            }
             return velo * direction.getMultiplier();
         }
 
@@ -236,9 +235,9 @@ public class Motor implements HardwareDevice {
      */
     protected GoBILDA type;
 
-    protected PIDController veloController = new PIDController(1, 0, 0);
+    protected PIDFController veloController = new PIDFController(1, 0, 0, 0);
 
-    protected PController positionController = new PController(1);
+    protected PIDFController positionController = new PIDFController(1, 0, 0, 0);
 
     protected SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 1, 0);
 

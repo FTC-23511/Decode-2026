@@ -1,7 +1,5 @@
 package com.seattlesolvers.solverslib.controller;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 public class CascadeController extends Controller {
     private final Controller primary;
     private final Controller secondary;

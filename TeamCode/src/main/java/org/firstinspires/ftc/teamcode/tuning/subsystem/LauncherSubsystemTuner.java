@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
@@ -29,7 +29,7 @@ public class LauncherSubsystemTuner extends CommandOpMode {
     public static double TARGET_VEL = 0.0; // ticks/sec
     public static double DISTANCE = 1.5; // meters
 
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
 
@@ -69,18 +69,18 @@ public class LauncherSubsystemTuner extends CommandOpMode {
 
         robot.launcher.setFlywheelTicks(TARGET_VEL);
 
-        telemetryData.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryData.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
-        telemetryData.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
-        telemetryData.addData("SERVO_OUTPUT", SERVO_OUTPUT);
-        telemetryData.addData("Hood Pos", robot.hoodServo.get());
-        telemetryData.addData("Motor Power", robot.launchMotors.get());
-        telemetryData.addData("Motor Velocity", robot.launchEncoder.getCorrectedVelocity());
-        telemetryData.addData("TARGET_VEL", TARGET_VEL);
+        telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
+        telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
+        telemetryEx.addData("SERVO_OUTPUT", SERVO_OUTPUT);
+        telemetryEx.addData("Hood Pos", robot.hoodServo.get());
+        telemetryEx.addData("Motor Power", robot.launchMotors.get());
+        telemetryEx.addData("Motor Velocity", robot.launchEncoder.getCorrectedVelocity());
+        telemetryEx.addData("TARGET_VEL", TARGET_VEL);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryData);
+        robot.updateLoop(telemetryEx);
     }
 }

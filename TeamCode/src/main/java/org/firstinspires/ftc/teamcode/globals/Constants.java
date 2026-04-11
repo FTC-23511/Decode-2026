@@ -97,9 +97,19 @@ public class Constants {
     public static double RAMP_ENGAGED = 0.52;
     public static double RAMP_DISENGAGED = 0.26;
 
+    public static double STOPPER_ENGAGED_POS = 0.36;
+    public static double STOPPER_DISENGAGED_POS = 0.72;
+
     public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00045); // Coefficients for ticks
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
+
+    public static PIDFCoefficients TRANSFER_PIDF_COEFFICIENTS = new PIDFCoefficients(0.001, 0, 0, 0.00041);
+    public static double TRANSFER_VEL_TOLERANCE = 41; // Ticks
+    public static double TRANSFER_DEFAULT_ON_SPEED = 0.00; // Power
+    public static double TRANSFER_MAX_VELOCITY = 2500; // Ticks/second
+    public static double TRANSFER_CLOSE_VELOCITY = 1500; // Ticks/second
+    public static double TRANSFER_FAR_VELOCITY = 2500; // Ticks/second
 
     public static final double GRAVITY = 9.81; // meters/second
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches

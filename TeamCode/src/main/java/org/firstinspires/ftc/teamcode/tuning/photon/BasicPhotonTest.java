@@ -11,10 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.hardware.motors.CRServo;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -24,7 +23,7 @@ import org.firstinspires.ftc.teamcode.globals.GoBildaPinpointDriver;
 @TeleOp(group = "Photon")
 public class BasicPhotonTest extends LinearOpMode {
     private ElapsedTime timer = new ElapsedTime();
-    TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public static boolean ENABLE_PHOTON = true;
     public static boolean MOTOR = true;
     public static boolean SWERVO = true;
@@ -89,8 +88,8 @@ public class BasicPhotonTest extends LinearOpMode {
             PhotonCore.CONTROL_HUB.clearBulkCache();
             PhotonCore.EXPANSION_HUB.clearBulkCache();
 
-            telemetryData.addData("Loop Time (ms)", timer.milliseconds());
-            telemetryData.update();
+            telemetryEx.addData("Loop Time (ms)", timer.milliseconds());
+            telemetryEx.update();
         }
     }
 }

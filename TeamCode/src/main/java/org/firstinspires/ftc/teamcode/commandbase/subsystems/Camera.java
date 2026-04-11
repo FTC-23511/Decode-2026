@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.posesToAngle;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import android.util.Log;
 import android.util.Size;
@@ -17,7 +16,7 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
-import com.seattlesolvers.solverslib.util.TelemetryData;
+import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -498,7 +497,7 @@ public class Camera extends SubsystemBase {
         updateArducam(5); // Only done in CameraLocalization
     }
 
-    public void updateCameraTelemetry(TelemetryData telemetryEx) {
+    public void updateCameraTelemetry(TelemetryEx telemetryEx) {
         telemetryEx.addData("Camera: Last Staleness", lastStaleness);
         telemetryEx.addData("Camera: Last Correction X", lastCorrectionX);
         telemetryEx.addData("Camera: Last Correction Y", lastCorrectionY);
