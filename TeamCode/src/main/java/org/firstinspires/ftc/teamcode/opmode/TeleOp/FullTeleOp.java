@@ -314,7 +314,6 @@ public class FullTeleOp extends CommandOpMode {
             telemetryEx.addData("Turret State", Turret.turretState);
             telemetryEx.addData("Turret Target", robot.turret.getTarget());
             telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-//        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
             telemetryEx.addData("Angle Offset", Drive.ANGLE_OFFSET);
             telemetryEx.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryEx.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
