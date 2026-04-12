@@ -68,10 +68,12 @@ public class Launcher extends SubsystemBase {
     public void init() {
         if (!TESTING_OP_MODE) {
             setRamp(OP_MODE_TYPE.equals(OpModeType.AUTO));
+            setStopper(false);
             setHood(MIN_HOOD_ANGLE);
         }
 
         setFlywheel(0, false);
+        setTransfer(0);
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
@@ -114,6 +116,10 @@ public class Launcher extends SubsystemBase {
 
     public double getTargetFlywheelVelocity() {
         return targetFlywheelVelocity;
+    }
+
+    public double getTargetTransferVelocity() {
+        return targetTransferVelocity;
     }
 
     public void setActiveControl(boolean state) {
@@ -195,6 +201,10 @@ public class Launcher extends SubsystemBase {
 
     public void setRamp(boolean engaged) {
         robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
+    }
+
+    public void setStopper(boolean engaged) {
+        robot.stopperServo.set(engaged ? STOPPER_ENGAGED_POS : STOPPER_DISENGAGED_POS);
     }
 
     public InterpLUT getTimeOfFlightLUT() {

@@ -4,8 +4,6 @@ import com.outoftheboxrobotics.photoncore.PhotonCore;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import android.util.Log;
-
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -13,7 +11,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
-import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
@@ -71,7 +68,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public MotorEx BLmotor;
     public MotorEx BRmotor;
 
-    public MotorGroup intakeMotors;
+    public MotorGroup intakeMotor;
 
     public MotorGroup launchMotors;
     public Motor.Encoder launchEncoder;
@@ -142,12 +139,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BLmotor.setRunMode(Motor.RunMode.RawPower);
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
-        intakeMotors = new MotorGroup(
-                new MotorEx(hwMap, "backIntakeMotor")
-                        .setCachingTolerance(0.01)
-                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
-                        .setRunMode(Motor.RunMode.RawPower)
-                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE),
+        intakeMotor = new MotorGroup(
                 new MotorEx(hwMap, "frontIntakeMotor")
                         .setCachingTolerance(0.01)
                         .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
@@ -175,7 +167,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
                 .setInverted(true);
 
-        transferEncoder = new Motor(hwMap, "FL").encoder // TODO: Check
+        transferEncoder = new Motor(hwMap, "BL").encoder
                 .setDirection(Motor.Direction.FORWARD);
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
@@ -242,8 +234,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intake = new Intake();
         launcher = new Launcher();
         turret = new Turret();
-
-        // Camera for vision
         camera = new Camera(hwMap);
 
         // Robot/CommandScheduler configurations

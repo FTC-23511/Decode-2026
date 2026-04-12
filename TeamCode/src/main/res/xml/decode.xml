@@ -30,14 +30,16 @@
             <goBILDA5202SeriesMotor name="rightLaunchMotor" port="0"/>
             <goBILDA5202SeriesMotor name="frontIntakeMotor" port="1"/>
             <goBILDA5202SeriesMotor name="leftLaunchMotor" port="2"/>
-            <goBILDA5202SeriesMotor name="backIntakeMotor" port="3"/>
+            <goBILDA5202SeriesMotor name="transferMotor" port="3"/>
 
             <AnalogInput name="distanceSensor" port="0"/>
             <AnalogInput name="turretEncoder2" port="2"/>
             <AnalogInput name="turretEncoder" port="3"/>
 
-            <Servo name="hoodServo" port="3"/>
+            <Servo name="stopperServo" port="1"/>
+            <Servo name="hoodServo" port="3"/>  
             <Servo name="rampServo" port="5"/>
+
         </LynxModule>
     </LynxUsbDevice>
     <Webcam name="Webcam 1" serialNumber="UC762" />

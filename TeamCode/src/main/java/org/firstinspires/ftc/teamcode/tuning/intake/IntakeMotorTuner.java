@@ -13,8 +13,10 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -64,12 +66,13 @@ public class IntakeMotorTuner extends CommandOpMode {
         }
 
         MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotors.set(MOTOR_POWER);
+        robot.intakeMotor.set(MOTOR_POWER);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
         telemetryEx.addData("MOTOR_POWER", MOTOR_POWER);
+        telemetryEx.addData("MOTOR_CURRENT", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();

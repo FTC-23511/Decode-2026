@@ -69,7 +69,7 @@ public class FullLaunchTuner extends CommandOpMode {
         }
 
         INTAKE_MOTOR_POWER = Range.clip(INTAKE_MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotors.set(INTAKE_MOTOR_POWER);
+        robot.intakeMotor.set(INTAKE_MOTOR_POWER);
 
         HOOD_SERVO_POS = Range.clip(HOOD_SERVO_POS, MIN_HOOD_SERVO_POS, MAX_HOOD_SERVO_POS);
         robot.hoodServo.set(HOOD_SERVO_POS);

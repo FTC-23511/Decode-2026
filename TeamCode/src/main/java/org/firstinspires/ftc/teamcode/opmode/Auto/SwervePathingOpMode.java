@@ -112,7 +112,7 @@ public class SwervePathingOpMode extends CommandOpMode {
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
             telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-            telemetryEx.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+            telemetryEx.addData("Intake overCurrent", ((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
             telemetryEx.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
             telemetryEx.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
             telemetryEx.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
