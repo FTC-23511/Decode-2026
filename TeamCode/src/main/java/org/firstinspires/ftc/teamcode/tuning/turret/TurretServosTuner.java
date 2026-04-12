@@ -63,6 +63,10 @@ public class TurretServosTuner extends CommandOpMode {
             robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TARGET_POS);
         }
 
+        if (gamepad1.squareWasPressed()) {
+            robot.turret.setTurret(Turret.TurretState.OFF, 0);
+        }
+
         telemetryEx.addData("TARGET POS", TARGET_POS);
         telemetryEx.addData("Turret at pos", robot.turret.readyToLaunch());
         telemetryEx.addData("Analog pos", robot.turret.getAnalogPos());

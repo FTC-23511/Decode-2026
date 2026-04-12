@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "SwerveTuner", group = "Tuning")
+@TeleOp(name = "SwerveTuner", group = "Drive")
 public class SwerveTuner extends CommandOpMode {
     public static double FL_SERVO_POS = 0.5;
     public static double FR_SERVO_POS = 0.5;

@@ -18,7 +18,7 @@ import com.seattlesolvers.solverslib.util.TelemetryEx;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 
 @Config
-@TeleOp(name = "SwerveModeTuner", group = "Servo")
+@TeleOp(name = "SwerveModeTuner", group = "Drive")
 public class SwerveModeTuner extends OpMode {
     public GamepadEx driver;
     public GamepadEx operator;

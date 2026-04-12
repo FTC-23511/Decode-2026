@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tuning.launcher;
+package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LauncherTransferTuner", group = "Launcher")
+@TeleOp(name = "LauncherTransferTuner", group = "Subsystem")
 public class FullLaunchTuner extends CommandOpMode {
     public ElapsedTime timer;
 

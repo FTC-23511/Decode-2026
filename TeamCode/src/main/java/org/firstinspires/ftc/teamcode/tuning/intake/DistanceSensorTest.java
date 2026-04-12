@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "DistanceSensorTest", group = "Sensor")
+@TeleOp(name = "DistanceSensorTest", group = "Intake")
 public class DistanceSensorTest extends CommandOpMode {
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));

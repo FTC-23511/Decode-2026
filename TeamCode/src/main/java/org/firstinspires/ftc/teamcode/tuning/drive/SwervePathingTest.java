@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmode.Auto;
+package org.firstinspires.ftc.teamcode.tuning.drive;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
@@ -26,8 +26,8 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 import java.util.ArrayList;
 
 @Config
-@Autonomous(name = "SwervePathingOpMode", group = "Auto")
-public class SwervePathingOpMode extends CommandOpMode {
+@Autonomous(name = "SwervePathingTest", group = "Drive")
+public class SwervePathingTest extends CommandOpMode {
     public ElapsedTime timer;
 
     MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());

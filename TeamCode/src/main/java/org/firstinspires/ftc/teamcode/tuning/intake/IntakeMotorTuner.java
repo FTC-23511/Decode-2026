@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "IntakeMotorTuner", group = "Motor")
+@TeleOp(name = "IntakeMotorTuner", group = "Intake")
 public class IntakeMotorTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
