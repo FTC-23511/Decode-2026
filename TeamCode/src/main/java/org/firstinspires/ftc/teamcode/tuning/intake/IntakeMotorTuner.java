@@ -66,13 +66,13 @@ public class IntakeMotorTuner extends CommandOpMode {
         }
 
         MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotors.set(MOTOR_POWER);
+        robot.intakeMotor.set(MOTOR_POWER);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
         telemetryEx.addData("MOTOR_POWER", MOTOR_POWER);
-        telemetryEx.addData("MOTOR_CURRENT", ((MotorEx) robot.intakeMotors.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryEx.addData("MOTOR_CURRENT", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         super.run();

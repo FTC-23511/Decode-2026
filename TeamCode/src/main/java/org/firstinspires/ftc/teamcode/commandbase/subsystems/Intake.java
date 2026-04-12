@@ -50,16 +50,16 @@ public class Intake extends SubsystemBase {
     public void setIntake(MotorState motorState) {
         switch (motorState) {
             case STOP:
-                robot.intakeMotors.set(0);
+                robot.intakeMotor.set(0);
                 break;
             case TRANSFER:
-                robot.intakeMotors.set(INTAKE_TRANSFER_SPEED);
+                robot.intakeMotor.set(INTAKE_TRANSFER_SPEED);
                 break;
             case FORWARD:
-                robot.intakeMotors.set(INTAKE_FORWARD_SPEED);
+                robot.intakeMotor.set(INTAKE_FORWARD_SPEED);
                 break;
             case REVERSE:
-                robot.intakeMotors.set(INTAKE_REVERSE_SPEED);
+                robot.intakeMotor.set(INTAKE_REVERSE_SPEED);
                 break;
         }
 
@@ -79,7 +79,7 @@ public class Intake extends SubsystemBase {
 
         switch (motorState) {
             case FORWARD:
-                transferFull = (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+                transferFull = (((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
 
                 if (transferFull()) {
                     setIntake(MotorState.STOP);
