@@ -163,6 +163,22 @@ public class FullTeleOp extends CommandOpMode {
                         () -> gamepad1.left_trigger > 0.5
                 )
         );
+
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+                new InstantCommand(() -> robot.camera.setRecordReadings(false))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new InstantCommand(() -> robot.camera.setRecordReadings(true))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
+                new InstantCommand(() -> robot.camera.relocalizeArducam())
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                new InstantCommand(() -> robot.camera.undoRelocalization())
+        );
     }
 
     @Override

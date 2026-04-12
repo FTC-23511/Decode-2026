@@ -229,10 +229,15 @@ public class Camera extends SubsystemBase {
     public void updateArducam(int n) {
         if (enabled) {
             detections = null;
-            updateROI(robot.drive.getPose());
-            if (!TESTING_OP_MODE) {
+
+            if (TESTING_OP_MODE) {
+                updateDecimation(TEST_DISTANCE);
+            } else {
                 updateDecimation(GOAL_POSE().minus(robot.drive.getPose()).getTranslation().getNorm());
             }
+
+            updateROI(robot.drive.getPose());
+
             for (int i = n; i > 0; i--) {
                 detections = aprilTagProcessor.getDetections();
 
@@ -266,17 +271,8 @@ public class Camera extends SubsystemBase {
                 return true;
             }
         }
-        return false;
-    }
 
-    /**
-     * Updates Arducam detections and then relocalizes the robot.
-     * @param n max number of times to attempt reading to get a valid result
-     * @return true if relocalization was successful, false otherwise.
-     */
-    public boolean relocalizeArducam(int n) {
-        updateArducam(n);
-        return relocalizeArducam();
+        return false;
     }
 
     public void updateROI(Pose2d robotPose) {
@@ -362,8 +358,6 @@ public class Camera extends SubsystemBase {
 
         return null;
     }
-
-
 
     private void updateCameraPoseReadings(Pose2d cameraPose) {
         cameraPoseEstimates.add(cameraPose);
@@ -488,11 +482,12 @@ public class Camera extends SubsystemBase {
 
         if (recordReadings) {
             updateArducam(1);
+
             if (detections != null && !detections.isEmpty()) {
                 Pose2d cameraPose = getCameraPose();
                 double timestamp = getDetectionTimestamp();
+
                 if (cameraPose != null && timestamp != -1) {
-                    // Only log to the TreeMap Kalman Filter, do NOT shift the robot pose here
                     addPose(timestamp, cameraPose);
                 }
             }
