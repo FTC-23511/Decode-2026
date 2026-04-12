@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tuning.sensor;
+package org.firstinspires.ftc.teamcode.tuning.camera;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
@@ -91,7 +91,7 @@ public class CameraTuner extends CommandOpMode {
         telemetryEx.addData("Angle Mode Value", angleVal);
 
         double robotPose = robot.drive.getPose().getRotation().getDegrees();
-        double turretPos = Math.toDegrees(robot.turret.getPosition());
+        double turretPos = Math.toDegrees(robot.turret.getRelativePos());
 
         telemetryEx.addData("Robot Pose", robotPose);
         telemetryEx.addData("turretPos", turretPos);

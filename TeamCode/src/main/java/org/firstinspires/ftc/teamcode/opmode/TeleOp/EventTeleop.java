@@ -231,7 +231,7 @@ public class EventTeleop extends CommandOpMode {
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
 
-            telemetryEx.addData("Turret Position", robot.turret.getPosition());
+            telemetryEx.addData("Turret Position", robot.turret.getRelativePos());
             telemetryEx.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
             telemetryEx.addData("Intake overCurrent", ((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
             telemetryEx.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());

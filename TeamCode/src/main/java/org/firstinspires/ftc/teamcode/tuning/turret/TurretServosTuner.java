@@ -1,42 +1,35 @@
-package org.firstinspires.ftc.teamcode.tuning.launcher;
-
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+package org.firstinspires.ftc.teamcode.tuning.turret;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "RampServoTuner", group = "Launcher")
-public class RampServoTuner extends CommandOpMode {
+@TeleOp(name = "TurretServosTuner", group = "Turret")
+public class TurretServosTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
-    public ElapsedTime timer;
-
-    public static double SERVO_POS = 0.0;
-
+    public static double TARGET_POS = 0.0;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
-
+    public ElapsedTime timer;
     private final Robot robot = Robot.getInstance();
-    
+
     @Override
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
-        TESTING_OP_MODE = true;
+        Constants.TESTING_OP_MODE = true;
+        Turret.turretState = Turret.TurretState.GOAL_LOCK_CONTROL;
 
         // Resets the command scheduler
         super.reset();
@@ -46,32 +39,35 @@ public class RampServoTuner extends CommandOpMode {
 
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
-
-        // Driver controls
-        // Reset heading
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
-        );
     }
 
     @Override
     public void run() {
-        // Keep all the has movement init for until when TeleOp starts
-        // This is like the init but when the program is actually started
         if (timer == null) {
-            robot.initHasMovement();
             timer = new ElapsedTime();
         }
 
-        SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
-        robot.rampServo.set(SERVO_POS);
+        if (gamepad1.dpadUpWasPressed()) {
+            TARGET_POS += 0.1;
+        }
 
-        telemetryEx.addData("Loop Time", timer.milliseconds());
-        timer.reset();
+        if (gamepad1.dpadDownWasPressed()) {
+            TARGET_POS -= 0.1;
+        }
 
-        telemetryEx.addData("SERVO_POS", SERVO_POS);
+        if (gamepad1.circleWasPressed()) {
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, TARGET_POS);
+        }
 
-        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
+        if (gamepad1.squareWasPressed()) {
+            robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TARGET_POS);
+        }
+
+        telemetryEx.addData("TARGET POS", TARGET_POS);
+        telemetryEx.addData("Turret at pos", robot.turret.readyToLaunch());
+        telemetryEx.addData("Analog pos", robot.turret.getAnalogPos());
+        telemetryEx.addData("Relative pos", robot.turret.getRelativePos());
         robot.updateLoop(telemetryEx);
+
     }
 }

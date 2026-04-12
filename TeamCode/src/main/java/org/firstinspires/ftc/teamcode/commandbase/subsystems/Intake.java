@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -25,6 +26,7 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean intakeJammed = false;
+    public boolean transferFull = false;
     public static boolean keepIntakeOn = false;
     private final ElapsedTime intakeTimer;
     public final ElapsedTime distanceTimer;
@@ -71,24 +73,21 @@ public class Intake extends SubsystemBase {
     public void update() {
         robot.profiler.start("Intake Update");
 
-        robot.profiler.start("Distance Sensor");
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
-            updateDistanceSensors();
+//            updateDistanceSensors();
         }
-        robot.profiler.end("Distance Sensor");
 
         switch (motorState) {
             case FORWARD:
-//                if (transferFull()) {
-//                    setIntake(MotorState.STOP);
-//                }
+                transferFull = (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent());
+
+                if (transferFull()) {
+                    setIntake(MotorState.STOP);
+                }
 //                intakeJammed = true;
 //                intakeTimer.reset();
 //                setIntake(MotorState.REVERSE);
 //
-//                if (((MotorEx) robot.intakeMotors.getMotor()).isOverCurrent()) {
-//
-//                }
                 break;
             case TRANSFER:
                 break;
@@ -145,7 +144,8 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME;
+//        return withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME;
+        return transferFull;
     }
 
     @Override

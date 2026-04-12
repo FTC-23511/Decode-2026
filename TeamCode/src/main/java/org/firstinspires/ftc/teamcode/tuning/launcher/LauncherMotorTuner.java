@@ -1,49 +1,40 @@
 package org.firstinspires.ftc.teamcode.tuning.launcher;
-
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LauncherTransferTuner", group = "Intake")
-public class LauncherTransferTuner extends CommandOpMode {
+@TeleOp(name = "LauncherMotorTuner", group = "Launcher")
+public class LauncherMotorTuner extends CommandOpMode {
     public ElapsedTime timer;
 
-    public static double INTAKE_MOTOR_POWER = 0.0;
+    public static double P = 0.000;
+    public static double I = 0.0;
+    public static double D = 0.0;
+    public static double F = 0.0000;
 
-    public static double TRANSFER_P = 0.000;
-    public static double TRANSFER_I = 0.0;
-    public static double TRANSFER_D = 0.0;
-    public static double TRANSFER_F = 0.0000;
-
-    public static double LAUNCHER_P = 0.000;
-    public static double LAUNCHER_I = 0.0;
-    public static double LAUNCHER_D = 0.0;
-    public static double LAUNCHER_F = 0.0000;
-
-    public static double TRANSFER_TARGET_VEL = 0.0;
     public static double LAUNCHER_TARGET_VEL = 0.0;
 
-    public static double HOOD_SERVO_POS = 0.0;
+    public static boolean REVERSE_ENCODER = true;
+    public static boolean REVERSE_MOTOR = false;
 
-    private final PIDFController transferPIDF = new PIDFController(TRANSFER_P, TRANSFER_I, TRANSFER_D, TRANSFER_F);
-    private final PIDFController launcherPIDF = new PIDFController(LAUNCHER_P, LAUNCHER_I, LAUNCHER_D, LAUNCHER_F);
+    private final PIDFController launcherPIDF = new PIDFController(P, I, D, F);
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
-    
+
     @Override
     public void initialize() {
         // Must have for all opModes
@@ -66,35 +57,21 @@ public class LauncherTransferTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        INTAKE_MOTOR_POWER = Range.clip(INTAKE_MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotors.set(INTAKE_MOTOR_POWER);
-
-        HOOD_SERVO_POS = Range.clip(HOOD_SERVO_POS, MIN_HOOD_SERVO_POS, MAX_HOOD_SERVO_POS);
-        robot.hoodServo.set(HOOD_SERVO_POS);
-
-        transferPIDF.setPIDF(TRANSFER_P, TRANSFER_I, TRANSFER_D, TRANSFER_F);
-        transferPIDF.setSetPoint(TRANSFER_TARGET_VEL);
-
-        launcherPIDF.setPIDF(LAUNCHER_P, LAUNCHER_I, LAUNCHER_D, LAUNCHER_F);
+        launcherPIDF.setPIDF(P, I, D, F);
         launcherPIDF.setSetPoint(LAUNCHER_TARGET_VEL);
-
-        double transferVel = robot.transferEncoder.getCorrectedVelocity();
-        double transferPower = transferPIDF.calculate(transferVel, TRANSFER_TARGET_VEL);
 
         double launcherVel = robot.launchEncoder.getCorrectedVelocity();
         double launcherPower = launcherPIDF.calculate(launcherVel, LAUNCHER_TARGET_VEL);
 
-        robot.transferMotor.set(transferPower);
+        robot.launchMotors.setInverted(REVERSE_MOTOR);
+        robot.launchEncoder.setDirection(REVERSE_ENCODER ? Motor.Direction.REVERSE : Motor.Direction.FORWARD);
         robot.launchMotors.set(launcherPower);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryEx.addData("INTAKE_MOTOR_POWER", INTAKE_MOTOR_POWER);
-        telemetryEx.addData("transferPower", transferPower);
-        telemetryEx.addData("transfer target velocity", TRANSFER_TARGET_VEL);
-        telemetryEx.addData("transfer actual velocity", transferVel);
         telemetryEx.addData("launcherPower", launcherPower);
+        telemetryEx.addData("launcher pos", robot.launchEncoder.getPosition());
         telemetryEx.addData("launcher target velocity", LAUNCHER_TARGET_VEL);
         telemetryEx.addData("launcher actual velocity", launcherVel);
 

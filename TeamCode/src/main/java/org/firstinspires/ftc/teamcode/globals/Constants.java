@@ -97,6 +97,7 @@ public class Constants {
     public static double RAMP_ENGAGED = 0.52;
     public static double RAMP_DISENGAGED = 0.26;
 
+
     public static double STOPPER_ENGAGED_POS = 0.36;
     public static double STOPPER_DISENGAGED_POS = 0.72;
 

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.FLYWHEEL_PIDF_COEFFICIENTS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -22,7 +21,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
 @TeleOp(name = "FullLaunchTuner", group = "Subsystem")
-public class FullLaunchTuner extends CommandOpMode {
+public class MathLaunchTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -90,7 +89,7 @@ public class FullLaunchTuner extends CommandOpMode {
         telemetryEx.addData("Launch Motor Power", robot.launchMotors.get());
         telemetryEx.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
         telemetryEx.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
-        telemetryEx.addData("Turret Encoder Pos", robot.turret.getPosition());
+        telemetryEx.addData("Turret Encoder Pos", robot.turret.getRelativePos());
         telemetryEx.addData("Turret Pos 1", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

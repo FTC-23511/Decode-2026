@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Transform2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
@@ -244,7 +245,6 @@ public class Camera extends SubsystemBase {
         }
     }
 
-
     /**
      * Relocalizes the robot using Arducam detections.
      * @param hardReset If true, trusts the camera 100% (use when stopped). If false, smoothly filters 10% (use when moving).
@@ -256,7 +256,6 @@ public class Camera extends SubsystemBase {
             double timestamp = getDetectionTimestamp();
             if (cameraPose != null && timestamp != -1) {
                 Pose2d avgPose = getAverageCameraPose(cameraPose);
-
                 if (hardReset) {
                     // Robot is stopped: 100% Trust in Camera
                     updateFilter(timestamp, avgPose, 1.0, 1.0);
@@ -465,8 +464,6 @@ public class Camera extends SubsystemBase {
             visionPortal.close();
         }
     }
-
-
 
     @Override
     public void periodic() {

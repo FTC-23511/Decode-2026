@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tuning.sensor;
+package org.firstinspires.ftc.teamcode.tuning.camera;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.GOAL_POSE;
@@ -105,7 +105,7 @@ public class CameraAngle extends CommandOpMode {
                 } catch (Exception ignored) {
                     telemetryEx.addData("tY Offset", "out of bounds error");
                 }
-                telemetryEx.addData("turret position", robot.turret.getPosition());
+                telemetryEx.addData("turret position", robot.turret.getRelativePos());
                 telemetryEx.addData("bot pose", lastKnownPose);
                 double distance = Constants.GOAL_POSE().minus(lastKnownPose).getTranslation().getNorm() * DistanceUnit.mPerInch;
                 telemetryEx.addData("Distance (m)", distance);

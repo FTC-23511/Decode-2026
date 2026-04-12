@@ -11,17 +11,14 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.geometry.Twist2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Turret extends SubsystemBase {
@@ -74,7 +71,7 @@ public class Turret extends SubsystemBase {
         if (!TURRET_SYNCED) {
             if (robot.analogTurretEncoder.getVoltage() > 0.001) {
                 robot.turretEncoder.overrideResetPos(0);
-                TURRET_SYNC_OFFSET = robot.turretEncoder.getPosition() - (MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false) / TURRET_RADIANS_PER_TICK);
+                TURRET_SYNC_OFFSET = robot.turretEncoder.getPosition() - (getAnalogPos() / TURRET_RADIANS_PER_TICK);
                 robot.turretEncoder.overrideResetPos((int) TURRET_SYNC_OFFSET);
                 TURRET_SYNCED = true;
             }
@@ -126,11 +123,15 @@ public class Turret extends SubsystemBase {
         return turretController.getSetPoint();
     }
 
-    public double getPosition() {
+    public double getRelativePos() {
         if (!TURRET_SYNCED) {
             resetTurretEncoder();
         }
         return MathUtils.normalizeRadians(robot.turretEncoder.getPosition() * TURRET_RADIANS_PER_TICK, false);
+    }
+
+    public double getAnalogPos() {
+        return MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false);
     }
 
     public void update() {
@@ -167,7 +168,7 @@ public class Turret extends SubsystemBase {
             return false;
         }
 
-        return (Math.abs(getPosition() - servoPos) <= TURRET_POS_TOLERANCE) && !turretState.equals(OFF);
+        return (Math.abs(getRelativePos() - servoPos) <= TURRET_POS_TOLERANCE) && !turretState.equals(OFF);
     }
 
     /**

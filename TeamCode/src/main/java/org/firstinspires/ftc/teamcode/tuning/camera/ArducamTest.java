@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tuning.sensor;
+package org.firstinspires.ftc.teamcode.tuning.camera;
 
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;

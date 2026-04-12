@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -47,7 +46,7 @@ public class AlliancePoseSelector extends LinearOpMode {
             telemetry.addData("Circle / Square", "Red");
             telemetry.addData("Alliance Color", ALLIANCE_COLOR);
 
-            telemetry.addData("Encoder Pos", robot.turret.getPosition());;
+            telemetry.addData("Encoder Pos", robot.turret.getRelativePos());;
             telemetry.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
             telemetry.update();

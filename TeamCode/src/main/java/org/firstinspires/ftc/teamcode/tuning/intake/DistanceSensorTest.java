@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tuning.sensor;
+package org.firstinspires.ftc.teamcode.tuning.intake;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
@@ -10,8 +10,6 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
-import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
@@ -67,7 +65,6 @@ public class DistanceSensorTest extends CommandOpMode {
 
         telemetryEx.addData("Distance Threshold", INTAKE_DISTANCE_THRESHOLD);
         telemetryEx.addData("Actual Distance", robot.intake.getDistance());
-        telemetryEx.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
         telemetryEx.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
         telemetryEx.addData("transferFull", robot.intake.transferFull());
 

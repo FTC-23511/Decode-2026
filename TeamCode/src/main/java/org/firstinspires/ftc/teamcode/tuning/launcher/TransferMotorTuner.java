@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "TransferMotorTuner", group = "Intake")
+@TeleOp(name = "TransferMotorTuner", group = "Launcher")
 public class TransferMotorTuner extends CommandOpMode {
     public ElapsedTime timer;
 
