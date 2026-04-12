@@ -10,6 +10,9 @@ import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
+import com.seattlesolvers.solverslib.util.InterpLUT;
+
+import java.util.Arrays;
 
 public class VirtualGoalSolverTest {
 
@@ -17,8 +20,17 @@ public class VirtualGoalSolverTest {
     private final Pose2d robotPose = new Pose2d(0, 0, new Rotation2d(0));
     private double expectedStationaryAngle;
 
+    private InterpLUT testTimeOfFlightLUT;
+
     @BeforeEach
     public void setup() {
+
+        testTimeOfFlightLUT = new InterpLUT(
+                Arrays.asList(-0.01, 0.0, 5.0, 10.0), // test distances
+                Arrays.asList(-0.01, 0.0, 1.5, 3.0),  // test times
+                true
+        );
+        testTimeOfFlightLUT.createLUT();
         // Calculate the TRUE geometric angle from the turret's physical starting
         // position to the goal. This accounts for your offset (1.95977, 0) automatically.
         // Note: rotateBy takes degrees per your previous clarification.
@@ -42,7 +54,7 @@ public class VirtualGoalSolverTest {
     @Test
     public void testStationary() {
         MathFunctions.VirtualGoalSolver.ShotSolution sol = MathFunctions.VirtualGoalSolver.solve(
-                robotPose, new Vector2d(0, 0), 0, goalPose
+                robotPose, new Vector2d(0, 0), 0, goalPose, testTimeOfFlightLUT
         );
         printResults("Stationary", sol);
 
@@ -57,7 +69,7 @@ public class VirtualGoalSolverTest {
         // Turret must aim more -X (Backward) to compensate.
         // For a goal at (-72, 72), "more backward" results in an angle > 135 deg.
         MathFunctions.VirtualGoalSolver.ShotSolution sol = MathFunctions.VirtualGoalSolver.solve(
-                robotPose, new Vector2d(20.0, 0), 0, goalPose
+                robotPose, new Vector2d(20.0, 0), 0, goalPose, testTimeOfFlightLUT
         );
         printResults("Moving Forward (+X)", sol);
 
@@ -71,7 +83,7 @@ public class VirtualGoalSolverTest {
         // To compensate, turret must aim Right (-Y relative to goal).
         // In Quadrant 2, aiming "Right" INCREASES the angle toward 180 deg.
         MathFunctions.VirtualGoalSolver.ShotSolution sol = MathFunctions.VirtualGoalSolver.solve(
-                robotPose, new Vector2d(0, 20.0), 0, goalPose
+                robotPose, new Vector2d(0, 20.0), 0, goalPose, testTimeOfFlightLUT
         );
         printResults("Moving Left (+Y)", sol);
 
@@ -88,7 +100,7 @@ public class VirtualGoalSolverTest {
         // Front turret moves Left (+Y). Compensation must be Right (-Y).
         // In Quadrant 2, shifting -Y INCREASES the angle toward 180.
         MathFunctions.VirtualGoalSolver.ShotSolution sol = MathFunctions.VirtualGoalSolver.solve(
-                robotPose, new Vector2d(0, 0), 1.0, goalPose
+                robotPose, new Vector2d(0, 0), 1.0, goalPose, testTimeOfFlightLUT
         );
         printResults("Spinning CCW (+1 rad/s)", sol);
 
@@ -105,7 +117,7 @@ public class VirtualGoalSolverTest {
     public void testHighSpeedDiagonal() {
         // High speed (30 in/s) in both X and Y directions
         MathFunctions.VirtualGoalSolver.ShotSolution sol = MathFunctions.VirtualGoalSolver.solve(
-                robotPose, new Vector2d(30.0, 30.0), 0, goalPose
+                robotPose, new Vector2d(30.0, 30.0), 0, goalPose, testTimeOfFlightLUT
         );
         printResults("High Speed Diagonal", sol);
 

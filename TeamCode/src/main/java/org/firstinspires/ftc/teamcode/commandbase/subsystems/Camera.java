@@ -63,6 +63,10 @@ public class Camera extends SubsystemBase {
         this.recordReadings = recordReadings;
     }
 
+    public boolean isRecordReadingsEnabled() {
+        return recordReadings;
+    }
+
     private final ArrayList<Pose2d> cameraPoseEstimates = new ArrayList<>();
 
     public final InterpLUT roiYOffsetLUT = new InterpLUT(
@@ -457,6 +461,23 @@ public class Camera extends SubsystemBase {
         }
 
         return null;
+    }
+
+    public void setCameraExposure(long exposureMs) {
+        if (visionPortal != null && visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+            }
+            exposureControl.setExposure(exposureMs, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void setCameraGain(int gain) {
+        if (visionPortal != null && visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
+        }
     }
 
     public void closeCamera() {
