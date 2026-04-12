@@ -28,7 +28,7 @@ public class ArducamTuner extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
-        Constants.TESTING_OP_MODE = false; // Ensure periodic() runs for recordReadings
+        Constants.TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
@@ -39,13 +39,13 @@ public class ArducamTuner extends CommandOpMode {
         driver = new GamepadEx(gamepad1);
 
         // Toggle camera readings
-        driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new InstantCommand(() -> robot.camera.setRecordReadings(!robot.camera.isRecordReadingsEnabled()))
         );
 
         // Hard relocalization
-        driver.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new InstantCommand(() -> robot.camera.relocalizeArducam(true))
+        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
+                new InstantCommand(() -> robot.camera.relocalizeArducam())
         );
 
         // Exposure Tuning (D-Pad Up/Down)
