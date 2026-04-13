@@ -153,12 +153,8 @@ public class Launcher extends SubsystemBase {
         if (activeControl) {
             double flywheelVel = robot.launchEncoder.getCorrectedVelocity();
 
-//            robot.launcher.flywheelController.setPIDF(
-//                    FLYWHEEL_PIDF_COEFFICIENTS.p, FLYWHEEL_PIDF_COEFFICIENTS.i, FLYWHEEL_PIDF_COEFFICIENTS.d,
-//                    FLYWHEEL_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
-            robot.launchMotors.set(
-                    flywheelController.calculate(flywheelVel)
-            );
+//            robot.launcher.flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
+//            robot.launcher.transferController.setF(TRANSFER_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
 
             double transferVel = robot.transferMotor.getCorrectedVelocity();
 
@@ -167,7 +163,6 @@ public class Launcher extends SubsystemBase {
 
             robot.launchMotors.set(flywheelController.calculate(flywheelVel));
             robot.transferMotor.set(transferController.calculate(transferVel));
-
 
             if (flywheelController.atSetPoint()) {
                 impossible = false;
