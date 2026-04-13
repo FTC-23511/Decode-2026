@@ -71,17 +71,14 @@ public class Drive extends SubsystemBase {
 
         timer = new ElapsedTime();
 
-        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
             setPose(END_POSE);
+            follower.setTarget(END_POSE);
         }
     }
 
     public void init() {
-        follower.setTarget(END_POSE);
-        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
-            setPose(END_POSE);
-        }
-//        ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
+//      ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
     }
 
     public Pose2d getPose() {

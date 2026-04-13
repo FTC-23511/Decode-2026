@@ -94,9 +94,8 @@ public class Constants {
 //    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
     // Launcher
-    public static double RAMP_ENGAGED = 0.52;
-    public static double RAMP_DISENGAGED = 0.26;
-
+    public static double RAMP_ENGAGED = 0.60;
+    public static double RAMP_DISENGAGED = 0.13;
 
     public static double STOPPER_ENGAGED_POS = 0.36;
     public static double STOPPER_DISENGAGED_POS = 0.72;
@@ -123,9 +122,9 @@ public class Constants {
     public static double LAUNCHER_MAX_BALL_VELOCITY = 12; // Meters/second // TODO: tune this to potentially be lower
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
-    public static double MIN_HOOD_SERVO_POS = 0.025; // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_HOOD_SERVO_POS = 0.24; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
-    public static double MAX_HOOD_SERVO_POS = 0.67; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_SERVO_POS = 0.92; // Position // MUST MATCH WITH VALUE ABOVE
 
     // Turret
     public static PIDFCoefficients TURRET_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians

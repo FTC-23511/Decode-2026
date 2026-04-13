@@ -27,7 +27,6 @@ public class CancelCommand extends CommandBase {
         robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
         robot.launcher.setTransfer(0);
         robot.launcher.setRamp(false);
-        robot.launcher.setStopper(false);
     }
 
     @Override

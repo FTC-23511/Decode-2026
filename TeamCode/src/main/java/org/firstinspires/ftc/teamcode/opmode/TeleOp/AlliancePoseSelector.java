@@ -25,7 +25,6 @@ public class AlliancePoseSelector extends LinearOpMode {
         TESTING_OP_MODE = true;
         robot.init(hardwareMap);
 
-
         waitForStart();
         if (isStopRequested()) return;
 

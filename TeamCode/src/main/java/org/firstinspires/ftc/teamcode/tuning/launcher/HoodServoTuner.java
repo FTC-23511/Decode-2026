@@ -9,17 +9,24 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "StopperServoTuner", group = "Launcher")
-public class StopperServoTuner extends CommandOpMode {
+@TeleOp(name = "HoodServoTuner", group = "Launcher")
+public class HoodServoTuner extends CommandOpMode {
+    public GamepadEx driver;
+    public GamepadEx operator;
+
     public ElapsedTime timer;
 
-    public static double SERVO_POS = 0.5;
+    public static double SERVO_POS = 0.0;
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -36,6 +43,15 @@ public class StopperServoTuner extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
+
+        // Driver controls
+        // Reset heading
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
+        );
     }
 
     @Override
@@ -48,12 +64,14 @@ public class StopperServoTuner extends CommandOpMode {
         }
 
         SERVO_POS = Range.clip(SERVO_POS, 0.0, 1.0);
-        robot.stopperServo.set(SERVO_POS);
+        robot.hoodServo.set(SERVO_POS);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
         telemetryEx.addData("SERVO_POS", SERVO_POS);
+
+        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryEx);
     }
 }

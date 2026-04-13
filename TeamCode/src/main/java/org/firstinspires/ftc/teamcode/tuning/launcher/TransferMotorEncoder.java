@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.tuning.launcher;
+
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -7,33 +8,28 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.hardware.motors.Motor;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LauncherMotorTuner", group = "Launcher")
-public class LauncherMotorTuner extends CommandOpMode {
+@TeleOp(name = "TransferMotorEncoder", group = "Launcher")
+public class TransferMotorEncoder extends CommandOpMode {
+    public GamepadEx driver;
+    public GamepadEx operator;
+
     public ElapsedTime timer;
-
-    public static double P = 0.000;
-    public static double I = 0.0;
-    public static double D = 0.0;
-    public static double F = 0.0000;
-
-    public static double LAUNCHER_TARGET_VEL = 0.0;
-
-    public static boolean REVERSE_ENCODER = false;
-    public static boolean REVERSE_MOTOR = false;
-
-    private final PIDFController launcherPIDF = new PIDFController(P, I, D, F);
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
+
+    public static double transferPower = 0.0;
 
     @Override
     public void initialize() {
@@ -46,6 +42,15 @@ public class LauncherMotorTuner extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        driver = new GamepadEx(gamepad1);
+        operator = new GamepadEx(gamepad2);
+
+        // Driver controls
+        // Reset heading
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
+        );
     }
 
     @Override
@@ -57,24 +62,25 @@ public class LauncherMotorTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        launcherPIDF.setPIDF(P, I, D, F);
-        launcherPIDF.setSetPoint(LAUNCHER_TARGET_VEL);
-
-        double launcherVel = robot.launchEncoder.getCorrectedVelocity();
-        double launcherPower = launcherPIDF.calculate(launcherVel, LAUNCHER_TARGET_VEL) * (REVERSE_MOTOR ? -1 : 1);
-
-        robot.launchEncoder.setDirection(REVERSE_ENCODER ? Motor.Direction.REVERSE : Motor.Direction.FORWARD);
-        robot.launchMotors.set(launcherPower);
+        robot.transferMotor.set(transferPower);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryEx.addData("launcherPower", launcherPower);
-        telemetryEx.addData("launcher pos", robot.launchEncoder.getPosition());
-        telemetryEx.addData("launcher target velocity", LAUNCHER_TARGET_VEL);
-        telemetryEx.addData("launcher actual velocity", launcherVel);
+        telemetryEx.addData("Transfer Motor Position", robot.launchEncoder.getPosition());
+        telemetryEx.addData("Actual Velocity", robot.launchEncoder.getCorrectedVelocity());
+        telemetryEx.addData("Transfer Power", transferPower);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryEx);
+//        robot.controlHub.clearBulkCache();
+//        robot.expansionHub.clearBulkCache();
     }
+
+    @Override
+    public void end() {
+        Constants.END_POSE = robot.drive.getPose();
+    }
+
+
 }

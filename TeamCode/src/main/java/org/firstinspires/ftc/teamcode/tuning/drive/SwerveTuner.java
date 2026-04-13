@@ -13,10 +13,10 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 @Config
 @TeleOp(name = "SwerveTuner", group = "Drive")
 public class SwerveTuner extends CommandOpMode {
-    public static double FL_SERVO_POS = 0.5;
-    public static double FR_SERVO_POS = 0.5;
-    public static double BL_SERVO_POS = 0.5;
-    public static double BR_SERVO_POS = 0.5;
+    public static double FL_SERVO_POWER = 0.0;
+    public static double FR_SERVO_POWER = 0.0;
+    public static double BL_SERVO_POWER = 0.0;
+    public static double BR_SERVO_POWER = 0.0;
 
     public static double FL_MOTOR_POWER = 0.0;
     public static double FR_MOTOR_POWER = 0.0;
@@ -47,10 +47,10 @@ public class SwerveTuner extends CommandOpMode {
         robot.BLmotor.set(BL_MOTOR_POWER);
         robot.BRmotor.set(BR_MOTOR_POWER);
 
-        robot.FLswervo.set(FL_SERVO_POS);
-        robot.FRswervo.set(FR_SERVO_POS);
-        robot.BLswervo.set(BL_SERVO_POS);
-        robot.BRswervo.set(BR_SERVO_POS);
+        robot.FLswervo.set(FL_SERVO_POWER);
+        robot.FRswervo.set(FR_SERVO_POWER);
+        robot.BLswervo.set(BL_SERVO_POWER);
+        robot.BRswervo.set(BR_SERVO_POWER);
 
         telemetryEx.addData("FL Swervo Abs Pos", robot.FLswervo.getAbsoluteEncoder().getCurrentPosition());
         telemetryEx.addData("FR Swervo Abs Pos", robot.FRswervo.getAbsoluteEncoder().getCurrentPosition());

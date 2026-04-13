@@ -36,7 +36,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double LAUNCHER_TARGET_VEL = 0.0;
 
     public static double HOOD_SERVO_POS = 0.0;
-    public static double STOPPER_SERVO_POS = 0.0;
+//    public static double STOPPER_SERVO_POS = 0.0;
     public static double RAMP_SERVO_POS = 0.0;
 
     private final PIDFController transferPIDF = new PIDFController(TRANSFER_P, TRANSFER_I, TRANSFER_D, TRANSFER_F);
@@ -77,8 +77,8 @@ public class FullLaunchTuner extends CommandOpMode {
         RAMP_SERVO_POS = Range.clip(RAMP_SERVO_POS, RAMP_DISENGAGED, RAMP_ENGAGED);
         robot.rampServo.set(RAMP_SERVO_POS);
 
-        STOPPER_SERVO_POS = Range.clip(STOPPER_SERVO_POS, STOPPER_DISENGAGED_POS, STOPPER_ENGAGED_POS);
-        robot.stopperServo.set(STOPPER_SERVO_POS);
+//        STOPPER_SERVO_POS = Range.clip(STOPPER_SERVO_POS, STOPPER_DISENGAGED_POS, STOPPER_ENGAGED_POS);
+//        robot.stopperServo.set(STOPPER_SERVO_POS);
 
         transferPIDF.setPIDF(TRANSFER_P, TRANSFER_I, TRANSFER_D, TRANSFER_F);
         transferPIDF.setSetPoint(TRANSFER_TARGET_VEL);

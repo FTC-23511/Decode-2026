@@ -68,7 +68,6 @@ public class Launcher extends SubsystemBase {
     public void init() {
         if (!TESTING_OP_MODE) {
             setRamp(OP_MODE_TYPE.equals(OpModeType.AUTO));
-            setStopper(false);
             setHood(MIN_HOOD_ANGLE);
         }
 
@@ -198,9 +197,9 @@ public class Launcher extends SubsystemBase {
         robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
     }
 
-    public void setStopper(boolean engaged) {
-        robot.stopperServo.set(engaged ? STOPPER_ENGAGED_POS : STOPPER_DISENGAGED_POS);
-    }
+//    public void setStopper(boolean engaged) {
+//        robot.stopperServo.set(engaged ? STOPPER_ENGAGED_POS : STOPPER_DISENGAGED_POS);
+//    }
 
     public InterpLUT getTimeOfFlightLUT() {
         return timeOfFlightLUT;

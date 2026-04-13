@@ -75,7 +75,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public MotorEx transferMotor;
     public Motor.Encoder transferEncoder;
-    public ServoEx stopperServo;
+//    public ServoEx stopperServo;
 
     public CRServoEx FRswervo;
     public CRServoEx FLswervo;
@@ -207,8 +207,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setInverted(true);
         rampServo = new ServoEx(hwMap, "rampServo").setCachingTolerance(0.001)
                 .setInverted(false);
-        stopperServo = new ServoEx(hwMap, "stopperServo").setCachingTolerance(0.001)
-                .setInverted(true);
+//        stopperServo = new ServoEx(hwMap, "stopperServo").setCachingTolerance(0.001)
+//                .setInverted(true);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
                 .setOffsets(-76.32, 152.50, DistanceUnit.MM)
