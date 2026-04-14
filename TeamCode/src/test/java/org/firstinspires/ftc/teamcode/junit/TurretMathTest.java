@@ -6,10 +6,6 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SERVO_OFFS
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.util.MathUtils;
-
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +31,7 @@ public class TurretMathTest {
 
     @Test
     public void servoToRadPos() {
-        double pos = MathFunctions.convertServoPoseToRadian(0.47);
+        double pos = MathFunctions.convertServoPosToRadian(0.47);
 
         assertEquals(-0.16755160819145587, pos, 0.0001);
     }

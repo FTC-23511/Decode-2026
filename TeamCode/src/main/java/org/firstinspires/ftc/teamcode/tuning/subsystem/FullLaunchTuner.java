@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "LauncherTransferTuner", group = "Subsystem")
+@TeleOp(name = "FullLaunchTuner", group = "Subsystem")
 public class FullLaunchTuner extends CommandOpMode {
     public ElapsedTime timer;
 
@@ -87,10 +87,10 @@ public class FullLaunchTuner extends CommandOpMode {
         launcherPIDF.setSetPoint(LAUNCHER_TARGET_VEL);
 
         double transferVel = robot.transferEncoder.getCorrectedVelocity();
-        double transferPower = transferPIDF.calculate(transferVel, TRANSFER_TARGET_VEL);
+        double transferPower = transferPIDF.calculate(transferVel);
 
         double launcherVel = robot.launchEncoder.getCorrectedVelocity();
-        double launcherPower = launcherPIDF.calculate(launcherVel, LAUNCHER_TARGET_VEL);
+        double launcherPower = launcherPIDF.calculate(launcherVel);
 
         robot.transferMotor.set(transferPower);
         robot.launchMotors.set(launcherPower);

@@ -66,6 +66,10 @@ public class Motor implements HardwareDevice {
         private Direction direction;
         private double lastTimeStamp, veloEstimate, dpp, accel, lastVelo;
 
+        private double velocitySpikeThreshold = Double.MAX_VALUE;
+        private double lastValidVelocityReading = 0;
+        private boolean isFirstVelocityRead = true;
+
         /**
          * The encoder object for the motor.
          *
@@ -118,7 +122,6 @@ public class Motor implements HardwareDevice {
             resetVal += getPosition();
         }
 
-
         /**
          * Sets the encoder position reset position a custom value.
          */
@@ -148,6 +151,15 @@ public class Motor implements HardwareDevice {
         }
 
         /**
+         * Sets the maximum allowable jump in ticks/sec between loops before a reading is ignored.
+         * * @param threshold Max delta in ticks per second.
+         */
+        public Encoder setVelocitySpikeThreshold(double threshold) {
+            this.velocitySpikeThreshold = threshold;
+            return this;
+        }
+
+        /**
          * @return the number of revolutions turned by the encoder
          */
         public double getRevolutions() {
@@ -155,18 +167,27 @@ public class Motor implements HardwareDevice {
         }
 
         /**
-         * @return the raw velocity of the motor reported by the encoder
+         * @return the raw velocity of the motor reported by the encoder (Filtered)
          */
         public double getRawVelocity() {
-            double velo = getVelocity();
+            double rawVelo = getVelocity();
+
+            if (!isFirstVelocityRead && Math.abs(rawVelo - lastValidVelocityReading) > velocitySpikeThreshold) {
+                rawVelo = lastValidVelocityReading;
+            } else {
+                lastValidVelocityReading = rawVelo;
+                isFirstVelocityRead = false;
+            }
+
             double currentTime = (double) System.nanoTime() / 1E9;
             double dt = currentTime - lastTimeStamp;
             if (dt > 1E-4) {
-                accel = (velo - lastVelo) / dt;
-                lastVelo = velo;
+                accel = (rawVelo - lastVelo) / dt;
+                lastVelo = rawVelo;
                 lastTimeStamp = currentTime;
             }
-            return velo * direction.getMultiplier();
+
+            return rawVelo * direction.getMultiplier();
         }
 
         /**

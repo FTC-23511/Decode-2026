@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "FullLaunchTuner", group = "Subsystem")
+@TeleOp(name = "MathLaunchTuner", group = "Subsystem")
 public class MathLaunchTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;

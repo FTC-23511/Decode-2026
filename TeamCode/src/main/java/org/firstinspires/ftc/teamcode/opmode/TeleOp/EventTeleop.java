@@ -1,22 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_FAR_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;

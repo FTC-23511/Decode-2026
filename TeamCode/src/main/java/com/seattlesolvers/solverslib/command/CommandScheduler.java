@@ -10,6 +10,8 @@ package com.seattlesolvers.solverslib.command;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.globals.Constants;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -214,9 +216,11 @@ public final class CommandScheduler {
             return;
         }
 
-        // Run the periodic method of all registered subsystems.
-        for (Subsystem subsystem : m_subsystems.keySet()) {
-            subsystem.periodic();
+        if (!Constants.TESTING_OP_MODE) {
+            // Run the periodic method of all registered subsystems.
+            for (Subsystem subsystem : m_subsystems.keySet()) {
+                subsystem.periodic();
+            }
         }
 
         // Poll buttons for new commands to add.

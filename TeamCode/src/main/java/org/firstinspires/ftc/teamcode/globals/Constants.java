@@ -100,14 +100,14 @@ public class Constants {
     public static double STOPPER_ENGAGED_POS = 0.36;
     public static double STOPPER_DISENGAGED_POS = 0.72;
 
-    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00045); // Coefficients for ticks
+    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS = new PIDFCoefficients(0.01, 0, 0, 0.00055); // Coefficients for ticks
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
     public static PIDFCoefficients TRANSFER_PIDF_COEFFICIENTS = new PIDFCoefficients(0.001, 0, 0, 0.00041);
     public static double TRANSFER_VEL_TOLERANCE = 41; // Ticks
     public static double TRANSFER_DEFAULT_ON_SPEED = 0.00; // Power
-    public static double TRANSFER_MAX_VELOCITY = 2500; // Ticks/second
+    public static double TRANSFER_MAX_VELOCITY = 2000; // Ticks/second
     public static double TRANSFER_CLOSE_VELOCITY = 1500; // Ticks/second
     public static double TRANSFER_FAR_VELOCITY = 2500; // Ticks/second
 
@@ -157,8 +157,8 @@ public class Constants {
 
     public static Vector2d TURRET_PHYSICAL_OFFSET = new Vector2d(1.95977, 0); // Inches
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static double MAX_TURRET_ANGLE = 2.6; // Radians (only for one side of the turret)
-    public static double MIN_TURRET_ANGLE = -2.6; // Radians (only for one side of the turret)
+    public static double MAX_TURRET_ANGLE = 2.67; // Radians (only for one side of the turret)
+    public static double MIN_TURRET_ANGLE = -2.7; // Radians (only for one side of the turret)
     public static boolean TURRET_SYNCED = false;
     public static double TURRET_SYNC_OFFSET = 0.0;
 

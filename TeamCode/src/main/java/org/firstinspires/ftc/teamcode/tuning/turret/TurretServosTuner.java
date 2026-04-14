@@ -11,7 +11,9 @@ import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 @Config
 @TeleOp(name = "TurretServosTuner", group = "Turret")
@@ -19,7 +21,7 @@ public class TurretServosTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
-    public static double TARGET_POS = 0.0;
+    public static double TARGET_RADIANS = 0.0;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public ElapsedTime timer;
     private final Robot robot = Robot.getInstance();
@@ -29,13 +31,14 @@ public class TurretServosTuner extends CommandOpMode {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
         Constants.TESTING_OP_MODE = true;
-        Turret.turretState = Turret.TurretState.GOAL_LOCK_CONTROL;
 
         // Resets the command scheduler
         super.reset();
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
 
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
@@ -47,27 +50,10 @@ public class TurretServosTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        if (gamepad1.dpadUpWasPressed()) {
-            TARGET_POS += 0.1;
-        }
+        robot.turretServos.set(MathFunctions.convertRadianToServoPos(TARGET_RADIANS) + TURRET_SERVO_OFFSET);
 
-        if (gamepad1.dpadDownWasPressed()) {
-            TARGET_POS -= 0.1;
-        }
-
-        if (gamepad1.circleWasPressed()) {
-            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, TARGET_POS);
-        }
-
-        if (gamepad1.squareWasPressed()) {
-            robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TARGET_POS);
-        }
-
-        if (gamepad1.squareWasPressed()) {
-            robot.turret.setTurret(Turret.TurretState.OFF, 0);
-        }
-
-        telemetryEx.addData("TARGET POS", TARGET_POS);
+        telemetryEx.addData("TARGET POS (Radians)", TARGET_RADIANS);
+        telemetryEx.addData("TARGET POS (Servo Pos)", robot.turretServos.get());
         telemetryEx.addData("Turret at pos", robot.turret.readyToLaunch());
         telemetryEx.addData("Analog pos", robot.turret.getAnalogPos());
         telemetryEx.addData("Relative pos", robot.turret.getRelativePos());

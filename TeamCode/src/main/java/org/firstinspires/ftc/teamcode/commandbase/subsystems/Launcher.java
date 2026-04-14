@@ -138,7 +138,10 @@ public class Launcher extends SubsystemBase {
 
     private void update() {
         robot.profiler.start("Launcher Update");
-        if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL && !TESTING_OP_MODE) {
+        flywheelController.setCoefficients(FLYWHEEL_PIDF_COEFFICIENTS);
+        transferController.setCoefficients(TRANSFER_PIDF_COEFFICIENTS);
+
+        if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
             double[] targetLauncherValues = MathFunctions.distanceToLauncherValues(robot.getShotSolution().effectiveDistance);
 
             if (Double.isNaN(targetLauncherValues[0])) {
@@ -151,14 +154,10 @@ public class Launcher extends SubsystemBase {
 
         if (activeControl) {
             double flywheelVel = robot.launchEncoder.getCorrectedVelocity();
+            double transferVel = robot.transferEncoder.getCorrectedVelocity();
 
 //            robot.launcher.flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
 //            robot.launcher.transferController.setF(TRANSFER_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
-
-            double transferVel = robot.transferMotor.getCorrectedVelocity();
-
-            flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
-            transferController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f);
 
             robot.launchMotors.set(flywheelController.calculate(flywheelVel));
             robot.transferMotor.set(transferController.calculate(transferVel));
@@ -166,7 +165,7 @@ public class Launcher extends SubsystemBase {
             if (flywheelController.atSetPoint()) {
                 impossible = false;
                 setHood(targetHoodAngle);
-            } else if (!TESTING_OP_MODE) {
+            } else {
                 // hood compensation
                 double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
                         robot.getShotSolution().effectiveDistance,

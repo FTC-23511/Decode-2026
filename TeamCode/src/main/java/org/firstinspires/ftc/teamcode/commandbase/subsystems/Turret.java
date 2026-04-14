@@ -135,12 +135,14 @@ public class Turret extends SubsystemBase {
     }
 
     public void update() {
+        if (TESTING_OP_MODE) {
+            return;
+        }
+
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
                 robot.profiler.end("Turret Write");
-                if (TESTING_OP_MODE) { // let the user "hack" the mode and take over what the turret is actually doing
-
-                } else if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
+                if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
                     double turretTarget = robot.getShotSolution().turretGlobalHeading.minus(robot.drive.getPose().getRotation()).getRadians();
                     turretTarget += robot.getShotSolution().turretAngularVelocity * TURRET_VEL_LAG;
                     setTurretPos(turretTarget);
@@ -163,7 +165,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean readyToLaunch() {
-        double servoPos = MathFunctions.convertServoPoseToRadian(robot.turretServos.get() - TURRET_SERVO_OFFSET);
+        double servoPos = MathFunctions.convertServoPosToRadian(robot.turretServos.get() - TURRET_SERVO_OFFSET);
         if (Double.isNaN(servoPos)) {
             return false;
         }

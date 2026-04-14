@@ -2,18 +2,12 @@ package org.firstinspires.ftc.teamcode.globals;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
-import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
-import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 public class MathFunctions {
@@ -96,7 +90,7 @@ public class MathFunctions {
         return (radians + (Math.toRadians(TURRET_SERVO_ROTATION) / 2.0)) / Math.toRadians(TURRET_SERVO_ROTATION);
     }
 
-    public static double convertServoPoseToRadian(double pos) {
+    public static double convertServoPosToRadian(double pos) {
         if (Double.isNaN(pos)) {
             return Double.NaN;
         }
