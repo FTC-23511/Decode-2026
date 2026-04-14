@@ -6,8 +6,8 @@
         <LynxModule name="Control Hub" port="173">
             <goBILDA5202SeriesMotor name="FL" port="0"/>
             <goBILDA5202SeriesMotor name="BL" port="1"/>
-            <goBILDA5202SeriesMotor name="FR" port="2"/>
-            <goBILDA5202SeriesMotor name="BR" port="3"/>
+            <goBILDA5202SeriesMotor name="BR" port="2"/>
+            <goBILDA5202SeriesMotor name="FR" port="3"/>
 
             <Servo name="leftTurretServo" port="0"/>
             <Servo name="rightTurretServo" port="1"/>

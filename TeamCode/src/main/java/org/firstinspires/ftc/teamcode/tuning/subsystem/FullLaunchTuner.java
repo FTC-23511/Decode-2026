@@ -10,9 +10,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -36,7 +39,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double LAUNCHER_TARGET_VEL = 0.0;
 
     public static double HOOD_SERVO_POS = 0.0;
-//    public static double STOPPER_SERVO_POS = 0.0;
+    public static double TURRET_RADIANS = 0.0;
     public static double RAMP_SERVO_POS = 0.0;
 
     private final PIDFController transferPIDF = new PIDFController(TRANSFER_P, TRANSFER_I, TRANSFER_D, TRANSFER_F);
@@ -57,6 +60,8 @@ public class FullLaunchTuner extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+
+        robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
     }
 
     @Override
@@ -66,6 +71,19 @@ public class FullLaunchTuner extends CommandOpMode {
         if (timer == null) {
             robot.initHasMovement();
             timer = new ElapsedTime();
+        }
+
+        if (gamepad1.circleWasPressed()) {
+            INTAKE_MOTOR_POWER = 0.0;
+            TRANSFER_TARGET_VEL = 1000;
+            LAUNCHER_TARGET_VEL = 1700;
+            RAMP_SERVO_POS = RAMP_DISENGAGED;
+            HOOD_SERVO_POS = MAX_HOOD_SERVO_POS;
+        }
+
+        if (gamepad1.triangleWasPressed()) {
+            INTAKE_MOTOR_POWER = 1.0;
+            RAMP_SERVO_POS = RAMP_ENGAGED;
         }
 
         INTAKE_MOTOR_POWER = Range.clip(INTAKE_MOTOR_POWER, -1.0, 1.0);
@@ -94,6 +112,8 @@ public class FullLaunchTuner extends CommandOpMode {
 
         robot.transferMotor.set(transferPower);
         robot.launchMotors.set(launcherPower);
+
+        robot.turretServos.set(MathFunctions.convertRadianToServoPos(TURRET_RADIANS) + TURRET_SERVO_OFFSET);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();

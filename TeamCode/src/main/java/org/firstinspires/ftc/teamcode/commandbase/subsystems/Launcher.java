@@ -154,13 +154,13 @@ public class Launcher extends SubsystemBase {
 
         if (activeControl) {
             double flywheelVel = robot.launchEncoder.getCorrectedVelocity();
-            double transferVel = robot.transferEncoder.getCorrectedVelocity();
+//            double transferVel = robot.transferEncoder.getCorrectedVelocity();
 
 //            robot.launcher.flywheelController.setF(FLYWHEEL_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
 //            robot.launcher.transferController.setF(TRANSFER_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
 
             robot.launchMotors.set(flywheelController.calculate(flywheelVel));
-            robot.transferMotor.set(transferController.calculate(transferVel));
+//            robot.transferMotor.set(transferController.calculate(transferVel));
 
             if (flywheelController.atSetPoint()) {
                 impossible = false;
@@ -181,10 +181,10 @@ public class Launcher extends SubsystemBase {
         } else {
             if (getFlywheelTarget() == 0) {
                 robot.launchMotors.set(0);
-                robot.transferMotor.set(0);
+//                robot.transferMotor.set(0);
             } else {
                 robot.launchMotors.set(LAUNCHER_DEFAULT_ON_SPEED);
-                robot.transferMotor.set(TRANSFER_DEFAULT_ON_SPEED);
+//                robot.transferMotor.set(TRANSFER_DEFAULT_ON_SPEED);
             }
 
             impossible = true;

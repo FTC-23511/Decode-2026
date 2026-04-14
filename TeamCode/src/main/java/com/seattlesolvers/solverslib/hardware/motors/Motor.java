@@ -66,9 +66,8 @@ public class Motor implements HardwareDevice {
         private Direction direction;
         private double lastTimeStamp, veloEstimate, dpp, accel, lastVelo;
 
-        private double velocitySpikeThreshold = Double.MAX_VALUE;
-        private double lastValidVelocityReading = 0;
-        private boolean isFirstVelocityRead = true;
+        private double velocityLimit = Double.MAX_VALUE;
+        private double lastSafeVelocity = 0.0;
 
         /**
          * The encoder object for the motor.
@@ -151,11 +150,12 @@ public class Motor implements HardwareDevice {
         }
 
         /**
-         * Sets the maximum allowable jump in ticks/sec between loops before a reading is ignored.
-         * * @param threshold Max delta in ticks per second.
+         * Sets the maximum allowable velocity reading.
+         * Readings above this absolute value are ignored.
+         * * @param limit the maximum velocity limit
          */
-        public Encoder setVelocitySpikeThreshold(double threshold) {
-            this.velocitySpikeThreshold = threshold;
+        public Encoder setVelocityLimit(double limit) {
+            this.velocityLimit = limit;
             return this;
         }
 
@@ -167,27 +167,18 @@ public class Motor implements HardwareDevice {
         }
 
         /**
-         * @return the raw velocity of the motor reported by the encoder (Filtered)
+         * @return the raw velocity of the motor reported by the encoder
          */
         public double getRawVelocity() {
-            double rawVelo = getVelocity();
-
-            if (!isFirstVelocityRead && Math.abs(rawVelo - lastValidVelocityReading) > velocitySpikeThreshold) {
-                rawVelo = lastValidVelocityReading;
-            } else {
-                lastValidVelocityReading = rawVelo;
-                isFirstVelocityRead = false;
-            }
-
+            double velo = getVelocity();
             double currentTime = (double) System.nanoTime() / 1E9;
             double dt = currentTime - lastTimeStamp;
             if (dt > 1E-4) {
-                accel = (rawVelo - lastVelo) / dt;
-                lastVelo = rawVelo;
+                accel = (velo - lastVelo) / dt;
+                lastVelo = velo;
                 lastTimeStamp = currentTime;
             }
-
-            return rawVelo * direction.getMultiplier();
+            return velo * direction.getMultiplier();
         }
 
         /**
@@ -200,7 +191,7 @@ public class Motor implements HardwareDevice {
         private final static int CPS_STEP = 0x10000;
 
         /**
-         * Corrects for velocity overflow
+         * Corrects for velocity overflow and caps sudden extreme spikes.
          *
          * @return the corrected velocity
          */
@@ -210,9 +201,12 @@ public class Motor implements HardwareDevice {
             while (Math.abs(veloEstimate - abs) > CPS_STEP / 2.0) {
                 abs += Math.signum(veloEstimate - abs) * CPS_STEP;
             }
-            return abs * Math.signum(real);
-        }
 
+            if (abs <= Math.abs(velocityLimit)) {
+                lastSafeVelocity = abs * Math.signum(real);
+            }
+            return lastSafeVelocity;
+        }
     }
 
     /**

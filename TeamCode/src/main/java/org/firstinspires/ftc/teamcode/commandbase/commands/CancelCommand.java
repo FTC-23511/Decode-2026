@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commandbase.commands;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
@@ -32,5 +33,10 @@ public class CancelCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         return true;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        CommandScheduler.getInstance().cancelAll();
     }
 }

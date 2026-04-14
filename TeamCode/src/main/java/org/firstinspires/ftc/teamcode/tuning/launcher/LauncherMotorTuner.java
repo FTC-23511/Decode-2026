@@ -30,6 +30,8 @@ public class LauncherMotorTuner extends CommandOpMode {
     public static boolean REVERSE_ENCODER = false;
     public static boolean REVERSE_MOTOR = false;
 
+    private double MAX_VELO = 0;
+
     private final PIDFController launcherPIDF = new PIDFController(P, I, D, F);
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
@@ -62,7 +64,11 @@ public class LauncherMotorTuner extends CommandOpMode {
         launcherPIDF.setSetPoint(LAUNCHER_TARGET_VEL);
 
         double launcherVel = robot.launchEncoder.getCorrectedVelocity();
-        double launcherPower = launcherPIDF.calculate(launcherVel, LAUNCHER_TARGET_VEL) * (REVERSE_MOTOR ? -1 : 1);
+        double launcherPower = launcherPIDF.calculate(launcherVel) * (REVERSE_MOTOR ? -1 : 1);
+
+        if (launcherVel > MAX_VELO) {
+            MAX_VELO = launcherVel;
+        }
 
         robot.launchEncoder.setDirection(REVERSE_ENCODER ? Motor.Direction.REVERSE : Motor.Direction.FORWARD);
         robot.launchMotors.set(launcherPower);
@@ -73,6 +79,7 @@ public class LauncherMotorTuner extends CommandOpMode {
         telemetryEx.addData("launcherPower", launcherPower);
         telemetryEx.addData("launcher pos", robot.launchEncoder.getPosition());
         telemetryEx.addData("launcher target velocity", LAUNCHER_TARGET_VEL);
+        telemetryEx.addData("MAX_VELO", MAX_VELO);
         telemetryEx.addData("launcher actual velocity", launcherVel);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

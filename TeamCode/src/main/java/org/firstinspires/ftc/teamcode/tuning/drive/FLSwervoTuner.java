@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "FLSwervoTuner", group = "Launcher")
+@TeleOp(name = "FLSwervoTuner", group = "Drive")
 public class FLSwervoTuner extends CommandOpMode {
     public ElapsedTime timer;
 

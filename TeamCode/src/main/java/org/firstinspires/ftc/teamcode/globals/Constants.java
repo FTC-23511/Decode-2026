@@ -104,8 +104,8 @@ public class Constants {
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
-    public static PIDFCoefficients TRANSFER_PIDF_COEFFICIENTS = new PIDFCoefficients(0.001, 0, 0, 0.00041);
-    public static double TRANSFER_VEL_TOLERANCE = 41; // Ticks
+    public static PIDFCoefficients TRANSFER_PIDF_COEFFICIENTS = new PIDFCoefficients(0, 0, 0, 1);
+    public static double TRANSFER_VEL_TOLERANCE = 0; // Ticks
     public static double TRANSFER_DEFAULT_ON_SPEED = 0.00; // Power
     public static double TRANSFER_MAX_VELOCITY = 2000; // Ticks/second
     public static double TRANSFER_CLOSE_VELOCITY = 1500; // Ticks/second

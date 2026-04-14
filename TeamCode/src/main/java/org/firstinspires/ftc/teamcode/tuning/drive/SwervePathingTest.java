@@ -97,6 +97,7 @@ public class SwervePathingTest extends CommandOpMode {
     public void run() {
         // DO NOT REMOVE
         robot.updateLoop(null);
+        robot.drive.periodic();
 
         // Update any constants that are being updated by FTCDash - used for tuning
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
