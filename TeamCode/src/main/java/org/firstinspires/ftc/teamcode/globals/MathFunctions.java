@@ -251,7 +251,7 @@ public class MathFunctions {
      * Helper to calculate required velocity.
      * Includes check for negative denominator to prevent NaN.
      */
-    private static double calculateVelocity(double x, double deltaY, double angleHoriz, double g) {
+    public static double calculateVelocity(double x, double deltaY, double angleHoriz, double g) {
         double angleRad = Math.toRadians(angleHoriz);
         double tanTheta = Math.tan(angleRad);
         double cosTheta = Math.cos(angleRad);

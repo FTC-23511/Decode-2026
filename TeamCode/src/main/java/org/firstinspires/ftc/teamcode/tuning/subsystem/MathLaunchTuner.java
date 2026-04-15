@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.tuning.subsystem;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.BACKBOARD_Y_OFFSET;
+import static org.firstinspires.ftc.teamcode.globals.Constants.GRAVITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_HEIGHT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TARGET_HEIGHT;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -13,6 +17,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
@@ -89,6 +94,7 @@ public class MathLaunchTuner extends CommandOpMode {
         } else {
             telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
             telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
+            telemetryEx.addData("Suggested Ticks Vel for angle+distance", Launcher.launcherLUT.get(MathFunctions.calculateVelocity(DISTANCE, TARGET_HEIGHT + BACKBOARD_Y_OFFSET - LAUNCHER_HEIGHT, 90 - HOOD_SERVO_OUTPUT, GRAVITY)));
         }
 
         telemetryEx.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
