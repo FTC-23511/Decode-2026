@@ -64,7 +64,7 @@ public class LauncherMathTest {
     public void mathTest() {
         double distance = 4.0;
 
-        double[] values = MathFunctions.distanceToLauncherValues(distance);
+        double[] values = MathFunctions.distanceToLauncherValues(distance, 35);
 
         System.out.println("distance: " + distance);
         System.out.println("ideal launcher values: " + Arrays.toString(values));
