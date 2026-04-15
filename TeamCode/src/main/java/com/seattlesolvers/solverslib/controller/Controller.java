@@ -132,9 +132,10 @@ public abstract class Controller {
      * Sets the error which is considered tolerable for use with {@link #atSetPoint()}.
      *
      * @param positionTolerance Position error which is tolerable.
+     * @return this object for chaining purposes
      */
-    public void setTolerance(double positionTolerance) {
-        setTolerance(positionTolerance, Double.POSITIVE_INFINITY);
+    public Controller setTolerance(double positionTolerance) {
+        return setTolerance(positionTolerance, Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -142,10 +143,12 @@ public abstract class Controller {
      *
      * @param positionTolerance Position error which is tolerable.
      * @param velocityTolerance Velocity error which is tolerable.
+     * @return this object for chaining purposes
      */
-    public void setTolerance(double positionTolerance, double velocityTolerance) {
+    public Controller setTolerance(double positionTolerance, double velocityTolerance) {
         errorTolerance_p = positionTolerance;
         errorTolerance_v = velocityTolerance;
+        return this;
     }
 
     /**

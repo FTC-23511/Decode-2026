@@ -98,102 +98,129 @@ public class MathFunctions {
         return (pos * Math.toRadians(TURRET_SERVO_ROTATION)) - (Math.toRadians(TURRET_SERVO_ROTATION) / 2.0);
     }
 
+    public static double[] distanceToLauncherValues(double distance) {
+        return distanceToLauncherValues(distance, Launcher.preferredHoodAngleLUT.get(distance));
+    }
+
     /**
      * Calculates the best launch parameters (Velocity, Angle) for a given distance.
-     * 1. Tries to hit the Backboard (high velocity, flat shot).
-     * 2. Falls back to Goal Center if Backboard is unreachable.
-     * 3. Ensures the shot clears the Goal Lip Buffer.
-     * * @param distance Horizontal distance to goal center (m).
+     * @param distance Horizontal distance to goal center (m).
+     * @param preferredAngleV The desired launch angle from vertical (deg).
      * @return { velocity (m/s), angleFromVertical (deg) }
      */
-    public static double[] distanceToLauncherValues(double distance) {
+    public static double[] distanceToLauncherValues(double distance, double preferredAngleV) {
         distance += Launcher.DISTANCE_OFFSET;
         double g = GRAVITY;
         double x = distance;
         double xLip = x - GOAL_LIP;
 
-        // Physical height the ball must be at when passing the lip
         double deltaYLip = (TARGET_HEIGHT + LIP_BUFFER) - LAUNCHER_HEIGHT;
 
         // --- Attempt 1: Backboard Shot (Priority) ---
-        double[] result = calculateBestShot(x, TARGET_HEIGHT + BACKBOARD_Y_OFFSET, xLip, deltaYLip, g);
+        double[] result = calculateBestShot(x, TARGET_HEIGHT + BACKBOARD_Y_OFFSET, xLip, deltaYLip, g, preferredAngleV);
 
         // --- Attempt 2: Center Goal Fallback ---
-        // If Attempt 1 failed (NaN), aim for the center of the goal
         if (Double.isNaN(result[0])) {
-            result = calculateBestShot(x, TARGET_HEIGHT, xLip, deltaYLip, g);
+            result = calculateBestShot(x, TARGET_HEIGHT, xLip, deltaYLip, g, preferredAngleV);
         }
 
         return result;
     }
 
     /**
-     * Robust solver that finds the flattest valid shot for a specific target Y.
+     * Robust solver that prioritizes a "Sweet Spot" target angle.
      */
-    private static double[] calculateBestShot(double x, double targetY, double xLip, double deltaYLip, double g) {
+    private static double[] calculateBestShot(double x, double targetY, double xLip, double deltaYLip, double g, double preferredAngleV) {
         double deltaY = targetY - LAUNCHER_HEIGHT;
-        double minPhysAngleH = 90.0 - MAX_HOOD_ANGLE; // e.g., 45 deg
-        double maxPhysAngleH = 90.0 - MIN_HOOD_ANGLE; // e.g., 70 deg
+
+        // Convert Vertical angles to Horizontal for trajectory math
+        double maxPhysAngleH = 90.0 - MIN_HOOD_ANGLE;
+        double minPhysAngleH = 90.0 - MAX_HOOD_ANGLE;
+        double preferredAngleH = 90.0 - preferredAngleV;
 
         // 1. Line-of-Sight Check
-        // We cannot shoot flatter than the direct line to the target.
-        // +0.1 degrees ensures the velocity formula denominator is never zero/negative.
         double minGeomAngle = Math.toDegrees(Math.atan(deltaY / x)) + 0.1;
 
         // 2. Lip Clearance Check
         double minLipH = 0.0;
         if (xLip > 0) {
-            // Find angle that passes through (xLip, deltaYLip) AND (x, deltaY)
             double num = (deltaY * xLip * xLip) - (deltaYLip * x * x);
             double den = (x * xLip * xLip) - (xLip * x * x);
-
-            // If den is 0 (xLip == x), vertical shot needed (impossible)
             if (Math.abs(den) > 1e-5) {
                 minLipH = Math.toDegrees(Math.atan(num / den));
             } else {
-                minLipH = 89.9; // Arbitrary high angle if lip is exactly at target dist
+                minLipH = 89.9;
             }
         }
 
-        // 3. Determine the Angle Floor
-        // The shot must be steeper than: Hood Min, Lip Clearance, AND Line-of-Sight
-        double targetAngleH = Math.max(minPhysAngleH, Math.max(minLipH, minGeomAngle));
+        // 3. Determine Absolute Floor
+        double absoluteMinAngleH = Math.max(minPhysAngleH, Math.max(minLipH, minGeomAngle));
 
-        // If the required floor is steeper than the hood allows, this shot is impossible
-        if (targetAngleH > maxPhysAngleH) {
-            return new double[]{Double.NaN, Double.NaN};
+        // 4. Try the Preferred Angle First
+        double targetAngleH = Math.max(preferredAngleH, absoluteMinAngleH);
+
+        if (targetAngleH <= maxPhysAngleH) {
+            double vReq = calculateVelocity(x, deltaY, targetAngleH, g);
+            if (!Double.isNaN(vReq) && vReq <= LAUNCHER_MAX_BALL_VELOCITY) {
+                return new double[]{vReq, 90.0 - targetAngleH};
+            }
         }
 
-        // 4. Calculate Velocity for this "Floor" Angle
-        // This is the fastest, flattest legal shot possible.
-        double vReq = calculateVelocity(x, deltaY, targetAngleH, g);
-
-        if (!Double.isNaN(vReq) && vReq <= LAUNCHER_MAX_BALL_VELOCITY) {
-            return new double[]{vReq, 90.0 - targetAngleH};
-        }
-
-        // 5. Velocity Limited Fallback (Max Power)
-        // If flattest shot requires > Max Velocity, we find the best angle at Max Velocity
+        // 5. Maximum Power Fallback
         double v = LAUNCHER_MAX_BALL_VELOCITY;
         double A = (g * x * x) / (2.0 * v * v);
         double B = -x;
         double C = deltaY + A;
         double disc = B * B - 4 * A * C;
 
-        if (disc < 0) return new double[]{Double.NaN, Double.NaN}; // Cannot reach even at Max V
+        if (disc < 0) return new double[]{Double.NaN, Double.NaN};
 
         double sqrtD = Math.sqrt(disc);
-        double tan1 = (-B - sqrtD) / (2 * A); // Flatter solution
-        double tan2 = (-B + sqrtD) / (2 * A); // Steeper solution
+        double tan1 = (-B - sqrtD) / (2 * A);
+        double tan2 = (-B + sqrtD) / (2 * A);
 
         double a1 = Math.toDegrees(Math.atan(tan1));
         double a2 = Math.toDegrees(Math.atan(tan2));
 
-        // Prefer a1 (Flat), then a2 (Lob), ensuring they meet our Angle Floor
-        if (a1 >= targetAngleH && a1 <= maxPhysAngleH) return new double[]{v, 90.0 - a1};
-        if (a2 >= targetAngleH && a2 <= maxPhysAngleH) return new double[]{v, 90.0 - a2};
+        boolean a1Valid = a1 >= absoluteMinAngleH && a1 <= maxPhysAngleH;
+        boolean a2Valid = a2 >= absoluteMinAngleH && a2 <= maxPhysAngleH;
+
+        // Pick the valid angle closest to the preferred angle
+        if (a1Valid && a2Valid) {
+            if (Math.abs(a1 - preferredAngleH) < Math.abs(a2 - preferredAngleH)) {
+                return new double[]{v, 90.0 - a1};
+            } else {
+                return new double[]{v, 90.0 - a2};
+            }
+        }
+
+        if (a1Valid) return new double[]{v, 90.0 - a1};
+        if (a2Valid) return new double[]{v, 90.0 - a2};
 
         return new double[]{Double.NaN, Double.NaN};
+    }
+
+    public static double getHoodAngleFromVelocity(double distance, double velocity) {
+        return getHoodAngleFromVelocity(distance, velocity, Launcher.preferredHoodAngleLUT.get(distance));
+    }
+
+    /**
+     * Calculates the best hood angle for a specific velocity.
+     */
+    public static double getHoodAngleFromVelocity(double distance, double velocity, double preferredAngleV) {
+        double g = GRAVITY;
+        double x = distance;
+        double xLip = x - GOAL_LIP;
+
+        double deltaYLip = (TARGET_HEIGHT + LIP_BUFFER) - LAUNCHER_HEIGHT;
+
+        double angle = solveForTarget(x, TARGET_HEIGHT + BACKBOARD_Y_OFFSET, xLip, deltaYLip, velocity, g, preferredAngleV);
+
+        if (Double.isNaN(angle)) {
+            angle = solveForTarget(x, TARGET_HEIGHT, xLip, deltaYLip, velocity, g, preferredAngleV);
+        }
+
+        return angle;
     }
 
     /**
@@ -215,95 +242,57 @@ public class MathFunctions {
     }
 
     /**
-     * Calculates the best hood angle for a specific velocity.
-     * Prioritizes backboard target, falls back to goal center.
-     * Ensures the shot clears the rim by LIP_BUFFER height.
-     *
-     * @param distance Horizontal distance to target.
-     * @param velocity Current ball velocity.
-     * @return Angle from Vertical (deg) or NaN.
-     */
-    public static double getHoodAngleFromVelocity(double distance, double velocity) {
-        double g = GRAVITY;
-        double x = distance;
-        double xLip = x - GOAL_LIP;
-
-        // The ball must be this high when it crosses the lip distance
-        double deltaYLip = (TARGET_HEIGHT + LIP_BUFFER) - LAUNCHER_HEIGHT;
-
-        // 1. Try to solve for Backboard Height
-        double angle = solveForTarget(x, TARGET_HEIGHT + BACKBOARD_Y_OFFSET, xLip, deltaYLip, velocity, g);
-
-        // 2. Fallback to Goal Center Height
-        if (Double.isNaN(angle)) {
-            angle = solveForTarget(x, TARGET_HEIGHT, xLip, deltaYLip, velocity, g);
-        }
-
-        return angle;
-    }
-
-    /**
      * Internal helper to solve the quadratic for a specific target height Y.
      */
-    private static double solveForTarget(double x, double targetY, double xLip, double deltaYLip, double v, double g) {
+    private static double solveForTarget(double x, double targetY, double xLip, double deltaYLip, double v, double g, double preferredAngleV) {
         double deltaY = targetY - LAUNCHER_HEIGHT;
 
-        // Trajectory Quadratic: A*tan^2 + B*tan + C = 0
         double A = (g * x * x) / (2.0 * v * v);
         double B = -x;
         double C = deltaY + A;
 
         double disc = (B * B) - (4.0 * A * C);
-        if (disc < 0) return Double.NaN; // Velocity too low
+        if (disc < 0) return Double.NaN;
 
         double sqrtD = Math.sqrt(disc);
-        double tan1 = (-B - sqrtD) / (2.0 * A); // Flatter
-        double tan2 = (-B + sqrtD) / (2.0 * A); // Steeper
+        double tan1 = (-B - sqrtD) / (2.0 * A);
+        double tan2 = (-B + sqrtD) / (2.0 * A);
 
         double angle1H = Math.toDegrees(Math.atan(tan1));
         double angle2H = Math.toDegrees(Math.atan(tan2));
 
-        // Calculate Lip Constraint for this specific trajectory path
         double minLipH = 0.0;
         if (xLip > 0) {
             double num = (deltaY * xLip * xLip) - (deltaYLip * x * x);
             double den = (x * xLip * xLip) - (xLip * x * x);
             minLipH = Math.toDegrees(Math.atan(num / den));
-            // No +1.0 deg; relies on deltaYLip including the buffer
         }
 
-        // Select the best valid angle (Flattest first)
         double epsilon = 1e-7;
-        if (isAngleValid(angle1H, minLipH, epsilon)) return 90.0 - angle1H;
-//        if (isAngleValid(angle2H, minLipH, epsilon)) return 90.0 - angle2H;
+        boolean a1Valid = isAngleValid(angle1H, minLipH, epsilon);
+        boolean a2Valid = isAngleValid(angle2H, minLipH, epsilon);
+
+        double preferredAngleH = 90.0 - preferredAngleV;
+
+        if (a1Valid && a2Valid) {
+            if (Math.abs(angle1H - preferredAngleH) < Math.abs(angle2H - preferredAngleH)) {
+                return 90.0 - angle1H;
+            } else {
+                return 90.0 - angle2H;
+            }
+        }
+
+        if (a1Valid) return 90.0 - angle1H;
+        if (a2Valid) return 90.0 - angle2H;
 
         return Double.NaN;
     }
 
     private static boolean isAngleValid(double angleHoriz, double minLipHoriz, double epsilon) {
         double angleVert = 90.0 - angleHoriz;
-        // Check Lip clearance AND Hood Mechanical Limits
         return angleHoriz >= (minLipHoriz - epsilon)
                 && angleVert >= (MIN_HOOD_ANGLE - epsilon)
                 && angleVert <= (MAX_HOOD_ANGLE + epsilon);
-    }
-
-    /**
-     * Finds leg of triangle given hypotenuse and the other leg
-     */
-    public static double findLeg(double hypot, double leg) {
-        if (leg > hypot || hypot <= 0 || leg <= 0) {
-            return Double.NaN;
-        }
-
-        return Math.sqrt(Math.pow(hypot, 2) - Math.pow(leg, 2));
-    }
-
-    /**
-     * Finds hypotenuse of triangle given both legs
-     */
-    public static double findHypotenuse(double leg1, double leg2) {
-        return Math.hypot(leg1, leg2);
     }
 
     /**
