@@ -275,6 +275,16 @@ public class Camera extends SubsystemBase {
         return false;
     }
 
+    /**
+     * Updates Arducam detections and then relocalizes the robot.
+     * @param n max number of times to attempt reading to get a valid result
+     * @return true if relocalization was successful, false otherwise.
+     */
+    public boolean relocalizeArducam(int n) {
+        updateArducam(n);
+        return relocalizeArducam();
+    }
+
     public void updateROI(Pose2d robotPose) {
         if (robotPose == null) return;
         double distance;
@@ -487,7 +497,16 @@ public class Camera extends SubsystemBase {
                 Pose2d cameraPose = getCameraPose();
                 double timestamp = getDetectionTimestamp();
 
-                if (cameraPose != null && timestamp != -1) {
+                // Get the actual detection object so we can read its hardware timestamp
+                AprilTagDetection detection = cleanDetection(detections);
+
+                // Make sure detection isn't null before doing math on it
+                if (cameraPose != null && timestamp != -1 && detection != null) {
+
+                    // Calculate latency (staleness) in milliseconds
+                    lastStaleness = (System.nanoTime() - detection.frameAcquisitionNanoTime) / 1000000.0;
+
+                    // Log the pose to the Kalman filter history
                     addPose(timestamp, cameraPose);
                 }
             }
