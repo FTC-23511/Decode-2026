@@ -508,7 +508,9 @@ public class MathFunctions {
             double horizontalVel = velocity * Math.sin(angleRad);
 
             // Prevent divide by zero
-            if (Math.abs(horizontalVel) < 0.01) return 0.0;
+            if (Math.abs(horizontalVel) < 0.01) {
+                return 0.0;
+            }
 
             return distance / horizontalVel;
         }

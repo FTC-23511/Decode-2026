@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -31,7 +30,9 @@ public class MathLaunchTuner extends CommandOpMode {
     public static boolean USE_RAW_SERVO_POS = false;
     public static double HOOD_SERVO_OUTPUT = 0.0; // either raw servo pos or hood angle
     public static double LAUNCHER_TARGET_VEL = 0.0; // ticks/sec
+    public static double TRANSFER_TARGET_POWER = 0.0; // power [0, 1]
     public static double DISTANCE = 1.5; // meters
+    public static boolean USE_LEGACY = true; // meters
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
@@ -77,22 +78,28 @@ public class MathLaunchTuner extends CommandOpMode {
         robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TURRET_POS);
 
         robot.launcher.setFlywheelTicks(LAUNCHER_TARGET_VEL);
+        robot.launcher.setTransferPower(TRANSFER_TARGET_POWER);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
+        if (USE_LEGACY) {
+            telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
+            telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
+        } else {
+            telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
+            telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
+        }
 
-        telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
-        telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
         telemetryEx.addData("HOOD_SERVO_OUTPUT", HOOD_SERVO_OUTPUT);
         telemetryEx.addData("Hood Pos", robot.hoodServo.get());
         telemetryEx.addData("Launch Motor Power", robot.launchMotors.get());
         telemetryEx.addData("Actual Motor Vel", robot.launchEncoder.getCorrectedVelocity());
         telemetryEx.addData("Target Motor Vel", LAUNCHER_TARGET_VEL);
         telemetryEx.addData("Turret Encoder Pos", robot.turret.getRelativePos());
-        telemetryEx.addData("Turret Pos 1", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryEx);
+        robot.launcher.periodic();
     }
 }
