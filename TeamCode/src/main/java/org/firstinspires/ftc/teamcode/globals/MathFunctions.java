@@ -105,7 +105,7 @@ public class MathFunctions {
     /**
      * Calculates the best launch parameters (Velocity, Angle) for a given distance.
      * @param distance Horizontal distance to goal center (m).
-     * @param preferredAngleV The desired launch angle from vertical (deg).
+     * @param preferredAngleV Launch angle from vertical (deg). If NaN, defaults to flattest shot.
      * @return { velocity (m/s), angleFromVertical (deg) }
      */
     public static double[] distanceToLauncherValues(double distance, double preferredAngleV) {
@@ -113,10 +113,9 @@ public class MathFunctions {
         double g = GRAVITY;
         double x = distance;
         double xLip = x - GOAL_LIP;
-
         double deltaYLip = (TARGET_HEIGHT + LIP_BUFFER) - LAUNCHER_HEIGHT;
 
-        // --- Attempt 1: Backboard Shot (Priority) ---
+        // --- Attempt 1: Backboard Shot ---
         double[] result = calculateBestShot(x, TARGET_HEIGHT + BACKBOARD_Y_OFFSET, xLip, deltaYLip, g, preferredAngleV);
 
         // --- Attempt 2: Center Goal Fallback ---
@@ -127,38 +126,31 @@ public class MathFunctions {
         return result;
     }
 
-    /**
-     * Robust solver that prioritizes a "Sweet Spot" target angle.
-     */
     private static double[] calculateBestShot(double x, double targetY, double xLip, double deltaYLip, double g, double preferredAngleV) {
         double deltaY = targetY - LAUNCHER_HEIGHT;
-
-        // Convert Vertical angles to Horizontal for trajectory math
         double maxPhysAngleH = 90.0 - MIN_HOOD_ANGLE;
         double minPhysAngleH = 90.0 - MAX_HOOD_ANGLE;
-        double preferredAngleH = 90.0 - preferredAngleV;
 
-        // 1. Line-of-Sight Check
+        // 1. Minimum Angle Constraints (Lip & Line-of-Sight)
         double minGeomAngle = Math.toDegrees(Math.atan(deltaY / x)) + 0.1;
-
-        // 2. Lip Clearance Check
         double minLipH = 0.0;
         if (xLip > 0) {
             double num = (deltaY * xLip * xLip) - (deltaYLip * x * x);
             double den = (x * xLip * xLip) - (xLip * x * x);
-            if (Math.abs(den) > 1e-5) {
-                minLipH = Math.toDegrees(Math.atan(num / den));
-            } else {
-                minLipH = 89.9;
-            }
+            minLipH = (Math.abs(den) > 1e-5) ? Math.toDegrees(Math.atan(num / den)) : 89.9;
         }
 
-        // 3. Determine Absolute Floor
         double absoluteMinAngleH = Math.max(minPhysAngleH, Math.max(minLipH, minGeomAngle));
 
-        // 4. Try the Preferred Angle First
-        double targetAngleH = Math.max(preferredAngleH, absoluteMinAngleH);
+        // 2. Determine Target Angle based on NaN check
+        double targetAngleH;
+        if (Double.isNaN(preferredAngleV)) {
+            targetAngleH = absoluteMinAngleH; // Fallback to Flattest
+        } else {
+            targetAngleH = Math.max(90.0 - preferredAngleV, absoluteMinAngleH); // Use Preferred
+        }
 
+        // 3. Try Velocity for Target Angle
         if (targetAngleH <= maxPhysAngleH) {
             double vReq = calculateVelocity(x, deltaY, targetAngleH, g);
             if (!Double.isNaN(vReq) && vReq <= LAUNCHER_MAX_BALL_VELOCITY) {
@@ -166,7 +158,7 @@ public class MathFunctions {
             }
         }
 
-        // 5. Maximum Power Fallback
+        // 4. Maximum Power Fallback
         double v = LAUNCHER_MAX_BALL_VELOCITY;
         double A = (g * x * x) / (2.0 * v * v);
         double B = -x;
@@ -176,51 +168,83 @@ public class MathFunctions {
         if (disc < 0) return new double[]{Double.NaN, Double.NaN};
 
         double sqrtD = Math.sqrt(disc);
-        double tan1 = (-B - sqrtD) / (2 * A);
-        double tan2 = (-B + sqrtD) / (2 * A);
-
-        double a1 = Math.toDegrees(Math.atan(tan1));
-        double a2 = Math.toDegrees(Math.atan(tan2));
+        double a1 = Math.toDegrees(Math.atan((-B - sqrtD) / (2 * A))); // Flatter
+        double a2 = Math.toDegrees(Math.atan((-B + sqrtD) / (2 * A))); // Steeper
 
         boolean a1Valid = a1 >= absoluteMinAngleH && a1 <= maxPhysAngleH;
         boolean a2Valid = a2 >= absoluteMinAngleH && a2 <= maxPhysAngleH;
 
-        // Pick the valid angle closest to the preferred angle
-        if (a1Valid && a2Valid) {
-            if (Math.abs(a1 - preferredAngleH) < Math.abs(a2 - preferredAngleH)) {
-                return new double[]{v, 90.0 - a1};
-            } else {
-                return new double[]{v, 90.0 - a2};
+        // If Preferred is NaN, always take the flattest valid shot (a1)
+        if (Double.isNaN(preferredAngleV)) {
+            if (a1Valid) return new double[]{v, 90.0 - a1};
+            if (a2Valid) return new double[]{v, 90.0 - a2};
+        } else {
+            // Otherwise, pick the root closest to the preference
+            double preferredH = 90.0 - preferredAngleV;
+            if (a1Valid && a2Valid) {
+                return (Math.abs(a1 - preferredH) < Math.abs(a2 - preferredH))
+                        ? new double[]{v, 90.0 - a1} : new double[]{v, 90.0 - a2};
             }
+            if (a1Valid) return new double[]{v, 90.0 - a1};
+            if (a2Valid) return new double[]{v, 90.0 - a2};
         }
-
-        if (a1Valid) return new double[]{v, 90.0 - a1};
-        if (a2Valid) return new double[]{v, 90.0 - a2};
 
         return new double[]{Double.NaN, Double.NaN};
     }
 
-    public static double getHoodAngleFromVelocity(double distance, double velocity) {
-        return getHoodAngleFromVelocity(distance, velocity, Launcher.preferredHoodAngleLUT.get(distance));
-    }
-
-    /**
-     * Calculates the best hood angle for a specific velocity.
-     */
     public static double getHoodAngleFromVelocity(double distance, double velocity, double preferredAngleV) {
         double g = GRAVITY;
         double x = distance;
         double xLip = x - GOAL_LIP;
-
         double deltaYLip = (TARGET_HEIGHT + LIP_BUFFER) - LAUNCHER_HEIGHT;
 
         double angle = solveForTarget(x, TARGET_HEIGHT + BACKBOARD_Y_OFFSET, xLip, deltaYLip, velocity, g, preferredAngleV);
-
         if (Double.isNaN(angle)) {
             angle = solveForTarget(x, TARGET_HEIGHT, xLip, deltaYLip, velocity, g, preferredAngleV);
         }
-
         return angle;
+    }
+
+    private static double solveForTarget(double x, double targetY, double xLip, double deltaYLip, double v, double g, double preferredAngleV) {
+        double deltaY = targetY - LAUNCHER_HEIGHT;
+        double A = (g * x * x) / (2.0 * v * v);
+        double B = -x;
+        double C = deltaY + A;
+
+        double disc = (B * B) - (4.0 * A * C);
+        if (disc < 0) return Double.NaN;
+
+        double sqrtD = Math.sqrt(disc);
+        double a1H = Math.toDegrees(Math.atan((-B - sqrtD) / (2.0 * A)));
+        double a2H = Math.toDegrees(Math.atan((-B + sqrtD) / (2.0 * A)));
+
+        double minLipH = 0.0;
+        if (xLip > 0) {
+            double num = (deltaY * xLip * xLip) - (deltaYLip * x * x);
+            double den = (x * xLip * xLip) - (xLip * x * x);
+            minLipH = Math.toDegrees(Math.atan(num / den));
+        }
+
+        boolean a1Valid = isAngleValid(a1H, minLipH, 1e-7);
+        boolean a2Valid = isAngleValid(a2H, minLipH, 1e-7);
+
+        // NaN Check for Hood Compensation
+        if (Double.isNaN(preferredAngleV)) {
+            if (a1Valid) return 90.0 - a1H; // Default to flattest
+        } else {
+            double prefH = 90.0 - preferredAngleV;
+            if (a1Valid && a2Valid) {
+                return (Math.abs(a1H - prefH) < Math.abs(a2H - prefH)) ? 90.0 - a1H : 90.0 - a2H;
+            }
+            if (a1Valid) return 90.0 - a1H;
+            if (a2Valid) return 90.0 - a2H;
+        }
+
+        return Double.NaN;
+    }
+
+    public static double getHoodAngleFromVelocity(double distance, double velocity) {
+        return getHoodAngleFromVelocity(distance, velocity, Launcher.preferredHoodAngleLUT.get(distance));
     }
 
     /**
@@ -239,53 +263,6 @@ public class MathFunctions {
         if (denom <= 1e-9) return Double.NaN; // Shot aims too low or infinite velocity
 
         return Math.sqrt((g * x * x) / denom);
-    }
-
-    /**
-     * Internal helper to solve the quadratic for a specific target height Y.
-     */
-    private static double solveForTarget(double x, double targetY, double xLip, double deltaYLip, double v, double g, double preferredAngleV) {
-        double deltaY = targetY - LAUNCHER_HEIGHT;
-
-        double A = (g * x * x) / (2.0 * v * v);
-        double B = -x;
-        double C = deltaY + A;
-
-        double disc = (B * B) - (4.0 * A * C);
-        if (disc < 0) return Double.NaN;
-
-        double sqrtD = Math.sqrt(disc);
-        double tan1 = (-B - sqrtD) / (2.0 * A);
-        double tan2 = (-B + sqrtD) / (2.0 * A);
-
-        double angle1H = Math.toDegrees(Math.atan(tan1));
-        double angle2H = Math.toDegrees(Math.atan(tan2));
-
-        double minLipH = 0.0;
-        if (xLip > 0) {
-            double num = (deltaY * xLip * xLip) - (deltaYLip * x * x);
-            double den = (x * xLip * xLip) - (xLip * x * x);
-            minLipH = Math.toDegrees(Math.atan(num / den));
-        }
-
-        double epsilon = 1e-7;
-        boolean a1Valid = isAngleValid(angle1H, minLipH, epsilon);
-        boolean a2Valid = isAngleValid(angle2H, minLipH, epsilon);
-
-        double preferredAngleH = 90.0 - preferredAngleV;
-
-        if (a1Valid && a2Valid) {
-            if (Math.abs(angle1H - preferredAngleH) < Math.abs(angle2H - preferredAngleH)) {
-                return 90.0 - angle1H;
-            } else {
-                return 90.0 - angle2H;
-            }
-        }
-
-        if (a1Valid) return 90.0 - angle1H;
-        if (a2Valid) return 90.0 - angle2H;
-
-        return Double.NaN;
     }
 
     private static boolean isAngleValid(double angleHoriz, double minLipHoriz, double epsilon) {
