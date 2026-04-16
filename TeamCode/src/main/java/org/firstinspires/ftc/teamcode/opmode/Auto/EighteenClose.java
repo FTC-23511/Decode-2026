@@ -54,24 +54,22 @@ public class EighteenClose extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(-49.81512605042016, 58.285714285714285, Math.toRadians(90))); // Starting Pose
-        pathPoses.add(new Pose2d(-28.43697478991597, 12.705882352941178, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-23.19327731092437, 12.100840336134446, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-56.0672268907563, 12.302521008403353, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-47.59663865546218, -2.0168067226890685, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-56.26890756302521, -2.2184873949579753, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-20.974789915966376, 4.638655462184872, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-46.58823529411764, 0.20168067226890685, Math.toRadians(-0.001))); // Line 3
+        pathPoses.add(new Pose2d(-56.26890756302521, 0.202, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-18.352941176470583, 8.26890756302521, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-30.655462184873954, -11.89915966386555, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-61.3109243697479, -12.100840336134457, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-44.57142857142857, -8.26890756302521, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-37.310924369747895, -9.075630252100837, Math.toRadians(0))); // Line 8
         pathPoses.add(new Pose2d(-55.66386554621849, -2.4201680672268964, Math.toRadians(0))); // Line 9
-        pathPoses.add(new Pose2d(-19.159663865546214, 3.02521008403361, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-59.29411764705882, -10.689075630252091, Math.toRadians(-35))); // Line 11
-        pathPoses.add(new Pose2d(-17.34453781512605, 0.8067226890756274, Math.toRadians(0))); // Line 12
-        pathPoses.add(new Pose2d(-59.29411764705882, -10.689075630252091, Math.toRadians(-35))); // Line 13
-        pathPoses.add(new Pose2d(-17.34453781512605, 0.8067226890756274, Math.toRadians(0))); // Line 14
-        pathPoses.add(new Pose2d(-59.29411764705882, -10.689075630252091, Math.toRadians(-35))); // Line 15
-        pathPoses.add(new Pose2d(-17.34453781512605, 0.8067226890756274, Math.toRadians(0))); // Line 16
-        pathPoses.add(new Pose2d(-17.34453781512605, -1.6134453781512548, Math.toRadians(0))); // Line 17
+        pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-55.23188405797101, -4.7681159420289845, Math.toRadians(-10))); // Line 11
+        pathPoses.add(new Pose2d(-60.30252100840335, -20.369747899159673, Math.toRadians(-45))); // Line 12
+        pathPoses.add(new Pose2d(-10.487394957983192, 6.4537815126050475, Math.toRadians(0))); // Line 13
+        pathPoses.add(new Pose2d(-19.159663865546214, -2.0168067226890685, Math.toRadians(0))); // Line 14
+
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -138,11 +136,14 @@ public class EighteenClose extends CommandOpMode {
                         // gate intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
+
+                                        new DriveTo(pathPoses.get(11)).withTimeout(1267),
+
                                         // Intake turns on, drives to 11, turns off upon arrival
-                                        gateIntake(11, 1500),
+                                        gateIntake(12, 1500),
 
                                         // Drives to 12 and shoots
-                                        pathShoot(12, 1500)
+                                        pathShoot(13, 1500)
                                 ),
                                 REPEAT_TIMES
                         ),
