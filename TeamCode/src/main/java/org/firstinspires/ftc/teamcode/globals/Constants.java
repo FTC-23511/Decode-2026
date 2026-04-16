@@ -170,7 +170,7 @@ public class Constants {
 
     public static double GOAL_LIP = 0.45; // Meters
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
-    public static double LIP_BUFFER = 8 * DistanceUnit.mPerInch; // Meters
+    public static double LIP_BUFFER = 14 * DistanceUnit.mPerInch; // Meters
 
     public static boolean USE_INTERPLUT = true;
 

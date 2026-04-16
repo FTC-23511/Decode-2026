@@ -43,6 +43,7 @@ public class SwerveTeleOp extends CommandOpMode {
     public void initialize() {
         // Must have for all opModes
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
+        Constants.TESTING_OP_MODE = true;
 
         // Resets the command scheduler
         super.reset();
