@@ -1,19 +1,26 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -26,6 +33,9 @@ public class SwerveTeleOp extends CommandOpMode {
     public ElapsedTime timer;
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
+
+    public static double MIN_OUTPUT = 0.3; // As a fraction of the max speed of the robot
+    public static double MAX_OUTPUT = 1; // As a fraction of the max speed of the robot
 
     private final Robot robot = Robot.getInstance();
 
@@ -64,17 +74,43 @@ public class SwerveTeleOp extends CommandOpMode {
             module.setSwervoPIDF(Constants.SWERVO_PIDF_COEFFICIENTS);
         }
 
-        // Drive the robot
-        double minSpeed = 0.3; // As a fraction of the max speed of the robot
-        double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        robot.drive.swerve.updateWithTargetVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                        -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                        -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
-                        robot.drive.getPose().getRotation()
-                )
-        );
+        if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
+            // Drive the robot
+            if (driver.isDown(GamepadKeys.Button.START)) {
+                robot.drive.swerve.updateWithXLock();
+            } else {
+                robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
+                double speedMultiplier = MIN_OUTPUT + (1 - MIN_OUTPUT) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+                Pose2d robotPose = robot.drive.getPose();
+                Rotation2d robotAngle = robotPose.getRotation();
+                double headingCorrection = 0;
+
+                if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                    robot.drive.headingLock = true;
+                    robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+                    robot.drive.headingLock = false;
+                } else if (robot.drive.headingLock) {
+                    headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
+                    if (robot.drive.follower.atTarget()) {
+                        headingCorrection = 0;
+                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
+                        headingCorrection = 0;
+                    }
+                }
+
+                robot.drive.swerve.updateWithTargetVelocity(
+                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                                -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                                robot.drive.headingLock ? headingCorrection : -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                                new Rotation2d(robotAngle.getAngle(AngleUnit.RADIANS) + (ALLIANCE_COLOR.equals(Constants.AllianceColor.BLUE) ? Math.PI : 0))
+                        )
+                );
+            }
+        }
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
