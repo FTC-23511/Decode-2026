@@ -72,11 +72,6 @@ public class SwerveTuner extends CommandOpMode {
         double calcBlOffset = (TWO_PI - blPos) % TWO_PI;
         double calcBrOffset = (TWO_PI - brPos) % TWO_PI;
 
-        double calcFlOffset = (FULL_CIRCLE - flPos) % FULL_CIRCLE;
-        double calcFrOffset = (FULL_CIRCLE - frPos) % FULL_CIRCLE;
-        double calcBlOffset = (FULL_CIRCLE - blPos) % FULL_CIRCLE;
-        double calcBrOffset = (FULL_CIRCLE - brPos) % FULL_CIRCLE;
-
         telemetryEx.addData("FL Swervo Abs Pos", flPos);
         telemetryEx.addData("FR Swervo Abs Pos", frPos);
         telemetryEx.addData("BL Swervo Abs Pos", blPos);

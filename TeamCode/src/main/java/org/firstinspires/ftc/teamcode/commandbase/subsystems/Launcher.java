@@ -197,7 +197,10 @@ public class Launcher extends SubsystemBase {
         );
     }
 
-    // use launchValid() instead as it accounts for hood compensation
+    /**
+     * Use launchValid() instead as it accounts for hood compensation
+     * @return if the flywheel is at target
+     */
     @Deprecated
     public boolean flywheelReady() {
         return activeControl && flywheelController.atSetPoint();
