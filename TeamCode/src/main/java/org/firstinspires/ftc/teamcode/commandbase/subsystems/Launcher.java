@@ -32,23 +32,20 @@ public class Launcher extends SubsystemBase {
 
     private static final List<Double> launcherDistance = Arrays.asList(0.0,  1.5,      2.0,   2.5,  3.0,  3.5,  4.0,   4.5,   5.0); // distance from ball leaving robot to when it touches goal for first time (meters)
     private static final List<Double> shootingTime     = Arrays.asList(0.67, 0.58375,  0.5,   0.52, 0.70, 0.77, 0.80d, 0.83d, 0.86d); // time it takes for ball to leave robot to start of goal (seconds)
-// 3.07 + 3.15 + 3.04 + 3.06
+
     public static final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
-            launcherOutput,
-            true
+            launcherOutput
     );
 
     public static final InterpLUT inverseLauncherLUT = new InterpLUT(
             launcherOutput,
-            launcherInput,
-            true
+            launcherInput
     );
 
     public static final InterpLUT timeOfFlightLUT = new InterpLUT(
             launcherDistance,
-            shootingTime,
-            true
+            shootingTime
     );
 
     public Launcher() {

@@ -116,7 +116,6 @@ public class Constants {
     public static double LAUNCHER_MAX_BALL_VELOCITY = 10; // Meters/second // TODO: tune this to potentially be lower
     public static double FLYWHEEL_ACCEL = 670; // Ticks/second^2 // TODO: tune this to potentially be non-linear
 
-
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.24; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal

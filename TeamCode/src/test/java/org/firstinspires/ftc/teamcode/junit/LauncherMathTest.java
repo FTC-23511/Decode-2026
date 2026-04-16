@@ -28,14 +28,12 @@ public class LauncherMathTest {
 
         launcherLUT = new InterpLUT(
                 launcherInput,
-                launcherOutput,
-                true
+                launcherOutput
         );
 
         inverseLauncherLUT = new InterpLUT(
                 launcherOutput,
-                launcherInput,
-                true
+                launcherInput
         );
 
         launcherLUT.createLUT();
