@@ -53,10 +53,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public File profilerFile;
     public File logCatFile;
 
-//    public LynxModule controlHub;
-//    public LynxModule expansionHub;
-//    public LynxModule servoHub;
-//    public ArrayList<LynxModule> hubs;
     public VoltageSensor voltageSensor;
     private double cachedVoltage;
     private ElapsedTime voltageTimer;
@@ -74,8 +70,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Motor.Encoder launchEncoder;
 
     public MotorEx transferMotor;
-    public Motor.Encoder transferEncoder;
-//    public ServoEx stopperServo;
 
     public CRServoEx FRswervo;
     public CRServoEx FLswervo;
@@ -100,8 +94,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public Turret turret;
     public Camera camera;
 
-//    public SensorDigitalDevice frontDistanceSensor;
-//    public SensorDigitalDevice backDistanceSensor;
     public AnalogInput distanceSensor;
     private MathFunctions.VirtualGoalSolver.ShotSolution shotSolution;
 
@@ -139,14 +131,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         BLmotor.setRunMode(Motor.RunMode.RawPower);
         BRmotor.setRunMode(Motor.RunMode.RawPower);
 
-        intakeMotor = new MotorGroup(
-                new MotorEx(hwMap, "frontIntakeMotor")
-                        .setCachingTolerance(0.01)
-                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
-                        .setRunMode(Motor.RunMode.RawPower)
-                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
-        );
-
         launchMotors = new MotorGroup(
                 new MotorEx(hwMap, "leftLaunchMotor")
                         .setCachingTolerance(0.01)
@@ -168,9 +152,14 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
                 .setInverted(false);
 
-        transferEncoder = new Motor(hwMap, "BL").encoder
-                .setDirection(Motor.Direction.FORWARD)
-                .setVelocityLimit(5000);
+        intakeMotor = new MotorGroup(
+                new MotorEx(hwMap, "frontIntakeMotor")
+                        .setCachingTolerance(0.01)
+                        .setCurrentAlert(INTAKE_CURRENT_THRESHOLD, CurrentUnit.MILLIAMPS)
+                        .setRunMode(Motor.RunMode.RawPower)
+                        .setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+//                ,transferMotor
+        );
 
         FRswervo = new CRServoEx(hwMap, "FR", new AbsoluteAnalogEncoder(hwMap, "FR")
                 .zero(FR_ENCODER_OFFSET), CRServoEx.RunMode.RawPower)
@@ -358,7 +347,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                     predictedLinearVelIps,
                     predictedOmegaRadPerSec,
                     turret.adjustedGoalPose(),
-                    launcher.getTimeOfFlightLUT()
+                    Launcher.timeOfFlightLUT
             );
         }
 

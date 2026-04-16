@@ -8,6 +8,7 @@ import android.util.Size;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -44,10 +45,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+@Config
 public class Camera extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public boolean enabled = false;
-    public static Motif motifState = Motif.NOT_FOUND;
     public ArrayList<AprilTagDetection> detections = null;
     public AprilTagProcessor aprilTagProcessor;
     public RectProcessor rectProcessor;
@@ -71,8 +72,7 @@ public class Camera extends SubsystemBase {
 
     public final InterpLUT roiYOffsetLUT = new InterpLUT(
             Arrays.asList(0.0,  28.0,   39.0,  56.0, 67.0,  80.616, 99.31,  112.00, 120.0, 136.0, 150.0), // input: distance between robot and AprilTag (inches)
-            Arrays.asList(240.0, 230.0, 129.8, 81.0, 67.0,  45.0,   33.2,   25.0,   22.0,  20.0,   20.0), // output: camera region of interest Y Offset
-            true
+            Arrays.asList(240.0, 230.0, 129.8, 81.0, 67.0,  45.0,   33.2,   25.0,   22.0,  20.0,   20.0) // output: camera region of interest Y Offset
     );
 
     private final TreeMap<Double, Pose2d> pinpointHistory = new TreeMap<>();
@@ -83,13 +83,6 @@ public class Camera extends SubsystemBase {
 
     private double lastCorrectionX = 0, lastCorrectionY = 0, lastCorrectionHeading = 0;
     private double lastStaleness = 0;
-
-    public enum Motif {
-        NOT_FOUND,
-        GPP,
-        PGP,
-        PPG
-    }
 
     // For Testing
     public Camera() {

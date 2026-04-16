@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Config
 public class Intake extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
@@ -25,19 +27,21 @@ public class Intake extends SubsystemBase {
         FOV_27
     }
 
-    public boolean intakeJammed = false;
-    public boolean transferFull = false;
     public static boolean keepIntakeOn = false;
-    private final ElapsedTime intakeTimer;
+
+    public final ElapsedTime currentTimer;
     public final ElapsedTime distanceTimer;
     public boolean withinDistance = false;
+    public boolean withinCurrent = false;
+    public boolean currentBuffered = false;
+
     public static MotorState motorState = MotorState.STOP;
     public static DistanceState distanceState = DistanceState.FOV_15;
 
     public Intake() {
-        intakeTimer = new ElapsedTime();
+        currentTimer = new ElapsedTime();
         distanceTimer = new ElapsedTime();
-        intakeTimer.reset();
+        currentTimer.reset();
         distanceTimer.reset();
     }
 
@@ -56,6 +60,8 @@ public class Intake extends SubsystemBase {
                 robot.intakeMotor.set(INTAKE_TRANSFER_SPEED);
                 break;
             case FORWARD:
+                currentTimer.reset();
+                currentBuffered = false;
                 robot.intakeMotor.set(INTAKE_FORWARD_SPEED);
                 break;
             case REVERSE:
@@ -73,30 +79,24 @@ public class Intake extends SubsystemBase {
     public void update() {
         robot.profiler.start("Intake Update");
 
-        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
-//            updateDistanceSensors();
-        }
-
         switch (motorState) {
             case FORWARD:
-                transferFull = (((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
+                if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+                    updateDistanceSensor();
 
-                if (transferFull()) {
-                    setIntake(MotorState.STOP);
+                    if (currentBuffered) {
+                        updateCurrentSensor();
+                    } else if (currentTimer.milliseconds() > INTAKE_CURRENT_BUFFER_TIME) {
+                        currentBuffered = true;
+                        currentTimer.reset();
+                    } else {
+                        withinCurrent = false;
+                    }
                 }
-//                intakeJammed = true;
-//                intakeTimer.reset();
-//                setIntake(MotorState.REVERSE);
-//
                 break;
             case TRANSFER:
                 break;
             case REVERSE:
-//                if (intakeJammed && intakeTimer.milliseconds() >= INTAKE_UNJAM_TIME) {
-//                    setIntake(MotorState.FORWARD);
-//                    intakeJammed = false;
-//                    intakeTimer.reset();
-//                }
                 break;
             case STOP:
                 // No point of setting intakeMotor to 0 again
@@ -130,22 +130,29 @@ public class Intake extends SubsystemBase {
         return distance;
     }
 
-    public void updateDistanceSensors() {
-        if (motorState.equals(MotorState.FORWARD)) {
-            double distance = getDistance();
-            withinDistance = distance > 0 && INTAKE_DISTANCE_THRESHOLD >= distance;
+    public void updateDistanceSensor() {
+        double distance = getDistance();
+        withinDistance = distance > 0 && distance >= INTAKE_DISTANCE_THRESHOLD;
 
-            if (!withinDistance) {
-                distanceTimer.reset();
-            }
-        } else {
-            withinDistance = false;
+        if (!withinDistance) {
+            distanceTimer.reset();
+        }
+    }
+
+    public void updateCurrentSensor() {
+        withinCurrent = (((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
+
+        if (!withinCurrent) {
+            currentTimer.reset();
         }
     }
 
     public boolean transferFull() {
-//        return withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME;
-        return transferFull;
+        return withinCurrent && currentTimer.milliseconds() >= INTAKE_CURRENT_TIME;
+    }
+
+    public boolean transferEmpty() {
+        return withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME;
     }
 
     @Override

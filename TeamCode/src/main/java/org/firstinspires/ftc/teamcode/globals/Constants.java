@@ -63,10 +63,10 @@ public class Constants {
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
-    public static double FR_ENCODER_OFFSET = 4.00; // Radians
-    public static double FL_ENCODER_OFFSET = 3.85; // Radians
-    public static double BL_ENCODER_OFFSET = 2.49; // Radians
-    public static double BR_ENCODER_OFFSET = 1.12; // Radians
+    public static double FR_ENCODER_OFFSET = 4.04; // Radians
+    public static double FL_ENCODER_OFFSET = 3.78; // Radians
+    public static double BL_ENCODER_OFFSET = 2.44; // Radians
+    public static double BR_ENCODER_OFFSET = 1.03; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
     public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(5.67, 0, 0.3, 0); // Coefficients for radians
@@ -85,8 +85,9 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 3410; // Milliamps
-    public static double INTAKE_UNJAM_TIME = 410.0; // Milliseconds
+    public static double INTAKE_CURRENT_THRESHOLD = 4000.0; // Milliamps
+    public static double INTAKE_CURRENT_TIME = 125.0; // Milliseconds
+    public static double INTAKE_CURRENT_BUFFER_TIME = 200.0; // Milliseconds
 
     public static double INTAKE_DISTANCE_THRESHOLD = 6.867; // cm
     public static double INTAKE_DISTANCE_TIME = 241; // milliseconds
@@ -104,13 +105,6 @@ public class Constants {
     public static double FLYWHEEL_VEL_TOLERANCE = 41; // Ticks
     public static double LAUNCHER_DEFAULT_ON_SPEED = 0.67; // Power
 
-    public static PIDFCoefficients TRANSFER_PIDF_COEFFICIENTS = new PIDFCoefficients(0, 0, 0, 1);
-    public static double TRANSFER_VEL_TOLERANCE = 0; // Ticks
-    public static double TRANSFER_DEFAULT_ON_SPEED = 0.00; // Power
-    public static double TRANSFER_MAX_VELOCITY = 2000; // Ticks/second
-    public static double TRANSFER_CLOSE_VELOCITY = 1500; // Ticks/second
-    public static double TRANSFER_FAR_VELOCITY = 2500; // Ticks/second
-
     public static final double GRAVITY = 9.81; // meters/second
     public static final double LAUNCHER_HEIGHT = 0.3302; // meters // 13 inches
     public static final double TARGET_HEIGHT = 1.0; // meters
@@ -118,8 +112,9 @@ public class Constants {
     public static double LAUNCHER_VERY_FAR_VELOCITY = 7.0;
     public static double LAUNCHER_FAR_VELOCITY = 5.8; // Meters/second
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
-    public static double LAUNCHER_MAX_VELOCITY = 2500; // Ticks/second
-    public static double LAUNCHER_MAX_BALL_VELOCITY = 12; // Meters/second // TODO: tune this to potentially be lower
+    public static double FLYWHEEL_MAX_VELOCITY = 2500; // Ticks/second
+    public static double LAUNCHER_MAX_BALL_VELOCITY = 10; // Meters/second // TODO: tune this to potentially be lower
+    public static double FLYWHEEL_ACCEL = 670; // Ticks/second^2 // TODO: tune this to potentially be non-linear
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.24; // MUST MATCH WITH VALUE ABOVE
@@ -177,7 +172,7 @@ public class Constants {
 
     public static double GOAL_LIP = 0.45; // Meters
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
-    public static double LIP_BUFFER = 8 * DistanceUnit.mPerInch; // Meters
+    public static double LIP_BUFFER = 14 * DistanceUnit.mPerInch; // Meters
 
     public static boolean USE_INTERPLUT = true;
 

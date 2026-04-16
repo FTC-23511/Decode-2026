@@ -4,14 +4,12 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -21,47 +19,33 @@ import java.util.List;
 @Config
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
-
-
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
-    private final PIDFController transferController = new PIDFController(TRANSFER_PIDF_COEFFICIENTS);
 
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
-    private double targetTransferVelocity = 0.0;
     private boolean impossible = true;
     public static double DISTANCE_OFFSET = -0.0; // -0.267
 
     private static final List<Double> launcherInput  = Arrays.asList(0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.47,   6.80,   7.53,   7.84,   9.0); // input: velocity (m/s)
-    private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
+    private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1380.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
 
-    private static final List<Double> launcherDistance   = Arrays.asList(-0.01, 0.0); // distance from ball leaving robot to when it touches goal for first time
-    private final List<Double> shootingTime              = Arrays.asList(-0.01, 0.0); // time it takes for ball to leave robot to start of goal
-    private static final List<Double> preferredHoodAngle = Arrays.asList(-0.01, 0.0); // time it takes for ball to leave robot to start of goal
+    private static final List<Double> launcherDistance = Arrays.asList(0.0,  1.5,      2.0,   2.5,  3.0,  3.5,  4.0,   4.5,   5.0); // distance from ball leaving robot to when it touches goal for first time (meters)
+    private static final List<Double> shootingTime     = Arrays.asList(0.67, 0.58375,  0.5,   0.52, 0.70, 0.77, 0.80d, 0.83d, 0.86d); // time it takes for ball to leave robot to start of goal (seconds)
 
     public static final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
+            launcherOutput
+    );
+
+    public static final InterpLUT inverseLauncherLUT = new InterpLUT(
             launcherOutput,
-            true
+            launcherInput
     );
 
-    private final InterpLUT inverseLauncherLUT = new InterpLUT(
-            launcherOutput,
-            launcherInput,
-            true
-    );
-
-    private final InterpLUT timeOfFlightLUT = new InterpLUT(
+    public static final InterpLUT timeOfFlightLUT = new InterpLUT(
             launcherDistance,
-            shootingTime,
-            true
-    );
-
-    public static final InterpLUT preferredHoodAngleLUT = new InterpLUT(
-            launcherDistance,
-            preferredHoodAngle,
-            true
+            shootingTime
     );
 
     public Launcher() {
@@ -69,7 +53,6 @@ public class Launcher extends SubsystemBase {
         inverseLauncherLUT.createLUT();
         timeOfFlightLUT.createLUT();
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
-        transferController.setTolerance(TRANSFER_VEL_TOLERANCE);
     }
 
     public void init() {
@@ -79,18 +62,20 @@ public class Launcher extends SubsystemBase {
         }
 
         setFlywheel(0, false);
-        setTransfer(0);
+        setTransfer(false);
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
-        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, TRANSFER_MAX_VELOCITY));
+        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, FLYWHEEL_MAX_VELOCITY));
         targetFlywheelVelocity = flywheelController.getSetPoint();
         setActiveControl(setActiveControl);
     }
 
-    public void setTransfer(double targetVel) {
-        transferController.setSetPoint(Range.clip(targetVel, 0, TRANSFER_MAX_VELOCITY));
-        targetTransferVelocity = transferController.getSetPoint();
+    /**
+     * Method to turn the transfer motor on or off
+     */
+    public void setTransfer(boolean active) {
+        robot.transferMotor.set(active ? 1 : 0);
     }
 
     public void setLauncher(Pose2d robotPose) {
@@ -116,24 +101,12 @@ public class Launcher extends SubsystemBase {
         setActiveControl(true);
     }
 
-    public void setTransferTicks(double vel) {
-        transferController.setSetPoint(vel);
-    }
-
-    public void setTransferPower(double power) {
-        robot.transferMotor.set(power);
-    }
-
     public double getTargetHoodAngle() {
         return targetHoodAngle;
     }
 
     public double getTargetFlywheelVelocity() {
         return targetFlywheelVelocity;
-    }
-
-    public double getTargetTransferVelocity() {
-        return targetTransferVelocity;
     }
 
     public void setActiveControl(boolean state) {
@@ -154,7 +127,6 @@ public class Launcher extends SubsystemBase {
     private void update() {
         robot.profiler.start("Launcher Update");
         flywheelController.setCoefficients(FLYWHEEL_PIDF_COEFFICIENTS);
-        transferController.setCoefficients(TRANSFER_PIDF_COEFFICIENTS);
 
         if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
             double[] targetLauncherValues = MathFunctions.distanceToLauncherValues(robot.getShotSolution().effectiveDistance);
@@ -211,14 +183,6 @@ public class Launcher extends SubsystemBase {
         robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
     }
 
-//    public void setStopper(boolean engaged) {
-//        robot.stopperServo.set(engaged ? STOPPER_ENGAGED_POS : STOPPER_DISENGAGED_POS);
-//    }
-
-    public InterpLUT getTimeOfFlightLUT() {
-        return timeOfFlightLUT;
-    }
-
     public void setHood(double angle) {
         setHood(angle, false);
     }
@@ -233,14 +197,44 @@ public class Launcher extends SubsystemBase {
         );
     }
 
-    // use launchValid() instead as it accounts for hood compensation
+    /**
+     * Use launchValid() instead as it accounts for hood compensation
+     * @return if the flywheel is at target
+     */
     @Deprecated
     public boolean flywheelReady() {
-        return activeControl && flywheelController.atSetPoint() && transferController.atSetPoint();
+        return activeControl && flywheelController.atSetPoint();
     }
 
     public boolean launchValid() {
         return activeControl && !impossible;
+    }
+
+    public boolean launchWillBeValid() {
+        if (!activeControl) return false;
+
+        double currentVel = robot.launchEncoder.getCorrectedVelocity();
+        double targetVel = flywheelController.getSetPoint();
+        double maxDeltaVel = FLYWHEEL_ACCEL * BALL_TRANSFER_TIME;
+        
+        double predictedVel;
+        if (targetVel > currentVel) {
+            predictedVel = Math.min(targetVel, currentVel + maxDeltaVel);
+        } else {
+            predictedVel = Math.max(targetVel, currentVel - maxDeltaVel);
+        }
+
+        if (Math.abs(targetVel - predictedVel) <= FLYWHEEL_VEL_TOLERANCE) {
+            return true;
+        } else if (!TESTING_OP_MODE) {
+            double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
+                    robot.getShotSolution().effectiveDistance,
+                    inverseLauncherLUT.get(predictedVel)
+            );
+            return !Double.isNaN(adjustedHoodAngle);
+        }
+        
+        return false;
     }
 
     @Override
