@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import static java.lang.Thread.sleep;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -21,19 +22,19 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.Arrays;
 
+@Config
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
     public enum TurretState {
         GOAL_LOCK_CONTROL,
         ANGLE_CONTROL,
-        OFF,
+        OFF
     }
 
     public final InterpLUT goalAdjustmentLUT = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1,  0.25), // input: angle (radians) formed by lines between robot to goal and far field wall
-            Arrays.asList(3.0,         3.0,   3.0,  2.0,        1.67, 4.67, 6.67, 9.41, 9.41), // output: new goal pos (inches)
-            true
+            Arrays.asList(3.0,         3.0,   3.0,  2.0,        1.67, 4.67, 6.67, 9.41, 9.41) // output: new goal pos (inches)
     );
 
     private Pose2d turretPose = null;

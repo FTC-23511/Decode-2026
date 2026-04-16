@@ -1,11 +1,28 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SYNCED;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ZONE_TOLERANCE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -21,19 +38,24 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
+import com.seattlesolvers.solverslib.util.MathUtils;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-@Disabled
-@TeleOp(name = "AAAEventTeleOp")
-public class EventTeleop extends CommandOpMode {
+@Config
+@TeleOp(name = "ExperimentalFullTeleOp", group = "AAATeleOp")
+public class ExperimentalFullTeleOp extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -43,7 +65,8 @@ public class EventTeleop extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
-    public static double MAX_OUTPUT = 0.5;
+    public static double MIN_OUTPUT = 0.3; // As a fraction of the max speed of the robot
+    public static double MAX_OUTPUT = 1; // As a fraction of the max speed of the robot
 
     @Override
     public void initialize() {
@@ -57,6 +80,8 @@ public class EventTeleop extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
+        Drive.ANGLE_OFFSET = 0;
+
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
                 new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
                 new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
@@ -69,9 +94,16 @@ public class EventTeleop extends CommandOpMode {
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new ConditionalCommand(
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 55.25, Math.PI))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 55.25, 0))),
                         new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
                         new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                ).andThen(
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0),
+                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0)
                 )
         );
 
@@ -84,20 +116,29 @@ public class EventTeleop extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.launcher.setFlywheel(0, false)),
+                        new InstantCommand(() -> robot.launcher.setTransfer(false))
+                )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
+                        new InstantCommand(() -> Intake.keepIntakeOn = false),
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> Intake.keepIntakeOn = true),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
+                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
+                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
                 )
         );
 
@@ -109,43 +150,43 @@ public class EventTeleop extends CommandOpMode {
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.readyToLaunch = true),
-                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                        new InstantCommand(() -> robot.launcher.setRamp(true)),
-
-                        new ConditionalCommand(
-                            new ClearLaunch(false),
-                            new ClearLaunch(true),
-                            () -> gamepad1.left_trigger > 0.5
-                        )
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
 
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+                new InstantCommand(() -> robot.camera.setRecordReadings(false))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new InstantCommand(() -> robot.camera.setRecordReadings(true))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
+                new InstantCommand(() -> robot.camera.relocalizeArducam())
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                new InstantCommand(() -> robot.camera.undoRelocalization())
+        );
     }
 
     @Override
     public void initialize_loop() {
+        if (gamepad1.right_stick_button) {
+            TURRET_SYNCED = false;
+            robot.turret.resetTurretEncoder();
+            robot.pinpoint.resetPosAndIMU();
+        }
+
+        Launcher.DISTANCE_OFFSET = 0;
         robot.drive.setPose(END_POSE);
         telemetryEx.addData("END_POSE", END_POSE);
+        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
         telemetryEx.update();
+
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
 
     @Override
@@ -158,6 +199,34 @@ public class EventTeleop extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
+        if (gamepad2.dpadRightWasPressed()) {
+            Drive.ANGLE_OFFSET += Math.toRadians(5);
+        }
+        if (gamepad2.dpadLeftWasPressed()) {
+            Drive.ANGLE_OFFSET -= Math.toRadians(5);
+        }
+
+        if (gamepad2.dpadUpWasPressed()) {
+            Launcher.DISTANCE_OFFSET += 0.2;
+        }
+        if (gamepad2.dpadDownWasPressed()) {
+            Launcher.DISTANCE_OFFSET -= 0.2;
+        }
+
+        if (gamepad2.circleWasPressed()) {
+            Drive.ANGLE_OFFSET += Math.toRadians(2);
+        }
+        if (gamepad2.squareWasPressed()) {
+            Drive.ANGLE_OFFSET -= Math.toRadians(2);
+        }
+
+        if (gamepad2.triangleWasPressed()) {
+            Launcher.DISTANCE_OFFSET += 0.1;
+        }
+        if (gamepad2.crossWasPressed()) {
+            Launcher.DISTANCE_OFFSET -= 0.1;
+        }
+
         robot.profiler.start("Swerve Drive");
         if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
             // Drive the robot
@@ -165,8 +234,7 @@ public class EventTeleop extends CommandOpMode {
                 robot.drive.swerve.updateWithXLock();
             } else {
                 robot.drive.swerve.setMaxSpeed(MAX_OUTPUT);
-                double minSpeed = 0.3; // As a fraction of the max speed of the robot
-                double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+                double speedMultiplier = MIN_OUTPUT + (1 - MIN_OUTPUT) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
                 Pose2d robotPose = robot.drive.getPose();
                 Rotation2d robotAngle = robotPose.getRotation();
@@ -198,15 +266,26 @@ public class EventTeleop extends CommandOpMode {
             }
         }
 
-        if (robot.intake.transferFull() && !Intake.motorState.equals(Intake.MotorState.STOP)) {
-            gamepad1.rumble(100);
+        // Gamepad rumble when intake is full
+        if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
+            gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
-        } else {
+        } else if (gamepad1.isRumbling() && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
 
         robot.profiler.end("Swerve Drive");
+
+        // Experimental controls for smoother SOTM control
+        if (gamepad1.left_trigger > 0.5) {
+            robot.readyToLaunch = true;
+            if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
+                schedule(new ContinuousClearLaunch());
+            }
+        } else {
+            robot.readyToLaunch = false;
+        }
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
@@ -228,11 +307,14 @@ public class EventTeleop extends CommandOpMode {
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
+            telemetryEx.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
+            telemetryEx.addData("Zone Tolerance", ZONE_TOLERANCE);
 
             telemetryEx.addData("Turret State", Turret.turretState);
             telemetryEx.addData("Turret Target", robot.turret.getTarget());
             telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-//        telemetryData.addData("Camera Pose Null", robot.camera.getCameraPose() == null);
+            telemetryEx.addData("Angle Offset", Drive.ANGLE_OFFSET);
+            telemetryEx.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
             try { telemetryEx.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryEx.addData("Wall Angle", robot.turret.angleToWall());
             try { telemetryEx.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
@@ -261,10 +343,6 @@ public class EventTeleop extends CommandOpMode {
     @Override
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
-
         robot.exportProfiler(robot.profilerFile, robot.logCatFile);
-
-        telemetryEx.update();
-
     }
 }

@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode.tuning.launcher;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_MAX_VELOCITY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;

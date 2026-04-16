@@ -28,14 +28,12 @@ public class LauncherMathTest {
 
         launcherLUT = new InterpLUT(
                 launcherInput,
-                launcherOutput,
-                true
+                launcherOutput
         );
 
         inverseLauncherLUT = new InterpLUT(
                 launcherOutput,
-                launcherInput,
-                true
+                launcherInput
         );
 
         launcherLUT.createLUT();
@@ -64,7 +62,7 @@ public class LauncherMathTest {
     public void mathTest() {
         double distance = 4.0;
 
-        double[] values = MathFunctions.distanceToLauncherValues(distance, 35);
+        double[] values = MathFunctions.distanceToLauncherValues(distance);
 
         System.out.println("distance: " + distance);
         System.out.println("ideal launcher values: " + Arrays.toString(values));

@@ -27,8 +27,7 @@ public class VirtualGoalSolverTest {
 
         testTimeOfFlightLUT = new InterpLUT(
                 Arrays.asList(-0.01, 0.0, 5.0, 10.0), // test distances
-                Arrays.asList(-0.01, 0.0, 1.5, 3.0),  // test times
-                true
+                Arrays.asList(-0.01, 0.0, 1.5, 3.0)  // test times
         );
         testTimeOfFlightLUT.createLUT();
         // Calculate the TRUE geometric angle from the turret's physical starting

@@ -60,7 +60,6 @@ public class Motor implements HardwareDevice {
     }
 
     public class Encoder {
-
         private Supplier<Integer> m_position;
         private int resetVal, lastPosition;
         private Direction direction;
