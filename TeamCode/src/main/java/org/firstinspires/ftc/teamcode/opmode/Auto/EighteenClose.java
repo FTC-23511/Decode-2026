@@ -108,7 +108,7 @@ public class EighteenClose extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.9)),
 
                         // preload
-                        pathShoot(1, 1600),
+                        pathSOTM(1, 1600),
 
                         // intake 1st spike
 
@@ -276,7 +276,7 @@ public class EighteenClose extends CommandOpMode {
     public SequentialCommandGroup pathSOTM(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> robot.readyToLaunch = true),
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).deadlineWith(
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).alongWith(
                         new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex))),
                         new ContinuousClearLaunch()
                 ),
