@@ -164,6 +164,8 @@ public class FullTeleOp extends CommandOpMode {
                 )
         );
 
+
+
         operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new InstantCommand(() -> robot.camera.setRecordReadings(false))
         );
@@ -177,7 +179,7 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         operator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
-                new InstantCommand(() -> robot.camera.undoRelocalization())
+                new InstantCommand(() -> robot.drive.applyVirtualTargetShift())
         );
     }
 

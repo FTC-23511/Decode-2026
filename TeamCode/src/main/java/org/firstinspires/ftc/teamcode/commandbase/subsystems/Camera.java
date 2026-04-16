@@ -202,13 +202,16 @@ public class Camera extends SubsystemBase {
     }
 
     /**
-     * Gets the exact timestamp of the best AprilTag detection in seconds.
+     * Gets the exact timestamp of the best AprilTag detection in seconds
+     * and updates the latency/staleness variable.
      * @return the timestamp in seconds, or -1 if no detection is found.
      */
     public double getDetectionTimestamp() {
         if (detections != null && !detections.isEmpty()) {
             AprilTagDetection detection = cleanDetection(detections);
             if (detection != null && detection.robotPose != null) {
+                // Update latency/staleness right here instead of doing it later
+                lastStaleness = (System.nanoTime() - detection.frameAcquisitionNanoTime) / 1000000.0;
                 return detection.frameAcquisitionNanoTime / 1e9;
             }
         }
@@ -266,6 +269,16 @@ public class Camera extends SubsystemBase {
         }
 
         return false;
+    }
+
+    /**
+     * Updates Arducam detections and then relocalizes the robot.
+     * @param n max number of times to attempt reading to get a valid result
+     * @return true if relocalization was successful, false otherwise.
+     */
+    public boolean relocalizeArducam(int n) {
+        updateArducam(n);
+        return relocalizeArducam();
     }
 
     public void updateROI(Pose2d robotPose) {
@@ -481,7 +494,20 @@ public class Camera extends SubsystemBase {
                 double timestamp = getDetectionTimestamp();
 
                 if (cameraPose != null && timestamp != -1) {
+                    // 1. Log the pose to history
                     addPose(timestamp, cameraPose);
+
+                    // 2. THE AUTO-MAGIC FILTER: Decide if the data is trustworthy
+                    double distanceToTag = Constants.APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
+
+                    // We only trust the camera if we are within 72 inches of the tag,
+                    // and the frame isn't excessively stale (e.g., under 50ms latency)
+                    if (distanceToTag < 72.0 && lastStaleness < 50.0) {
+
+                        // 3. Apply the "Nudge". Notice we use your low-gain Kalman
+                        // variables (0.1), NOT a 1.0 hard reset!
+                        updateFilter(timestamp, cameraPose, KALMAN_GAIN_POS, KALMAN_GAIN_HEADING);
+                    }
                 }
             }
         }

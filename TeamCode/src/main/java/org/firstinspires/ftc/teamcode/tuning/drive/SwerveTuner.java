@@ -27,6 +27,9 @@ public class SwerveTuner extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
     private TelemetryEx telemetryEx;
 
+    // We use Math.PI * 2 instead of 6.28 for higher precision
+    private final double FULL_CIRCLE = Math.PI * 2;
+
     @Override
     public void initialize() {
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
@@ -68,6 +71,11 @@ public class SwerveTuner extends CommandOpMode {
         double calcFrOffset = (TWO_PI - frPos) % TWO_PI;
         double calcBlOffset = (TWO_PI - blPos) % TWO_PI;
         double calcBrOffset = (TWO_PI - brPos) % TWO_PI;
+
+        double calcFlOffset = (FULL_CIRCLE - flPos) % FULL_CIRCLE;
+        double calcFrOffset = (FULL_CIRCLE - frPos) % FULL_CIRCLE;
+        double calcBlOffset = (FULL_CIRCLE - blPos) % FULL_CIRCLE;
+        double calcBrOffset = (FULL_CIRCLE - brPos) % FULL_CIRCLE;
 
         telemetryEx.addData("FL Swervo Abs Pos", flPos);
         telemetryEx.addData("FR Swervo Abs Pos", frPos);
