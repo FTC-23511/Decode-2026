@@ -2,8 +2,22 @@ package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
-
-import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
+import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
+import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
+import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
+import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
+import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
+import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SYNCED;
+import static org.firstinspires.ftc.teamcode.globals.Constants.ZONE_TOLERANCE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -30,6 +44,7 @@ import com.seattlesolvers.solverslib.util.TelemetryEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -39,8 +54,8 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "FullTeleOp", group = "AAATeleOp")
-public class FullTeleOp extends CommandOpMode {
+@TeleOp(name = "ExperimentalFullTeleOp", group = "AAATeleOp")
+public class ExperimentalFullTeleOp extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
@@ -101,21 +116,22 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> robot.launcher.setFlywheel(0, false)),
+                        new InstantCommand(() -> robot.launcher.setTransfer(false))
+                )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> Intake.keepIntakeOn = false),
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> Intake.keepIntakeOn = true),
-                        new InstantCommand(() -> robot.launcher.setRamp(false)),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
                 )
         );
@@ -136,32 +152,6 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.PS).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.readyToLaunch = true),
-                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                        new InstantCommand(() -> robot.launcher.setRamp(true)),
-                        new ClearLaunch(false)
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.readyToLaunch = true),
-                        new InstantCommand(() -> robot.launcher.setActiveControl(true)),
-                        new InstantCommand(() -> robot.launcher.setRamp(true)),
-                        new ClearLaunch(true)
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
-                new ConditionalCommand(
-                        new StationaryAimbotFullLaunch(false),
-                        new StationaryAimbotFullLaunch(true),
-                        () -> gamepad1.left_trigger > 0.5
-                )
         );
 
         operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
@@ -285,8 +275,17 @@ public class FullTeleOp extends CommandOpMode {
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
 
-
         robot.profiler.end("Swerve Drive");
+
+        // Experimental controls for smoother SOTM control
+        if (gamepad1.left_trigger > 0.5) {
+            robot.readyToLaunch = true;
+            if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
+                schedule(new ContinuousClearLaunch());
+            }
+        } else {
+            robot.readyToLaunch = false;
+        }
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();

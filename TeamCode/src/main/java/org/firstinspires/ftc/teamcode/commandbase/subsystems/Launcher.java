@@ -69,11 +69,14 @@ public class Launcher extends SubsystemBase {
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
-        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, LAUNCHER_MAX_VELOCITY));
+        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, FLYWHEEL_MAX_VELOCITY));
         targetFlywheelVelocity = flywheelController.getSetPoint();
         setActiveControl(setActiveControl);
     }
 
+    /**
+     * Method to turn the transfer motor on or off
+     */
     public void setTransfer(boolean active) {
         robot.transferMotor.set(active ? 1 : 0);
     }
@@ -205,6 +208,33 @@ public class Launcher extends SubsystemBase {
 
     public boolean launchValid() {
         return activeControl && !impossible;
+    }
+
+    public boolean launchWillBeValid() {
+        if (!activeControl) return false;
+
+        double currentVel = robot.launchEncoder.getCorrectedVelocity();
+        double targetVel = flywheelController.getSetPoint();
+        double maxDeltaVel = FLYWHEEL_ACCEL * BALL_TRANSFER_TIME;
+        
+        double predictedVel;
+        if (targetVel > currentVel) {
+            predictedVel = Math.min(targetVel, currentVel + maxDeltaVel);
+        } else {
+            predictedVel = Math.max(targetVel, currentVel - maxDeltaVel);
+        }
+
+        if (Math.abs(targetVel - predictedVel) <= FLYWHEEL_VEL_TOLERANCE) {
+            return true;
+        } else if (!TESTING_OP_MODE) {
+            double adjustedHoodAngle = MathFunctions.getHoodAngleFromVelocity(
+                    robot.getShotSolution().effectiveDistance,
+                    inverseLauncherLUT.get(predictedVel)
+            );
+            return !Double.isNaN(adjustedHoodAngle);
+        }
+        
+        return false;
     }
 
     @Override
