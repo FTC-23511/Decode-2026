@@ -209,13 +209,16 @@ public class Camera extends SubsystemBase {
     }
 
     /**
-     * Gets the exact timestamp of the best AprilTag detection in seconds.
+     * Gets the exact timestamp of the best AprilTag detection in seconds
+     * and updates the latency/staleness variable.
      * @return the timestamp in seconds, or -1 if no detection is found.
      */
     public double getDetectionTimestamp() {
         if (detections != null && !detections.isEmpty()) {
             AprilTagDetection detection = cleanDetection(detections);
             if (detection != null && detection.robotPose != null) {
+                // Update latency/staleness right here instead of doing it later
+                lastStaleness = (System.nanoTime() - detection.frameAcquisitionNanoTime) / 1000000.0;
                 return detection.frameAcquisitionNanoTime / 1e9;
             }
         }
@@ -495,17 +498,12 @@ public class Camera extends SubsystemBase {
 
             if (detections != null && !detections.isEmpty()) {
                 Pose2d cameraPose = getCameraPose();
+
+                // This call now fetches the timestamp AND updates lastStaleness
                 double timestamp = getDetectionTimestamp();
 
-                // Get the actual detection object so we can read its hardware timestamp
-                AprilTagDetection detection = cleanDetection(detections);
-
-                // Make sure detection isn't null before doing math on it
-                if (cameraPose != null && timestamp != -1 && detection != null) {
-
-                    // Calculate latency (staleness) in milliseconds
-                    lastStaleness = (System.nanoTime() - detection.frameAcquisitionNanoTime) / 1000000.0;
-
+                // We no longer need to call cleanDetection() again down here
+                if (cameraPose != null && timestamp != -1) {
                     // Log the pose to the Kalman filter history
                     addPose(timestamp, cameraPose);
                 }
