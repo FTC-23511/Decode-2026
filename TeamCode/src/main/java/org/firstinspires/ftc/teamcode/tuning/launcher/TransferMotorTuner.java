@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
-@TeleOp(name = "TransferMotorEncoder", group = "Launcher")
-public class TransferMotorEncoder extends CommandOpMode {
+@TeleOp(name = "TransferMotorTuner", group = "Launcher")
+public class TransferMotorTuner extends CommandOpMode {
     public GamepadEx driver;
     public GamepadEx operator;
 
