@@ -26,6 +26,9 @@ public class SwerveTuner extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
     private TelemetryEx telemetryEx;
 
+    // We use Math.PI * 2 instead of 6.28 for higher precision
+    private final double FULL_CIRCLE = Math.PI * 2;
+
     @Override
     public void initialize() {
         Constants.OP_MODE_TYPE = Constants.OpModeType.TELEOP;
@@ -52,11 +55,33 @@ public class SwerveTuner extends CommandOpMode {
         robot.BLswervo.set(BL_SERVO_POWER);
         robot.BRswervo.set(BR_SERVO_POWER);
 
-        telemetryEx.addData("FL Swervo Abs Pos", robot.FLswervo.getAbsoluteEncoder().getCurrentPosition());
-        telemetryEx.addData("FR Swervo Abs Pos", robot.FRswervo.getAbsoluteEncoder().getCurrentPosition());
-        telemetryEx.addData("BL Swervo Abs Pos", robot.BLswervo.getAbsoluteEncoder().getCurrentPosition());
-        telemetryEx.addData("BR Swervo Abs Pos", robot.BRswervo.getAbsoluteEncoder().getCurrentPosition());
-        
+        // 1. Get current positions
+        double flPos = robot.FLswervo.getAbsoluteEncoder().getCurrentPosition();
+        double frPos = robot.FRswervo.getAbsoluteEncoder().getCurrentPosition();
+        double blPos = robot.BLswervo.getAbsoluteEncoder().getCurrentPosition();
+        double brPos = robot.BRswervo.getAbsoluteEncoder().getCurrentPosition();
+
+        // 2. Calculate the new offsets (Full Circle - Current Position)
+        // We use % FULL_CIRCLE to ensure the offset stays cleanly within the 0 to 2PI range
+        double calcFlOffset = (FULL_CIRCLE - flPos) % FULL_CIRCLE;
+        double calcFrOffset = (FULL_CIRCLE - frPos) % FULL_CIRCLE;
+        double calcBlOffset = (FULL_CIRCLE - blPos) % FULL_CIRCLE;
+        double calcBrOffset = (FULL_CIRCLE - brPos) % FULL_CIRCLE;
+
+        // 3. Telemetry out the raw positions
+        telemetryEx.addData("FL Swervo Abs Pos", flPos);
+        telemetryEx.addData("FR Swervo Abs Pos", frPos);
+        telemetryEx.addData("BL Swervo Abs Pos", blPos);
+        telemetryEx.addData("BR Swervo Abs Pos", brPos);
+
+        telemetryEx.addData("-----------------------", "");
+
+        // 4. Telemetry out the calculated offsets
+        telemetryEx.addData("-> NEW FL_ENCODER_OFFSET", calcFlOffset);
+        telemetryEx.addData("-> NEW FR_ENCODER_OFFSET", calcFrOffset);
+        telemetryEx.addData("-> NEW BL_ENCODER_OFFSET", calcBlOffset);
+        telemetryEx.addData("-> NEW BR_ENCODER_OFFSET", calcBrOffset);
+
         // DO NOT REMOVE: Runs command scheduler, updates telemetry, and clears bulk cache
         robot.updateLoop(telemetryEx);
     }
