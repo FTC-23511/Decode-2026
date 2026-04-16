@@ -67,7 +67,7 @@ public class EighteenClose extends CommandOpMode {
         pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 10
         pathPoses.add(new Pose2d(-55.23188405797101, -4.7681159420289845, Math.toRadians(-10))); // Line 11
         pathPoses.add(new Pose2d(-60.30252100840335, -20.369747899159673, Math.toRadians(-45))); // Line 12
-        pathPoses.add(new Pose2d(-10.487394957983192, 6.4537815126050475, Math.toRadians(0))); // Line 13
+        pathPoses.add(new Pose2d(-25.210084033613448, 12.50420168067227, Math.toRadians(0))); // Line 13
         pathPoses.add(new Pose2d(-19.159663865546214, -2.0168067226890685, Math.toRadians(0))); // Line 14
 
 
