@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning.intake;
 
+import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
+import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -17,6 +19,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -51,8 +54,16 @@ public class IntakeMotorTuner extends CommandOpMode {
 
         // Driver controls
         // Reset heading
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
+        driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
+                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
         );
     }
 
@@ -65,17 +76,26 @@ public class IntakeMotorTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        MOTOR_POWER = Range.clip(MOTOR_POWER, -1.0, 1.0);
-        robot.intakeMotor.set(MOTOR_POWER);
+        if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
+            gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
+            gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
+        } else if (gamepad1.isRumbling() && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
+            gamepad1.stopRumble();
+            gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
+        }
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryEx.addData("MOTOR_POWER", MOTOR_POWER);
-        telemetryEx.addData("MOTOR_CURRENT", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryEx.addData("Intake Current", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryEx.addData("Transfer Full", robot.intake.transferFull());
+        telemetryEx.addData("Transfer Empty", robot.intake.transferEmpty());
+
+        telemetryEx.addData("Within Current", robot.intake.withinCurrent);
+        telemetryEx.addData("Current Timer", robot.intake.currentTimer.milliseconds());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        super.run();
-        telemetryEx.update();
+        robot.updateLoop(telemetryEx);
+        robot.intake.periodic();
     }
 }

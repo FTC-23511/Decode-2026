@@ -26,7 +26,6 @@ public class CancelCommand extends CommandBase {
         robot.turret.setTurret(Turret.TurretState.OFF, 0);
         robot.intake.setIntake(Intake.MotorState.STOP);
         robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false);
-        robot.launcher.setTransfer(0);
         robot.launcher.setRamp(false);
     }
 

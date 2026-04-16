@@ -276,7 +276,7 @@ public class FullTeleOp extends CommandOpMode {
             }
         }
 
-//        /* Gamepad rumble when intake is full
+        // Gamepad rumble when intake is full
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
@@ -284,7 +284,7 @@ public class FullTeleOp extends CommandOpMode {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
-//        */
+
 
         robot.profiler.end("Swerve Drive");
 
@@ -326,7 +326,6 @@ public class FullTeleOp extends CommandOpMode {
             telemetryEx.addData("Flywheel Ready", robot.launcher.flywheelReady());
 
             telemetryEx.addData("Intake Motor State", Intake.motorState);
-            telemetryEx.addData("Intake Jammed", robot.intake.intakeJammed);
 
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 

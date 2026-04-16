@@ -8,6 +8,7 @@ import android.util.Size;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -44,10 +45,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+@Config
 public class Camera extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
     public boolean enabled = false;
-    public static Motif motifState = Motif.NOT_FOUND;
     public ArrayList<AprilTagDetection> detections = null;
     public AprilTagProcessor aprilTagProcessor;
     public RectProcessor rectProcessor;
@@ -83,13 +84,6 @@ public class Camera extends SubsystemBase {
 
     private double lastCorrectionX = 0, lastCorrectionY = 0, lastCorrectionHeading = 0;
     private double lastStaleness = 0;
-
-    public enum Motif {
-        NOT_FOUND,
-        GPP,
-        PGP,
-        PPG
-    }
 
     // For Testing
     public Camera() {

@@ -30,6 +30,7 @@ public class TransferMotorEncoder extends CommandOpMode {
     private final Robot robot = Robot.getInstance();
 
     public static double transferPower = 0.0;
+    public static boolean REVERSE_MOTOR = false;
 
     @Override
     public void initialize() {
@@ -62,13 +63,13 @@ public class TransferMotorEncoder extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
+        transferPower *= (REVERSE_MOTOR ? 1 : -1);
+
         robot.transferMotor.set(transferPower);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
 
-        telemetryEx.addData("Transfer Motor Position", robot.launchEncoder.getPosition());
-        telemetryEx.addData("Actual Velocity", robot.launchEncoder.getCorrectedVelocity());
         telemetryEx.addData("Transfer Power", transferPower);
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry

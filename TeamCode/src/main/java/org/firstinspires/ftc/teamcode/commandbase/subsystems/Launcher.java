@@ -22,23 +22,20 @@ import java.util.List;
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
-
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
-    private final PIDFController transferController = new PIDFController(TRANSFER_PIDF_COEFFICIENTS);
 
     private boolean activeControl = false;
     private double targetHoodAngle = MIN_HOOD_ANGLE;
     private double targetFlywheelVelocity = 0.0;
-    private double targetTransferVelocity = 0.0;
     private boolean impossible = true;
     public static double DISTANCE_OFFSET = -0.0; // -0.267
 
     private static final List<Double> launcherInput  = Arrays.asList(0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.47,   6.80,   7.53,   7.84,   9.0); // input: velocity (m/s)
     private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
 
-    private static final List<Double> launcherDistance   = Arrays.asList(-0.01, 0.0); // distance from ball leaving robot to when it touches goal for first time
-    private final List<Double> shootingTime              = Arrays.asList(-0.01, 0.0); // time it takes for ball to leave robot to start of goal
-    private static final List<Double> preferredHoodAngle = Arrays.asList(-0.01, 0.0); // time it takes for ball to leave robot to start of goal
+    private static final List<Double> launcherDistance   = Arrays.asList(2.0); // distance from ball leaving robot to when it touches goal for first time
+    private final List<Double> shootingTime              = Arrays.asList(); // time it takes for ball to leave robot to start of goal
+    private static final List<Double> preferredHoodAngle = Arrays.asList(40.34079066711036); // preferred hood angle before hood compensation
 
     public static final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
@@ -69,7 +66,6 @@ public class Launcher extends SubsystemBase {
         inverseLauncherLUT.createLUT();
         timeOfFlightLUT.createLUT();
         flywheelController.setTolerance(FLYWHEEL_VEL_TOLERANCE);
-        transferController.setTolerance(TRANSFER_VEL_TOLERANCE);
     }
 
     public void init() {
@@ -79,18 +75,16 @@ public class Launcher extends SubsystemBase {
         }
 
         setFlywheel(0, false);
-        setTransfer(0);
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
-        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, TRANSFER_MAX_VELOCITY));
+        flywheelController.setSetPoint(Range.clip(launcherLUT.get(targetVel), 0, LAUNCHER_MAX_VELOCITY));
         targetFlywheelVelocity = flywheelController.getSetPoint();
         setActiveControl(setActiveControl);
     }
 
-    public void setTransfer(double targetVel) {
-        transferController.setSetPoint(Range.clip(targetVel, 0, TRANSFER_MAX_VELOCITY));
-        targetTransferVelocity = transferController.getSetPoint();
+    public void setTransfer(boolean active) {
+        robot.transferMotor.set(active ? 1 : 0);
     }
 
     public void setLauncher(Pose2d robotPose) {
@@ -116,24 +110,8 @@ public class Launcher extends SubsystemBase {
         setActiveControl(true);
     }
 
-    public void setTransferTicks(double vel) {
-        transferController.setSetPoint(vel);
-    }
-
-    public void setTransferPower(double power) {
-        robot.transferMotor.set(power);
-    }
-
-    public double getTargetHoodAngle() {
-        return targetHoodAngle;
-    }
-
     public double getTargetFlywheelVelocity() {
         return targetFlywheelVelocity;
-    }
-
-    public double getTargetTransferVelocity() {
-        return targetTransferVelocity;
     }
 
     public void setActiveControl(boolean state) {
@@ -154,7 +132,6 @@ public class Launcher extends SubsystemBase {
     private void update() {
         robot.profiler.start("Launcher Update");
         flywheelController.setCoefficients(FLYWHEEL_PIDF_COEFFICIENTS);
-        transferController.setCoefficients(TRANSFER_PIDF_COEFFICIENTS);
 
         if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
             double[] targetLauncherValues = MathFunctions.distanceToLauncherValues(robot.getShotSolution().effectiveDistance);
@@ -236,7 +213,7 @@ public class Launcher extends SubsystemBase {
     // use launchValid() instead as it accounts for hood compensation
     @Deprecated
     public boolean flywheelReady() {
-        return activeControl && flywheelController.atSetPoint() && transferController.atSetPoint();
+        return activeControl && flywheelController.atSetPoint();
     }
 
     public boolean launchValid() {

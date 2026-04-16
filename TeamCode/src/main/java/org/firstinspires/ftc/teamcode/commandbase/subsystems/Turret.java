@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import static java.lang.Thread.sleep;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -21,13 +22,14 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 
 import java.util.Arrays;
 
+@Config
 public class Turret extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
 
     public enum TurretState {
         GOAL_LOCK_CONTROL,
         ANGLE_CONTROL,
-        OFF,
+        OFF
     }
 
     public final InterpLUT goalAdjustmentLUT = new InterpLUT(

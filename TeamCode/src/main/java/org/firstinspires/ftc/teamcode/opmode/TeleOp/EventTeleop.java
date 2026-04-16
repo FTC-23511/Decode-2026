@@ -243,7 +243,6 @@ public class EventTeleop extends CommandOpMode {
             telemetryEx.addData("Flywheel Ready", robot.launcher.flywheelReady());
 
             telemetryEx.addData("Intake Motor State", Intake.motorState);
-            telemetryEx.addData("Intake Jammed", robot.intake.intakeJammed);
 
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 

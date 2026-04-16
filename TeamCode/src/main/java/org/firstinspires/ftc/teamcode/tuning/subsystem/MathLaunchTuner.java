@@ -35,7 +35,7 @@ public class MathLaunchTuner extends CommandOpMode {
     public static boolean USE_RAW_SERVO_POS = false;
     public static double HOOD_SERVO_OUTPUT = 0.0; // either raw servo pos or hood angle
     public static double LAUNCHER_TARGET_VEL = 0.0; // ticks/sec
-    public static double TRANSFER_TARGET_POWER = 0.0; // power [0, 1]
+//    public static boolean TRANSFER_ON = false;
     public static double DISTANCE = 1.5; // meters
     public static boolean USE_LEGACY = true; // meters
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
@@ -83,7 +83,7 @@ public class MathLaunchTuner extends CommandOpMode {
         robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, TURRET_POS);
 
         robot.launcher.setFlywheelTicks(LAUNCHER_TARGET_VEL);
-        robot.launcher.setTransferPower(TRANSFER_TARGET_POWER);
+//        robot.launcher.setTransfer(TRANSFER_ON);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         timer.reset();
@@ -92,8 +92,9 @@ public class MathLaunchTuner extends CommandOpMode {
             telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[0]);
             telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.legacyDistanceToLauncherValues(DISTANCE)[1]);
         } else {
-            telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE)[0]);
-            telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE)[1]);
+            telemetryEx.addData("Math Output Required Ball Vel", MathFunctions.distanceToLauncherValues(DISTANCE, Double.NaN)[0]);
+            telemetryEx.addData("Math Output Required Hood Angle", MathFunctions.distanceToLauncherValues(DISTANCE, Double.NaN)[1]);
+            telemetryEx.addData("Suggested Ball Vel for angle+distance", MathFunctions.calculateVelocity(DISTANCE, TARGET_HEIGHT + BACKBOARD_Y_OFFSET - LAUNCHER_HEIGHT, 90 - HOOD_SERVO_OUTPUT, GRAVITY));
             telemetryEx.addData("Suggested Ticks Vel for angle+distance", Launcher.launcherLUT.get(MathFunctions.calculateVelocity(DISTANCE, TARGET_HEIGHT + BACKBOARD_Y_OFFSET - LAUNCHER_HEIGHT, 90 - HOOD_SERVO_OUTPUT, GRAVITY)));
         }
 
