@@ -30,12 +30,13 @@ public class Launcher extends SubsystemBase {
     private boolean impossible = true;
     public static double DISTANCE_OFFSET = -0.0; // -0.267
 
+    // MAKE SURE ALL THESE LISTS HAVE 2 ELEMENTS MINIMUM. OTHERWISE ROBOT COULD CRASH!!!
     private static final List<Double> launcherInput  = Arrays.asList(0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.47,   6.80,   7.53,   7.84,   9.0); // input: velocity (m/s)
     private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
 
-    private static final List<Double> launcherDistance   = Arrays.asList(2.0); // distance from ball leaving robot to when it touches goal for first time
-    private final List<Double> shootingTime              = Arrays.asList(); // time it takes for ball to leave robot to start of goal
-    private static final List<Double> preferredHoodAngle = Arrays.asList(40.34079066711036); // preferred hood angle before hood compensation
+    private static final List<Double> launcherDistance   = Arrays.asList(0.0, 0.1); // distance from ball leaving robot to when it touches goal for first time
+    private static final List<Double> shootingTime       = Arrays.asList(0.0, 0.1); // time it takes for ball to leave robot to start of goal
+    private static final List<Double> preferredHoodAngle = Arrays.asList(0.0, 0.1); // preferred hood angle before hood compensation
 
     public static final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
