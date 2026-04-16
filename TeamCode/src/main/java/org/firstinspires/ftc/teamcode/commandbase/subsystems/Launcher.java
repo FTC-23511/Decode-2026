@@ -4,14 +4,12 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -21,7 +19,6 @@ import java.util.List;
 @Config
 public class Launcher extends SubsystemBase {
     private final Robot robot = Robot.getInstance();
-
     private final PIDFController flywheelController = new PIDFController(FLYWHEEL_PIDF_COEFFICIENTS);
 
     private boolean activeControl = false;
@@ -30,35 +27,27 @@ public class Launcher extends SubsystemBase {
     private boolean impossible = true;
     public static double DISTANCE_OFFSET = -0.0; // -0.267
 
-    // MAKE SURE ALL THESE LISTS HAVE 2 ELEMENTS MINIMUM. OTHERWISE ROBOT COULD CRASH!!!
     private static final List<Double> launcherInput  = Arrays.asList(0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.47,   6.80,   7.53,   7.84,   9.0); // input: velocity (m/s)
     private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
 
-    private static final List<Double> launcherDistance   = Arrays.asList(0.0, 0.1); // distance from ball leaving robot to when it touches goal for first time
-    private static final List<Double> shootingTime       = Arrays.asList(0.0, 0.1); // time it takes for ball to leave robot to start of goal
-    private static final List<Double> preferredHoodAngle = Arrays.asList(0.0, 0.1); // preferred hood angle before hood compensation
-
+    private static final List<Double> launcherDistance = Arrays.asList(0.0,  1.5,      2.0,   2.5,  3.0,  3.5,  4.0,   4.5,   5.0); // distance from ball leaving robot to when it touches goal for first time (meters)
+    private static final List<Double> shootingTime     = Arrays.asList(0.67, 0.58375,  0.5,   0.52, 0.70, 0.77, 0.80d, 0.83d, 0.86d); // time it takes for ball to leave robot to start of goal (seconds)
+// 3.07 + 3.15 + 3.04 + 3.06
     public static final InterpLUT launcherLUT = new InterpLUT(
             launcherInput,
             launcherOutput,
             true
     );
 
-    private final InterpLUT inverseLauncherLUT = new InterpLUT(
+    public static final InterpLUT inverseLauncherLUT = new InterpLUT(
             launcherOutput,
             launcherInput,
             true
     );
 
-    private final InterpLUT timeOfFlightLUT = new InterpLUT(
+    public static final InterpLUT timeOfFlightLUT = new InterpLUT(
             launcherDistance,
             shootingTime,
-            true
-    );
-
-    public static final InterpLUT preferredHoodAngleLUT = new InterpLUT(
-            launcherDistance,
-            preferredHoodAngle,
             true
     );
 
@@ -76,6 +65,7 @@ public class Launcher extends SubsystemBase {
         }
 
         setFlywheel(0, false);
+        setTransfer(false);
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
@@ -109,6 +99,10 @@ public class Launcher extends SubsystemBase {
     public void setFlywheelTicks(double vel) {
         flywheelController.setSetPoint(vel);
         setActiveControl(true);
+    }
+
+    public double getTargetHoodAngle() {
+        return targetHoodAngle;
     }
 
     public double getTargetFlywheelVelocity() {
@@ -187,14 +181,6 @@ public class Launcher extends SubsystemBase {
 
     public void setRamp(boolean engaged) {
         robot.rampServo.set(engaged ? RAMP_ENGAGED : RAMP_DISENGAGED);
-    }
-
-//    public void setStopper(boolean engaged) {
-//        robot.stopperServo.set(engaged ? STOPPER_ENGAGED_POS : STOPPER_DISENGAGED_POS);
-//    }
-
-    public InterpLUT getTimeOfFlightLUT() {
-        return timeOfFlightLUT;
     }
 
     public void setHood(double angle) {

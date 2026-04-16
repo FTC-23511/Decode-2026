@@ -30,6 +30,7 @@ public class FullLaunchTuner extends CommandOpMode {
     public static double LAUNCHER_F = 0.0000;
 
     public static double LAUNCHER_TARGET_VEL = 0.0;
+    public static boolean TRANSFER_ON = false;
 
     public static double HOOD_SERVO_POS = 0.0;
     public static double TURRET_RADIANS = 0.0;
@@ -96,6 +97,7 @@ public class FullLaunchTuner extends CommandOpMode {
         double launcherPower = launcherPIDF.calculate(launcherVel);
 
         robot.launchMotors.set(launcherPower);
+        robot.launcher.setTransfer(TRANSFER_ON);
 
         robot.turretServos.set(MathFunctions.convertRadianToServoPos(TURRET_RADIANS) + TURRET_SERVO_OFFSET);
 
