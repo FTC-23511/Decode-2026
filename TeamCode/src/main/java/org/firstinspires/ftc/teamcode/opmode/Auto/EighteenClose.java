@@ -29,6 +29,7 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -269,6 +270,18 @@ public class EighteenClose extends CommandOpMode {
                 new SetIntake(Intake.MotorState.FORWARD),
                 new DriveTo(pathPoses.get(pathStartingIndex), 0.5).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.STOP)
+        );
+    }
+
+    public SequentialCommandGroup pathSOTM(int pathStartingIndex, long timeout) {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> robot.readyToLaunch = true),
+                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).deadlineWith(
+                        new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex))),
+                        new ContinuousClearLaunch()
+                ),
+
+                new InstantCommand(() -> robot.launcher.setRamp(false))
         );
     }
 }
