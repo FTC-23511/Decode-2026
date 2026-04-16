@@ -498,14 +498,23 @@ public class Camera extends SubsystemBase {
 
             if (detections != null && !detections.isEmpty()) {
                 Pose2d cameraPose = getCameraPose();
-
-                // This call now fetches the timestamp AND updates lastStaleness
                 double timestamp = getDetectionTimestamp();
 
-                // We no longer need to call cleanDetection() again down here
                 if (cameraPose != null && timestamp != -1) {
-                    // Log the pose to the Kalman filter history
+                    // 1. Log the pose to history
                     addPose(timestamp, cameraPose);
+
+                    // 2. THE AUTO-MAGIC FILTER: Decide if the data is trustworthy
+                    double distanceToTag = Constants.APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm();
+
+                    // We only trust the camera if we are within 72 inches of the tag,
+                    // and the frame isn't excessively stale (e.g., under 50ms latency)
+                    if (distanceToTag < 72.0 && lastStaleness < 50.0) {
+
+                        // 3. Apply the "Nudge". Notice we use your low-gain Kalman
+                        // variables (0.1), NOT a 1.0 hard reset!
+                        updateFilter(timestamp, cameraPose, KALMAN_GAIN_POS, KALMAN_GAIN_HEADING);
+                    }
                 }
             }
         }

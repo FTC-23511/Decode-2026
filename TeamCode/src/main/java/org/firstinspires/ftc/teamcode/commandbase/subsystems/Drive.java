@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commandbase.subsystems;
 
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import org.firstinspires.ftc.teamcode.globals.Constants;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,6 +12,7 @@ import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Translation2d;
+import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
@@ -21,7 +23,9 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 
 @Config
 public class Drive extends SubsystemBase {
@@ -83,6 +87,42 @@ public class Drive extends SubsystemBase {
 
     public Pose2d getPose() {
         return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
+    }
+
+    public void applyVirtualTargetShift() {
+        // 1. Get the current shot solution (which uses current ANGLE_OFFSET and DISTANCE_OFFSET)
+        MathFunctions.VirtualGoalSolver.ShotSolution solution = robot.getShotSolution();
+
+        // 2. Get the raw robot pose (no ANGLE_OFFSET)
+        Pose2d rawPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
+
+        // 3. Calculate physical turret position
+        double robotHeadingDegrees = rawPose.getRotation().getDegrees();
+        Vector2d turretOffsetField = Constants.TURRET_PHYSICAL_OFFSET.rotateBy(robotHeadingDegrees);
+        Vector2d turretPosVec = new Vector2d(rawPose.getX(), rawPose.getY()).plus(turretOffsetField);
+
+        // 4. Calculate physical landing point P
+        // distance + manual distance offset (meters)
+        double physicalDistMeters = solution.effectiveDistance + Launcher.DISTANCE_OFFSET;
+        double physicalDistInches = physicalDistMeters / 0.0254;
+
+        // physical turret heading (radians)
+        double heading = solution.turretGlobalHeading.getRadians();
+
+        double pX = turretPosVec.getX() + physicalDistInches * Math.cos(heading);
+        double pY = turretPosVec.getY() + physicalDistInches * Math.sin(heading);
+
+        // 5. Calculate Delta from base target
+        // Base target is (-72 * multiplier, 72)
+        double baseGoalX = -72 * Constants.ALLIANCE_COLOR.getMultiplier();
+        double baseGoalY = 72;
+
+        Constants.TARGET_OFFSET_X = pX - baseGoalX;
+        Constants.TARGET_OFFSET_Y = pY - baseGoalY;
+
+        // 6. Reset manual offsets
+        ANGLE_OFFSET = 0;
+        Launcher.DISTANCE_OFFSET = 0;
     }
 
     public ChassisSpeeds getVelocity() {
