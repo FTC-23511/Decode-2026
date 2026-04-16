@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -52,11 +53,34 @@ public class SwerveTuner extends CommandOpMode {
         robot.BLswervo.set(BL_SERVO_POWER);
         robot.BRswervo.set(BR_SERVO_POWER);
 
-        telemetryEx.addData("FL Swervo Abs Pos", robot.FLswervo.getAbsoluteEncoder().getCurrentPosition());
-        telemetryEx.addData("FR Swervo Abs Pos", robot.FRswervo.getAbsoluteEncoder().getCurrentPosition());
-        telemetryEx.addData("BL Swervo Abs Pos", robot.BLswervo.getAbsoluteEncoder().getCurrentPosition());
-        telemetryEx.addData("BR Swervo Abs Pos", robot.BRswervo.getAbsoluteEncoder().getCurrentPosition());
-        
+        robot.FLswervo.getAbsoluteEncoder().zero(FL_ENCODER_OFFSET);
+        robot.FRswervo.getAbsoluteEncoder().zero(FR_ENCODER_OFFSET);
+        robot.BLswervo.getAbsoluteEncoder().zero(BL_ENCODER_OFFSET);
+        robot.BRswervo.getAbsoluteEncoder().zero(BR_ENCODER_OFFSET);
+
+        double flPos = robot.FLswervo.getAbsoluteEncoder().getCurrentPosition();
+        double frPos = robot.FRswervo.getAbsoluteEncoder().getCurrentPosition();
+        double blPos = robot.BLswervo.getAbsoluteEncoder().getCurrentPosition();
+        double brPos = robot.BRswervo.getAbsoluteEncoder().getCurrentPosition();
+
+        double TWO_PI = Math.PI * 2;
+        double calcFlOffset = (TWO_PI - flPos) % TWO_PI;
+        double calcFrOffset = (TWO_PI - frPos) % TWO_PI;
+        double calcBlOffset = (TWO_PI - blPos) % TWO_PI;
+        double calcBrOffset = (TWO_PI - brPos) % TWO_PI;
+
+        telemetryEx.addData("FL Swervo Abs Pos", flPos);
+        telemetryEx.addData("FR Swervo Abs Pos", frPos);
+        telemetryEx.addData("BL Swervo Abs Pos", blPos);
+        telemetryEx.addData("BR Swervo Abs Pos", brPos);
+
+        telemetryEx.addData("-----------------------", "");
+
+        telemetryEx.addData("NEW FL_ENCODER_OFFSET", calcFlOffset);
+        telemetryEx.addData("NEW FR_ENCODER_OFFSET", calcFrOffset);
+        telemetryEx.addData("NEW BL_ENCODER_OFFSET", calcBlOffset);
+        telemetryEx.addData("NEW BR_ENCODER_OFFSET", calcBrOffset);
+
         // DO NOT REMOVE: Runs command scheduler, updates telemetry, and clears bulk cache
         robot.updateLoop(telemetryEx);
     }

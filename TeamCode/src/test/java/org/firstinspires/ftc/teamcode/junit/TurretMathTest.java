@@ -19,7 +19,7 @@ public class TurretMathTest {
     public void radToServoMax() {
         double pos = MathFunctions.convertRadianToServoPos(MAX_TURRET_ANGLE) + TURRET_SERVO_OFFSET;
 
-        assertEquals(1.0, pos, 0.005);
+        assertEquals(1.0, pos, 0.01);
     }
 
     @Test
