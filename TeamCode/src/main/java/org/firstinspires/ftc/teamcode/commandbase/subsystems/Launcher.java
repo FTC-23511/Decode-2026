@@ -57,7 +57,7 @@ public class Launcher extends SubsystemBase {
 
     public void init() {
         if (!TESTING_OP_MODE) {
-            setRamp(OP_MODE_TYPE.equals(OpModeType.AUTO));
+            setRamp(false);
             setHood(MIN_HOOD_ANGLE);
         }
 
@@ -147,7 +147,6 @@ public class Launcher extends SubsystemBase {
 //            robot.launcher.transferController.setF(TRANSFER_PIDF_COEFFICIENTS.f * (robot.getVoltage() / DEFAULT_VOLTAGE));
 
             robot.launchMotors.set(flywheelController.calculate(flywheelVel));
-//            robot.transferMotor.set(transferController.calculate(transferVel));
 
             if (flywheelController.atSetPoint()) {
                 impossible = false;

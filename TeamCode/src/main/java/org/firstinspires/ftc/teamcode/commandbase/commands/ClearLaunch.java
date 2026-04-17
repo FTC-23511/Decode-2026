@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Deprecated
 public class ClearLaunch extends CommandBase {
     private final Robot robot;
     private final ElapsedTime timer;

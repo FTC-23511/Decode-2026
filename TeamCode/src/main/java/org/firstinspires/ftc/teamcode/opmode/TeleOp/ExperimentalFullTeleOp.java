@@ -277,8 +277,7 @@ public class ExperimentalFullTeleOp extends CommandOpMode {
         // Experimental controls for smoother SOTM control
         if (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5) {
             robot.readyToLaunch = true;
-            if (CommandScheduler.getInstance().isAvailable(robot.turret)
-                    && (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL)) {
+            if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
                 schedule(new ContinuousClearLaunch());
             }
         } else {

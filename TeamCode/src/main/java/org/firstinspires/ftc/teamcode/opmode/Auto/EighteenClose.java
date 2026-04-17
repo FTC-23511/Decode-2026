@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -29,7 +30,6 @@ import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
-import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
@@ -60,18 +60,17 @@ public class EighteenClose extends CommandOpMode {
         pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-23.19327731092437, 12.100840336134446, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-56.0672268907563, 12.302521008403353, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-46.58823529411764, 0.20168067226890685, Math.toRadians(-0.001))); // Line 3
-        pathPoses.add(new Pose2d(-56.26890756302521, 0.202, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-46.58823529411764, 0.20168067226890685, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-56.26890756302521, 0.20212471293051983, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-18.352941176470583, 8.26890756302521, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-30.655462184873954, -11.89915966386555, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-61.3109243697479, -12.100840336134457, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-61.310924369749379, -12.100840336134457, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-37.310924369747895, -9.075630252100837, Math.toRadians(0))); // Line 8
         pathPoses.add(new Pose2d(-55.66386554621849, -3.2268907563025238, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 10
         pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 11
         pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 12
         pathPoses.add(new Pose2d(-18.55462184873949, -3.6302521008403374, Math.toRadians(0))); // Line 13
-
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -109,7 +108,7 @@ public class EighteenClose extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.9)),
 
                         // preload
-                        pathSOTM(1, 1600),
+                        pathShoot(1, 1600),
 
                         // intake 1st spike
                         pathIntake(2, 1050),
@@ -127,18 +126,16 @@ public class EighteenClose extends CommandOpMode {
                         new DriveTo(pathPoses.get(6), 1.0).withTimeout(1050),
                         pathIntake(7,1050),
 
-
                         // open gate
                         new DriveTo(pathPoses.get(8), 1.0).withTimeout(967),
                         new DriveTo(pathPoses.get(9)).withTimeout(1267),
 
                         // shoot 2nd spike
                         pathShoot(10, 900),
+
                         // gate intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-
-
                                         // Intake turns on, drives to 11, turns off upon arrival
                                         gateIntake(11, 3000),
 
@@ -235,20 +232,10 @@ public class EighteenClose extends CommandOpMode {
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).alongWith(
-                        new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex)))
-                ),
-
-                new ClearLaunch(true).raceWith(
-                        new RunCommand(
-                                () -> robot.drive.swerve.updateWithTargetVelocity(
-                                        ChassisSpeeds.fromFieldRelativeSpeeds(
-                                                robot.drive.follower.calculate(robot.drive.getPose()),
-                                                robot.drive.getPose().getRotation()
-                                        )
-                                )
-                        )
-                ),
+                new ParallelCommandGroup(
+                        new DriveTo(pathPoses.get(pathStartingIndex)),
+                        new WaitCommand(timeout)
+                ).deadlineWith(new ContinuousClearLaunch()),
 
                 new InstantCommand(() -> robot.launcher.setRamp(false))
         );
@@ -267,19 +254,6 @@ public class EighteenClose extends CommandOpMode {
                 new SetIntake(Intake.MotorState.FORWARD),
                 new DriveTo(pathPoses.get(pathStartingIndex), 0.5).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.STOP)
-        );
-    }
-
-    public SequentialCommandGroup pathSOTM(int pathStartingIndex, long timeout) {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> robot.readyToLaunch = true),
-                new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)),
-                        new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex))),
-                        new ContinuousClearLaunch()
-                ).withTimeout(timeout),
-
-                new InstantCommand(() -> robot.launcher.setRamp(false))
         );
     }
 }
