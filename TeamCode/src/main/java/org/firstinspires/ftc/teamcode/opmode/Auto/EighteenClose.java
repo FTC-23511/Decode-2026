@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -276,11 +277,11 @@ public class EighteenClose extends CommandOpMode {
     public SequentialCommandGroup pathSOTM(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> robot.readyToLaunch = true),
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).alongWith(
+                new ParallelCommandGroup(
+                        new DriveTo(pathPoses.get(pathStartingIndex)),
                         new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex))),
                         new ContinuousClearLaunch()
-                ),
-
+                ).withTimeout(timeout),
                 new InstantCommand(() -> robot.launcher.setRamp(false))
         );
     }
