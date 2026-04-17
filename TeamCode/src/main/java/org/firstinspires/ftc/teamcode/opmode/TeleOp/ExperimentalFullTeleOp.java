@@ -2,22 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.APRILTAG_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.JOYSTICK_DEAD_ZONE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.LAUNCHER_CLOSE_VELOCITY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_TELEOP_HEADING_CORRECTION_VEL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MIN_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.STRAFING_SLEW_RATE_LIMIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURNING_SLEW_RATE_LIMIT;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SYNCED;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ZONE_TOLERANCE;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -31,6 +16,7 @@ import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
@@ -43,9 +29,7 @@ import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
-import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.StationaryAimbotFullLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
@@ -240,18 +224,31 @@ public class ExperimentalFullTeleOp extends CommandOpMode {
                 Rotation2d robotAngle = robotPose.getRotation();
                 double headingCorrection = 0;
 
-                if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                if (gamepad1.leftBumperWasPressed()) {
+                    robot.drive.gateLock = true;
                     robot.drive.headingLock = true;
-                    robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
-                } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
-                    robot.drive.headingLock = false;
-                } else if (robot.drive.headingLock) {
+                    ((PIDFController) robot.drive.follower.headingController).setCoefficients(AUTO_HEADING_COEFFICIENTS);
+                    robot.drive.follower.setTarget(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? GATE_INTAKE_POSE() : Pose2d.mirrorPose(GATE_INTAKE_POSE()));
                     headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
-                    if (robot.drive.follower.atTarget()) {
-                        headingCorrection = 0;
-                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
-                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
-                        headingCorrection = 0;
+                } else {
+                    if (!robot.drive.gateLock) {
+                        ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
+                    }
+
+                    if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                        robot.drive.headingLock = true;
+                        robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                    } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+                        robot.drive.headingLock = false;
+                        robot.drive.gateLock = false;
+                    } else if (robot.drive.headingLock) {
+                        headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
+                        if (robot.drive.follower.atTarget()) {
+                            headingCorrection = 0;
+                        } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                            robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
+                            headingCorrection = 0;
+                        }
                     }
                 }
 
@@ -278,9 +275,10 @@ public class ExperimentalFullTeleOp extends CommandOpMode {
         robot.profiler.end("Swerve Drive");
 
         // Experimental controls for smoother SOTM control
-        if (gamepad1.left_trigger > 0.5) {
+        if (driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5) {
             robot.readyToLaunch = true;
-            if (CommandScheduler.getInstance().isAvailable(robot.turret)) {
+            if (CommandScheduler.getInstance().isAvailable(robot.turret)
+                    && (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL)) {
                 schedule(new ContinuousClearLaunch());
             }
         } else {
@@ -307,6 +305,8 @@ public class ExperimentalFullTeleOp extends CommandOpMode {
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
+            telemetryEx.addData("Heading Lock", robot.drive.headingLock);
+            telemetryEx.addData("Near Zone", Drive.robotNearZone(robot.drive.getPose()));
             telemetryEx.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
             telemetryEx.addData("Zone Tolerance", ZONE_TOLERANCE);
 

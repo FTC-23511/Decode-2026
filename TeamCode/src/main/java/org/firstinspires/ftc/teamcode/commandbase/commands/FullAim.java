@@ -6,12 +6,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
@@ -93,7 +90,7 @@ public class FullAim extends CommandBase {
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
             ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
         } else {
-            ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
+            ((PIDFController) robot.drive.follower.headingController).setCoefficients(AUTO_HEADING_COEFFICIENTS);
         }
 
         robot.turret.setTurret(Turret.TurretState.OFF, 0);

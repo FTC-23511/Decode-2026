@@ -61,6 +61,11 @@ public class Constants {
     public static double TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
     public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
+    public static double GATE_INTAKE_ANGLE = Math.toRadians(330.0); // Radians
+
+    public static Pose2d GATE_INTAKE_POSE() {
+        return new Pose2d(0, 0, GATE_INTAKE_ANGLE);
+    }
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 4.04; // Radians
@@ -69,7 +74,7 @@ public class Constants {
     public static double BR_ENCODER_OFFSET = 1.03; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
-    public static PIDFCoefficients HEADING_COEFFICIENTS = new PIDFCoefficients(5.67, 0, 0.3, 0); // Coefficients for radians
+    public static PIDFCoefficients AUTO_HEADING_COEFFICIENTS = new PIDFCoefficients(5.67, 0, 0.3, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static PIDFCoefficients AIMBOT_COEFFICIENTS = new PIDFCoefficients(3.5, 0, 0, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.41; // Inches
@@ -172,7 +177,7 @@ public class Constants {
 
     public static double GOAL_LIP = 0.45; // Meters
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
-    public static double LIP_BUFFER = 14 * DistanceUnit.mPerInch; // Meters
+    public static double LIP_BUFFER = 8.5 * DistanceUnit.mPerInch; // Meters
 
     public static boolean USE_INTERPLUT = true;
 

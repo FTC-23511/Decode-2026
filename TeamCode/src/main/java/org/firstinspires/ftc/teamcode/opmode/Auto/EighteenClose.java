@@ -19,6 +19,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
@@ -55,6 +57,7 @@ public class EighteenClose extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
+
         pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-23.19327731092437, 12.100840336134446, Math.toRadians(0))); // Line 1
         pathPoses.add(new Pose2d(-56.0672268907563, 12.302521008403353, Math.toRadians(0))); // Line 2
@@ -111,7 +114,6 @@ public class EighteenClose extends CommandOpMode {
                         pathSOTM(1, 1600),
 
                         // intake 1st spike
-
                         pathIntake(2, 967),
 
                         // open gate
@@ -148,8 +150,6 @@ public class EighteenClose extends CommandOpMode {
                                 ),
                                 REPEAT_TIMES
                         ),
-
-
 
                         // park + end
                         new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
@@ -276,10 +276,11 @@ public class EighteenClose extends CommandOpMode {
     public SequentialCommandGroup pathSOTM(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new InstantCommand(() -> robot.readyToLaunch = true),
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout).alongWith(
+                new ParallelCommandGroup(
+                        new DriveTo(pathPoses.get(pathStartingIndex)),
                         new InstantCommand(() -> robot.launcher.setLauncher(pathPoses.get(pathStartingIndex))),
                         new ContinuousClearLaunch()
-                ),
+                ).withTimeout(timeout),
 
                 new InstantCommand(() -> robot.launcher.setRamp(false))
         );

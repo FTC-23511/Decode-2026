@@ -63,6 +63,7 @@ public class Intake extends SubsystemBase {
                 currentTimer.reset();
                 currentBuffered = false;
                 robot.intakeMotor.set(INTAKE_FORWARD_SPEED);
+                robot.launcher.setTransfer(true);
                 break;
             case REVERSE:
                 robot.intakeMotor.set(INTAKE_REVERSE_SPEED);

@@ -20,7 +20,7 @@ public class GoalZoneTest {
     public void zoneTest1() {
         robotPose = new Pose2d(0, -17.5 / 2, Math.toRadians(0));
 
-        boolean robotInGoal = Drive.robotInZone(robotPose);
+        boolean robotInGoal = Drive.robotNearZone(robotPose);
 
         assertTrue(robotInGoal);
     }
@@ -29,7 +29,7 @@ public class GoalZoneTest {
     public void zoneTest2() {
         robotPose = new Pose2d(0, -48, Math.toRadians(0));
 
-        boolean robotInGoal = Drive.robotInZone(robotPose);
+        boolean robotInGoal = Drive.robotNearZone(robotPose);
 
         assertTrue(robotInGoal);
     }
@@ -38,7 +38,7 @@ public class GoalZoneTest {
     public void zoneTest3() {
         robotPose = new Pose2d(0, -40, Math.toRadians(90));
 
-        boolean robotInGoal = Drive.robotInZone(robotPose);
+        boolean robotInGoal = Drive.robotNearZone(robotPose);
 
         assertTrue(robotInGoal);
     }

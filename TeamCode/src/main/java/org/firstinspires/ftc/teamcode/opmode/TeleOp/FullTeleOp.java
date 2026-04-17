@@ -310,7 +310,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
-            telemetryEx.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
+            telemetryEx.addData("In Launch Zone", Drive.robotNearZone(robot.drive.getPose()));
             telemetryEx.addData("Zone Tolerance", ZONE_TOLERANCE);
 
             telemetryEx.addData("Turret State", Turret.turretState);

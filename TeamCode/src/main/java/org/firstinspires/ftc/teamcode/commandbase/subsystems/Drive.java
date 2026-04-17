@@ -8,10 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveDrivetrain;
-import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Translation2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
@@ -20,17 +17,16 @@ import com.seattlesolvers.solverslib.p2p.P2PController;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
-import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 
 @Config
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
+    public boolean gateLock = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
@@ -62,7 +58,7 @@ public class Drive extends SubsystemBase {
 
         follower = new P2PController(
                 new PIDFController(XY_COEFFICIENTS).setMinOutput(XY_MIN_OUTPUT),
-                (OP_MODE_TYPE.equals(OpModeType.TELEOP) ? new PIDFController(TELEOP_HEADING_COEFFICIENTS) : new PIDFController(HEADING_COEFFICIENTS)).setMinOutput(HEADING_MIN_OUTPUT),
+                (OP_MODE_TYPE.equals(OpModeType.TELEOP) ? new PIDFController(TELEOP_HEADING_COEFFICIENTS) : new PIDFController(AUTO_HEADING_COEFFICIENTS)).setMinOutput(HEADING_MIN_OUTPUT),
                 ANGLE_UNIT,
                 XY_TOLERANCE,
                 HEADING_TOLERANCE
@@ -137,12 +133,26 @@ public class Drive extends SubsystemBase {
         robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
     }
 
-    public static boolean robotInZone(Pose2d robotPose) {
+    /**
+     * For turret (updates within ZONE_TOLERANCE)
+     */
+    public static boolean robotNearZone(Pose2d robotPose) {
         robotZone.setPosition(robotPose.getX(), robotPose.getY());
         robotZone.setRotation(robotPose.getHeading());
 
         return robotZone.distanceTo(bigLaunchZone) <= Math.max(0, ZONE_TOLERANCE)
             || robotZone.distanceTo(smallLaunchZone) <= Math.max(0, ZONE_TOLERANCE);
+    }
+
+    /**
+     * For launcher (updates only in zone)
+     */
+    public static boolean robotInZone(Pose2d robotPose) {
+        robotZone.setPosition(robotPose.getX(), robotPose.getY());
+        robotZone.setRotation(robotPose.getHeading());
+
+        return robotZone.distanceTo(bigLaunchZone) <= 0
+                || robotZone.distanceTo(smallLaunchZone) <= 0;
     }
 
     @Override

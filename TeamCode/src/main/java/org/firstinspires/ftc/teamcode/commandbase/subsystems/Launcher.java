@@ -28,7 +28,7 @@ public class Launcher extends SubsystemBase {
     public static double DISTANCE_OFFSET = -0.0; // -0.267
 
     private static final List<Double> launcherInput  = Arrays.asList(0.0, 4.29,   4.49,   4.76,   5.22,   5.65,   6.06,   6.47,   6.80,   7.53,   7.84,   9.0); // input: velocity (m/s)
-    private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1380.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
+    private static final List<Double> launcherOutput = Arrays.asList(0.0, 1040.0, 1100.0, 1180.0, 1320.0, 1467.0, 1567.0, 1700.0, 1767.0, 2000.0, 2200.0, 2500.0); // output: ticks/s
 
     private static final List<Double> launcherDistance = Arrays.asList(0.0,  1.5,      2.0,   2.5,  3.0,  3.5,  4.0,   4.5,   5.0); // distance from ball leaving robot to when it touches goal for first time (meters)
     private static final List<Double> shootingTime     = Arrays.asList(0.67, 0.58375,  0.5,   0.52, 0.70, 0.77, 0.80d, 0.83d, 0.86d); // time it takes for ball to leave robot to start of goal (seconds)
@@ -62,7 +62,7 @@ public class Launcher extends SubsystemBase {
         }
 
         setFlywheel(0, false);
-        setTransfer(false);
+        setTransfer(OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE);
     }
 
     public void setFlywheel(double targetVel, boolean setActiveControl) {
@@ -128,7 +128,7 @@ public class Launcher extends SubsystemBase {
         robot.profiler.start("Launcher Update");
         flywheelController.setCoefficients(FLYWHEEL_PIDF_COEFFICIENTS);
 
-        if (Drive.robotInZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
+        if (Drive.robotNearZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
             double[] targetLauncherValues = MathFunctions.distanceToLauncherValues(robot.getShotSolution().effectiveDistance);
 
             if (Double.isNaN(targetLauncherValues[0])) {

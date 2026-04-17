@@ -104,7 +104,7 @@ public class SwervePathingTest extends CommandOpMode {
             module.setSwervoPIDF(SWERVO_PIDF_COEFFICIENTS);
         }
         ((PIDFController) robot.drive.follower.translationalController).setCoefficients(XY_COEFFICIENTS);
-        ((PIDFController) robot.drive.follower.headingController).setCoefficients(HEADING_COEFFICIENTS);
+        ((PIDFController) robot.drive.follower.headingController).setCoefficients(AUTO_HEADING_COEFFICIENTS);
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("High TelemetryData");
