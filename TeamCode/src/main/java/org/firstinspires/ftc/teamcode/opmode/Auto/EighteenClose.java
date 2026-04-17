@@ -66,12 +66,11 @@ public class EighteenClose extends CommandOpMode {
         pathPoses.add(new Pose2d(-30.655462184873954, -11.89915966386555, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-61.3109243697479, -12.100840336134457, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-37.310924369747895, -9.075630252100837, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-55.66386554621849, -2.4201680672268964, Math.toRadians(0))); // Line 9
+        pathPoses.add(new Pose2d(-55.66386554621849, -3.2268907563025238, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-55.23188405797101, -4.7681159420289845, Math.toRadians(-10))); // Line 11
-        pathPoses.add(new Pose2d(-60.30252100840335, -20.369747899159673, Math.toRadians(-45))); // Line 12
-        pathPoses.add(new Pose2d(-25.210084033613448, 12.50420168067227, Math.toRadians(0))); // Line 13
-        pathPoses.add(new Pose2d(-19.159663865546214, -2.0168067226890685, Math.toRadians(0))); // Line 14
+        pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 11
+        pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 12
+        pathPoses.add(new Pose2d(-18.55462184873949, -3.6302521008403374, Math.toRadians(0))); // Line 13
 
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -113,24 +112,24 @@ public class EighteenClose extends CommandOpMode {
                         pathSOTM(1, 1600),
 
                         // intake 1st spike
-                        pathIntake(2, 967),
+                        pathIntake(2, 1050),
 
                         // open gate
-                        new DriveTo(pathPoses.get(3)).withTimeout(1670),
-                        new DriveTo(pathPoses.get(4)).withTimeout(600),
+                        new DriveTo(pathPoses.get(3)).withTimeout(1200),
+                        new DriveTo(pathPoses.get(4)).withTimeout(967),
 
                         // shoot 1st spike
-                        pathShoot(5, 1250),
+                        pathShoot(5, 1050),
 
                         // intake 2nd spike
                         new SetIntake(Intake.MotorState.FORWARD),
 
-                        new DriveTo(pathPoses.get(6), 1.0).withTimeout(500),
-                        pathIntake(7, 967),
+                        new DriveTo(pathPoses.get(6), 1.0).withTimeout(1050),
+                        pathIntake(7,1050),
 
 
                         // open gate
-                        new DriveTo(pathPoses.get(8), 1.0).withTimeout(467),
+                        new DriveTo(pathPoses.get(8), 1.0).withTimeout(967),
                         new DriveTo(pathPoses.get(9)).withTimeout(1267),
 
                         // shoot 2nd spike
@@ -139,13 +138,12 @@ public class EighteenClose extends CommandOpMode {
                         new RepeatCommand(
                                 new SequentialCommandGroup(
 
-                                        new DriveTo(pathPoses.get(11)).withTimeout(1267),
 
                                         // Intake turns on, drives to 11, turns off upon arrival
-                                        gateIntake(12, 1500),
+                                        gateIntake(11, 3000),
 
                                         // Drives to 12 and shoots
-                                        pathShoot(13, 1500)
+                                        pathShoot(12, 1500)
                                 ),
                                 REPEAT_TIMES
                         ),
