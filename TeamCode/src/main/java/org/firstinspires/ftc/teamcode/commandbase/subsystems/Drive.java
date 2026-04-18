@@ -10,6 +10,7 @@ import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveDrivetrain;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Twist2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
@@ -81,7 +82,20 @@ public class Drive extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
+        Pose2d pinpointPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
+
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            return pinpointPose;
+        }
+
+        ChassisSpeeds targetVel = swerve.getTargetVelocity();
+        double dt = timer.seconds();
+
+        return pinpointPose.exp(new Twist2d(
+                targetVel.vxMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
+                targetVel.vyMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
+                targetVel.omegaRadiansPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR
+        ));
     }
 
     public void applyVirtualTargetShift() {

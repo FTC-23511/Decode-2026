@@ -53,6 +53,7 @@ public class Constants {
     public static double PINPOINT_TELEOP_POLLING_RATE = 100; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
     public static double DRIVE_VEL_PREDICT_ALPHA = 0.2; // Tune between 0 and 1
+    public static double DRIVE_POS_PREDICT_INTEGRATION_SCALAR = 0.5;
 
     public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
     public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
