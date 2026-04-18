@@ -74,7 +74,7 @@ public class Constants {
     public static double BR_ENCODER_OFFSET = 1.03; // Radians
 
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
-    public static PIDFCoefficients AUTO_HEADING_COEFFICIENTS = new PIDFCoefficients(5.67, 0, 0.3, 0); // Coefficients for radians
+    public static PIDFCoefficients AUTO_HEADING_COEFFICIENTS = new PIDFCoefficients(8.1, 0, 0.3, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians
     public static PIDFCoefficients AIMBOT_COEFFICIENTS = new PIDFCoefficients(3.5, 0, 0, 0); // Coefficients for radians
     public static double XY_TOLERANCE = 0.41; // Inches
@@ -93,6 +93,8 @@ public class Constants {
     public static double INTAKE_CURRENT_THRESHOLD = 4000.0; // Milliamps
     public static double INTAKE_CURRENT_TIME = 125.0; // Milliseconds
     public static double INTAKE_CURRENT_BUFFER_TIME = 200.0; // Milliseconds
+
+    public static double INTAKE_REVERSE_ON_STOP_TIME = 0.0; // Seconds
 
     public static double INTAKE_DISTANCE_THRESHOLD = 6.867; // cm
     public static double INTAKE_DISTANCE_TIME = 241; // milliseconds

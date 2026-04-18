@@ -55,15 +55,24 @@ public class IntakeMotorTuner extends CommandOpMode {
         // Driver controls
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
+                new InstantCommand(() -> {
+                    robot.intake.setIntake(Intake.MotorState.FORWARD);
+                    MOTOR_POWER = Constants.INTAKE_FORWARD_SPEED;
+                })
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                new InstantCommand(() -> {
+                    robot.intake.setIntake(Intake.MotorState.STOP);
+                    MOTOR_POWER = 0.0;
+                })
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
-                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.REVERSE))
+                new InstantCommand(() -> {
+                    robot.intake.setIntake(Intake.MotorState.REVERSE);
+                    MOTOR_POWER = Constants.INTAKE_REVERSE_SPEED;
+                })
         );
     }
 
@@ -75,6 +84,16 @@ public class IntakeMotorTuner extends CommandOpMode {
             robot.initHasMovement();
             timer = new ElapsedTime();
         }
+
+        if (MOTOR_POWER > 0) {
+            Intake.motorState = Intake.MotorState.FORWARD;
+        } else if (MOTOR_POWER < 0) {
+            Intake.motorState = Intake.MotorState.REVERSE;
+        } else {
+            Intake.motorState = Intake.MotorState.STOP;
+        }
+
+        robot.intakeMotor.set(MOTOR_POWER);
 
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);

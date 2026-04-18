@@ -97,7 +97,7 @@ public class Turret extends SubsystemBase {
                 setTurretPos(value);
                 break;
             case GOAL_LOCK_CONTROL:
-                if (TESTING_OP_MODE || OP_MODE_TYPE.equals(OpModeType.AUTO)) {
+                if (TESTING_OP_MODE) {
                     setTurretPos(value);
                 }
                 break;
