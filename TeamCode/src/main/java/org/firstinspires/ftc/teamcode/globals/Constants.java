@@ -56,9 +56,11 @@ public class Constants {
 
     public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
     public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
+    public static double AUTO_MIN_POWER = 0.3; // power // TODO: TUNE
+    public static double AUTO_POWER_SCALAR = 5.0; // power // TODO: TUNE
 
-    public static double STRAFING_SLEW_RATE_LIMIT = 6.7; // Joystick/second
-    public static double TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
+    public static double TELEOP_STRAFING_SLEW_RATE_LIMIT = 5.67; // Joystick/second
+    public static double TELEOP_TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
     public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
     public static double GATE_INTAKE_ANGLE = Math.toRadians(330.0); // Radians

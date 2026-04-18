@@ -21,7 +21,7 @@ public class P2PController {
     private Transform2d error;
 
     private SlewRateLimiter magnitudeLimiter = null;
-    private SlewRateLimiter hLimiter = null;
+    private SlewRateLimiter headingLimiter = null;
 
     public P2PController(Controller translationalController, Controller headingController, AngleUnit angleUnit, Pose2d start, Pose2d target, double positionalTolerance, double angularTolerance) {
         this.translationalController = translationalController;
@@ -87,16 +87,16 @@ public class P2PController {
         // We feed 0 as current and error as target so the PID acts on the error directly
         double headingVal = headingController.calculate(0, headingError);
 
-        if (hLimiter != null) {
-            headingVal = hLimiter.calculate(headingVal);
+        if (headingLimiter != null) {
+            headingVal = headingLimiter.calculate(headingVal);
         }
 
         return new ChassisSpeeds(xVal, yVal, headingVal);
     }
 
-    public P2PController setSlewRateLimiters(SlewRateLimiter magnitudeLimiter, SlewRateLimiter hLimiter) {
+    public P2PController setSlewRateLimiters(SlewRateLimiter magnitudeLimiter, SlewRateLimiter headingLimiter) {
         this.magnitudeLimiter = magnitudeLimiter;
-        this.hLimiter = hLimiter;
+        this.headingLimiter = headingLimiter;
         return this;
     }
 

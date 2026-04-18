@@ -119,17 +119,13 @@ public class EighteenClose extends CommandOpMode {
                         // shoot 1st spike
                         pathShoot(5, 1550),
 
-
                         // intake 2nd spike
                         new DriveTo(pathPoses.get(6)).withTimeout(867),
                         pathIntake(7,1350),
                         new WaitCommand(500),
 
-
-
-
                         // shoot 2nd spike
-                        pathShoot(8, 2500),
+                        pathShoot(8, 1900),
 
                         // gate intake cycles
                         new RepeatCommand(
@@ -138,7 +134,7 @@ public class EighteenClose extends CommandOpMode {
                                         gateIntake(9, 3500),
 
                                         // Drives to 12 and shoots
-                                        pathShoot(10, 2550)
+                                        pathShoot(10, 1900)
                                 ),
                                 REPEAT_TIMES
                         ),
