@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
@@ -59,16 +60,17 @@ public class EighteenClose extends CommandOpMode {
 
         pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-23.19327731092437, 12.100840336134446, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-58.0672268907563, 12.302521008403353, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-60.0672268907563, 12.302521008403353, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-46.58823529411764, 2.50168067226890685, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-58.26890756302521, 0.20212471293051984, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-18.352941176470583, 8.26890756302521, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-30.453781512605048, -11.697478991596643, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-60.890756302521005, -6.072268907563023, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-30.453781512605048, -13.697478991596643, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-60.890756302521005, -8.072268907563023, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-62.170252100840335, -13.012605042016805, Math.toRadians(-35))); // Line 9
-        pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-28.55462184873949, -3.6302521008403374, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-59.170252100840335, -14.012605042016805, Math.toRadians(-35))); // Line 9
+        pathPoses.add(new Pose2d(-75.170252100840335, -6.012605042016805, Math.toRadians(-35))); // Line 10
+        pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-28.55462184873949, -3.6302521008403374, Math.toRadians(0))); // Line 12
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -95,7 +97,8 @@ public class EighteenClose extends CommandOpMode {
         robot.launcher.setRamp(false);
 
         robot.drive.setPose(pathPoses.get(0));
-        robot.turret.setTurret(GOAL_LOCK_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(ANGLE_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
         schedule(
@@ -117,7 +120,7 @@ public class EighteenClose extends CommandOpMode {
                         new WaitCommand(500),
 
                         // shoot 1st spike
-                        pathShoot(5, 1550),
+                        pathShoot(5, 1750),
 
                         // intake 2nd spike
                         new DriveTo(pathPoses.get(6)).withTimeout(867),
@@ -125,16 +128,16 @@ public class EighteenClose extends CommandOpMode {
                         new WaitCommand(500),
 
                         // shoot 2nd spike
-                        pathShoot(8, 1900),
+                        pathShoot(8, 1750),
 
                         // gate intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
                                         // Intake turns on, drives to 11, turns off upon arrival
-                                        gateIntake(9, 3500),
+                                        gateIntake(9, 2500),
 
                                         // Drives to 12 and shoots
-                                        pathShoot(10, 1900)
+                                        pathShoot(11, 1750)
                                 ),
                                 REPEAT_TIMES
                         ),
@@ -227,7 +230,7 @@ public class EighteenClose extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.8).withTimeout(timeout),
                         new WaitCommand(timeout)
                 ).deadlineWith(new ContinuousClearLaunch()),
 
@@ -237,15 +240,12 @@ public class EighteenClose extends CommandOpMode {
 
     public SequentialCommandGroup gateIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.4)).beforeStarting(new WaitCommand(900))
-                ),
+                new DriveTo(pathPoses.get(pathStartingIndex), 0.5),
                 new SetIntake(Intake.MotorState.FORWARD),
-                new WaitCommand(600),
-                new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.67))
+                new DriveTo(pathPoses.get(pathStartingIndex+1), 0.3).withTimeout(timeout)
         );
     }
+
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(

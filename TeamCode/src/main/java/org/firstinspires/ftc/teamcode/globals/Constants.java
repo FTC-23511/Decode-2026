@@ -56,8 +56,8 @@ public class Constants {
 
     public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
     public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
-    public static double AUTO_MIN_POWER = 0.3; // power // TODO: TUNE
-    public static double AUTO_POWER_SCALAR = 5.0; // power // TODO: TUNE
+    public static double AUTO_MIN_POWER = 0.25; // power // TODO: TUNE
+    public static double AUTO_POWER_SCALAR = 6.7; // power // TODO: TUNE
 
     public static double TELEOP_STRAFING_SLEW_RATE_LIMIT = 5.67; // Joystick/second
     public static double TELEOP_TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second

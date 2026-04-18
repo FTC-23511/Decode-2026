@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
 import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
@@ -18,6 +19,7 @@ import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
@@ -47,8 +49,8 @@ public class Far extends CommandOpMode {
 
     public ElapsedTime autoTimer;
     public static int REPEAT_TIMES = 5;
-
     public static boolean GATE_OPEN = false;
+    private boolean PATH_ALTERNATE = true;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -57,14 +59,13 @@ public class Far extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
         pathPoses.add(new Pose2d(-15.327731092436977, -64.33613445378151, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-26.82352941176471, -61.512605042016816, Math.toRadians(-0.002))); // Line 3
-        pathPoses.add(new Pose2d(-60.504201680672274, -56.0672268907563, Math.toRadians(-0.002))); // Line 4
-        pathPoses.add(new Pose2d(-26.82352941176471, -61.512605042016816, Math.toRadians(-0.002))); // Line 5
-        pathPoses.add(new Pose2d(-60.504201680672274, -56.0672268907563, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-26.82352941176471, -61.512605042016816, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1 - Prep intake spike 1
+        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2 - Intake spike 1
+        pathPoses.add(new Pose2d(-23.19327731092437, -63.12605042016807, Math.toRadians(0))); // Line 3 - Launch ball (same as 6)
+        pathPoses.add(new Pose2d(-63.504201680672274, -56.0672268907563, Math.toRadians(0))); // Line 4 - Low HP intake (corner)
+        pathPoses.add(new Pose2d(-63.504201680672274, -40.0672268907563, Math.toRadians(0))); // Line 5 - High HP intake (closer to gate)_
+        pathPoses.add(new Pose2d(-23.19327731092437, -63.12605042016807, Math.toRadians(0))); // Line 6 - Launch ball (same as 3)
+        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(0))); // Line 7 - Park
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -91,7 +92,8 @@ public class Far extends CommandOpMode {
         robot.launcher.setRamp(false);
 
         robot.drive.setPose(pathPoses.get(0));
-        robot.turret.setTurret(GOAL_LOCK_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(ANGLE_CONTROL, Math.toRadians(120) * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
 
         // Schedule the full auto
         schedule(
@@ -108,19 +110,21 @@ public class Far extends CommandOpMode {
                         new DriveTo(pathPoses.get(1)).withTimeout(967),
                         pathIntake(2, 1670),
 
-                        pathShoot(3, 1250),
+                        pathShoot(3, 1600),
 
                         // hp intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        pathIntake(4, 1670),
-                                        pathIntake(5, 1670)
-
-
+                                        new ConditionalCommand(
+                                                pathIntake(4, 2000),
+                                                pathIntake(5, 2000),
+                                                () -> PATH_ALTERNATE
                                         ),
+                                        new InstantCommand(() -> PATH_ALTERNATE = !PATH_ALTERNATE),
+                                        pathShoot(6, 1670)
+                                ),
                                 REPEAT_TIMES
                         ),
-
 
                         // park + end
                         new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
