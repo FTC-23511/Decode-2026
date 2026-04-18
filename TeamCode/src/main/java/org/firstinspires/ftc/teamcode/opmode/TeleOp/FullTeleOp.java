@@ -68,9 +68,9 @@ public class FullTeleOp extends CommandOpMode {
         Drive.ANGLE_OFFSET = 0;
 
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
-                new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
-                new SlewRateLimiter(STRAFING_SLEW_RATE_LIMIT),
-                new SlewRateLimiter(TURNING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(TELEOP_STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(TELEOP_STRAFING_SLEW_RATE_LIMIT),
+                new SlewRateLimiter(TELEOP_TURNING_SLEW_RATE_LIMIT),
                 null
         );
         operator = new GamepadEx(gamepad2);
