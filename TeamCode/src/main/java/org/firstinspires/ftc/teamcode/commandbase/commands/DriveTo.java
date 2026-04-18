@@ -45,7 +45,8 @@ public class DriveTo extends CommandBase {
     @Override
     public void execute() {
         if (minPower != maxPower) {
-            double newMaxPower = Math.sqrt(robot.drive.follower.getError().getTranslation().getNorm()) / AUTO_POWER_SCALAR;
+            double error = robot.drive.follower.getError().getTranslation().getNorm();
+            double newMaxPower = minPower + (maxPower - minPower) * (error / (error + AUTO_POWER_SCALAR));
             robot.drive.swerve.setMaxSpeed(MathUtils.clamp(newMaxPower, minPower, maxPower));
         }
 
