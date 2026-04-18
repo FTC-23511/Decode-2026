@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.MathFunctions;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Deprecated
 public class FullAim extends CommandBase {
     private final Robot robot;
     private final ElapsedTime timer;
@@ -60,10 +61,10 @@ public class FullAim extends CommandBase {
             robot.drive.swerve.updateWithXLock();
         }
 
-        RobotLog.aa("aimIndex", String.valueOf(aimIndex));
+//        RobotLog.aa("aimIndex", String.valueOf(aimIndex));
 
         if (robot.turret.readyToLaunch()) {
-            RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
+//            RobotLog.aa("turret aimbot done", String.valueOf(robot.turret.readyToLaunch()));
 //                robot.turret.setTurret(Turret.TurretState.OFF, robot.turret.getPosition()); // lock turret to current position
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
             errorsAngleVelocity = MathFunctions.distanceToLauncherValues(robot.turret.adjustedGoalPose().minus(robot.turret.getTurretPose()).getTranslation().getNorm() * DistanceUnit.mPerInch);

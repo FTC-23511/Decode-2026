@@ -188,8 +188,6 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .zero(TURRET_ENCODER_OFFSET)
                 .setReversed(true);
 
-        RobotLog.aa("VERY First Voltage", String.valueOf(analogTurretEncoder.getVoltage()));
-
         turretEncoder = new Motor(hwMap, "BL").encoder
                 .setDirection(Motor.Direction.FORWARD)
                 .overrideResetPos((int) TURRET_SYNC_OFFSET);
@@ -225,7 +223,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         intake = new Intake();
         launcher = new Launcher();
         turret = new Turret();
-        camera = new Camera(hwMap);
+        camera = new Camera();
 
         // Robot/CommandScheduler configurations
 //        setBulkReading(hwMap, LynxModule.BulkCachingMode.MANUAL);

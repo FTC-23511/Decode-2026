@@ -86,7 +86,7 @@ public class Camera extends SubsystemBase {
 
     // For Testing
     public Camera() {
-
+        enabled = false;
     }
 
     public Camera(HardwareMap hwMap) {
@@ -136,7 +136,7 @@ public class Camera extends SubsystemBase {
     }
 
     public void init() {
-        if (!TESTING_OP_MODE) {
+        if (!TESTING_OP_MODE && enabled) {
             if (OP_MODE_TYPE.equals(Constants.OpModeType.TELEOP)) {
                 updateROI(END_POSE);
             } else {
@@ -482,7 +482,7 @@ public class Camera extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (TESTING_OP_MODE) {
+        if (TESTING_OP_MODE || !enabled) {
             return;
         }
 

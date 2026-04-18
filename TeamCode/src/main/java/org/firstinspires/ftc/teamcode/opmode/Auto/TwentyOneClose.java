@@ -20,14 +20,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
-import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
-import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
@@ -64,15 +61,15 @@ public class TwentyOneClose extends CommandOpMode {
         pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 4
         pathPoses.add(new Pose2d(-13.714285714285712, 1.8151260504201687, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 6
-        pathPoses.add(new Pose2d(-13.714285714285712, 6.4537815126050475, Math.toRadians(-0.003))); // Line 7
-        pathPoses.add(new Pose2d(-57.07563025210084, 14.117647058823525, Math.toRadians(-0.003))); // Line 8
+        pathPoses.add(new Pose2d(-13.714285714285712, 6.4537815126050475, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-57.07563025210084, 14.117647058823525, Math.toRadians(0))); // Line 8
         pathPoses.add(new Pose2d(-11.495798319327726, 11.294117647058819, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 10
         pathPoses.add(new Pose2d(-16.53781512605042, 8.067226890756302, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-30.050420168067223, -36.30252100840336, Math.toRadians(-0.002))); // Line 12
+        pathPoses.add(new Pose2d(-30.050420168067223, -36.30252100840336, Math.toRadians(0))); // Line 12
         pathPoses.add(new Pose2d(-62.31932773109244, -36.10084033613445, Math.toRadians(0))); // Line 13
         pathPoses.add(new Pose2d(-15.932773109243698, 0.6050420168067205, Math.toRadians(0))); // Line 14
-        pathPoses.add(new Pose2d(-18.756302521008397, -1.999, Math.toRadians(-0.016))); // Line 15
+        pathPoses.add(new Pose2d(-18.756302521008397, -1.999, Math.toRadians(0))); // Line 15
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {

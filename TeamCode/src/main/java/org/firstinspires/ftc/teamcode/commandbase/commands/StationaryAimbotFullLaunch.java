@@ -8,6 +8,7 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
+@Deprecated
 public class StationaryAimbotFullLaunch extends SequentialCommandGroup {
     public StationaryAimbotFullLaunch() {
         this(true);

@@ -16,7 +16,6 @@ import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveModule;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -30,8 +29,7 @@ import java.util.ArrayList;
 public class SwervePathingTest extends CommandOpMode {
     public ElapsedTime timer;
 
-    MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-    TelemetryEx telemetryEx = new TelemetryEx(multipleTelemetry);
+    TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
     public static boolean FOLLOW_PREPROGRAMMED_PATHS = false;
@@ -41,10 +39,10 @@ public class SwervePathingTest extends CommandOpMode {
 
     public ArrayList<Pose2d> pathPoses;
     public void generatePath() {
-        pathPoses = new ArrayList<Pose2d>();
+        pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(0, 0, 0)); // Starting Pose
-        pathPoses.add(new Pose2d(24, 24, Math.PI/2)); // Line 1
+        pathPoses.add(new Pose2d(24, 24, Math.PI / 2)); // Line 1
         pathPoses.add(new Pose2d(0, 0, 0)); // Line 2
     }
 
@@ -62,12 +60,6 @@ public class SwervePathingTest extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
-
-//        robot.drive.follower.setSlewRateLimiters(
-//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
-//                new SlewRateLimiter(AUTO_STRAFING_SLEW_RATE_LIMIT),
-//                new SlewRateLimiter(AUTO_TURNING_SLEW_RATE_LIMIT)
-//        );
 
         // Schedule the full auto
         robot.drive.setPose(pathPoses.get(0));
@@ -103,17 +95,16 @@ public class SwervePathingTest extends CommandOpMode {
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
             module.setSwervoPIDF(SWERVO_PIDF_COEFFICIENTS);
         }
+
         ((PIDFController) robot.drive.follower.translationalController).setCoefficients(XY_COEFFICIENTS);
         ((PIDFController) robot.drive.follower.headingController).setCoefficients(AUTO_HEADING_COEFFICIENTS);
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("High TelemetryData");
 
-            telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
             telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-            telemetryEx.addData("Intake overCurrent", ((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
             telemetryEx.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
             telemetryEx.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
             telemetryEx.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
@@ -126,12 +117,12 @@ public class SwervePathingTest extends CommandOpMode {
 
         robot.profiler.start("Low TelemetryData");
 
-        multipleTelemetry.addData("atTarget", robot.drive.follower.atTarget());
-        multipleTelemetry.addData("X Error", robot.drive.follower.getError().getTranslation().getX());
-        multipleTelemetry.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
-        multipleTelemetry.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
-        multipleTelemetry.addData("Loop Times", timer.milliseconds());
-        multipleTelemetry.update();
+        telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
+        telemetryEx.addData("X Error", robot.drive.follower.getError().getTranslation().getX());
+        telemetryEx.addData("Y Error", robot.drive.follower.getError().getTranslation().getY());
+        telemetryEx.addData("Heading Error", robot.drive.follower.getError().getRotation().getAngle(AngleUnit.RADIANS));
+        telemetryEx.addData("Loop Times", timer.milliseconds());
+        telemetryEx.update();
 
         timer.reset();
 
