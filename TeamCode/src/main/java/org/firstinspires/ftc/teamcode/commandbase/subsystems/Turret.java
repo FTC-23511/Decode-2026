@@ -142,7 +142,7 @@ public class Turret extends SubsystemBase {
 
         switch (turretState) {
             case GOAL_LOCK_CONTROL:
-                robot.profiler.end("Turret Write");
+                robot.profiler.start("Turret Write");
                 if (Drive.robotNearZone(robot.drive.getPose()) && ENABLE_ZONE_CONTROL) {
                     double turretTarget = robot.getShotSolution().turretGlobalHeading.minus(robot.drive.getPose().getRotation()).getRadians();
                     turretTarget += robot.getShotSolution().turretAngularVelocity * TURRET_VEL_LAG;

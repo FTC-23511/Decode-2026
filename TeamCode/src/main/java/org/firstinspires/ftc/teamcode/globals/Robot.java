@@ -271,7 +271,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
 
     public void exportProfiler(File profilerFile, File logCatFile) {
-        RobotLog.i("Starting async profiler and Logcat export to: " + profilerFile.getAbsolutePath());
+        RobotLog.i("Starting async profiler and logcat export to: " + profilerFile.getAbsolutePath());
 
         Thread exportThread = new Thread(() -> {
             try {

@@ -262,8 +262,8 @@ public class EventTeleop extends CommandOpMode {
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
 
+        telemetryEx.update();
         robot.exportProfiler(robot.profilerFile, robot.logCatFile);
-
         telemetryEx.update();
 
     }

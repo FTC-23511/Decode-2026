@@ -132,6 +132,7 @@ public class SwerveTeleOp extends CommandOpMode {
     @Override
     public void end() {
         Constants.END_POSE = robot.drive.getPose();
+        telemetryEx.update();
         robot.exportProfiler(robot.profilerFile, robot.logCatFile);
     }
 }

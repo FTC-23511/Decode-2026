@@ -53,7 +53,7 @@ public class Constants {
     public static double PINPOINT_TELEOP_POLLING_RATE = 100; // Hertz
     public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
     public static double DRIVE_VEL_PREDICT_ALPHA = 0.2; // Tune between 0 and 1
-    public static double DRIVE_POS_PREDICT_INTEGRATION_SCALAR = 0.5;
+    public static double DRIVE_POS_PREDICT_INTEGRATION_SCALAR = 0.35; // Tune between 0 and 1
 
     public static double AUTO_STRAFING_SLEW_RATE_LIMIT = 250; // inches/second
     public static double AUTO_TURNING_SLEW_RATE_LIMIT = 1000; // radians/second // TODO: TUNE
@@ -86,7 +86,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     public static boolean ENABLE_ZONE_CONTROL = true;
-    public static double ZONE_TOLERANCE = 10.0;
+    public static double ZONE_TOLERANCE = 15.0;
 
     // Intake
     public static double INTAKE_FORWARD_SPEED = 1.0;
@@ -125,6 +125,7 @@ public class Constants {
     public static double FLYWHEEL_MAX_VELOCITY = 2500; // Ticks/second
     public static double LAUNCHER_MAX_BALL_VELOCITY = 10; // Meters/second // TODO: tune this to potentially be lower
     public static double FLYWHEEL_ACCEL = 670; // Ticks/second^2 // TODO: tune this to potentially be non-linear
+
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.24; // MUST MATCH WITH VALUE ABOVE

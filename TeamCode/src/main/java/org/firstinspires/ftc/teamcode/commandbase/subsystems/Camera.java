@@ -196,7 +196,7 @@ public class Camera extends SubsystemBase {
     }
 
     public void initHasMovement() {
-        if (!Constants.TESTING_OP_MODE) {
+        if (!Constants.TESTING_OP_MODE && enabled) {
             visionPortal.stopLiveView();
         }
     }

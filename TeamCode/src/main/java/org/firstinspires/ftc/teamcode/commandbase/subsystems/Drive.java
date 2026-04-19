@@ -28,7 +28,6 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
-    public boolean gateLock = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;
@@ -88,14 +87,23 @@ public class Drive extends SubsystemBase {
             return pinpointPose;
         }
 
-        ChassisSpeeds targetVel = swerve.getTargetVelocity();
         double dt = timer.seconds();
+        ChassisSpeeds targetVel = swerve.getTargetVelocity();
 
-        return pinpointPose.exp(new Twist2d(
+        ChassisSpeeds fieldCentricVelocities = ChassisSpeeds.fromFieldRelativeSpeeds(
                 targetVel.vxMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
                 targetVel.vyMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
-                targetVel.omegaRadiansPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR
-        ));
+                targetVel.omegaRadiansPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
+                pinpointPose.getRotation()
+        );
+
+        return pinpointPose.exp(
+                new Twist2d(
+                        fieldCentricVelocities.vxMetersPerSecond,
+                        fieldCentricVelocities.vyMetersPerSecond,
+                        fieldCentricVelocities.omegaRadiansPerSecond
+                )
+        );
     }
 
     public void applyVirtualTargetShift() {
@@ -181,5 +189,4 @@ public class Drive extends SubsystemBase {
         }
         robot.profiler.end("Drive Update");
     }
-
 }

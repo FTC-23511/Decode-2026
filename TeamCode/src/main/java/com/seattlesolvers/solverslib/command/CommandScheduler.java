@@ -216,6 +216,8 @@ public final class CommandScheduler {
             return;
         }
 
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("Periodics");
+
         if (!Constants.TESTING_OP_MODE) {
             // Run the periodic method of all registered subsystems.
             for (Subsystem subsystem : m_subsystems.keySet()) {
@@ -223,11 +225,17 @@ public final class CommandScheduler {
             }
         }
 
+
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("Periodics");
+
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("Gamepad Buttons");
         // Poll buttons for new commands to add.
         for (Runnable button : m_buttons) {
             button.run();
         }
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("Gamepad Buttons");
 
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("Commands Run");
         m_inRunLoop = true;
         // Run scheduled commands, remove finished commands.
         for (Iterator<Command> iterator = m_scheduledCommands.keySet().iterator();
@@ -259,11 +267,16 @@ public final class CommandScheduler {
             }
         }
         m_inRunLoop = false;
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("Commands Run");
 
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("Commands Scheduled");
         for (Map.Entry<Command, Boolean> commandInterruptible : m_toSchedule.entrySet()) {
             schedule(commandInterruptible.getValue(), commandInterruptible.getKey());
         }
 
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("Commands Scheduled");
+
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("Commands Cancelled");
         for (Command command : m_toCancel) {
             cancel(command);
         }
@@ -271,6 +284,9 @@ public final class CommandScheduler {
         m_toSchedule.clear();
         m_toCancel.clear();
 
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("Commands Cancelled");
+
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.start("Default Commands");
         // Add default commands for un-required registered subsystems.
         for (Map.Entry<Subsystem, Command> subsystemCommand : m_subsystems.entrySet()) {
             if (!m_requirements.containsKey(subsystemCommand.getKey())
@@ -278,6 +294,7 @@ public final class CommandScheduler {
                 schedule(subsystemCommand.getValue());
             }
         }
+        org.firstinspires.ftc.teamcode.globals.Robot.getInstance().profiler.end("Default Commands");
 
         if (clearHubCache) {
             for (LynxModule hub : allHubs) {

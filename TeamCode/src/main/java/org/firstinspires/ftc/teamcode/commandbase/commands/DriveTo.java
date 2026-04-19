@@ -15,6 +15,8 @@ public class DriveTo extends CommandBase {
     private final double maxPower;
     private final double minPower;
     private final double previousMaxPower;
+    private final double integrationScalar;
+    private final double previousIntegrationScalar;
 
     public DriveTo(Pose2d pose) {
         this(pose, Robot.getInstance().drive.swerve.getMaxSpeed());
@@ -25,11 +27,19 @@ public class DriveTo extends CommandBase {
     }
 
     public DriveTo(Pose2d pose, double minPower, double maxPower) {
+        this(pose, minPower, maxPower, DRIVE_POS_PREDICT_INTEGRATION_SCALAR);
+    }
+
+    public DriveTo(Pose2d pose, double minPower, double maxPower, double integrationScalar) {
         target = pose;
         robot = Robot.getInstance();
         previousMaxPower = robot.drive.swerve.getMaxSpeed();
+
         this.maxPower = maxPower;
         this.minPower = minPower;
+        this.integrationScalar = integrationScalar;
+        this.previousIntegrationScalar = DRIVE_POS_PREDICT_INTEGRATION_SCALAR;
+
         addRequirements(robot.drive);
     }
 
@@ -39,6 +49,10 @@ public class DriveTo extends CommandBase {
 
         if (maxPower != previousMaxPower) {
             robot.drive.swerve.setMaxSpeed(maxPower);
+        }
+
+        if (previousIntegrationScalar != DRIVE_POS_PREDICT_INTEGRATION_SCALAR) {
+            DRIVE_POS_PREDICT_INTEGRATION_SCALAR = integrationScalar;
         }
     }
 
@@ -70,5 +84,6 @@ public class DriveTo extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         robot.drive.swerve.setMaxSpeed(previousMaxPower);
+        DRIVE_POS_PREDICT_INTEGRATION_SCALAR = previousIntegrationScalar;
     }
 }

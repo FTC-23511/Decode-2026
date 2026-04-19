@@ -2,15 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode.Auto;
 
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SYNCED;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -21,14 +13,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
-import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
-import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
@@ -58,11 +47,11 @@ public class EighteenClose extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-23.19327731092437, 12.100840336134446, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-60.0672268907563, 12.302521008403353, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-46.58823529411764, 2.50168067226890685, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-58.26890756302521, 0.20212471293051984, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-45.3781512605042,   55.05882352941177, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-23.19327731092437,  12.100840336134446, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-60.0672268907563,   12.302521008403353, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-46.58823529411764,  2.50168067226890685, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-58.26890756302521,  0.20212471293051984, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-18.352941176470583, 8.26890756302521, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-30.453781512605048, -13.697478991596643, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-60.890756302521005, -8.072268907563023, Math.toRadians(0))); // Line 7
@@ -99,6 +88,7 @@ public class EighteenClose extends CommandOpMode {
         robot.drive.setPose(pathPoses.get(0));
         robot.turret.setTurret(ANGLE_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
+        robot.readyToLaunch = true;
 
         // Schedule the full auto
         schedule(
@@ -107,7 +97,7 @@ public class EighteenClose extends CommandOpMode {
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
                         new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.6)),
-
+                        new InstantCommand(() -> robot.readyToLaunch = true),
                         // preload
                         pathShoot(1, 1250),
 
@@ -201,12 +191,6 @@ public class EighteenClose extends CommandOpMode {
             telemetryEx.addData("Turret Position", robot.turret.getRelativePos());
             telemetryEx.update();
 
-//            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
-//            telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
-//            telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
-//            telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-//            telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
-
 //            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 
             robot.profiler.end("TelemetryData");
@@ -225,6 +209,8 @@ public class EighteenClose extends CommandOpMode {
         END_POSE = robot.drive.getPose();
         robot.turret.setTurretPos(0.5, true);
         robot.intake.setIntake(Intake.MotorState.STOP);
+        telemetryEx.update();
+        robot.exportProfiler(robot.profilerFile, robot.logCatFile);
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
@@ -232,9 +218,9 @@ public class EighteenClose extends CommandOpMode {
                 new ParallelCommandGroup(
                         new DriveTo(pathPoses.get(pathStartingIndex), 0.8).withTimeout(timeout),
                         new WaitCommand(timeout)
-                ).deadlineWith(new ContinuousClearLaunch()),
-
-                new InstantCommand(() -> robot.launcher.setRamp(false))
+                ).deadlineWith(
+                        new ContinuousClearLaunch()
+                )
         );
     }
 
@@ -242,10 +228,9 @@ public class EighteenClose extends CommandOpMode {
         return new SequentialCommandGroup(
                 new DriveTo(pathPoses.get(pathStartingIndex), 0.5),
                 new SetIntake(Intake.MotorState.FORWARD),
-                new DriveTo(pathPoses.get(pathStartingIndex+1), 0.3).withTimeout(timeout)
+                new DriveTo(pathPoses.get(pathStartingIndex + 1), AUTO_MIN_POWER, AUTO_MIN_POWER, 0).withTimeout(timeout)
         );
     }
-
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
