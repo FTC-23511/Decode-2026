@@ -89,20 +89,25 @@ public class Drive extends SubsystemBase {
         }
 
         double dt = timer.seconds();
-        ChassisSpeeds targetVel = swerve.getTargetVelocity();
+        
+        // Blend measured (field-centric) and target (robot-centric) velocities
+        ChassisSpeeds measuredVelField = getVelocity();
+        ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(swerve.getTargetVelocity(), pinpointPose.getRotation());
 
-        ChassisSpeeds fieldCentricVelocities = ChassisSpeeds.fromFieldRelativeSpeeds(
-                targetVel.vxMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
-                targetVel.vyMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
-                targetVel.omegaRadiansPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
+        double blendedVx = measuredVelField.vxMetersPerSecond + (targetVelField.vxMetersPerSecond - measuredVelField.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+        double blendedVy = measuredVelField.vyMetersPerSecond + (targetVelField.vyMetersPerSecond - measuredVelField.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+        double blendedOmega = measuredVelField.omegaRadiansPerSecond + (targetVelField.omegaRadiansPerSecond - measuredVelField.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+        ChassisSpeeds blendedVelRobot = ChassisSpeeds.fromFieldRelativeSpeeds(
+                new ChassisSpeeds(blendedVx, blendedVy, blendedOmega),
                 pinpointPose.getRotation()
         );
 
         return pinpointPose.exp(
                 new Twist2d(
-                        fieldCentricVelocities.vxMetersPerSecond,
-                        fieldCentricVelocities.vyMetersPerSecond,
-                        fieldCentricVelocities.omegaRadiansPerSecond
+                        blendedVelRobot.vxMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
+                        blendedVelRobot.vyMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
+                        blendedVelRobot.omegaRadiansPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR
                 )
         );
     }

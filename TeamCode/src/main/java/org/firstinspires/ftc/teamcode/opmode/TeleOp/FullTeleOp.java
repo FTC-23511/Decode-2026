@@ -65,6 +65,7 @@ public class FullTeleOp extends CommandOpMode {
         robot.init(hardwareMap);
 
         Drive.ANGLE_OFFSET = 0;
+        Launcher.DISTANCE_OFFSET = 0;
 
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
                 new SlewRateLimiter(TELEOP_STRAFING_SLEW_RATE_LIMIT),

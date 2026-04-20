@@ -41,7 +41,6 @@ public class ClearLaunch extends CommandBase {
             robot.launcher.setActiveControl(true);
         }
         robot.launcher.setRamp(true);
-        robot.turret.setTurret(Turret.TurretState.OFF, 0);
 
         timer.reset();
     }
@@ -51,8 +50,10 @@ public class ClearLaunch extends CommandBase {
 //        RobotLog.ww("ClearLaunch", "Running");
         if (!preciseShots || robot.launcher.launchValid()) {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
+            robot.launcher.setTransfer(true);
         } else {
             robot.intake.setIntake(Intake.MotorState.STOP);
+            robot.launcher.setTransfer(false);
         }
     }
 
@@ -68,12 +69,11 @@ public class ClearLaunch extends CommandBase {
 //        RobotLog.ww("ClearLaunch done, interrupted", String.valueOf(interrupted));
 
         robot.launcher.setRamp(false);
-        robot.launcher.setActiveControl(false);
         robot.readyToLaunch = true;
     }
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 1467); // TODO: replace with real end condition of the command
+        return !robot.readyToLaunch || (timer.milliseconds() > 1067 && preciseShots) || (timer.milliseconds() > 867 && !preciseShots);
     }
 }

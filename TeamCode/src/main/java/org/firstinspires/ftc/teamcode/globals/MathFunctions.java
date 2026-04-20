@@ -172,27 +172,6 @@ public class MathFunctions {
             return new double[]{vReq, 90.0 - targetAngleH};
         }
 
-        // 5. Velocity Limited Fallback (Max Power)
-        // If flattest shot requires > Max Velocity, we find the best angle at Max Velocity
-        double v = LAUNCHER_MAX_BALL_VELOCITY;
-        double A = (g * x * x) / (2.0 * v * v);
-        double B = -x;
-        double C = deltaY + A;
-        double disc = B * B - 4 * A * C;
-
-        if (disc < 0) return new double[]{Double.NaN, Double.NaN}; // Cannot reach even at Max V
-
-        double sqrtD = Math.sqrt(disc);
-        double tan1 = (-B - sqrtD) / (2 * A); // Flatter solution
-        double tan2 = (-B + sqrtD) / (2 * A); // Steeper solution
-
-        double a1 = Math.toDegrees(Math.atan(tan1));
-        double a2 = Math.toDegrees(Math.atan(tan2));
-
-        // Prefer a1 (Flat), then a2 (Lob), ensuring they meet our Angle Floor
-        if (a1 >= targetAngleH && a1 <= maxPhysAngleH) return new double[]{v, 90.0 - a1};
-        if (a2 >= targetAngleH && a2 <= maxPhysAngleH) return new double[]{v, 90.0 - a2};
-
         return new double[]{Double.NaN, Double.NaN};
     }
 
