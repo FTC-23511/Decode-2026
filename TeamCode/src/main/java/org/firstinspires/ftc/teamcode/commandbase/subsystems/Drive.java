@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 public class Drive extends SubsystemBase {
     public final P2PController follower;
     public boolean headingLock = false;
+    public boolean gateLock = false;
     private final Robot robot = Robot.getInstance();
     public final CoaxialSwerveDrivetrain swerve;
     private final ElapsedTime timer;

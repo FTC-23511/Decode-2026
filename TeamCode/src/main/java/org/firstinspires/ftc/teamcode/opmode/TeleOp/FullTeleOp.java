@@ -224,18 +224,31 @@ public class FullTeleOp extends CommandOpMode {
                 Rotation2d robotAngle = robotPose.getRotation();
                 double headingCorrection = 0;
 
-                if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                if (gamepad1.leftBumperWasPressed()) {
+                    robot.drive.gateLock = true;
                     robot.drive.headingLock = true;
-                    robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
-                } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
-                    robot.drive.headingLock = false;
-                } else if (robot.drive.headingLock) {
+                    ((PIDFController) robot.drive.follower.headingController).setCoefficients(AUTO_HEADING_COEFFICIENTS);
+                    robot.drive.follower.setTarget(ALLIANCE_COLOR.equals(AllianceColor.BLUE) ? GATE_INTAKE_POSE() : Pose2d.mirrorPose(GATE_INTAKE_POSE()));
                     headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
-                    if (robot.drive.follower.atTarget()) {
-                        headingCorrection = 0;
-                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
-                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
-                        headingCorrection = 0;
+                } else {
+                    if (!robot.drive.gateLock) {
+                        ((PIDFController) robot.drive.follower.headingController).setCoefficients(TELEOP_HEADING_COEFFICIENTS);
+                    }
+
+                    if (Math.abs(driver.getRightX()) < JOYSTICK_DEAD_ZONE && !robot.drive.headingLock) {
+                        robot.drive.headingLock = true;
+                        robot.drive.follower.setTarget(new Pose2d(0, 0, robotAngle));
+                    } else if (Math.abs(driver.getRightX()) > JOYSTICK_DEAD_ZONE) {
+                        robot.drive.headingLock = false;
+                        robot.drive.gateLock = false;
+                    } else if (robot.drive.headingLock) {
+                        headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
+                        if (robot.drive.follower.atTarget()) {
+                            headingCorrection = 0;
+                        } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
+                            robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
+                            headingCorrection = 0;
+                        }
                     }
                 }
 
