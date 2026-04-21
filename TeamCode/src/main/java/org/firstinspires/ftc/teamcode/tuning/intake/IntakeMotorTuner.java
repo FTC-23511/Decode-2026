@@ -108,7 +108,6 @@ public class IntakeMotorTuner extends CommandOpMode {
 
         telemetryEx.addData("Intake Current", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
         telemetryEx.addData("Transfer Full", robot.intake.transferFull());
-        telemetryEx.addData("Transfer Empty", robot.intake.transferEmpty());
 
         telemetryEx.addData("Within Current", robot.intake.withinCurrent);
         telemetryEx.addData("Current Timer", robot.intake.currentTimer.milliseconds());

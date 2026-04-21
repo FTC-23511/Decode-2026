@@ -133,7 +133,7 @@ public class Intake extends SubsystemBase {
 
     public void updateDistanceSensor() {
         double distance = getDistance();
-        withinDistance = distance > 0 && distance >= INTAKE_DISTANCE_THRESHOLD;
+        withinDistance = distance > 0 && distance <= INTAKE_DISTANCE_THRESHOLD;
 
         if (!withinDistance) {
             distanceTimer.reset();
@@ -149,11 +149,8 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return withinCurrent && currentTimer.milliseconds() >= INTAKE_CURRENT_TIME;
-    }
-
-    public boolean transferEmpty() {
-        return withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME;
+        return (withinCurrent && currentTimer.milliseconds() >= INTAKE_CURRENT_TIME)
+            && (withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME);
     }
 
     @Override
