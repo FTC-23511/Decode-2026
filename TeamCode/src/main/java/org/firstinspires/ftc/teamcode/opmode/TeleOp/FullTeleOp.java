@@ -29,6 +29,7 @@ import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
@@ -112,6 +113,10 @@ public class FullTeleOp extends CommandOpMode {
                         new InstantCommand(() -> Intake.keepIntakeOn = false),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
                 )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+                new ClearLaunch(false)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(

@@ -124,7 +124,7 @@ public class Constants {
     public static double LAUNCHER_CLOSE_VELOCITY = 4.51; // Meters/second
     public static double FLYWHEEL_MAX_VELOCITY = 2500; // Ticks/second
     public static double LAUNCHER_MAX_BALL_VELOCITY = 10; // Meters/second // TODO: tune this to potentially be lower
-    public static double FLYWHEEL_ACCEL = 670; // Ticks/second^2 // TODO: tune this to potentially be non-linear
+    public static double FLYWHEEL_ACCEL = 767; // Ticks/second^2 // TODO: tune this to potentially be non-linear
 
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
@@ -138,9 +138,6 @@ public class Constants {
     public static double TURRET_VEL_LAG = 0.067; // Seconds
     public static double TURRET_OPEN_F = 0.029; // Power
     public static double TURRET_POS_TOLERANCE = 0.0467; // Radians
-    public static double TURRET_TOLERANCE_SCALING(double distance) {
-        return 1.0 / (10 * (distance + 1));
-    }
     public static double TURRET_VEL_TOLERANCE = Double.POSITIVE_INFINITY; // Radians/second
     public static double TURRET_VEL_FILTER = 20; // Radians/second
     public static double TURRET_LAST_VEL_ENTRIES = 5;
@@ -185,7 +182,7 @@ public class Constants {
     public static double BACKBOARD_Y_OFFSET = 0.1; // Meters
     public static double LIP_BUFFER = 8.5 * DistanceUnit.mPerInch; // Meters
 
-    public static boolean USE_INTERPLUT = true;
+    public static boolean USE_TOF_INTERPLUT = true;
 
     public static Pose2d APRILTAG_POSE() {
         return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); // Inches

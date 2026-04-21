@@ -451,7 +451,7 @@ public class MathFunctions {
                 double shotVelIps = shotParams[0] * 39.3701;
                 double timeOfFlight;
 
-                if (USE_INTERPLUT) {
+                if (USE_TOF_INTERPLUT) {
                     timeOfFlight = timeOfFlightLUT.get(distMeters);
                 } else {
                     timeOfFlight = calculateTimeOfFlight(currentDistInches, shotVelIps, shotParams[1]);

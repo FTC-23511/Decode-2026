@@ -228,7 +228,7 @@ public class EighteenClose extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelRaceGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex), 1),
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.7),
                         new WaitCommand(timeout),
                         new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())).andThen(new WaitCommand(200))
                 ),
