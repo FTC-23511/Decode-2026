@@ -203,13 +203,8 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
                 .setOffsets(-76.32, 152.50, DistanceUnit.MM)
                 .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
                 .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
-                .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.CRC)
-                .resetPosAndIMU()
-                .setPosition(Pose2d.convertToPose2D(END_POSE, DistanceUnit.INCH, AngleUnit.RADIANS))
+                .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.LOCAL_TEST)
                 .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION, GoBildaPinpointDriver.Register.X_VELOCITY, GoBildaPinpointDriver.Register.Y_VELOCITY, GoBildaPinpointDriver.Register.H_VELOCITY);
-
-//        frontDistanceSensor = new SensorDigitalDevice(hwMap, "frontDistanceSensor", FRONT_DISTANCE_THRESHOLD);
-//        backDistanceSensor = new SensorDigitalDevice(hwMap, "backDistanceSensor", BACK_DISTANCE_THRESHOLD);
 
         distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 

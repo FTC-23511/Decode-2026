@@ -162,7 +162,8 @@ public class EighteenClose extends CommandOpMode {
         }
 
         if (gamepad1.right_stick_button) {
-            robot.pinpoint.resetPosAndIMU();
+            robot.pinpoint.recalibrateIMU();
+            telemetryEx.addData("Recalibrated", "true");
         }
 
         telemetryEx.addData("Gate Open", GATE_OPEN);
