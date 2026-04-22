@@ -21,7 +21,8 @@
             <AnalogInput name="BR" port="2"/>
             <AnalogInput name="FR" port="3"/>
 
-            <goBILDAPinpoint name="pinpoint" port="0" bus="1"/>
+<!--            <goBILDAPinpoint name="pinpoint" port="0" bus="1"/>/-->
+            <OctoQuadFWv3 name="octoquad" port="0" bus="1"/>-->
         </LynxModule>
     </LynxUsbDevice>
 

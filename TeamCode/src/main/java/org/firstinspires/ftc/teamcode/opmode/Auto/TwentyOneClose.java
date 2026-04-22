@@ -173,7 +173,9 @@ public class TwentyOneClose extends CommandOpMode {
         }
 
         if (gamepad1.right_stick_button) {
-            robot.pinpoint.resetPosAndIMU();
+//            robot.pinpoint.resetPosAndIMU();
+            TURRET_SYNCED = false;
+            robot.turret.resetTurretEncoder();
         }
 
         telemetryEx.addData("Gate Open", GATE_OPEN);

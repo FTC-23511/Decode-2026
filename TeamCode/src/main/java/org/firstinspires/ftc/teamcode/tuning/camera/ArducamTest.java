@@ -104,6 +104,7 @@ public class ArducamTest extends CommandOpMode {
         telemetryEx.update();
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
+//        robot.pinpoint.update();
         robot.pinpoint.update();
     }
 
@@ -138,11 +139,7 @@ public class ArducamTest extends CommandOpMode {
         timer.reset();
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        CommandScheduler.getInstance().run();
-        telemetryEx.update();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
-        robot.pinpoint.update();
+        robot.updateLoop(telemetryEx);
     }
 
     @Override

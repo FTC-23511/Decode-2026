@@ -83,8 +83,10 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public ServoEx hoodServo;
     public ServoEx rampServo;
 
-    public Limelight3A limelight;
+//    public Limelight3A limelight;
 
+    public OctoQuadFWv3 octoQuad;
+    public OctoQuadFWv3.LocalizerDataBlock localizer = new OctoQuadFWv3.LocalizerDataBlock();
     public GoBildaPinpointDriver pinpoint;
 //    public IMU imu;
 
@@ -199,13 +201,20 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //        stopperServo = new ServoEx(hwMap, "stopperServo").setCachingTolerance(0.001)
 //                .setInverted(true);
 
-        pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
-                .setOffsets(-76.32, 152.50, DistanceUnit.MM)
-                .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
-                .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
-                .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.LOCAL_TEST)
-                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION, GoBildaPinpointDriver.Register.X_VELOCITY, GoBildaPinpointDriver.Register.Y_VELOCITY, GoBildaPinpointDriver.Register.H_VELOCITY)
-                .setPosition(Pose2d.convertToPose2D(END_POSE, DISTANCE_UNIT, ANGLE_UNIT));
+        octoQuad = hwMap.get(OctoQuadFWv3.class, "octoquad");
+        octoQuad.setAllLocalizerParameters(1, 2, 0, 0, 0, 0, 0, 25);
+        octoQuad.setSingleEncoderDirection(1, OctoQuadFWv3.EncoderDirection.FORWARD);
+        octoQuad.setSingleEncoderDirection(2, OctoQuadFWv3.EncoderDirection.FORWARD);
+        octoQuad.setI2cRecoveryMode(OctoQuadFWv3.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR);
+        octoQuad.resetLocalizerAndCalibrateIMU();
+
+//        pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
+//                .setOffsets(-76.32, 152.50, DistanceUnit.MM)
+//                .setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
+//                .setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED)
+//                .setErrorDetectionType(GoBildaPinpointDriver.ErrorDetectionType.LOCAL_TEST)
+//                .setBulkReadScope(GoBildaPinpointDriver.Register.X_POSITION, GoBildaPinpointDriver.Register.Y_POSITION, GoBildaPinpointDriver.Register.H_ORIENTATION, GoBildaPinpointDriver.Register.X_VELOCITY, GoBildaPinpointDriver.Register.Y_VELOCITY, GoBildaPinpointDriver.Register.H_VELOCITY)
+//                .setPosition(Pose2d.convertToPose2D(END_POSE, DISTANCE_UNIT, ANGLE_UNIT));
 
         distanceSensor = hwMap.get(AnalogInput.class, "distanceSensor");
 
