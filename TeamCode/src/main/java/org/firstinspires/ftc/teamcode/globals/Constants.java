@@ -86,7 +86,7 @@ public class Constants {
     public static double HEADING_MIN_OUTPUT = 2; // Radians/second
 
     public static boolean ENABLE_ZONE_CONTROL = true;
-    public static double ZONE_TOLERANCE = 15.0;
+    public static double ZONE_TOLERANCE = 22.0;
 
     // Intake
     public static double INTAKE_FORWARD_SPEED = 1.0;
@@ -99,7 +99,7 @@ public class Constants {
 
     public static double INTAKE_REVERSE_ON_STOP_TIME = 0.0; // Seconds
 
-    public static double INTAKE_DISTANCE_THRESHOLD = 6.867; // cm
+    public static double INTAKE_DISTANCE_THRESHOLD = 4.867; // cm
     public static double INTAKE_DISTANCE_TIME = 241; // milliseconds
 //    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 //    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned

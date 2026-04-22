@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.tuning.intake;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.INTAKE_TRANSFER_SPEED;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -32,6 +33,9 @@ public class IntakeMotorTuner extends CommandOpMode {
     public ElapsedTime timer;
 
     public static double MOTOR_POWER = 0.0;
+    public static boolean USE_TRANSFER = true;
+
+    public static Intake.MotorState motorState = Intake.MotorState.STOP;
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -93,7 +97,11 @@ public class IntakeMotorTuner extends CommandOpMode {
             Intake.motorState = Intake.MotorState.STOP;
         }
 
-        robot.intakeMotor.set(MOTOR_POWER);
+        robot.intake.setIntake(motorState);
+
+        if (USE_TRANSFER) {
+            robot.transferMotor.set(MOTOR_POWER);
+        }
 
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
@@ -107,10 +115,14 @@ public class IntakeMotorTuner extends CommandOpMode {
         timer.reset();
 
         telemetryEx.addData("Intake Current", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryEx.addData("Distance (cm)", robot.intake.getDistance());
         telemetryEx.addData("Transfer Full", robot.intake.transferFull());
 
         telemetryEx.addData("Within Current", robot.intake.withinCurrent);
         telemetryEx.addData("Current Timer", robot.intake.currentTimer.milliseconds());
+
+        telemetryEx.addData("Within Distance", robot.intake.withinDistance);
+        telemetryEx.addData("Distance Timer", robot.intake.distanceTimer.milliseconds());
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryEx);

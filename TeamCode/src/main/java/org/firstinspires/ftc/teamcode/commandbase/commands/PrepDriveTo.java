@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.globals.Robot;
 /**
  * Aims all modules at a new target but does not actually move the wheels (applies essentially 0 power)
  */
+@Deprecated
 public class PrepDriveTo extends CommandBase {
     private final Robot robot;
     private final Pose2d target;

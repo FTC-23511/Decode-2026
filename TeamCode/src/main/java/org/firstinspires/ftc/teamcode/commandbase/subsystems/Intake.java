@@ -82,17 +82,15 @@ public class Intake extends SubsystemBase {
 
         switch (motorState) {
             case FORWARD:
-                if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
-                    updateDistanceSensor();
+                updateDistanceSensor();
 
-                    if (currentBuffered) {
-                        updateCurrentSensor();
-                    } else if (currentTimer.milliseconds() > INTAKE_CURRENT_BUFFER_TIME) {
-                        currentBuffered = true;
-                        currentTimer.reset();
-                    } else {
-                        withinCurrent = false;
-                    }
+                if (currentBuffered) {
+                    updateCurrentSensor();
+                } else if (currentTimer.milliseconds() > INTAKE_CURRENT_BUFFER_TIME) {
+                    currentTimer.reset();
+                    currentBuffered = true;
+                } else {
+                    withinCurrent = false;
                 }
                 break;
             case TRANSFER:
