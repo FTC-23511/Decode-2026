@@ -77,7 +77,10 @@ public class Drive extends SubsystemBase {
     }
 
     public void init() {
-//      ANGLE_OFFSET = -0.085 * ALLIANCE_COLOR.getMultiplier();
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP) && !TESTING_OP_MODE) {
+            setPose(END_POSE);
+            follower.setTarget(END_POSE);
+        }
     }
 
     public Pose2d getPose() {

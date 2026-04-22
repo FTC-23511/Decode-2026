@@ -166,7 +166,7 @@ public class FullTeleOp extends CommandOpMode {
         if (gamepad1.right_stick_button) {
             TURRET_SYNCED = false;
             robot.turret.resetTurretEncoder();
-            robot.pinpoint.resetPosAndIMU();
+            robot.pinpoint.recalibrateIMU();
         }
 
         Launcher.DISTANCE_OFFSET = 0;

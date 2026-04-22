@@ -54,16 +54,18 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-10.08403361344537, 4.235294117647058, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-30.453781512605048, -13.697478991596643, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-60.09075630252101, -6.572268907563023, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-10.893, 3.4285714285714306, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-60.80025210084033, -18.012605042016805, Math.toRadians(-27))); // Line 5
-        pathPoses.add(new Pose2d(-60.80025210084033, -11.012605042016805, Math.toRadians(-27))); // Line 6
-        pathPoses.add(new Pose2d(-10.890756302521005, 3.43, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-57.68067226890756, 13.714285714285712, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-32.26890756302521, 24.806722689075634, Math.toRadians(0))); // Line 9
-        pathPoses.add(new Pose2d(-51.83193277310925, 1.6134453781512619, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-11.08403361344537, 4.235294117647058, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-29.445378151260503, -12.705882352941178, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-63.51260504201681, -14.319327731092432, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-36.705882352941174, -6.2521008403361265, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-59.882352941176464, -3.4285714285714306, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-10.893, 3.4285714285714306, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-60.80025210084033, -18.012605042016805, Math.toRadians(-30))); // Line 7
+        pathPoses.add(new Pose2d(-59.80025210084033, -10.15126050420168, Math.toRadians(-30))); // Line 8
+        pathPoses.add(new Pose2d(-10.890756302521005, 3.43, Math.toRadians(0))); // Line 9
+        pathPoses.add(new Pose2d(-57.68067226890756, 13.714285714285712, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-32.26890756302521, 24.806722689075634, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-51.83193277310925, 1.6134453781512619, Math.toRadians(0))); // Line 12
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -105,35 +107,42 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
                         new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.6)),
                         new InstantCommand(() -> robot.readyToLaunch = true),
                         // preload
-                        pathShoot(1, 1550),
+                        new DriveTo(pathPoses.get(1), 1).withTimeout(1300),
+                        new ParallelRaceGroup(
+                                new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
+                                new ClearLaunch().beforeStarting(new WaitCommand(100))
+                        ),
 
                         // intake 2nd spike
                         new DriveTo(pathPoses.get(2), 1).withTimeout(400),
-                        pathIntake(3, 1250),
+                        pathIntake(3, 1550),
                         new WaitCommand(500),
+                        new DriveTo(pathPoses.get(4), 1).withTimeout(400),
+                        new DriveTo(pathPoses.get(5), 1).withTimeout(400),
+
 
 
                         // shoot 2nd spike
-                        pathShoot(4, 1550),
+                        pathShoot(6, 1550),
 
                         // gate intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
                                         // Intake turns on, drives to 11, turns off upon arrival
-                                        gateIntake(5, 2000),
+                                        gateIntake(7, 2000),
+                                        new SetIntake(Intake.MotorState.STOP),
 
                                         // Drives to 12 and shoots
-                                        pathShoot(7, 1550)
+                                        pathShoot(9, 1550)
                                 ),
                                 REPEAT_TIMES
                         ),
 
                         // intake 1st spike
-                        pathIntake(8,1350),
-                        new WaitCommand(500),
+                        pathIntake(10,1850),
 
                         // shoot 1st spike
-                        pathShoot(9, 1550),
+                        pathShoot(11, 1550),
 
                         // park + end
                         new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
@@ -153,7 +162,8 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
         }
 
         if (gamepad1.right_stick_button) {
-            robot.pinpoint.resetPosAndIMU();
+            robot.pinpoint.recalibrateIMU();
+            telemetryEx.addData("Recalibrated", "true");
         }
 
         telemetryEx.addData("Gate Open", GATE_OPEN);
@@ -219,7 +229,7 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
                 new ParallelRaceGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex), 1),
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.7),
                         new WaitCommand(timeout),
                         new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())).andThen(new WaitCommand(200))
                 ),
