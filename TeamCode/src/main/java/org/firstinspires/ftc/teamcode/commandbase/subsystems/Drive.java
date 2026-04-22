@@ -124,7 +124,7 @@ public class Drive extends SubsystemBase {
 
         // 2. Get the raw robot pose (no ANGLE_OFFSET)
 //        Pose2d rawPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
-        Pose2d rawPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
+        Pose2d rawPose = robotPose;
 
         // 3. Calculate physical turret position
         double robotHeadingDegrees = rawPose.getRotation().getDegrees();

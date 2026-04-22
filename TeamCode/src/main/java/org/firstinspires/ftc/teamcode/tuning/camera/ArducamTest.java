@@ -105,7 +105,7 @@ public class ArducamTest extends CommandOpMode {
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
 //        robot.pinpoint.update();
-        robot.pinpoint.update();
+        robot.drive.periodic();
     }
 
     @Override

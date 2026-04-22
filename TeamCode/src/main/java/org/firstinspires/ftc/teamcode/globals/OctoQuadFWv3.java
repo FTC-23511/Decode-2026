@@ -277,7 +277,7 @@ public class OctoQuadFWv3 extends I2cDeviceSynchDevice<I2cDeviceSynchSimple>
      * @param idx the index of the encoder
      * @param direction direction
      */
-    public void setSingleEncoderDirection(int idx, EncoderDirection direction)
+    public OctoQuadFWv3 setSingleEncoderDirection(int idx, EncoderDirection direction)
     {
         verifyInitialization();
 
@@ -296,6 +296,8 @@ public class OctoQuadFWv3 extends I2cDeviceSynchDevice<I2cDeviceSynchSimple>
         }
 
         writeContiguousRegisters(Register.COMMAND, Register.COMMAND_DAT_1, new byte[]{CMD_SET_PARAM, PARAM_ENCODER_DIRECTIONS, directionRegisterData});
+
+        return this;
     }
 
     /**
@@ -875,7 +877,7 @@ public class OctoQuadFWv3 extends I2cDeviceSynchDevice<I2cDeviceSynchSimple>
      * @param headingScalar see desc. for specific function call
      * @param velocityIntervalMs see desc. for specific function call
      */
-    public void setAllLocalizerParameters(
+    public OctoQuadFWv3 setAllLocalizerParameters(
             int portX,
             int portY,
             float ticksPerMM_x,
@@ -893,6 +895,8 @@ public class OctoQuadFWv3 extends I2cDeviceSynchDevice<I2cDeviceSynchSimple>
         setLocalizerTcpOffsetMM_Y(tcpOffsetMM_Y);
         setLocalizerImuHeadingScalar(headingScalar);
         setLocalizerVelocityIntervalMS(velocityIntervalMs);
+
+        return this;
     }
 
     /**
@@ -985,10 +989,12 @@ public class OctoQuadFWv3 extends I2cDeviceSynchDevice<I2cDeviceSynchSimple>
      * Poll {@link #getLocalizerStatus()} for {@link LocalizerStatus#RUNNING}
      * to determine when the reset is complete.
      */
-    public void resetLocalizerAndCalibrateIMU()
+    public OctoQuadFWv3 resetLocalizerAndCalibrateIMU()
     {
         verifyInitialization();
         writeRegister(Register.COMMAND, new byte[] {CMD_RESET_LOCALIZER});
+
+        return this;
     }
 
     /**
@@ -1184,11 +1190,13 @@ public class OctoQuadFWv3 extends I2cDeviceSynchDevice<I2cDeviceSynchSimple>
      * you call {@link #saveParametersToFlash()} ()}
      * @param mode the recovery mode to use
      */
-    public void setI2cRecoveryMode(I2cRecoveryMode mode)
+    public OctoQuadFWv3 setI2cRecoveryMode(I2cRecoveryMode mode)
     {
         verifyInitialization();
 
         writeContiguousRegisters(Register.COMMAND, Register.COMMAND_DAT_1, new byte[]{CMD_SET_PARAM, PARAM_I2C_RECOVERY_MODE, mode.bVal});
+
+        return this;
     }
 
     /**

@@ -166,12 +166,13 @@ public class FullTeleOp extends CommandOpMode {
         if (gamepad1.right_stick_button) {
             TURRET_SYNCED = false;
             robot.turret.resetTurretEncoder();
+            robot.octoQuad.resetLocalizerAndCalibrateIMU();
 //            robot.pinpoint.recalibrateIMU();
         }
 
         Launcher.DISTANCE_OFFSET = 0;
-        robot.drive.setPose(END_POSE);
         telemetryEx.addData("END_POSE", END_POSE);
+        telemetryEx.addData("END_POSE", robot.octoQuad.getLocalizerStatus());
         telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
         telemetryEx.update();
 

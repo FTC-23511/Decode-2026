@@ -87,7 +87,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 
     public OctoQuadFWv3 octoQuad;
     public OctoQuadFWv3.LocalizerDataBlock localizer = new OctoQuadFWv3.LocalizerDataBlock();
-    public GoBildaPinpointDriver pinpoint;
+//    public GoBildaPinpointDriver pinpoint;
 //    public IMU imu;
 
     public Drive drive;
@@ -201,12 +201,12 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //        stopperServo = new ServoEx(hwMap, "stopperServo").setCachingTolerance(0.001)
 //                .setInverted(true);
 
-        octoQuad = hwMap.get(OctoQuadFWv3.class, "octoquad");
-        octoQuad.setAllLocalizerParameters(1, 2, 0, 0, 0, 0, 0, 25);
-        octoQuad.setSingleEncoderDirection(1, OctoQuadFWv3.EncoderDirection.FORWARD);
-        octoQuad.setSingleEncoderDirection(2, OctoQuadFWv3.EncoderDirection.FORWARD);
-        octoQuad.setI2cRecoveryMode(OctoQuadFWv3.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR);
-        octoQuad.resetLocalizerAndCalibrateIMU();
+        octoQuad = hwMap.get(OctoQuadFWv3.class, "octoquad")
+                .setAllLocalizerParameters(1, 2, 0, 0, 0, 0, 0, 25)
+                .setSingleEncoderDirection(1, OctoQuadFWv3.EncoderDirection.FORWARD)
+                .setSingleEncoderDirection(2, OctoQuadFWv3.EncoderDirection.FORWARD)
+                .setI2cRecoveryMode(OctoQuadFWv3.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR)
+                .resetLocalizerAndCalibrateIMU();
 
 //        pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint")
 //                .setOffsets(-76.32, 152.50, DistanceUnit.MM)
