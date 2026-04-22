@@ -66,7 +66,11 @@ public class ChipsFar extends CommandOpMode {
         pathPoses.add(new Pose2d(-60.32125984251968, -54.31181102362204, Math.toRadians(20))); // Line 8
         pathPoses.add(new Pose2d(-62.135433070866135, -71.09291338582676, Math.toRadians(0))); // Line 9
         pathPoses.add(new Pose2d(-22.903937007874017, -62.02204724409449, Math.toRadians(0))); // Line 10
-        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-60.548031496063, -46.82834645669291, Math.toRadians(340))); // Line 11
+        pathPoses.add(new Pose2d(-60.32125984251968, -28.23307086614173, Math.toRadians(340))); // Line 12
+        pathPoses.add(new Pose2d(-21.08976377952756, -59.30078740157481, Math.toRadians(340))); // Line 13
+        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(315))); // Line 14
+    
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
