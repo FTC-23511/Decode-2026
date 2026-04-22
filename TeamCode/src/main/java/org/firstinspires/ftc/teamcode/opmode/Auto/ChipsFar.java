@@ -55,14 +55,18 @@ public class ChipsFar extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(-15.327731092436977, -64.33613445378151, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1 - Prep intake spike 1
-        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2 - Intake spike 1
-        pathPoses.add(new Pose2d(-23.19327731092437, -63.12605042016807, Math.toRadians(0))); // Line 3 - Launch ball (same as 6)
-        pathPoses.add(new Pose2d(-63.504201680672274, -56.0672268907563, Math.toRadians(0))); // Line 4 - HP  intake (corner)
-        pathPoses.add(new Pose2d(-63.504201680672274, -40.0672268907563, Math.toRadians(0))); // Line 5 - High HP intake (closer to gate)_
-        pathPoses.add(new Pose2d(-23.19327731092437, -63.12605042016807, Math.toRadians(0))); // Line 6 - Launch ball (same as 3)
-        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(0))); // Line 7 - Park
+        pathPoses.add(new Pose2d(-15.25, -64, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-22.903937007874017, -62.02204724409449, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-62.36220472440945, -62.475590551181114, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-55.55905511811024, -63.15590551181103, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-63.7228346456693, -59.30078740157481, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-21.08976377952756, -59.52755905511811, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-60.32125984251968, -54.31181102362204, Math.toRadians(20))); // Line 8
+        pathPoses.add(new Pose2d(-62.135433070866135, -71.09291338582676, Math.toRadians(0))); // Line 9
+        pathPoses.add(new Pose2d(-22.903937007874017, -62.02204724409449, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(0))); // Line 11
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {

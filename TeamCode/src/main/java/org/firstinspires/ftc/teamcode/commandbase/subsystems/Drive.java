@@ -160,6 +160,12 @@ public class Drive extends SubsystemBase {
     }
 
     public void setPose(Pose2d pose) {
+        robot.octoQuad.setLocalizerPose(
+                (int)(DistanceUnit.mmPerInch * pose.getX()),
+                (int)(DistanceUnit.mmPerInch * pose.getY()),
+                (float) pose.getHeading()
+        );
+
         robotPose = pose;
     }
 

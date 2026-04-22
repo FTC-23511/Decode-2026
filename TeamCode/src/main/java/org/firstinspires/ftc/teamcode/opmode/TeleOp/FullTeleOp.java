@@ -172,7 +172,7 @@ public class FullTeleOp extends CommandOpMode {
 
         Launcher.DISTANCE_OFFSET = 0;
         telemetryEx.addData("END_POSE", END_POSE);
-        telemetryEx.addData("END_POSE", robot.octoQuad.getLocalizerStatus());
+        telemetryEx.addData("Localizer Status", robot.octoQuad.getLocalizerStatus());
         telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
         telemetryEx.update();
 
