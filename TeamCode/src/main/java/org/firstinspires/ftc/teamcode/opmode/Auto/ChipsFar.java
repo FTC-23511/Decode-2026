@@ -25,6 +25,7 @@ import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
@@ -114,19 +115,34 @@ public class ChipsFar extends CommandOpMode {
                         // 3rd spike mark
                         new DriveTo(pathPoses.get(1)).withTimeout(967),
                         pathIntake(2, 1670),
-
                         pathShoot(3, 1600),
 
-                        // hp intake cycles
+                        // hp line intake
+                        new SequentialCommandGroup(
+                                new SetIntake(Intake.MotorState.FORWARD),
+                                new DriveTo(pathPoses.get(4), 0.6).withTimeout(1670),
+                                new DriveTo(pathPoses.get(5), 0.5).withTimeout(500),
+                                new DriveTo(pathPoses.get(6), 0.5).withTimeout(1000)
+                        ).interruptOn(() -> robot.intake.transferFull()),
+
+                        new SetIntake(Intake.MotorState.STOP),
+                        pathShoot(7, 1600),
+
+                        // hp intake™
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(8), 0.6).withTimeout(1670),
+                        new DriveTo(pathPoses.get(9), 0.8).withTimeout(567),
+                        pathShoot(10, 1600),
+
+                        // intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        new ConditionalCommand(
-                                                pathIntake(4, 2000),
-                                                pathIntake(5, 2000),
-                                                () -> PATH_ALTERNATE
-                                        ),
-                                        new InstantCommand(() -> PATH_ALTERNATE = !PATH_ALTERNATE),
-                                        pathShoot(6, 1670)
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(11), 0.6).withTimeout(1670),
+                                        new DriveTo(pathPoses.get(12), 0.8).withTimeout(1670),
+                                        new SetIntake(Intake.MotorState.STOP),
+
+                                        pathShoot(13, 1550)
                                 ),
                                 REPEAT_TIMES
                         ),
@@ -135,6 +151,7 @@ public class ChipsFar extends CommandOpMode {
                         new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
                         new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP)),
                         new DriveTo(pathPoses.get(pathPoses.size() - 1))
+
                 )
         );
     }
