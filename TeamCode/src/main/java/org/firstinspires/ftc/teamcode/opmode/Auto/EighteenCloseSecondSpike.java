@@ -54,7 +54,7 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-11.08403361344537, 4.235294117647058, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-11.08403361344537, 4.235294117647058, Math.toRadians(5))); // Line 1
         pathPoses.add(new Pose2d(-29.445378151260503, -12.705882352941178, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-63.51260504201681, -14.319327731092432, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-36.705882352941174, -6.2521008403361265, Math.toRadians(0))); // Line 4
@@ -159,20 +159,9 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
             REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
         }
 
-        if (gamepad1.right_stick_button) {
-//            robot.pinpoint.resetPosAndIMU();
-            TURRET_SYNCED = false;
-            robot.turret.resetTurretEncoder();
-        }
-
-        telemetryEx.addData("Gate Open", GATE_OPEN);
-        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
-        telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
-        telemetryEx.update();
-
-
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+        telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
+        telemetryEx.addData("GATE_OPEN", GATE_OPEN);
+        robot.initializeLoop(gamepad1, telemetryEx);
     }
 
     @Override

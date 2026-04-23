@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -202,7 +203,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
 //                .setInverted(true);
 
         octoQuad = hwMap.get(OctoQuadFWv3.class, "octoquad")
-                .setAllLocalizerParameters(0, 1, 13.26291192f, 13.26291192f, -152.50f, 76.32f, 1.0275f, 25)
+                .setAllLocalizerParameters(0, 1, 13.26291192f, 13.26291192f, -152.50f, 76.32f, 1.0275f, 15)
                 .setSingleEncoderDirection(0, OctoQuadFWv3.EncoderDirection.FORWARD)
                 .setSingleEncoderDirection(1, OctoQuadFWv3.EncoderDirection.REVERSE)
                 .setI2cRecoveryMode(OctoQuadFWv3.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR)
@@ -365,6 +366,27 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         if (telemetryEx != null) {
             telemetryEx.update();
         }
+
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
+    }
+
+    public void initializeLoop(Gamepad gamepad1, TelemetryEx telemetryEx) {
+        if (gamepad1.right_stick_button) {
+            TURRET_SYNCED = false;
+            turret.resetTurretEncoder();
+            octoQuad.resetLocalizerAndCalibrateIMU();
+//            robot.pinpoint.recalibrateIMU();
+        }
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            Launcher.DISTANCE_OFFSET = 0;
+            telemetryEx.addData("END_POSE", END_POSE);
+        }
+
+        telemetryEx.addData("Localizer Status", octoQuad.getLocalizerStatus());
+        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
+        telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
+        telemetryEx.update();
 
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();

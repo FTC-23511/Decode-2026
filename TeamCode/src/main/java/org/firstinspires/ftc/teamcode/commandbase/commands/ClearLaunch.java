@@ -47,7 +47,7 @@ public class ClearLaunch extends CommandBase {
     @Override
     public void execute() {
 //        RobotLog.ww("ClearLaunch", "Running");
-        if (!preciseShots || robot.launcher.launchValid()) {
+        if (!preciseShots || robot.launcher.launchWillBeValid()) {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
             robot.launcher.setTransfer(true);
         } else {
