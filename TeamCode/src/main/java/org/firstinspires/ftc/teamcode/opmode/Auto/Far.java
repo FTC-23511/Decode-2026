@@ -143,18 +143,7 @@ public class Far extends CommandOpMode {
             REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
         }
 
-        if (gamepad1.right_stick_button) {
-            robot.pinpoint.resetPosAndIMU();
-        }
-
-        telemetryEx.addData("Gate Open", GATE_OPEN);
-        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
-        telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
-        telemetryEx.update();
-
-
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+        robot.initializeLoop(gamepad1, telemetryEx);
     }
 
     @Override

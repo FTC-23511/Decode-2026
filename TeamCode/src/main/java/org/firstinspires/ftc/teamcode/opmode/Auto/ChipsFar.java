@@ -22,17 +22,23 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
+import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
+import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -45,9 +51,8 @@ public class ChipsFar extends CommandOpMode {
     public ElapsedTime timer;
 
     public ElapsedTime autoTimer;
-    public static int REPEAT_TIMES = 5;
+    public static int REPEAT_TIMES = 4;
     public static boolean GATE_OPEN = false;
-    private boolean PATH_ALTERNATE = true;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -55,14 +60,18 @@ public class ChipsFar extends CommandOpMode {
 
     public void generatePath() {
         pathPoses = new ArrayList<>();
-        pathPoses.add(new Pose2d(-15.327731092436977, -64.33613445378151, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1 - Prep intake spike 1
-        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2 - Intake spike 1
-        pathPoses.add(new Pose2d(-23.19327731092437, -63.12605042016807, Math.toRadians(0))); // Line 3 - Launch ball (same as 6)
-        pathPoses.add(new Pose2d(-63.504201680672274, -56.0672268907563, Math.toRadians(0))); // Line 4 - HP  intake (corner)
-        pathPoses.add(new Pose2d(-63.504201680672274, -40.0672268907563, Math.toRadians(0))); // Line 5 - High HP intake (closer to gate)_
-        pathPoses.add(new Pose2d(-23.19327731092437, -63.12605042016807, Math.toRadians(0))); // Line 6 - Launch ball (same as 3)
-        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(0))); // Line 7 - Park
+        pathPoses.add(new Pose2d(-18.5, -64, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-22.903937007874017, -62.02204724409449, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-62.36220472440945, -62.475590551181114, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-55.55905511811024, -63.15590551181103, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-63.7228346456693, -59.30078740157481, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-21.08976377952756, -59.52755905511811, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-60.548031496063, -46.82834645669291, Math.toRadians(315))); // Line 8
+        pathPoses.add(new Pose2d(-60.32125984251968, -28.23307086614173, Math.toRadians(315))); // Line 9
+        pathPoses.add(new Pose2d(-19.955905511811025, -60.43464566929134, Math.toRadians(315))); // Line 10
+        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(315))); // Line 11
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -91,6 +100,9 @@ public class ChipsFar extends CommandOpMode {
         robot.drive.setPose(pathPoses.get(0));
         robot.turret.setTurret(ANGLE_CONTROL, Math.toRadians(120) * ALLIANCE_COLOR.getMultiplier());
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
+        robot.readyToLaunch = true;
+
+        Launcher.DISTANCE_OFFSET = -0.167;
 
         // Schedule the full auto
         schedule(
@@ -99,26 +111,38 @@ public class ChipsFar extends CommandOpMode {
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
                         new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.9)),
+                        new InstantCommand(() -> robot.readyToLaunch = true),
 
                         // preload
-                        pathShoot(0, 1600),
+                        new ClearLaunch(true).beforeStarting(new WaitCommand(500)),
 
                         // 3rd spike mark
                         new DriveTo(pathPoses.get(1)).withTimeout(967),
                         pathIntake(2, 1670),
-
                         pathShoot(3, 1600),
 
-                        // hp intake cycles
+                        // hp line intake
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        new ConditionalCommand(
-                                                pathIntake(4, 2000),
-                                                pathIntake(5, 2000),
-                                                () -> PATH_ALTERNATE
-                                        ),
-                                        new InstantCommand(() -> PATH_ALTERNATE = !PATH_ALTERNATE),
-                                        pathShoot(6, 1670)
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(4), 0.6).withTimeout(1670),
+                                        new DriveTo(pathPoses.get(5), 0.5).withTimeout(500),
+                                        new DriveTo(pathPoses.get(6), 0.5).withTimeout(1000)
+                                ).interruptOn(() -> robot.intake.transferFull()),
+                                2
+                        ),
+
+                        new SetIntake(Intake.MotorState.STOP),
+                        pathShoot(7, 1600),
+                        // intake cycles
+                        new RepeatCommand(
+                                new SequentialCommandGroup(
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(8), 0.8).withTimeout(1670),
+                                        new DriveTo(pathPoses.get(9), 0.8).withTimeout(1670),
+                                        new SetIntake(Intake.MotorState.STOP),
+
+                                        pathShoot(10, 1550)
                                 ),
                                 REPEAT_TIMES
                         ),
@@ -140,18 +164,8 @@ public class ChipsFar extends CommandOpMode {
             REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
         }
 
-        if (gamepad1.right_stick_button) {
-            robot.pinpoint.resetPosAndIMU();
-        }
-
-        telemetryEx.addData("Gate Open", GATE_OPEN);
-        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
-        telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
-        telemetryEx.update();
-
-
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+        telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
+        robot.initializeLoop(gamepad1, telemetryEx);
     }
 
     @Override
@@ -210,24 +224,15 @@ public class ChipsFar extends CommandOpMode {
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new WaitCommand(timeout)
-                ).deadlineWith(new ContinuousClearLaunch()),
-
-                new InstantCommand(() -> robot.launcher.setRamp(false))
-        );
-    }
-
-    public SequentialCommandGroup gateIntake(int pathStartingIndex, long timeout) {
-        return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.4)).beforeStarting(new WaitCommand(900))
+                new ParallelRaceGroup(
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.7),
+                        new WaitCommand(timeout),
+                        new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())).andThen(new WaitCommand(200))
                 ),
-                new SetIntake(Intake.MotorState.FORWARD),
-                new WaitCommand(600),
-                new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.67))
+                new ParallelRaceGroup(
+                        new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
+                        new ClearLaunch(true).beforeStarting(new WaitCommand(100))
+                )
         );
     }
 

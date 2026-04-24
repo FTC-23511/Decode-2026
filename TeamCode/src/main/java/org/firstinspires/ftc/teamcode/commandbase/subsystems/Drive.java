@@ -33,6 +33,9 @@ public class Drive extends SubsystemBase {
     private final ElapsedTime timer;
     public static double ANGLE_OFFSET = 0.0;
 
+    private Pose2d robotPose = new Pose2d();
+    private ChassisSpeeds robotVelocity = new ChassisSpeeds();
+
     private static final PolygonZone bigLaunchZone = new PolygonZone(new Point(72, 72), new Point(0, 0), new Point(-72, 72));
     private static final PolygonZone smallLaunchZone = new PolygonZone(new Point(-24, -72), new Point(0, -48), new Point(24, -72));
     private static final PolygonZone robotZone = new PolygonZone(14.5, 17.5);
@@ -84,17 +87,17 @@ public class Drive extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        Pose2d pinpointPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT).rotate(ANGLE_OFFSET);
+        Pose2d currentPose = robotPose.rotate(ANGLE_OFFSET);
 
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
-            return pinpointPose;
+            return currentPose;
         }
 
         double dt = timer.seconds();
         
         // Blend measured (field-centric) and target (robot-centric) velocities
         ChassisSpeeds measuredVelField = getVelocity();
-        ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(swerve.getTargetVelocity(), pinpointPose.getRotation());
+        ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(swerve.getTargetVelocity(), currentPose.getRotation());
 
         double blendedVx = measuredVelField.vxMetersPerSecond + (targetVelField.vxMetersPerSecond - measuredVelField.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
         double blendedVy = measuredVelField.vyMetersPerSecond + (targetVelField.vyMetersPerSecond - measuredVelField.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
@@ -102,10 +105,10 @@ public class Drive extends SubsystemBase {
 
         ChassisSpeeds blendedVelRobot = ChassisSpeeds.fromFieldRelativeSpeeds(
                 new ChassisSpeeds(blendedVx, blendedVy, blendedOmega),
-                pinpointPose.getRotation()
+                currentPose.getRotation()
         );
 
-        return pinpointPose.exp(
+        return currentPose.exp(
                 new Twist2d(
                         blendedVelRobot.vxMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
                         blendedVelRobot.vyMetersPerSecond * dt * DRIVE_POS_PREDICT_INTEGRATION_SCALAR,
@@ -119,7 +122,7 @@ public class Drive extends SubsystemBase {
         MathFunctions.VirtualGoalSolver.ShotSolution solution = robot.getShotSolution();
 
         // 2. Get the raw robot pose (no ANGLE_OFFSET)
-        Pose2d rawPose = new Pose2d(robot.pinpoint.getPosition(), DISTANCE_UNIT, ANGLE_UNIT);
+        Pose2d rawPose = robotPose;
 
         // 3. Calculate physical turret position
         double robotHeadingDegrees = rawPose.getRotation().getDegrees();
@@ -151,15 +154,18 @@ public class Drive extends SubsystemBase {
     }
 
     public ChassisSpeeds getVelocity() {
-        return new ChassisSpeeds(
-                robot.pinpoint.getVelX(DistanceUnit.INCH),
-                robot.pinpoint.getVelY(DistanceUnit.INCH),
-                robot.pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS)
-        );
+        return robotVelocity;
     }
 
     public void setPose(Pose2d pose) {
-        robot.pinpoint.setPosition(Pose2d.convertToPose2D(pose, DISTANCE_UNIT, ANGLE_UNIT));
+        // Map from FTC Cartesian (X right, Y forward) to OctoQuad (X forward, Y left)
+        robot.octoQuad.setLocalizerPose(
+                (int)(DistanceUnit.mmPerInch * pose.getY()),
+                (int)(DistanceUnit.mmPerInch * -pose.getX()),
+                (float) (pose.getHeading() - Math.PI / 2.0)
+        );
+
+        robotPose = pose;
     }
 
     /**
@@ -185,11 +191,28 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
-//        swerve.update(); // Not needed as we are using updateWithTargetVelocity() in the opModes
         robot.profiler.start("Drive Update");
         if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : PINPOINT_TELEOP_POLLING_RATE))) {
-            robot.pinpoint.update();
+
+            robot.octoQuad.readLocalizerData(robot.localizer);
+            if (robot.localizer.crcOk) {
+                // Map from OctoQuad (X forward, Y left) to FTC Cartesian (X right, Y forward)
+                robotPose = new Pose2d(
+                        -robot.localizer.posY_mm / DistanceUnit.mmPerInch,
+                        robot.localizer.posX_mm / DistanceUnit.mmPerInch,
+                        robot.localizer.heading_rad + Math.PI / 2.0
+                );
+                
+                // Map OctoQuad field-centric velocity to FTC Cartesian field-centric velocity
+                robotVelocity = new ChassisSpeeds(
+                        -robot.localizer.velY_mmS / DistanceUnit.mmPerInch,
+                        robot.localizer.velX_mmS / DistanceUnit.mmPerInch,
+                        robot.localizer.velHeading_radS
+                );
+            }
+
             timer.reset();
+
             if (robot.camera != null && robot.camera.enabled) {
                 robot.camera.addPose(System.nanoTime() / 1e9, getPose());
             }

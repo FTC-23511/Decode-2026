@@ -163,20 +163,7 @@ public class FullTeleOp extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
-        if (gamepad1.right_stick_button) {
-            TURRET_SYNCED = false;
-            robot.turret.resetTurretEncoder();
-            robot.pinpoint.recalibrateIMU();
-        }
-
-        Launcher.DISTANCE_OFFSET = 0;
-        robot.drive.setPose(END_POSE);
-        telemetryEx.addData("END_POSE", END_POSE);
-        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
-        telemetryEx.update();
-
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+        robot.initializeLoop(gamepad1, telemetryEx);
     }
 
     @Override
