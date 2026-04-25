@@ -3,16 +3,15 @@ package org.firstinspires.ftc.teamcode.opmode.Auto;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AutoConstants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
@@ -52,18 +51,18 @@ public class EighteenClose extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-45.3781512605042,   55.05882352941177, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-20.19327731092437,  12.100840336134446, Math.toRadians(5))); // Line 1
-        pathPoses.add(new Pose2d(-60.0672268907563,   12.302521008403353, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-46.58823529411764,  2.50168067226890685, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-59.26890756302521,  0.20212471293051984, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-18.352941176470583, 8.26890756302521182, Math.toRadians(5))); // Line 5
-        pathPoses.add(new Pose2d(-30.453781512605048, -13.697478991596643, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-60.090756302521005, -6.572268907563023, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(5))); // Line 8
-        pathPoses.add(new Pose2d(-59.00025210084033, -18.012605042016805, Math.toRadians(-25))); // Line 9
-        pathPoses.add(new Pose2d(-60.54803149620063, -7.637795275590548, Math.toRadians(-25))); // Line 10
-        pathPoses.add(new Pose2d(-15.327731092436977, 6.4537815126050475, Math.toRadians(5))); // Line 11
+        pathPoses.add(new Pose2d(-42.0910191969118, 54.2016782054414254, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-16.90512605092437, 11.252016806134446, Math.toRadians(5))); // Line 1
+        pathPoses.add(new Pose2d(-56.7790756307563, 11.453697478403353, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-39.70710940350711, -0.6466988170694802, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-55.98075630302521, -0.6466988170694802, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-18.095734995924172, 12.459233342037919, Math.toRadians(5))); // Line 5
+        pathPoses.add(new Pose2d(-27.165630252605048, -13.896302521596644, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-56.80260504252101, -7.421092437563023, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-12.039579832436978, 5.604957982605048, Math.toRadians(5))); // Line 8
+        pathPoses.add(GATE_FIRST_POSE.get()); // Line 9
+        pathPoses.add(GATE_SECOND_POSE.get()); // Line 10
+        pathPoses.add(new Pose2d(-16.503317934312797, 10.184351825450229, Math.toRadians(5))); // Line 11
         pathPoses.add(new Pose2d(-28.55462184873949, -3.6302521008403374, Math.toRadians(0))); // Line 12
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
@@ -114,34 +113,37 @@ public class EighteenClose extends CommandOpMode {
                         ),
 
                         // intake 1st spike
-                        pathIntake(2, 1250),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(2), 0.6).withTimeout(1250),
+                        new SetIntake(Intake.MotorState.STOP),
 
                         // open gate
                         new DriveTo(pathPoses.get(3), 1).withTimeout(400),
                         new DriveTo(pathPoses.get(4)).withTimeout(967),
+//                        new SetIntake(Intake.MotorState.STOP),
                         new WaitCommand(500),
 
                         // shoot 1st spike
-                        pathShoot(5, 1450),
+                        pathShoot(5, 1200),
 
                         // intake 2nd spike
                         new DriveTo(pathPoses.get(6)).withTimeout(867),
-                        pathIntake(7,1350),
+                        pathIntake(7,1500, 0.45),
                         new WaitCommand(500),
 
                         // shoot 2nd spike
-                        pathShoot(8, 1550),
+                        pathShoot(8, 1200),
 
                         // gate intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
                                         // Intake turns on, drives to 9 + 10, turns off upon arrival
-                                        gateIntake(9, 2000),
+                                        gateIntake(9, 2500),
 
                                         // Drives to 11 and shoots
                                         pathShoot(11, 1550)
                                 ),
-                                REPEAT_TIMES
+                                Math.max(1, REPEAT_TIMES)
                         ),
 
                         // park + end
@@ -221,7 +223,7 @@ public class EighteenClose extends CommandOpMode {
                 new ParallelRaceGroup(
                         new DriveTo(pathPoses.get(pathStartingIndex), 0.7),
                         new WaitCommand(timeout),
-                        new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())).andThen(new WaitCommand(100))
+                        new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose()))
                 ),
                 new ParallelRaceGroup(
                         new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
@@ -232,9 +234,9 @@ public class EighteenClose extends CommandOpMode {
 
     public SequentialCommandGroup gateIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex), 0.67).withTimeout(1200),
+                new DriveTo(pathPoses.get(pathStartingIndex), 0.67).withTimeout(1400),
                 new SetIntake(Intake.MotorState.FORWARD),
-                new DriveTo(pathPoses.get(pathStartingIndex + 1), AUTO_MIN_POWER, 0.5, 0)
+                new DriveTo(pathPoses.get(pathStartingIndex + 1), 0.0, 0.5, 0)
                         .withTimeout(timeout)
                         .alongWith(new WaitCommand(timeout)),
                 new SetIntake(Intake.MotorState.STOP),
@@ -243,9 +245,13 @@ public class EighteenClose extends CommandOpMode {
     }
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
+        return pathIntake(pathStartingIndex, timeout, 0.6);
+    }
+
+    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
                 new SetIntake(Intake.MotorState.FORWARD),
-                new DriveTo(pathPoses.get(pathStartingIndex), 0.6).withTimeout(timeout),
+                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.STOP)
         );
     }

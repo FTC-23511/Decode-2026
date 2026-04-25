@@ -60,12 +60,14 @@ public class LauncherMathTest {
 
     @Test
     public void mathTest() {
-        double distance = 4.0;
+        double distance = 2.586313762868352;
 
         double[] values = MathFunctions.distanceToLauncherValues(distance);
+        double[] legacyValues = MathFunctions.legacyDistanceToLauncherValues(distance);
 
         System.out.println("distance: " + distance);
         System.out.println("ideal launcher values: " + Arrays.toString(values));
+        System.out.println("legacy launcher values: " + Arrays.toString(legacyValues));
 
         assertTrue(!Double.isNaN(values[0]) && !Double.isNaN(values[1]));
     }

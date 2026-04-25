@@ -101,6 +101,8 @@ public class IntakeMotorTuner extends CommandOpMode {
 
         if (USE_TRANSFER) {
             robot.transferMotor.set(MOTOR_POWER);
+        } else {
+            robot.transferMotor.set(0);
         }
 
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {

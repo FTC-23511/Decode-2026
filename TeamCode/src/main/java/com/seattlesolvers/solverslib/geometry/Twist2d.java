@@ -54,8 +54,8 @@ public class Twist2d {
     public boolean equals(Object obj) {
         if (obj instanceof Twist2d) {
             return Math.abs(((Twist2d) obj).dx - dx) < 1E-9
-                    && Math.abs(((Twist2d) obj).dy - dy) < 1E-9
-                    && Math.abs(((Twist2d) obj).dtheta - dtheta) < 1E-9;
+                && Math.abs(((Twist2d) obj).dy - dy) < 1E-9
+                && Math.abs(((Twist2d) obj).dtheta - dtheta) < 1E-9;
         }
         return false;
     }

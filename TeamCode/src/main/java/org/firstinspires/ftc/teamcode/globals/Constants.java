@@ -2,15 +2,17 @@ package org.firstinspires.ftc.teamcode.globals;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.seattlesolvers.solverslib.geometry.DashPose2d;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 @Config
 public class Constants {
-    // General
+    // General - keep in main constants
     public enum OpModeType {
         AUTO,
         TELEOP
@@ -64,11 +66,6 @@ public class Constants {
     public static double TELEOP_TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
     public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
-    public static double GATE_INTAKE_ANGLE = Math.toRadians(330.0); // Radians
-
-    public static Pose2d GATE_INTAKE_POSE() {
-        return new Pose2d(0, 0, GATE_INTAKE_ANGLE);
-    }
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 4.04; // Radians
@@ -101,8 +98,6 @@ public class Constants {
 
     public static double INTAKE_DISTANCE_THRESHOLD = 4.867; // cm
     public static double INTAKE_DISTANCE_TIME = 241; // milliseconds
-//    public static double FRONT_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
-//    public static double BACK_DISTANCE_THRESHOLD = 0.00; // TODO: needs to be tuned
 
     // Launcher
     public static double RAMP_ENGAGED = 0.60;
@@ -186,5 +181,11 @@ public class Constants {
 
     public static Pose2d APRILTAG_POSE() {
         return new Pose2d(-55.630 * ALLIANCE_COLOR.getMultiplier(), 58.346, 0); // Inches
+    }
+
+    @Config
+    public static class AutoConstants {
+        public static DashPose2d GATE_FIRST_POSE = new DashPose2d(-50.27488151658768, -13.76303317535545, -25); // Line 9
+        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-59.01210084084033, -10.026618805590548, -25); // Line 10
     }
 }
