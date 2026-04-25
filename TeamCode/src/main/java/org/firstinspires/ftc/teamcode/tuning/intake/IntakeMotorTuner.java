@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.tuning.intake;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
-import static org.firstinspires.ftc.teamcode.globals.Constants.INTAKE_TRANSFER_SPEED;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -10,12 +9,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
@@ -32,8 +29,10 @@ public class IntakeMotorTuner extends CommandOpMode {
 
     public ElapsedTime timer;
 
-    public static double MOTOR_POWER = 0.0;
-    public static boolean USE_TRANSFER = true;
+    public static double INTAKE_MOTOR_POWER = 0.0;
+    public static double TRANSFER_MOTOR_POWER = 0.0;
+    public static double BOTH_MOTOR_POWER = 0.0;
+    public static boolean USE_BOTH = true;
 
     public static Intake.MotorState motorState = Intake.MotorState.STOP;
 
@@ -61,21 +60,21 @@ public class IntakeMotorTuner extends CommandOpMode {
         driver.getGamepadButton(GamepadKeys.Button.TRIANGLE).whenPressed(
                 new InstantCommand(() -> {
                     robot.intake.setIntake(Intake.MotorState.FORWARD);
-                    MOTOR_POWER = Constants.INTAKE_FORWARD_SPEED;
+                    TRANSFER_MOTOR_POWER = Constants.INTAKE_FORWARD_SPEED;
                 })
         );
 
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new InstantCommand(() -> {
                     robot.intake.setIntake(Intake.MotorState.STOP);
-                    MOTOR_POWER = 0.0;
+                    TRANSFER_MOTOR_POWER = 0.0;
                 })
         );
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).whenPressed(
                 new InstantCommand(() -> {
                     robot.intake.setIntake(Intake.MotorState.REVERSE);
-                    MOTOR_POWER = Constants.INTAKE_REVERSE_SPEED;
+                    TRANSFER_MOTOR_POWER = Constants.INTAKE_REVERSE_SPEED;
                 })
         );
     }
@@ -89,20 +88,12 @@ public class IntakeMotorTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        if (MOTOR_POWER > 0) {
-            motorState = Intake.MotorState.FORWARD;
-        } else if (MOTOR_POWER < 0) {
-            motorState = Intake.MotorState.REVERSE;
+        if (USE_BOTH) {
+            robot.transferMotor.set(BOTH_MOTOR_POWER);
+            robot.intakeMotor.set(BOTH_MOTOR_POWER);
         } else {
-            motorState = Intake.MotorState.STOP;
-        }
-
-        robot.intake.setIntake(motorState);
-
-        if (USE_TRANSFER) {
-            robot.transferMotor.set(MOTOR_POWER);
-        } else {
-            robot.transferMotor.set(0);
+            robot.transferMotor.set(TRANSFER_MOTOR_POWER);
+            robot.intakeMotor.set(INTAKE_MOTOR_POWER);
         }
 
         if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {

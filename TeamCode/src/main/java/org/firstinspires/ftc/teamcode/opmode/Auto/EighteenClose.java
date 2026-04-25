@@ -11,6 +11,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
@@ -20,6 +21,7 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
@@ -51,7 +53,7 @@ public class EighteenClose extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-42.0910191969118, 54.2016782054414254, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-40.42101920131037, 54.2016782054414254, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-16.90512605092437, 11.252016806134446, Math.toRadians(5))); // Line 1
         pathPoses.add(new Pose2d(-56.7790756307563, 11.453697478403353, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-39.70710940350711, -0.6466988170694802, Math.toRadians(0))); // Line 3
@@ -90,6 +92,8 @@ public class EighteenClose extends CommandOpMode {
         robot.launcher.setRamp(false);
 
         robot.drive.setPose(pathPoses.get(0));
+        robot.drive.follower.setTarget(pathPoses.get(1));
+
         robot.turret.setTurret(ANGLE_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
         robot.readyToLaunch = true;
@@ -161,6 +165,17 @@ public class EighteenClose extends CommandOpMode {
         } else if (gamepad1.dpadDownWasPressed() || gamepad2.dpadDownWasPressed()) {
             REPEAT_TIMES--;
             REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
+        }
+
+        if (gamepad1.right_bumper) {
+            robot.drive.swerve.updateWithTargetVelocity(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                            robot.drive.follower.calculate(robot.drive.getPose()),
+                            robot.drive.getPose().getRotation()
+                    ).scale(0.000001)
+            );
+        } else {
+            robot.drive.swerve.stop();
         }
 
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
