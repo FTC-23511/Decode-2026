@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -35,6 +34,7 @@ public class Intake extends SubsystemBase {
     public boolean withinDistance = false;
     public boolean withinCurrent = false;
     public boolean currentBuffered = false;
+    public boolean isRumbling = false;
 
     public static MotorState motorState = MotorState.STOP;
     public static DistanceState distanceState = DistanceState.FOV_15;
@@ -50,6 +50,11 @@ public class Intake extends SubsystemBase {
         if (!TESTING_OP_MODE) {
 
         }
+
+        withinDistance = false;
+        withinCurrent = false;
+        currentBuffered = false;
+        isRumbling = false;
     }
 
     public void setIntake(MotorState motorState) {
@@ -150,8 +155,18 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean transferFull() {
-        return (withinCurrent && currentTimer.milliseconds() >= INTAKE_CURRENT_TIME)
-            && (withinDistance && distanceTimer.milliseconds() >= INTAKE_DISTANCE_TIME);
+        if (!motorState.equals(MotorState.FORWARD) && !motorState.equals(MotorState.TRANSFER)) {
+            return false;
+        }
+
+        if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
+            return (withinCurrent && currentTimer.milliseconds() >= TELEOP_INTAKE_CURRENT_TIME)
+                && (withinDistance && distanceTimer.milliseconds() >= TELEOP_INTAKE_DISTANCE_TIME);
+        }
+
+        return (withinCurrent && currentTimer.milliseconds() >= AUTO_INTAKE_CURRENT_TIME)
+            && (withinDistance && distanceTimer.milliseconds() >= AUTO_INTAKE_DISTANCE_TIME);
+
     }
 
     @Override

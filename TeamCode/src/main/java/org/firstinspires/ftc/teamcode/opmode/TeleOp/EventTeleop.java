@@ -240,7 +240,6 @@ public class EventTeleop extends CommandOpMode {
             telemetryEx.addData("Flywheel Active Control", robot.launcher.getActiveControl());
             telemetryEx.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
             telemetryEx.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-            telemetryEx.addData("Flywheel Ready", robot.launcher.flywheelReady());
 
             telemetryEx.addData("Intake Motor State", Intake.motorState);
 

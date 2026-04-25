@@ -11,7 +11,6 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
@@ -44,7 +43,6 @@ public class EighteenClose extends CommandOpMode {
     public ElapsedTime autoTimer;
     public static int REPEAT_TIMES = 3;
 
-    public static boolean GATE_OPEN = true;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -179,7 +177,6 @@ public class EighteenClose extends CommandOpMode {
         }
 
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
-        telemetryEx.addData("GATE_OPEN", GATE_OPEN);
         robot.initializeLoop(gamepad1, telemetryEx);
     }
 

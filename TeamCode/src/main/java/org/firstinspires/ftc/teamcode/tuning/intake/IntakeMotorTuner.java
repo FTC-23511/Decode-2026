@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.tuning.intake;
 
 import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
 import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
+import static org.firstinspires.ftc.teamcode.globals.Constants.INTAKE_CURRENT_BUFFER_TIME;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -33,8 +34,6 @@ public class IntakeMotorTuner extends CommandOpMode {
     public static double TRANSFER_MOTOR_POWER = 0.0;
     public static double BOTH_MOTOR_POWER = 0.0;
     public static boolean USE_BOTH = true;
-
-    public static Intake.MotorState motorState = Intake.MotorState.STOP;
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
@@ -88,6 +87,17 @@ public class IntakeMotorTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
+        robot.intake.updateDistanceSensor();
+
+        if (robot.intake.currentBuffered) {
+            robot.intake.updateCurrentSensor();
+        } else if (robot.intake.currentTimer.milliseconds() > INTAKE_CURRENT_BUFFER_TIME) {
+            robot.intake.currentTimer.reset();
+            robot.intake.currentBuffered = true;
+        } else {
+            robot.intake.withinCurrent = false;
+        }
+
         if (USE_BOTH) {
             robot.transferMotor.set(BOTH_MOTOR_POWER);
             robot.intakeMotor.set(BOTH_MOTOR_POWER);
@@ -96,10 +106,11 @@ public class IntakeMotorTuner extends CommandOpMode {
             robot.intakeMotor.set(INTAKE_MOTOR_POWER);
         }
 
-        if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
+        if (!robot.intake.isRumbling && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
-        } else if (gamepad1.isRumbling() && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
+            robot.intake.isRumbling = true;
+        } else if (robot.intake.isRumbling) {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
@@ -120,6 +131,5 @@ public class IntakeMotorTuner extends CommandOpMode {
 
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
         robot.updateLoop(telemetryEx);
-        robot.intake.periodic();
     }
 }

@@ -244,10 +244,11 @@ public class FullTeleOp extends CommandOpMode {
         }
 
         // Gamepad rumble when intake is full
-        if (!gamepad1.isRumbling() && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
+        if (!robot.intake.isRumbling && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
-        } else if (gamepad1.isRumbling() && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
+            robot.intake.isRumbling = true;
+        } else if (robot.intake.isRumbling && !Intake.motorState.equals(Intake.MotorState.FORWARD)) {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
@@ -272,9 +273,8 @@ public class FullTeleOp extends CommandOpMode {
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
 
-            telemetryEx.addData("Turret Position", robot.turret.getRelativePos());
-            telemetryEx.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
-            telemetryEx.addData("Intake overCurrent", ((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
+            // Drive
+            telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
             telemetryEx.addData("FR Module", robot.drive.swerve.getModules()[0].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[0].getPowerTelemetry());
             telemetryEx.addData("FL Module", robot.drive.swerve.getModules()[1].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[1].getPowerTelemetry());
             telemetryEx.addData("BL Module", robot.drive.swerve.getModules()[2].getTargetVelocity() + " | " + robot.drive.swerve.getModules()[2].getPowerTelemetry());
@@ -284,30 +284,29 @@ public class FullTeleOp extends CommandOpMode {
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
-            telemetryEx.addData("Heading Lock", robot.drive.headingLock);
             telemetryEx.addData("Near Zone", Drive.robotNearZone(robot.drive.getPose()));
             telemetryEx.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
-            telemetryEx.addData("Zone Tolerance", ZONE_TOLERANCE);
 
+            // Turret
             telemetryEx.addData("Turret State", Turret.turretState);
             telemetryEx.addData("Turret Target", robot.turret.getTarget());
+            telemetryEx.addData("Turret Position", robot.turret.getRelativePos());
             telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
-            telemetryEx.addData("Angle Offset", Drive.ANGLE_OFFSET);
             telemetryEx.addData("Analog Pos", MathUtils.normalizeRadians(robot.analogTurretEncoder.getCurrentPosition(), false));
-            try { telemetryEx.addData("turretPose", robot.turret.getTurretPose()); } catch (Exception ignored) {}
             telemetryEx.addData("Wall Angle", robot.turret.angleToWall());
-            try { telemetryEx.addData("Distance", APRILTAG_POSE().minus(robot.drive.getPose()).getTranslation().getNorm()); } catch (Exception ignored) {}
 
+            // Launcher
             telemetryEx.addData("Flywheel Active Control", robot.launcher.getActiveControl());
-            telemetryEx.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
+            telemetryEx.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
             telemetryEx.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-            telemetryEx.addData("Flywheel Ready", robot.launcher.flywheelReady());
+            telemetryEx.addData("Launch Valid", robot.launcher.launchValid());
 
-            telemetryEx.addData("Intake Motor State", Intake.motorState);
+            // Intake
+            telemetryEx.addData("Transfer Full", robot.intake.transferFull());
+            telemetryEx.addData("Within Current", robot.intake.withinCurrent);
+            telemetryEx.addData("Within Distance", robot.intake.withinDistance);
 
-            telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-
-            telemetryEx.addData("Sigma", "Polar");
+            telemetryEx.addData("Sigma", "Polar, Oscar, j5, Mason, Ethan from goBILDA");
 
             robot.profiler.end("TelemetryData");
         }

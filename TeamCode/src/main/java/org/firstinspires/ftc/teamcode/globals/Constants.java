@@ -8,7 +8,6 @@ import com.seattlesolvers.solverslib.geometry.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 @Config
 public class Constants {
@@ -91,13 +90,15 @@ public class Constants {
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
     public static double INTAKE_CURRENT_THRESHOLD = 3500.0; // Milliamps
-    public static double INTAKE_CURRENT_TIME = 125.0; // Milliseconds
+    public static double TELEOP_INTAKE_CURRENT_TIME = 125.0; // Milliseconds
+    public static double AUTO_INTAKE_CURRENT_TIME = 225.0; // Milliseconds
     public static double INTAKE_CURRENT_BUFFER_TIME = 200.0; // Milliseconds
 
     public static double INTAKE_REVERSE_ON_STOP_TIME = 0.0; // Seconds
 
-    public static double INTAKE_DISTANCE_THRESHOLD = 4.867; // cm
-    public static double INTAKE_DISTANCE_TIME = 241; // milliseconds
+    public static double INTAKE_DISTANCE_THRESHOLD = 6.7; // cm
+    public static double TELEOP_INTAKE_DISTANCE_TIME = 167.0; // milliseconds
+    public static double AUTO_INTAKE_DISTANCE_TIME = 250.0; // milliseconds
 
     // Launcher
     public static double RAMP_ENGAGED = 0.60;
@@ -120,7 +121,6 @@ public class Constants {
     public static double FLYWHEEL_MAX_VELOCITY = 2500; // Ticks/second
     public static double LAUNCHER_MAX_BALL_VELOCITY = 10; // Meters/second // TODO: tune this to potentially be lower
     public static double FLYWHEEL_ACCEL = 767; // Ticks/second^2 // TODO: tune this to potentially be non-linear
-
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
     public static double MIN_HOOD_SERVO_POS = 0.24; // MUST MATCH WITH VALUE ABOVE
@@ -185,7 +185,7 @@ public class Constants {
 
     @Config
     public static class AutoConstants {
-        public static DashPose2d GATE_FIRST_POSE = new DashPose2d(-50.27488151658768, -13.76303317535545, -25); // Line 9
-        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-59.01210084084033, -10.026618805590548, -25); // Line 10
+        public static DashPose2d GATE_FIRST_POSE = new DashPose2d(-51.27488151658768, -14.76303317535545, -25); // Line 9
+        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-60.01210084084033, -11.026618805590548, -25); // Line 10
     }
 }

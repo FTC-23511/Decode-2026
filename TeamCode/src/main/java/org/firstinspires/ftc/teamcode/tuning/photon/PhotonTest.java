@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.globals.GoBildaPinpointDriver;
 
 @Config
-@TeleOp(group = "Photon")
-public class BasicPhotonTest extends LinearOpMode {
+@TeleOp(name = "PhotonTest", group = "Photon")
+public class PhotonTest extends LinearOpMode {
     private ElapsedTime timer = new ElapsedTime();
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     public static boolean ENABLE_PHOTON = true;
