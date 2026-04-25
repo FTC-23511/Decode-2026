@@ -324,26 +324,30 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
             Pose2d robotPose = drive.getPose();
             Rotation2d robotRotation = robotPose.getRotation();
 
-            // Sensor velocity (Already Field-Centric from Pinpoint/Odometry)
-            ChassisSpeeds robotVelField = drive.getVelocity();
+            // Sensor velocity (Robot-Centric from Pinpoint/Odometry)
+            ChassisSpeeds robotVelRobot = drive.getVelocity();
 
-            // Driver intent (Robot-Centric from joysticks, needs conversion)
+            // Driver intent (Robot-Centric from joysticks)
             ChassisSpeeds targetVelRobot = drive.swerve.getTargetVelocity();
-            ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(targetVelRobot, robotRotation);
 
-            // 2. Predict Linear Velocity (Interpolate in Inches/Second)
-            // We are finding the "expected" velocity during the ball's transition
-            double predictedVx = robotVelField.vxMetersPerSecond +
-                    (targetVelField.vxMetersPerSecond - robotVelField.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+            // 2. Predict Linear Velocity (Robot-Centric)
+            double predictedVxRobot = robotVelRobot.vxMetersPerSecond +
+                    (targetVelRobot.vxMetersPerSecond - robotVelRobot.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
 
-            double predictedVy = robotVelField.vyMetersPerSecond +
-                    (targetVelField.vyMetersPerSecond - robotVelField.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
-
-            Vector2d predictedLinearVelIps = new Vector2d(predictedVx, predictedVy);
+            double predictedVyRobot = robotVelRobot.vyMetersPerSecond +
+                    (targetVelRobot.vyMetersPerSecond - robotVelRobot.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
 
             // 3. Predict Angular Velocity (Radians/sec)
-            double predictedOmegaRadPerSec = robotVelField.omegaRadiansPerSecond +
-                    (targetVelField.omegaRadiansPerSecond - robotVelField.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+            double predictedOmegaRadPerSec = robotVelRobot.omegaRadiansPerSecond +
+                    (targetVelRobot.omegaRadiansPerSecond - robotVelRobot.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+
+            // Convert predicted robot-centric velocity to field-centric for the solver
+            ChassisSpeeds predictedVelField = ChassisSpeeds.toFieldRelativeSpeeds(
+                    new ChassisSpeeds(predictedVxRobot, predictedVyRobot, predictedOmegaRadPerSec),
+                    robotRotation
+            );
+
+            Vector2d predictedLinearVelIps = new Vector2d(predictedVelField.vxMetersPerSecond, predictedVelField.vyMetersPerSecond);
 
             // 4. Solve
             shotSolution = MathFunctions.VirtualGoalSolver.solve(

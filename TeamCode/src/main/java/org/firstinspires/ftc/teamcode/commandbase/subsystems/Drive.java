@@ -95,18 +95,15 @@ public class Drive extends SubsystemBase {
 
         double dt = timer.seconds();
         
-        // Blend measured (field-centric) and target (robot-centric) velocities
-        ChassisSpeeds measuredVelField = getVelocity();
-        ChassisSpeeds targetVelField = ChassisSpeeds.toFieldRelativeSpeeds(swerve.getTargetVelocity(), currentPose.getRotation());
+        // Blend measured (robot-centric) and target (robot-centric) velocities
+        ChassisSpeeds measuredVelRobot = getVelocity();
+        ChassisSpeeds targetVelRobot = swerve.getTargetVelocity();
 
-        double blendedVx = measuredVelField.vxMetersPerSecond + (targetVelField.vxMetersPerSecond - measuredVelField.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
-        double blendedVy = measuredVelField.vyMetersPerSecond + (targetVelField.vyMetersPerSecond - measuredVelField.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
-        double blendedOmega = measuredVelField.omegaRadiansPerSecond + (targetVelField.omegaRadiansPerSecond - measuredVelField.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+        double blendedVx = measuredVelRobot.vxMetersPerSecond + (targetVelRobot.vxMetersPerSecond - measuredVelRobot.vxMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+        double blendedVy = measuredVelRobot.vyMetersPerSecond + (targetVelRobot.vyMetersPerSecond - measuredVelRobot.vyMetersPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
+        double blendedOmega = measuredVelRobot.omegaRadiansPerSecond + (targetVelRobot.omegaRadiansPerSecond - measuredVelRobot.omegaRadiansPerSecond) * DRIVE_VEL_PREDICT_ALPHA;
 
-        ChassisSpeeds blendedVelRobot = ChassisSpeeds.fromFieldRelativeSpeeds(
-                new ChassisSpeeds(blendedVx, blendedVy, blendedOmega),
-                currentPose.getRotation()
-        );
+        ChassisSpeeds blendedVelRobot = new ChassisSpeeds(blendedVx, blendedVy, blendedOmega);
 
         return currentPose.exp(
                 new Twist2d(
@@ -203,10 +200,12 @@ public class Drive extends SubsystemBase {
                         robot.localizer.heading_rad + Math.PI / 2.0
                 );
                 
-                // Map OctoQuad field-centric velocity to FTC Cartesian field-centric velocity
+                // OctoQuad velX_mmS is Forward tracking wheel velocity, velY_mmS is Strafe (Left) tracking wheel velocity
+                // ChassisSpeeds natively uses vx as Forward and vy as Left.
+                // This perfectly matches Pinpoint's original getVelX (Forward) and getVelY (Strafe).
                 robotVelocity = new ChassisSpeeds(
-                        -robot.localizer.velY_mmS / DistanceUnit.mmPerInch,
                         robot.localizer.velX_mmS / DistanceUnit.mmPerInch,
+                        robot.localizer.velY_mmS / DistanceUnit.mmPerInch,
                         robot.localizer.velHeading_radS
                 );
             }

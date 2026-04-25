@@ -73,6 +73,6 @@ public class ClearLaunch extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return !robot.readyToLaunch || (timer.milliseconds() > 1067 && preciseShots) || (timer.milliseconds() > 641 && !preciseShots);
+        return (timer.milliseconds() > 1067 && preciseShots) || (timer.milliseconds() > 641 && !preciseShots);
     }
 }
