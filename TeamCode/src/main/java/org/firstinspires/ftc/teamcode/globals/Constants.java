@@ -90,7 +90,7 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 4000.0; // Milliamps
+    public static double INTAKE_CURRENT_THRESHOLD = 3500.0; // Milliamps
     public static double INTAKE_CURRENT_TIME = 125.0; // Milliseconds
     public static double INTAKE_CURRENT_BUFFER_TIME = 200.0; // Milliseconds
 

@@ -40,7 +40,7 @@ public class IntakeMotorTuner extends CommandOpMode {
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
-    
+
     @Override
     public void initialize() {
         // Must have for all opModes
@@ -90,11 +90,11 @@ public class IntakeMotorTuner extends CommandOpMode {
         }
 
         if (MOTOR_POWER > 0) {
-            Intake.motorState = Intake.MotorState.FORWARD;
+            motorState = Intake.MotorState.FORWARD;
         } else if (MOTOR_POWER < 0) {
-            Intake.motorState = Intake.MotorState.REVERSE;
+            motorState = Intake.MotorState.REVERSE;
         } else {
-            Intake.motorState = Intake.MotorState.STOP;
+            motorState = Intake.MotorState.STOP;
         }
 
         robot.intake.setIntake(motorState);
@@ -117,6 +117,7 @@ public class IntakeMotorTuner extends CommandOpMode {
         timer.reset();
 
         telemetryEx.addData("Intake Current", ((MotorEx) robot.intakeMotor.getMotor()).getCurrent(CurrentUnit.MILLIAMPS));
+        telemetryEx.addData("Intake Overcurrent", ((MotorEx) robot.intakeMotor.getMotor()).isOverCurrent());
         telemetryEx.addData("Distance (cm)", robot.intake.getDistance());
         telemetryEx.addData("Transfer Full", robot.intake.transferFull());
 

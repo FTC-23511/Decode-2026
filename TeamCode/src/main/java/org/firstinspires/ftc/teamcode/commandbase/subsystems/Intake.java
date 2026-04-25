@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
 @Config
@@ -52,6 +53,8 @@ public class Intake extends SubsystemBase {
     }
 
     public void setIntake(MotorState motorState) {
+        if (Intake.motorState == motorState) return;
+
         switch (motorState) {
             case STOP:
                 robot.intakeMotor.set(0);
