@@ -37,8 +37,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @Config
-@Autonomous(name = "EighteenCloseSecondSpike", preselectTeleOp = "FullTeleOp", group = "Auto")
-public class EighteenCloseSecondSpike extends CommandOpMode {
+@Autonomous(name = "EighteenQuals", preselectTeleOp = "FullTeleOp", group = "Auto")
+public class EighteenQuals extends CommandOpMode {
     public ElapsedTime timer;
 
     public ElapsedTime autoTimer;
@@ -143,7 +143,7 @@ public class EighteenCloseSecondSpike extends CommandOpMode {
                                 .interruptOn(() -> robot.intake.transferFull()),
 
                         // shoot 1st spike
-                        pathShoot(12, 1867, false),
+                        pathShoot(12, 1600, false),
 
                         // park + end
                         new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),

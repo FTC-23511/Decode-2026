@@ -94,7 +94,7 @@ public class Constants {
     public static double AUTO_INTAKE_CURRENT_TIME = 225.0; // Milliseconds
     public static double INTAKE_CURRENT_BUFFER_TIME = 200.0; // Milliseconds
 
-    public static double INTAKE_REVERSE_ON_STOP_TIME = 0.0; // Seconds
+//    public static double INTAKE_REVERSE_ON_STOP_TIME = 0.0; // Seconds
 
     public static double INTAKE_DISTANCE_THRESHOLD = 6.7; // cm
     public static double TELEOP_INTAKE_DISTANCE_TIME = 167.0; // milliseconds
@@ -185,7 +185,7 @@ public class Constants {
 
     @Config
     public static class AutoConstants {
-        public static DashPose2d GATE_FIRST_POSE = new DashPose2d(-51.27488151658768, -14.76303317535545, -25); // Line 9
-        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-60.01210084084033, -11.026618805590548, -25); // Line 10
+        public static DashPose2d GATE_FIRST_POSE = new DashPose2d(-51.27488151658768, -14.46303317535545, -26.7); // Line 9
+        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-60.01210084084033, -10.726618805590548, -26.7); // Line 10
     }
 }
