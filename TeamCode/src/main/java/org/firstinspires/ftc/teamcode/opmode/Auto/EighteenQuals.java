@@ -184,21 +184,20 @@ public class EighteenQuals extends CommandOpMode {
             autoTimer = new ElapsedTime();
         }
 
-        // Always log Loop Time
-        telemetryEx.addData("Loop Time", timer.milliseconds());
-
-        timer.reset();
-
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
-//
+
+            // Always log Loop Time
+            telemetryEx.addData("Loop Time", timer.milliseconds());
+            timer.reset();
+
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
             telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-//
+
             telemetryEx.addData("Turret State", Turret.turretState);
             telemetryEx.addData("Turret Target", robot.turret.getTarget());
             telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
@@ -212,7 +211,7 @@ public class EighteenQuals extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryEx);
+        robot.updateLoop(null);
         robot.profiler.end("Run + Update");
 
         robot.profiler.end("Full Loop");

@@ -48,7 +48,7 @@ public class ParallelCommandGroup extends CommandGroupBase {
 
         for (Command command : commands) {
             if (!Collections.disjoint(command.getRequirements(), m_requirements)) {
-                throw new IllegalArgumentException("Multiple commands in a parallel group cannot"
+                throw new IllegalArgumentException("Multiple commands in a parallel group cannot "
                         + "require the same subsystems");
             }
             m_commands.put(command, false);

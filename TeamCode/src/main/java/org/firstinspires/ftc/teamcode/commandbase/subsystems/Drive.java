@@ -85,6 +85,10 @@ public class Drive extends SubsystemBase {
             setPose(END_POSE);
             follower.setTarget(END_POSE);
         }
+
+        if (!TESTING_OP_MODE) {
+            ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(-5) : 0;
+        }
     }
 
     public Pose2d getPose() {
@@ -147,7 +151,7 @@ public class Drive extends SubsystemBase {
         Constants.TARGET_OFFSET_Y = pY - baseGoalY;
 
         // 6. Reset manual offsets
-        ANGLE_OFFSET = 0;
+        ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? -Math.toRadians(5) : 0;
         Launcher.DISTANCE_OFFSET = 0;
     }
 
@@ -185,6 +189,28 @@ public class Drive extends SubsystemBase {
         robotZone.setRotation(robotPose.getHeading());
 
         return robotZone.isInside(bigLaunchZone) || robotZone.isInside(smallLaunchZone);
+    }
+
+    public static boolean robotInTeleOpZone(Pose2d robotPose) {
+        robotZone.setPosition(robotPose.getX(), robotPose.getY());
+        robotZone.setRotation(robotPose.getHeading());
+
+        return (robotZone.distanceTo(bigLaunchZone) <= Math.max(0, ZONE_TOLERANCE))
+                || robotZone.isInside(smallLaunchZone);
+    }
+
+    public static boolean robotInTeleOpCloseZone(Pose2d robotPose) {
+        robotZone.setPosition(robotPose.getX(), robotPose.getY());
+        robotZone.setRotation(robotPose.getHeading());
+
+        return robotZone.isInside(smallLaunchZone);
+    }
+
+    public static boolean robotInTeleOpFarZone(Pose2d robotPose) {
+        robotZone.setPosition(robotPose.getX(), robotPose.getY());
+        robotZone.setRotation(robotPose.getHeading());
+
+        return robotZone.distanceTo(bigLaunchZone) <= Math.max(0, ZONE_TOLERANCE);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class ChipsFar extends CommandOpMode {
     public ElapsedTime timer;
 
     public ElapsedTime autoTimer;
-    public static int REPEAT_TIMES = 4;
+    public static int REPEAT_TIMES = 3;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -61,15 +61,15 @@ public class ChipsFar extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
         pathPoses.add(new Pose2d(-18.5, -64, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-24.610168067226898, -35.089159663865544, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-61.11436974789911, -35.089159663865544, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-24.610168067226898, -37.089159663865544, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-61.11436974789911, -37.089159663865544, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-21.09393700787402, -61.212047244094485, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-60.55220472440944, -61.66559055118111, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-53.749055118110824, -62.345905511811026, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-61.91283464566993, -58.490787401574806, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-19.279763779527567, -58.71755905511811, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-58.73803149606912, -46.01834645669291, Math.toRadians(315))); // Line 8
-        pathPoses.add(new Pose2d(-58.51125984251968, -23.02307086614173, Math.toRadians(315))); // Line 9
+        pathPoses.add(new Pose2d(-58.056872037914694, -50.161137440758296, Math.toRadians(315))); // Line 8
+        pathPoses.add(new Pose2d(-58.51125984251968, -27.02307086614173, Math.toRadians(315))); // Line 9
         pathPoses.add(new Pose2d(-18.145905511811026, -59.62464566929134, Math.toRadians(345))); // Line 10
         pathPoses.add(new Pose2d(-28.038739495798318, -51.42529411764707, Math.toRadians(315))); // Line 11
 
@@ -110,14 +110,14 @@ public class ChipsFar extends CommandOpMode {
                         // Set starting pose
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
-                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.9)),
+                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.8)),
                         new InstantCommand(() -> robot.readyToLaunch = true),
 
                         // preload
                         new ClearLaunch(true).beforeStarting(new WaitCommand(500)),
 
                         // 3rd spike mark
-                        new DriveTo(pathPoses.get(1)).withTimeout(667),
+                        new DriveTo(pathPoses.get(1)).withTimeout(800),
                         new SetIntake(Intake.MotorState.FORWARD),
                         new DriveTo(pathPoses.get(2), 0.4, 0.8)
                                 .withTimeout(1670)
@@ -128,9 +128,9 @@ public class ChipsFar extends CommandOpMode {
                         // HP Ball
                         new SequentialCommandGroup(
                                 new SetIntake(Intake.MotorState.FORWARD),
-                                new DriveTo(pathPoses.get(4), 0.7, 1.0).withTimeout(1300),
-                                new DriveTo(pathPoses.get(5), 0.7, 1.0).withTimeout(500),
-                                new DriveTo(pathPoses.get(6), 0.7, 1.0).withTimeout(750)
+                                new DriveTo(pathPoses.get(4), 0.5, 0.8).withTimeout(1100),
+                                new DriveTo(pathPoses.get(5), 0.5, 0.8).withTimeout(600),
+                                new DriveTo(pathPoses.get(6), 0.3, 0.5).withTimeout(1050)
                         ).interruptOn(() -> robot.intake.transferFull()),
 
                         pathShoot(7, 1600),
@@ -140,8 +140,8 @@ public class ChipsFar extends CommandOpMode {
                                 new SequentialCommandGroup(
                                         new SequentialCommandGroup(
                                                 new SetIntake(Intake.MotorState.FORWARD),
-                                                new DriveTo(pathPoses.get(8), 0.8, 1.0).withTimeout(1000),
-                                                new DriveTo(pathPoses.get(9), 0.6, 1.0).withTimeout(1350)
+                                                new DriveTo(pathPoses.get(8), 0.5, 0.8).withTimeout(1200),
+                                                new DriveTo(pathPoses.get(9), 0.5, 0.8).withTimeout(1450)
                                         ).interruptOn(() -> robot.intake.transferFull()),
 
                                         pathShoot(10, 1550)
@@ -197,20 +197,21 @@ public class ChipsFar extends CommandOpMode {
         }
 
         // Always log Loop Time
-        telemetryEx.addData("Loop Time", timer.milliseconds());
 
-        timer.reset();
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
-//
+
+            telemetryEx.addData("Loop Time", timer.milliseconds());
+            timer.reset();
+
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
             telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-//
+
             telemetryEx.addData("Turret State", Turret.turretState);
             telemetryEx.addData("Turret Target", robot.turret.getTarget());
             telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
@@ -230,7 +231,7 @@ public class ChipsFar extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryEx);
+        robot.updateLoop(null);
         robot.profiler.end("Run + Update");
 
         robot.profiler.end("Full Loop");
@@ -266,7 +267,7 @@ public class ChipsFar extends CommandOpMode {
                 ),
                 new ParallelRaceGroup(
                         new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
-                        new ClearLaunch().beforeStarting(new WaitCommand(100))
+                        new ClearLaunch(true).beforeStarting(new WaitCommand(150))
                 )
         );
     }

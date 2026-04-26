@@ -66,7 +66,6 @@ public class FullTeleOp extends CommandOpMode {
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
 
-        Drive.ANGLE_OFFSET = 0;
         Launcher.DISTANCE_OFFSET = 0;
 
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
@@ -89,8 +88,8 @@ public class FullTeleOp extends CommandOpMode {
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
-                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0),
-                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0)
+                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(-5) : 0)
                 )
         );
 
@@ -270,14 +269,14 @@ public class FullTeleOp extends CommandOpMode {
             robot.readyToLaunch = false;
         }
 
-        telemetryEx.addData("Loop Time", timer.milliseconds());
-        timer.reset();
 
-//        telemetryData.addData("Turret Vel", robot.turret.getVelocity());
-        telemetryEx.addData("Robot Velocity", robot.drive.getVelocity()); // TODO: Delete after tuning
+
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
+
+            telemetryEx.addData("Loop Time", timer.milliseconds());
+            timer.reset();
 
             // Drive
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
@@ -320,7 +319,7 @@ public class FullTeleOp extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryEx);
+        robot.updateLoop(null);
         robot.profiler.end("Run + Update");
         robot.profiler.end("Full Loop");
     }

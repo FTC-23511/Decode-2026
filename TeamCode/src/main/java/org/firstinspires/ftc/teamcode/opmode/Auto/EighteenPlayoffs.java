@@ -189,14 +189,13 @@ public class EighteenPlayoffs extends CommandOpMode {
             autoTimer = new ElapsedTime();
         }
 
-        // Always log Loop Time
-        telemetryEx.addData("Loop Time", timer.milliseconds());
-
-        timer.reset();
-
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
 //
+            // Always log Loop Time
+            telemetryEx.addData("Loop Time", timer.milliseconds());
+            timer.reset();
+
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
             telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
@@ -217,7 +216,7 @@ public class EighteenPlayoffs extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryEx);
+        robot.updateLoop(null);
         robot.profiler.end("Run + Update");
 
         robot.profiler.end("Full Loop");

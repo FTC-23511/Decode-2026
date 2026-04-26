@@ -37,7 +37,7 @@ public class ContinuousClearLaunch extends CommandBase {
 
     @Override
     public void execute() {
-        if (robot.launcher.launchWillBeValid() && (!ENABLE_ZONE_CONTROL || Drive.robotInZone(robot.drive.getPose()))) {
+        if (robot.launcher.launchWillBeValid() && (!ENABLE_ZONE_CONTROL || Drive.robotInTeleOpZone(robot.drive.getPose()))) {
             robot.intake.setIntake(Intake.MotorState.TRANSFER);
             robot.launcher.setTransfer(true);
         } else {
