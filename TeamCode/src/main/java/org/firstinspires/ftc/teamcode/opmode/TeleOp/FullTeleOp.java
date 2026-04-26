@@ -269,6 +269,7 @@ public class FullTeleOp extends CommandOpMode {
         timer.reset();
 
 //        telemetryData.addData("Turret Vel", robot.turret.getVelocity());
+        telemetryEx.addData("Robot Velocity", robot.drive.getVelocity()); // TODO: Delete after tuning
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
@@ -284,6 +285,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
+            telemetryEx.addData("Robot Velocity", robot.drive.getVelocity());
             telemetryEx.addData("Near Zone", Drive.robotNearZone(robot.drive.getPose()));
             telemetryEx.addData("In Launch Zone", Drive.robotInZone(robot.drive.getPose()));
 

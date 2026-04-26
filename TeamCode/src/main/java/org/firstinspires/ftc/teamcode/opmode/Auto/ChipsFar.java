@@ -30,6 +30,7 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
@@ -52,7 +53,6 @@ public class ChipsFar extends CommandOpMode {
 
     public ElapsedTime autoTimer;
     public static int REPEAT_TIMES = 4;
-    public static boolean GATE_OPEN = false;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -61,17 +61,17 @@ public class ChipsFar extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
         pathPoses.add(new Pose2d(-18.5, -64, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-26.420168067226896, -35.89915966386555, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-62.92436974789916, -35.89915966386555, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-22.903937007874017, -62.02204724409449, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-62.36220472440945, -62.475590551181114, Math.toRadians(0))); // Line 4
-        pathPoses.add(new Pose2d(-55.55905511811024, -63.15590551181103, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-63.7228346456693, -59.30078740157481, Math.toRadians(0))); // Line 6
-        pathPoses.add(new Pose2d(-21.08976377952756, -59.52755905511811, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-60.548031496063, -46.82834645669291, Math.toRadians(315))); // Line 8
-        pathPoses.add(new Pose2d(-60.32125984251968, -28.23307086614173, Math.toRadians(315))); // Line 9
-        pathPoses.add(new Pose2d(-19.955905511811025, -60.43464566929134, Math.toRadians(315))); // Line 10
-        pathPoses.add(new Pose2d(-29.848739495798316, -52.23529411764707, Math.toRadians(315))); // Line 11
+        pathPoses.add(new Pose2d(-24.610168067226898, -35.089159663865544, Math.toRadians(0))); // Line 1
+        pathPoses.add(new Pose2d(-61.11436974789911, -35.089159663865544, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-21.09393700787402, -61.212047244094485, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-60.55220472440944, -61.66559055118111, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-53.749055118110824, -62.345905511811026, Math.toRadians(0))); // Line 5
+        pathPoses.add(new Pose2d(-61.91283464566993, -58.490787401574806, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-19.279763779527567, -58.71755905511811, Math.toRadians(0))); // Line 7
+        pathPoses.add(new Pose2d(-58.73803149606912, -46.01834645669291, Math.toRadians(315))); // Line 8
+        pathPoses.add(new Pose2d(-58.51125984251968, -23.02307086614173, Math.toRadians(315))); // Line 9
+        pathPoses.add(new Pose2d(-18.145905511811026, -59.62464566929134, Math.toRadians(345))); // Line 10
+        pathPoses.add(new Pose2d(-28.038739495798318, -51.42529411764707, Math.toRadians(315))); // Line 11
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -117,40 +117,50 @@ public class ChipsFar extends CommandOpMode {
                         new ClearLaunch(true).beforeStarting(new WaitCommand(500)),
 
                         // 3rd spike mark
-                        new DriveTo(pathPoses.get(1)).withTimeout(967),
-                        pathIntake(2, 1670),
+                        new DriveTo(pathPoses.get(1)).withTimeout(667),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(2), 0.4, 0.8)
+                                .withTimeout(1670)
+                                .interruptOn(() -> robot.intake.transferFull()),
+
                         pathShoot(3, 1600),
 
-                        // hp line intake
-                        new RepeatCommand(
-                                new SequentialCommandGroup(
-                                        new SetIntake(Intake.MotorState.FORWARD),
-                                        new DriveTo(pathPoses.get(4), 0.6).withTimeout(1670),
-                                        new DriveTo(pathPoses.get(5), 0.5).withTimeout(500),
-                                        new DriveTo(pathPoses.get(6), 0.5).withTimeout(1000)
-                                ).interruptOn(() -> robot.intake.transferFull()),
-                                2
-                        ),
+                        // HP Ball
+                        new SequentialCommandGroup(
+                                new SetIntake(Intake.MotorState.FORWARD),
+                                new DriveTo(pathPoses.get(4), 0.7, 1.0).withTimeout(1300),
+                                new DriveTo(pathPoses.get(5), 0.7, 1.0).withTimeout(500),
+                                new DriveTo(pathPoses.get(6), 0.7, 1.0).withTimeout(750)
+                        ).interruptOn(() -> robot.intake.transferFull()),
 
-                        new SetIntake(Intake.MotorState.STOP),
                         pathShoot(7, 1600),
+
                         // intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        new SetIntake(Intake.MotorState.FORWARD),
-                                        new DriveTo(pathPoses.get(8), 0.8).withTimeout(1670),
-                                        new DriveTo(pathPoses.get(9), 0.8).withTimeout(1670),
-                                        new SetIntake(Intake.MotorState.STOP),
+                                        new SequentialCommandGroup(
+                                                new SetIntake(Intake.MotorState.FORWARD),
+                                                new DriveTo(pathPoses.get(8), 0.8, 1.0).withTimeout(1000),
+                                                new DriveTo(pathPoses.get(9), 0.6, 1.0).withTimeout(1350)
+                                        ).interruptOn(() -> robot.intake.transferFull()),
 
                                         pathShoot(10, 1550)
                                 ),
                                 REPEAT_TIMES
                         ),
 
+                        new SequentialCommandGroup(
+                                new SetIntake(Intake.MotorState.FORWARD),
+                                new DriveTo(pathPoses.get(4), 1.0).withTimeout(1167)
+                        ).interruptOn(() -> robot.intake.transferFull()),
+
+                        pathShoot(7, 1400),
+
                         // park + end
-                        new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP)),
-                        new DriveTo(pathPoses.get(pathPoses.size() - 1))
+                        new DriveTo(pathPoses.get(pathPoses.size() - 1)).alongWith(
+                                new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
+                                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                        )
                 )
         );
     }
@@ -162,6 +172,17 @@ public class ChipsFar extends CommandOpMode {
         } else if (gamepad1.dpadDownWasPressed() || gamepad2.dpadDownWasPressed()) {
             REPEAT_TIMES--;
             REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
+        }
+
+        if (gamepad1.right_bumper) {
+            robot.drive.swerve.updateWithTargetVelocity(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                            robot.drive.follower.calculate(robot.drive.getPose()),
+                            robot.drive.getPose().getRotation()
+                    ).scale(0.000001)
+            );
+        } else {
+            robot.drive.swerve.stop();
         }
 
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
@@ -223,23 +244,41 @@ public class ChipsFar extends CommandOpMode {
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
+        return pathShoot(pathStartingIndex, timeout, true);
+    }
+
+    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean stopInZone) {
         return new SequentialCommandGroup(
                 new ParallelRaceGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex), 0.7),
+                        new DriveTo(pathPoses.get(pathStartingIndex), 1.0).alongWith(
+                                new SequentialCommandGroup(
+                                        new WaitCommand(500),
+                                        new SetIntake(Intake.MotorState.STOP)
+                                )
+                        ),
                         new WaitCommand(timeout),
-                        new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())).andThen(new WaitCommand(200))
+                        new ConditionalCommand(
+                                new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())),
+                                new RunCommand(() -> {}),
+                                () -> stopInZone
+                        )
+
                 ),
                 new ParallelRaceGroup(
                         new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
-                        new ClearLaunch(true).beforeStarting(new WaitCommand(100))
+                        new ClearLaunch().beforeStarting(new WaitCommand(100))
                 )
         );
     }
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
+        return pathIntake(pathStartingIndex, timeout, 0.6);
+    }
+
+    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
                 new SetIntake(Intake.MotorState.FORWARD),
-                new DriveTo(pathPoses.get(pathStartingIndex), 0.6).withTimeout(timeout),
+                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.STOP)
         );
     }

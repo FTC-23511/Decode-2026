@@ -10,6 +10,7 @@ import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.drivebase.swerve.coaxial.CoaxialSwerveDrivetrain;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.geometry.Rotation2d;
 import com.seattlesolvers.solverslib.geometry.Twist2d;
 import com.seattlesolvers.solverslib.geometry.Vector2d;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
@@ -193,20 +194,21 @@ public class Drive extends SubsystemBase {
 
             robot.octoQuad.readLocalizerData(robot.localizer);
             if (robot.localizer.crcOk) {
-                // Map from OctoQuad (X forward, Y left) to FTC Cartesian (X right, Y forward)
+                // Map position from OctoQuad (X forward, Y left) to FTC Cartesian (X right, Y forward)
                 robotPose = new Pose2d(
                         -robot.localizer.posY_mm / DistanceUnit.mmPerInch,
                         robot.localizer.posX_mm / DistanceUnit.mmPerInch,
                         robot.localizer.heading_rad + Math.PI / 2.0
                 );
-                
-                // OctoQuad velX_mmS is Forward tracking wheel velocity, velY_mmS is Strafe (Left) tracking wheel velocity
-                // ChassisSpeeds natively uses vx as Forward and vy as Left.
-                // This perfectly matches Pinpoint's original getVelX (Forward) and getVelY (Strafe).
-                robotVelocity = new ChassisSpeeds(
-                        robot.localizer.velX_mmS / DistanceUnit.mmPerInch,
-                        robot.localizer.velY_mmS / DistanceUnit.mmPerInch,
-                        robot.localizer.velHeading_radS
+
+                // Map velocity from OctoQuad (X forward, Y left) to FTC Cartesian (X right, Y forward)
+                robotVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(
+                        new ChassisSpeeds(
+                                -robot.localizer.velY_mmS / DistanceUnit.mmPerInch,
+                                robot.localizer.velX_mmS / DistanceUnit.mmPerInch,
+                                robot.localizer.velHeading_radS
+                        ),
+                        new Rotation2d(getPose().getHeading())
                 );
             }
 

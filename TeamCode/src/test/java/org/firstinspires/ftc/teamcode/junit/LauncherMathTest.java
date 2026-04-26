@@ -60,7 +60,7 @@ public class LauncherMathTest {
 
     @Test
     public void mathTest() {
-        double distance = 2.586313762868352;
+        double distance = 3.7;
 
         double[] values = MathFunctions.distanceToLauncherValues(distance);
         double[] legacyValues = MathFunctions.legacyDistanceToLauncherValues(distance);
