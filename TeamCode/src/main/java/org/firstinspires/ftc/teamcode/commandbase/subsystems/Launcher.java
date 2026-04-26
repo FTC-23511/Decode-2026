@@ -210,7 +210,9 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean launchWillBeValid() {
-        if (!activeControl) return false;
+        if (!activeControl) {
+            return false;
+        }
 
         double currentVel = robot.launchEncoder.getCorrectedVelocity();
         double targetVel = flywheelController.getSetPoint();

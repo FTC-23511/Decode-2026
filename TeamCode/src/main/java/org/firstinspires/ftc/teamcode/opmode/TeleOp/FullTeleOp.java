@@ -31,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commandbase.commands.CancelCommand;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.SlowClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
@@ -117,6 +118,10 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new ClearLaunch(false)
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new SlowClearLaunch()
         );
 
         driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(
