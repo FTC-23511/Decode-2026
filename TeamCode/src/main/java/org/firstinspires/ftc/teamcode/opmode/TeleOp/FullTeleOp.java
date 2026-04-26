@@ -89,7 +89,7 @@ public class FullTeleOp extends CommandOpMode {
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
                         new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
-                        new InstantCommand(() -> Drive.ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(-5) : 0)
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(0) : 0)
                 )
         );
 

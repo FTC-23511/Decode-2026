@@ -87,7 +87,7 @@ public class Drive extends SubsystemBase {
         }
 
         if (!TESTING_OP_MODE) {
-            ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(-5) : 0;
+            ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(0) : 0;
         }
     }
 

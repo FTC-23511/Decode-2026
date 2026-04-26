@@ -141,7 +141,7 @@ public class Constants {
     public static double TURRET_SMALL_MAX_OUTPUT = 0.067; // Power
     public static double TURRET_LARGE_MAX_OUTPUT = 1.0; // Power
     public static double TURRET_ENCODER_OFFSET = 3.28; // Radians
-    public static double TURRET_SERVO_OFFSET = 0.03; // Servo Pos
+    public static double TURRET_SERVO_OFFSET = 0.03358; // Servo Pos
     public static double TURRET_SERVO_ROTATION = 320;
     // Quadrature Encoder CPR = 8192, and gear ratio is 180:32 (32t is encoder)
 //    public static double TURRET_RADIANS_PER_TICK = (2.0 * Math.PI) / (8192 * (180.0 / 32)); // Radians
@@ -155,8 +155,8 @@ public class Constants {
 
     public static Vector2d TURRET_PHYSICAL_OFFSET = new Vector2d(1.95977, 0); // Inches
     private final double TURRET_LIMELIGHT_OFFSET = -4.124; // inches // 0.10475 m // USED ONLY FOR LIMELIGHT PIPELINE
-    public static double MAX_TURRET_ANGLE = 2.67; // Radians (only for one side of the turret)
-    public static double MIN_TURRET_ANGLE = -2.7; // Radians (only for one side of the turret)
+    public static double MAX_TURRET_ANGLE = 2.65; // Radians (only for one side of the turret)
+    public static double MIN_TURRET_ANGLE = -2.68; // Radians (only for one side of the turret)
     public static boolean TURRET_SYNCED = false;
     public static double TURRET_SYNC_OFFSET = 0.0;
 

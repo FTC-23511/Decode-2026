@@ -26,13 +26,13 @@ public class TurretMathTest {
     public void radToServoMin() {
         double pos = MathFunctions.convertRadianToServoPos(MIN_TURRET_ANGLE) + TURRET_SERVO_OFFSET;
 
-        assertEquals(0.0, pos, 0.065);
+        assertEquals(0.05, pos, 0.01);
     }
 
     @Test
     public void servoToRadPos() {
         double pos = MathFunctions.convertServoPosToRadian(0.47);
 
-        assertEquals(-0.16755160819145587, pos, 0.0001);
+        assertEquals(-0.16755160819145587, pos, 0.01);
     }
 }

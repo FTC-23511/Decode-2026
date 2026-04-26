@@ -117,7 +117,7 @@ public class ChipsFar extends CommandOpMode {
                         new ClearLaunch(true).beforeStarting(new WaitCommand(500)),
 
                         // 3rd spike mark
-                        new DriveTo(pathPoses.get(1)).withTimeout(800),
+                        new DriveTo(pathPoses.get(1)).withTimeout(650),
                         new SetIntake(Intake.MotorState.FORWARD),
                         new DriveTo(pathPoses.get(2), 0.4, 0.8)
                                 .withTimeout(1670)
@@ -128,9 +128,9 @@ public class ChipsFar extends CommandOpMode {
                         // HP Ball
                         new SequentialCommandGroup(
                                 new SetIntake(Intake.MotorState.FORWARD),
-                                new DriveTo(pathPoses.get(4), 0.5, 0.8).withTimeout(1100),
-                                new DriveTo(pathPoses.get(5), 0.5, 0.8).withTimeout(600),
-                                new DriveTo(pathPoses.get(6), 0.3, 0.5).withTimeout(1050)
+                                new DriveTo(pathPoses.get(4), 0.6, 1.0).withTimeout(1000),
+                                new DriveTo(pathPoses.get(5), 0.6, 1.0).withTimeout(500),
+                                new DriveTo(pathPoses.get(6), 0.6, 1.0).withTimeout(500)
                         ).interruptOn(() -> robot.intake.transferFull()),
 
                         pathShoot(7, 1600),
