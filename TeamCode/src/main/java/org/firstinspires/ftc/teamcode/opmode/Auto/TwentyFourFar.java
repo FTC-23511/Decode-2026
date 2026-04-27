@@ -53,6 +53,7 @@ public class TwentyFourFar extends CommandOpMode {
 
     public ElapsedTime autoTimer;
     public static int REPEAT_TIMES = 4;
+    public static boolean INTAKE_THIRD_SPIKE = true;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -117,13 +118,19 @@ public class TwentyFourFar extends CommandOpMode {
                         new ClearLaunch(true).beforeStarting(new WaitCommand(500)),
 
                         // 3rd spike mark
-                        new DriveTo(pathPoses.get(1)).withTimeout(667),
-                        new SetIntake(Intake.MotorState.FORWARD),
-                        new DriveTo(pathPoses.get(2), 0.4, 0.8)
-                                .withTimeout(1670)
-                                .interruptOn(() -> robot.intake.transferFull()),
+                        new ConditionalCommand(
+                                new SequentialCommandGroup(
+                                        new DriveTo(pathPoses.get(1)).withTimeout(667),
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(2), 0.4, 0.8)
+                                                .withTimeout(1670)
+                                                .interruptOn(() -> robot.intake.transferFull()),
 
-                        pathShoot(3, 1600),
+                                        pathShoot(3, 1600)
+                                ),
+                                new InstantCommand(),
+                                () -> INTAKE_THIRD_SPIKE
+                        ),
 
                         // HP Ball
                         new SequentialCommandGroup(
@@ -171,7 +178,13 @@ public class TwentyFourFar extends CommandOpMode {
             REPEAT_TIMES++;
         } else if (gamepad1.dpadDownWasPressed() || gamepad2.dpadDownWasPressed()) {
             REPEAT_TIMES--;
-            REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
+            REPEAT_TIMES = Math.max(1, REPEAT_TIMES);
+        }
+
+        if (gamepad1.cross || gamepad1.triangle) {
+            INTAKE_THIRD_SPIKE = true;
+        } else if (gamepad1.circle || gamepad1.square) {
+            INTAKE_THIRD_SPIKE = false;
         }
 
         if (gamepad1.right_bumper) {

@@ -384,13 +384,18 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         }
         if (OP_MODE_TYPE.equals(OpModeType.TELEOP)) {
             Launcher.DISTANCE_OFFSET = 0;
-            telemetryEx.addData("END_POSE", END_POSE);
+
+            if (telemetryEx != null) {
+                telemetryEx.addData("END_POSE", END_POSE);
+            }
         }
 
-        telemetryEx.addData("Localizer Status", octoQuad.getLocalizerStatus());
-        telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
-        telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
-        telemetryEx.update();
+        if (telemetryEx != null) {
+            telemetryEx.addData("TURRET_SYNCED", TURRET_SYNCED);
+            telemetryEx.addData("Localizer Status", octoQuad.getLocalizerStatus());
+            telemetryEx.addData("Alliance Color", ALLIANCE_COLOR);
+            telemetryEx.update();
+        }
 
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();

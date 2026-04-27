@@ -172,7 +172,7 @@ public class TwentyOneClose extends CommandOpMode {
             REPEAT_TIMES++;
         } else if (gamepad1.dpadDownWasPressed() || gamepad2.dpadDownWasPressed()) {
             REPEAT_TIMES--;
-            REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
+            REPEAT_TIMES = Math.max(1, REPEAT_TIMES);
         }
 
         if (gamepad1.right_bumper) {
