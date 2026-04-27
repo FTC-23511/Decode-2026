@@ -64,7 +64,7 @@ public class Constants {
     public static double TELEOP_STRAFING_SLEW_RATE_LIMIT = 5.67; // Joystick/second
     public static double TELEOP_TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
     public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
-    public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 1.0; // Radians/second
+    public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 0.67; // Radians/second
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 4.04; // Radians

@@ -181,9 +181,8 @@ public class EventTeleop extends CommandOpMode {
                     headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
                     if (robot.drive.follower.atTarget()) {
                         headingCorrection = 0;
-                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
-                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
-                        headingCorrection = 0;
+                    } else {
+                        headingCorrection = Math.max(Math.min(headingCorrection, MAX_TELEOP_HEADING_CORRECTION_VEL), -MAX_TELEOP_HEADING_CORRECTION_VEL);
                     }
                 }
 

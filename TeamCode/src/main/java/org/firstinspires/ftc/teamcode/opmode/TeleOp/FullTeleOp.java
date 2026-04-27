@@ -98,7 +98,16 @@ public class FullTeleOp extends CommandOpMode {
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+                new ConditionalCommand(
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 55.25, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 55.25, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
+                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                ).andThen(
+                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(0) : 0)
+                )
         );
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
@@ -230,9 +239,8 @@ public class FullTeleOp extends CommandOpMode {
                     headingCorrection = robot.drive.follower.calculate(new Pose2d(0, 0, robotAngle)).omegaRadiansPerSecond;
                     if (robot.drive.follower.atTarget()) {
                         headingCorrection = 0;
-                    } else if (Math.abs(headingCorrection) > MAX_TELEOP_HEADING_CORRECTION_VEL) {
-                        robot.drive.follower.setTarget(new Pose2d(robotPose.getTranslation(), robotAngle));
-                        headingCorrection = 0;
+                    } else {
+                        headingCorrection = Math.max(Math.min(headingCorrection, MAX_TELEOP_HEADING_CORRECTION_VEL), -MAX_TELEOP_HEADING_CORRECTION_VEL);
                     }
                 }
 
