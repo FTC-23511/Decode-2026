@@ -55,6 +55,8 @@ public class Intake extends SubsystemBase {
         withinCurrent = false;
         currentBuffered = false;
         isRumbling = false;
+        motorState = MotorState.STOP;
+        distanceState = DistanceState.FOV_15;
     }
 
     public void setIntake(MotorState motorState) {

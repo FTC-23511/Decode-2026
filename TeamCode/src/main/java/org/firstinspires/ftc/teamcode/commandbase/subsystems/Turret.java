@@ -60,9 +60,11 @@ public class Turret extends SubsystemBase {
 
     public void init() {
         if (!TESTING_OP_MODE) {
+            turretState = GOAL_LOCK_CONTROL;
             setTurret(GOAL_LOCK_CONTROL, 0);
             ENABLE_ZONE_CONTROL = true;
         } else {
+            turretState = OFF;
             setTurret(TurretState.OFF, 0);
             ENABLE_ZONE_CONTROL = false;
         }
