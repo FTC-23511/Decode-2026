@@ -1,36 +1,35 @@
 package org.firstinspires.ftc.teamcode.opmode.Auto;
 
+import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.ANGLE_CONTROL;
 import static org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret.TurretState.GOAL_LOCK_CONTROL;
-import static org.firstinspires.ftc.teamcode.globals.Constants.ALLIANCE_COLOR;
-import static org.firstinspires.ftc.teamcode.globals.Constants.AllianceColor;
-import static org.firstinspires.ftc.teamcode.globals.Constants.END_POSE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.MAX_HOOD_ANGLE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
-import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SYNCED;
+import static org.firstinspires.ftc.teamcode.globals.Constants.*;
+import static org.firstinspires.ftc.teamcode.globals.Constants.AutoConstants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
+import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
-import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
+import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.commandbase.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
@@ -43,9 +42,9 @@ public class TwentyOneClose extends CommandOpMode {
     public ElapsedTime timer;
 
     public ElapsedTime autoTimer;
-    public static int REPEAT_TIMES = 2;
+    public static int REPEAT_TIMES = 3;
 
-    public static boolean GATE_OPEN = false;
+    public static boolean GATE_OPEN = true;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private final Robot robot = Robot.getInstance();
@@ -54,22 +53,19 @@ public class TwentyOneClose extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-45.3781512605042, 55.05882352941177, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-11.495798319327726, -5.445378151260499, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-64.1344537815126, -14.117647058823525, Math.toRadians(0))); // Line 2
-        pathPoses.add(new Pose2d(-14.52100840336134, 0.4033613445378137, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 4
-        pathPoses.add(new Pose2d(-13.714285714285712, 1.8151260504201687, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 6
-        pathPoses.add(new Pose2d(-13.714285714285712, 6.4537815126050475, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-57.07563025210084, 14.117647058823525, Math.toRadians(0))); // Line 8
-        pathPoses.add(new Pose2d(-11.495798319327726, 11.294117647058819, Math.toRadians(0))); // Line 9
-        pathPoses.add(new Pose2d(-60.30252100840335, -13.512605042016805, Math.toRadians(-35))); // Line 10
-        pathPoses.add(new Pose2d(-16.53781512605042, 8.067226890756302, Math.toRadians(0))); // Line 11
-        pathPoses.add(new Pose2d(-30.050420168067223, -36.30252100840336, Math.toRadians(0))); // Line 12
-        pathPoses.add(new Pose2d(-62.31932773109244, -36.10084033613445, Math.toRadians(0))); // Line 13
-        pathPoses.add(new Pose2d(-15.932773109243698, 0.6050420168067205, Math.toRadians(0))); // Line 14
-        pathPoses.add(new Pose2d(-18.756302521008397, -1.999, Math.toRadians(0))); // Line 15
+        pathPoses.add(new Pose2d(-40.42101920131037, 54.201678205441425, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-16.90512605092437, 11.252016806134446, Math.toRadians(5))); // Line 1
+        pathPoses.add(new Pose2d(-28.66350710900474, -12.625592417061608, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-56.18957345971563, -13.76303317535545, Math.toRadians(0))); // Line 3
+        pathPoses.add(new Pose2d(-12.039579832436978, 5.604957982605048, Math.toRadians(5))); // Line 4
+        pathPoses.add(GATE_FIRST_POSE.get()); // Line 5
+        pathPoses.add(GATE_SECOND_POSE.get()); // Line 6
+        pathPoses.add(new Pose2d(-13.421800947867297, 3.9810426540284354, Math.toRadians(5))); // Line 7
+        pathPoses.add(new Pose2d(-27.753554502369674, -35.37440758293839, Math.toRadians(0))); // Line 8
+        pathPoses.add(new Pose2d(-64.60663507109005, -35.601895734597164, Math.toRadians(0))); // Line 9
+        pathPoses.add(new Pose2d(-16.834123222748815, 11.260663507109001, Math.toRadians(0))); // Line 10
+        pathPoses.add(new Pose2d(-58.91943127962085, 12.39810426540285, Math.toRadians(0))); // Line 11
+        pathPoses.add(new Pose2d(-23.43127962085308, 41.061611374407576, Math.toRadians(45))); // Line 12
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -96,7 +92,13 @@ public class TwentyOneClose extends CommandOpMode {
         robot.launcher.setRamp(false);
 
         robot.drive.setPose(pathPoses.get(0));
-        robot.turret.setTurret(GOAL_LOCK_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
+        robot.drive.follower.setTarget(pathPoses.get(1));
+
+        robot.turret.setTurret(ANGLE_CONTROL, (3 * Math.PI) / 4 * ALLIANCE_COLOR.getMultiplier());
+        robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
+        robot.readyToLaunch = true;
+
+        Launcher.DISTANCE_OFFSET = -0.267;
 
         // Schedule the full auto
         schedule(
@@ -104,61 +106,62 @@ public class TwentyOneClose extends CommandOpMode {
                         // Set starting pose
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
-                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.9)),
+                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.6)),
+                        new InstantCommand(() -> robot.readyToLaunch = true),
 
                         // preload
-                        pathShoot(1, 1600),
+                        new DriveTo(pathPoses.get(1), 0.767).withTimeout(1425),
+                        new ParallelRaceGroup(
+                                new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
+                                new ClearLaunch().beforeStarting(new WaitCommand(100))
+                        ),
 
                         // intake 2nd spike
-                        pathIntake(2, 1050),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        pathIntake(3,1000, 0.45),
+                        new DriveTo(pathPoses.get(3), 0.45)
+                                .withTimeout(1000)
+                                .interruptOn(() -> robot.intake.transferFull()),
+
 
                         // shoot 2nd spike
-                        pathIntake(3, 1050),
+                        pathShoot(4, 1200),
 
                         // gate intake cycles
                         new RepeatCommand(
                                 new SequentialCommandGroup(
-                                        // Intake turns on, drives to 11, turns off upon arrival
-                                        gateIntake(4, 3000),
+                                        // Intake turns on, drives to 9 + 10, turns off upon arrival
+                                        gateIntake(5, 2500),
 
-                                        // Drives to 12 and shoots
-                                        pathShoot(5, 1500)
+                                        // Drives to 11 and shoots
+                                        pathShoot(7, 1300)
                                 ),
-                                REPEAT_TIMES
-                        ),
-                        //intake 1st spike
-                        pathIntake(8, 1050),
-
-                        // shoot 1st spike
-                        pathShoot(9, 1050),
-
-                        new RepeatCommand(
-                                new SequentialCommandGroup(
-                                        // Intake turns on, drives to 11, turns off upon arrival
-                                        gateIntake(4, 3000),
-
-                                        // Drives to 12 and shoots
-                                        pathShoot(5, 1500)
-                                ),
-                                1
+                                Math.max(1, REPEAT_TIMES)
                         ),
 
                         // intake 3rd spike
+                        new DriveTo(pathPoses.get(8), 0.6, 0.8),
                         new SetIntake(Intake.MotorState.FORWARD),
-
-                        new DriveTo(pathPoses.get(12), 1.0).withTimeout(1050),
-                        pathIntake(13,1050),
-
-
+                        new DriveTo(pathPoses.get(9), 0.4, 0.7)
+                                .withTimeout(1467)
+                                .interruptOn(() -> robot.intake.transferFull()),
 
                         // shoot 3rd spike
-                        pathShoot(14, 1050),
+                        pathShoot(10, 1600, false),
 
+                        // intake 1st spike
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(11), 0.6)
+                                .withTimeout(1467)
+                                .interruptOn(() -> robot.intake.transferFull()),
+
+                        // shoot 1st spike
+                        pathShoot(12, 1900, false),
 
                         // park + end
                         new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
-                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP)),
-                        new DriveTo(pathPoses.get(pathPoses.size() - 1))
+                        new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+//                        new DriveTo(pathPoses.get(pathPoses.size() - 1))
                 )
         );
     }
@@ -172,8 +175,18 @@ public class TwentyOneClose extends CommandOpMode {
             REPEAT_TIMES = Math.max(0,REPEAT_TIMES);
         }
 
+        if (gamepad1.right_bumper) {
+            robot.drive.swerve.updateWithTargetVelocity(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                            robot.drive.follower.calculate(robot.drive.getPose()),
+                            robot.drive.getPose().getRotation()
+                    ).scale(0.000001)
+            );
+        } else {
+            robot.drive.swerve.stop();
+        }
+
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
-        telemetryEx.addData("GATE_OPEN", GATE_OPEN);
         robot.initializeLoop(gamepad1, telemetryEx);
     }
 
@@ -184,32 +197,25 @@ public class TwentyOneClose extends CommandOpMode {
             autoTimer = new ElapsedTime();
         }
 
-        // Always log Loop Time
-        telemetryEx.addData("Loop Time", timer.milliseconds());
-
-        timer.reset();
-
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");
-//
+
+            // Always log Loop Time
+            telemetryEx.addData("Loop Time", timer.milliseconds());
+            timer.reset();
+
             telemetryEx.addData("Robot Pose", robot.drive.getPose());
             telemetryEx.addData("Robot Target", robot.drive.follower.getTarget());
             telemetryEx.addData("atTarget", robot.drive.follower.atTarget());
             telemetryEx.addData("Heading", robot.drive.getPose().getHeading());
             telemetryEx.addData("Heading Coefficients", Arrays.toString(((PIDFController)robot.drive.follower.headingController).getCoefficients()));
             telemetryEx.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
-//
+
             telemetryEx.addData("Turret State", Turret.turretState);
             telemetryEx.addData("Turret Target", robot.turret.getTarget());
             telemetryEx.addData("Turret readyToLaunch", robot.turret.readyToLaunch());
             telemetryEx.addData("Turret Position", robot.turret.getRelativePos());
             telemetryEx.update();
-
-//            telemetryData.addData("Flywheel Velocity", robot.launchEncoder.getCorrectedVelocity());
-//            telemetryData.addData("Flywheel Active Control", robot.launcher.getActiveControl());
-//            telemetryData.addData("Flywheel Target Ball Velocity", robot.launcher.getTargetFlywheelVelocity());
-//            telemetryData.addData("Flywheel Target", robot.launcher.getFlywheelTarget());
-//            telemetryData.addData("Flywheel Ready", robot.launcher.flywheelReady());
 
 //            telemetryData.addData("Target Chassis Velocity", robot.drive.swerve.getTargetVelocity());
 
@@ -218,7 +224,7 @@ public class TwentyOneClose extends CommandOpMode {
 
         robot.profiler.start("Run + Update");
         // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
-        robot.updateLoop(telemetryEx);
+        robot.updateLoop(null);
         robot.profiler.end("Run + Update");
 
         robot.profiler.end("Full Loop");
@@ -229,31 +235,67 @@ public class TwentyOneClose extends CommandOpMode {
         END_POSE = robot.drive.getPose();
         robot.turret.setTurretPos(0.5, true);
         robot.intake.setIntake(Intake.MotorState.STOP);
+        telemetryEx.update();
+        robot.exportProfiler(robot.profilerFile, robot.logCatFile);
     }
 
     public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout) {
-        return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        new DriveTo(pathPoses.get(pathStartingIndex)),
-                        new WaitCommand(timeout)
-                ).deadlineWith(new ContinuousClearLaunch()),
+        return pathShoot(pathStartingIndex, timeout, true);
+    }
 
-                new InstantCommand(() -> robot.launcher.setRamp(false))
+    public SequentialCommandGroup pathShoot(int pathStartingIndex, long timeout, boolean stopInZone) {
+        return new SequentialCommandGroup(
+                new ParallelRaceGroup(
+                        new DriveTo(pathPoses.get(pathStartingIndex), 0.7).alongWith(
+                                new SequentialCommandGroup(
+                                        new WaitCommand(500),
+                                        new SetIntake(Intake.MotorState.STOP)
+                                )
+                        ),
+                        new WaitCommand(timeout),
+                        new ConditionalCommand(
+                                new WaitUntilCommand(() -> Drive.robotInZone(robot.drive.getPose())),
+                                new RunCommand(() -> {}),
+                                () -> stopInZone
+                        )
+
+                ),
+                new ParallelRaceGroup(
+                        new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
+                        new ClearLaunch().beforeStarting(new WaitCommand(100))
+                )
         );
     }
 
+
     public SequentialCommandGroup gateIntake(int pathStartingIndex, long timeout) {
         return new SequentialCommandGroup(
-                new DriveTo(pathPoses.get(pathStartingIndex)).withTimeout(timeout),
-                new SetIntake(Intake.MotorState.FORWARD),
-                new WaitCommand(700)
+                new DriveTo(pathPoses.get(pathStartingIndex), 0.0, 0.67).withTimeout(1400),
+                new SequentialCommandGroup(
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(pathStartingIndex + 1), 0.0, 0.5, 0)
+                                .withTimeout(timeout)
+                                .alongWith(new WaitCommand(timeout))
+                ).interruptOn(() -> robot.intake.transferFull()),
+
+                new ConditionalCommand(
+                        new WaitCommand(250),
+                        new InstantCommand(),
+                        () -> robot.intake.transferFull()
+                ),
+
+                new InstantCommand(() -> robot.launcher.setTransfer(false))
         );
     }
 
     public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout) {
+        return pathIntake(pathStartingIndex, timeout, 0.6);
+    }
+
+    public SequentialCommandGroup pathIntake(int pathStartingIndex, long timeout, double maxPower) {
         return new SequentialCommandGroup(
                 new SetIntake(Intake.MotorState.FORWARD),
-                new DriveTo(pathPoses.get(pathStartingIndex), 0.5).withTimeout(timeout),
+                new DriveTo(pathPoses.get(pathStartingIndex), maxPower).withTimeout(timeout),
                 new SetIntake(Intake.MotorState.STOP)
         );
     }

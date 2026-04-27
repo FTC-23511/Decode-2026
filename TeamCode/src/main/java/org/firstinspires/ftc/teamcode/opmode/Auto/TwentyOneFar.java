@@ -10,18 +10,15 @@ import static org.firstinspires.ftc.teamcode.globals.Constants.OP_MODE_TYPE;
 import static org.firstinspires.ftc.teamcode.globals.Constants.OpModeType;
 import static org.firstinspires.ftc.teamcode.globals.Constants.PROBLEMATIC_TELEMETRY;
 import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
-import static org.firstinspires.ftc.teamcode.globals.Constants.TURRET_SYNCED;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
 import com.seattlesolvers.solverslib.command.RepeatCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
@@ -34,7 +31,6 @@ import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.commandbase.commands.ClearLaunch;
-import org.firstinspires.ftc.teamcode.commandbase.commands.ContinuousClearLaunch;
 import org.firstinspires.ftc.teamcode.commandbase.commands.DriveTo;
 import org.firstinspires.ftc.teamcode.commandbase.commands.SetIntake;
 import org.firstinspires.ftc.teamcode.commandbase.subsystems.Drive;
@@ -47,8 +43,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @Config
-@Autonomous(name = "ChipsFar", preselectTeleOp = "FullTeleOp", group = "Auto")
-public class ChipsFar extends CommandOpMode {
+@Autonomous(name = "TwentyOneFar", preselectTeleOp = "FullTeleOp", group = "Auto")
+public class TwentyOneFar extends CommandOpMode {
     public ElapsedTime timer;
 
     public ElapsedTime autoTimer;
