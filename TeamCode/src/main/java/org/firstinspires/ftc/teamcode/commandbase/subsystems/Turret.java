@@ -34,7 +34,7 @@ public class Turret extends SubsystemBase {
 
     public final InterpLUT goalAdjustmentLUT = new InterpLUT(
             Arrays.asList(-Math.PI/2, -0.94, -0.9, -Math.PI/4, -0.6, -0.5, -0.3, -0.1,  0.25), // input: angle (radians) formed by lines between robot to goal and far field wall
-            Arrays.asList(-8.7,       -7.67, -4.67,  2.0,        1.67, 4.67, 6.67, 9.41, 9.41) // output: new goal pos (inches)
+            Arrays.asList(-7.67,      -6.67, -4.67, 0.0,        1.67, 4.67, 6.67, 9.41, 9.41) // output: new goal pos (inches)
     );
 
     private Pose2d turretPose = null;

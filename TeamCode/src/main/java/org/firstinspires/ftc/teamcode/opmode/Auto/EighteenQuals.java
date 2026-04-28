@@ -54,8 +54,8 @@ public class EighteenQuals extends CommandOpMode {
         pathPoses = new ArrayList<>();
 
         pathPoses.add(new Pose2d(-40.42101920131037, 54.2016782054414254, Math.toRadians(0))); // Starting Pose
-        pathPoses.add(new Pose2d(-16.90512605092437, 11.252016806134446, Math.toRadians(5))); // Line 1
-        pathPoses.add(new Pose2d(-59.0090756307563, 11.453697478403353, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-16.90512605092437, 12.252016806134446, Math.toRadians(5))); // Line 1
+        pathPoses.add(new Pose2d(-59.0090756307563, 12.453697478403353, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-39.70710940350711, -0.6466988170694802, Math.toRadians(0))); // Line 3
         pathPoses.add(new Pose2d(-55.98075630302521, -0.6466988170694802, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-18.095734995924172, 12.459233342037919, Math.toRadians(5))); // Line 5
@@ -65,7 +65,7 @@ public class EighteenQuals extends CommandOpMode {
         pathPoses.add(GATE_FIRST_POSE.get()); // Line 9
         pathPoses.add(GATE_SECOND_POSE.get()); // Line 10
         pathPoses.add(new Pose2d(-13.421800947867297, 3.9810426540284354, Math.toRadians(5))); // Line 11
-        pathPoses.add(new Pose2d(-21.38388625592417, 39.01421800947868, Math.toRadians(45))); // Line 12
+        pathPoses.add(new Pose2d(-12.38388625592417, 39.01421800947868, Math.toRadians(45))); // Line 12
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -98,7 +98,7 @@ public class EighteenQuals extends CommandOpMode {
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
         robot.readyToLaunch = true;
 
-        Launcher.DISTANCE_OFFSET = -0.267;
+        Launcher.DISTANCE_OFFSET = -0.241;
 
         // Schedule the full auto
         schedule(

@@ -65,10 +65,10 @@ public class TwentyOneFar extends CommandOpMode {
         pathPoses.add(new Pose2d(-53.749055118110824, -62.345905511811026, Math.toRadians(0))); // Line 5
         pathPoses.add(new Pose2d(-61.91283464566993, -58.490787401574806, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-19.279763779527567, -58.71755905511811, Math.toRadians(0))); // Line 7
-        pathPoses.add(new Pose2d(-58.056872037914694, -50.161137440758296, Math.toRadians(315))); // Line 8
-        pathPoses.add(new Pose2d(-58.51125984251968, -27.02307086614173, Math.toRadians(315))); // Line 9
+        pathPoses.add(new Pose2d(-58.056872037914694, -50.161137440758296, Math.toRadians(323))); // Line 8
+        pathPoses.add(new Pose2d(-58.51125984251968, -27.02307086614173, Math.toRadians(323))); // Line 9
         pathPoses.add(new Pose2d(-18.145905511811026, -59.62464566929134, Math.toRadians(345))); // Line 10
-        pathPoses.add(new Pose2d(-28.038739495798318, -51.42529411764707, Math.toRadians(315))); // Line 11
+        pathPoses.add(new Pose2d(-28.038739495798318, -51.42529411764707, Math.toRadians(323))); // Line 11
 
         if (ALLIANCE_COLOR.equals(AllianceColor.RED)) {
             for (Pose2d pose : pathPoses) {
@@ -99,7 +99,7 @@ public class TwentyOneFar extends CommandOpMode {
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
         robot.readyToLaunch = true;
 
-        Launcher.DISTANCE_OFFSET = -0.167;
+        Launcher.DISTANCE_OFFSET = -0.175;
 
         // Schedule the full auto
         schedule(
@@ -107,7 +107,7 @@ public class TwentyOneFar extends CommandOpMode {
                         // Set starting pose
                         new InstantCommand(),
                         new InstantCommand(() -> robot.drive.setPose(pathPoses.get(0))),
-                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.8)),
+                        new InstantCommand(() -> robot.drive.swerve.setMaxSpeed(0.75)),
                         new InstantCommand(() -> robot.readyToLaunch = true),
 
                         // preload
@@ -116,9 +116,9 @@ public class TwentyOneFar extends CommandOpMode {
                         // 3rd spike mark
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
-                                        new DriveTo(pathPoses.get(1)).withTimeout(667),
+                                        new DriveTo(pathPoses.get(1)).withTimeout(767),
                                         new SetIntake(Intake.MotorState.FORWARD),
-                                        new DriveTo(pathPoses.get(2), 0.4, 0.8)
+                                        new DriveTo(pathPoses.get(2), 0.4, 0.7)
                                                 .withTimeout(1670)
                                                 .interruptOn(() -> robot.intake.transferFull()),
 
@@ -144,7 +144,7 @@ public class TwentyOneFar extends CommandOpMode {
                                         new SequentialCommandGroup(
                                                 new SetIntake(Intake.MotorState.FORWARD),
                                                 new DriveTo(pathPoses.get(8), 0.5, 0.8).withTimeout(1200),
-                                                new DriveTo(pathPoses.get(9), 0.5, 0.8).withTimeout(1450)
+                                                new DriveTo(pathPoses.get(9), 0.3, 0.6).withTimeout(1567)
                                         ).interruptOn(() -> robot.intake.transferFull()),
 
                                         pathShoot(10, 1550)
@@ -177,6 +177,12 @@ public class TwentyOneFar extends CommandOpMode {
             REPEAT_TIMES = Math.max(1, REPEAT_TIMES);
         }
 
+        if (gamepad1.dpadLeftWasPressed()) {
+            Launcher.DISTANCE_OFFSET -= 0.005;
+        } else if (gamepad1.dpadDownWasPressed()) {
+            Launcher.DISTANCE_OFFSET += 0.005;
+        }
+
         if (gamepad1.cross || gamepad1.triangle) {
             INTAKE_THIRD_SPIKE = true;
         } else if (gamepad1.circle || gamepad1.square) {
@@ -195,6 +201,8 @@ public class TwentyOneFar extends CommandOpMode {
         }
 
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
+        telemetryEx.addData("INTAKE_THIRD_SPIKE", INTAKE_THIRD_SPIKE);
+        telemetryEx.addData("Launcher DISTANCE_OFFSET", Launcher.DISTANCE_OFFSET);
         robot.initializeLoop(gamepad1, telemetryEx);
     }
 
@@ -276,7 +284,7 @@ public class TwentyOneFar extends CommandOpMode {
                 ),
                 new ParallelRaceGroup(
                         new RunCommand(() -> robot.drive.swerve.updateWithXLock()),
-                        new ClearLaunch(true).beforeStarting(new WaitCommand(150))
+                        new ClearLaunch(true).beforeStarting(new WaitCommand(250))
                 )
         );
     }

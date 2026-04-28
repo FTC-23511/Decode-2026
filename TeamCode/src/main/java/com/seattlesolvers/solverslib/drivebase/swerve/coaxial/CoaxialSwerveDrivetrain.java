@@ -129,6 +129,7 @@ public class CoaxialSwerveDrivetrain extends RobotDrive {
      * Updates the modules/drivetrain to create an X (useful for preventing being pushed on the field)
      */
     public void updateWithXLock() {
+        setTargetVelocity(new ChassisSpeeds());
         for (int i = 0; i < modules.length; i++) {
             double angle = (-Math.PI / 4) + (Math.PI/2 * i);
             // Update the module itself
