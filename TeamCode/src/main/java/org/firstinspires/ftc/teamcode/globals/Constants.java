@@ -123,9 +123,9 @@ public class Constants {
     public static double FLYWHEEL_ACCEL = 467; // Ticks/second^2 // TODO: tune this to potentially be non-linear
 
     public static double MIN_HOOD_ANGLE = 20; // Degrees from horizontal
-    public static double MIN_HOOD_SERVO_POS = 0.24; // MUST MATCH WITH VALUE ABOVE
+    public static double MIN_HOOD_SERVO_POS = 0.08; // MUST MATCH WITH VALUE ABOVE
     public static double MAX_HOOD_ANGLE = 45; // Degrees from horizontal
-    public static double MAX_HOOD_SERVO_POS = 0.92; // Position // MUST MATCH WITH VALUE ABOVE
+    public static double MAX_HOOD_SERVO_POS = 0.78; // Position // MUST MATCH WITH VALUE ABOVE
 
     // Turret
     public static PIDFCoefficients TURRET_LARGE_PIDF_COEFFICIENTS = new PIDFCoefficients(0.467, 0.0, 0.028, 0.0); // Coefficients for radians
