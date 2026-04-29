@@ -179,7 +179,7 @@ public class TwentyOneFar extends CommandOpMode {
 
         if (gamepad1.dpadLeftWasPressed()) {
             Launcher.DISTANCE_OFFSET -= 0.005;
-        } else if (gamepad1.dpadDownWasPressed()) {
+        } else if (gamepad1.dpadRightWasPressed()) {
             Launcher.DISTANCE_OFFSET += 0.005;
         }
 

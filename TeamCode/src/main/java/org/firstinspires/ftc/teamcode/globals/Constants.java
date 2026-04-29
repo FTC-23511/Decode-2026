@@ -89,16 +89,16 @@ public class Constants {
     public static double INTAKE_REVERSE_SPEED = -1.0;
     public static double INTAKE_TRANSFER_SPEED = 1.0;
 
-    public static double INTAKE_CURRENT_THRESHOLD = 3500.0; // Milliamps
+    public static double INTAKE_CURRENT_THRESHOLD = 2600.0; // Milliamps
     public static double TELEOP_INTAKE_CURRENT_TIME = 125.0; // Milliseconds
-    public static double AUTO_INTAKE_CURRENT_TIME = 225.0; // Milliseconds
+    public static double AUTO_INTAKE_CURRENT_TIME = 167.0; // Milliseconds
     public static double INTAKE_CURRENT_BUFFER_TIME = 200.0; // Milliseconds
 
 //    public static double INTAKE_REVERSE_ON_STOP_TIME = 0.0; // Seconds
 
-    public static double INTAKE_DISTANCE_THRESHOLD = 6.7; // cm
+    public static double INTAKE_DISTANCE_THRESHOLD = 5.67; // cm
     public static double TELEOP_INTAKE_DISTANCE_TIME = 167.0; // milliseconds
-    public static double AUTO_INTAKE_DISTANCE_TIME = 250.0; // milliseconds
+    public static double AUTO_INTAKE_DISTANCE_TIME = 200.0; // milliseconds
 
     // Launcher
     public static double RAMP_ENGAGED = 0.60;

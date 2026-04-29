@@ -97,7 +97,7 @@ public class EighteenPlayoffs extends CommandOpMode {
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
         robot.readyToLaunch = true;
 
-        Launcher.DISTANCE_OFFSET = -0.267;
+        Launcher.DISTANCE_OFFSET = -0.241;
 
         // Schedule the full auto
         schedule(
@@ -123,6 +123,7 @@ public class EighteenPlayoffs extends CommandOpMode {
 
                         // open gate
                         new DriveTo(pathPoses.get(3), 1).withTimeout(400),
+                        new SetIntake(Intake.MotorState.STOP),
                         new DriveTo(pathPoses.get(4)).withTimeout(967),
 //                        new SetIntake(Intake.MotorState.STOP),
                         new WaitCommand(500),
@@ -132,8 +133,10 @@ public class EighteenPlayoffs extends CommandOpMode {
 
                         // intake 2nd spike
                         new DriveTo(pathPoses.get(6)).withTimeout(867),
-                        pathIntake(7,1500, 0.45),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(7), 0.45).withTimeout(1500),
                         new WaitCommand(500),
+                        new SetIntake(Intake.MotorState.STOP),
 
                         // shoot 2nd spike
                         pathShoot(8, 1200),
@@ -270,7 +273,7 @@ public class EighteenPlayoffs extends CommandOpMode {
                 ).interruptOn(() -> robot.intake.transferFull()),
 
                 new ConditionalCommand(
-                        new WaitCommand(250),
+                        new WaitCommand(200),
                         new InstantCommand(),
                         () -> robot.intake.transferFull()
                 ),

@@ -99,10 +99,8 @@ public class FullTeleOp extends CommandOpMode {
 
         driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
                 new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 55.25, Math.PI))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 55.25, 0))),
-//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
-//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(60.67, -41.26, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-60.67, -41.26, 0))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
                         new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
@@ -276,9 +274,6 @@ public class FullTeleOp extends CommandOpMode {
         } else {
             robot.readyToLaunch = false;
         }
-
-
-
 
         if (PROBLEMATIC_TELEMETRY) {
             robot.profiler.start("TelemetryData");

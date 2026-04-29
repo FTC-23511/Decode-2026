@@ -103,7 +103,7 @@ public class TwentyFourFar extends CommandOpMode {
         robot.turret.setTurret(GOAL_LOCK_CONTROL, 0);
         robot.readyToLaunch = true;
 
-        Launcher.DISTANCE_OFFSET = -0.167;
+        Launcher.DISTANCE_OFFSET = -0.175;
 
         // Schedule the full auto
         schedule(
@@ -181,6 +181,12 @@ public class TwentyFourFar extends CommandOpMode {
             REPEAT_TIMES = Math.max(1, REPEAT_TIMES);
         }
 
+        if (gamepad1.dpadLeftWasPressed()) {
+            Launcher.DISTANCE_OFFSET -= 0.005;
+        } else if (gamepad1.dpadRightWasPressed()) {
+            Launcher.DISTANCE_OFFSET += 0.005;
+        }
+
         if (gamepad1.cross || gamepad1.triangle) {
             INTAKE_THIRD_SPIKE = true;
         } else if (gamepad1.circle || gamepad1.square) {
@@ -199,6 +205,8 @@ public class TwentyFourFar extends CommandOpMode {
         }
 
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
+        telemetryEx.addData("INTAKE_THIRD_SPIKE", INTAKE_THIRD_SPIKE);
+        telemetryEx.addData("Launcher DISTANCE_OFFSET", Launcher.DISTANCE_OFFSET);
         robot.initializeLoop(gamepad1, telemetryEx);
     }
 

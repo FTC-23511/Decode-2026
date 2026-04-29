@@ -118,8 +118,10 @@ public class EighteenQuals extends CommandOpMode {
 
                         // intake 2nd spike
                         new DriveTo(pathPoses.get(6)).withTimeout(867),
-                        pathIntake(7,1000, 0.45),
+                        new SetIntake(Intake.MotorState.FORWARD),
+                        new DriveTo(pathPoses.get(7), 0.45).withTimeout(1500),
                         new WaitCommand(1250),
+                        new SetIntake(Intake.MotorState.STOP),
 
                         // shoot 2nd spike
                         pathShoot(8, 1200),
@@ -266,7 +268,7 @@ public class EighteenQuals extends CommandOpMode {
                 ).interruptOn(() -> robot.intake.transferFull()),
 
                 new ConditionalCommand(
-                        new WaitCommand(250),
+                        new WaitCommand(200),
                         new InstantCommand(),
                         () -> robot.intake.transferFull()
                 ),
