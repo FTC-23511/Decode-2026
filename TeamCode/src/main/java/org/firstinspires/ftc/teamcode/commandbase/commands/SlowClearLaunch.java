@@ -21,7 +21,6 @@ public class SlowClearLaunch extends CommandBase {
         endTimer = new ElapsedTime();
         shotTimer = new ElapsedTime();
 
-
         addRequirements(robot.intake, robot.launcher, robot.turret);
     }
 

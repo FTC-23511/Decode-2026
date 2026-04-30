@@ -253,7 +253,7 @@ public class FullTeleOp extends CommandOpMode {
             }
         }
 
-        // Gamepad rumble when intake is full
+        /*Gamepad rumble when intake is full
         if (!robot.intake.isRumbling && Intake.motorState.equals(Intake.MotorState.FORWARD) && robot.intake.transferFull()) {
             gamepad1.rumble(RUMBLE_DURATION_CONTINUOUS);
             gamepad1.setLedColor(255, 0, 0, LED_DURATION_CONTINUOUS);
@@ -262,6 +262,7 @@ public class FullTeleOp extends CommandOpMode {
             gamepad1.stopRumble();
             gamepad1.setLedColor(0, 0, 255, LED_DURATION_CONTINUOUS);
         }
+        */
 
         robot.profiler.end("Swerve Drive");
 
@@ -316,6 +317,7 @@ public class FullTeleOp extends CommandOpMode {
             telemetryEx.addData("Within Distance", robot.intake.withinDistance);
 
             telemetryEx.addData("Sigma", "Polar, Oscar, j5, Mason, Ethan from goBILDA");
+            telemetryEx.update();
 
             robot.profiler.end("TelemetryData");
         }

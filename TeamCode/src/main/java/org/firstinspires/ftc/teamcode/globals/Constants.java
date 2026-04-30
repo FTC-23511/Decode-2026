@@ -39,7 +39,6 @@ public class Constants {
     public static double MAX_VOLTAGE = 15.00; // Volts
     public static double BALL_TRANSFER_TIME = 0.15; // Seconds
     public static boolean PROBLEMATIC_TELEMETRY = false;
-    public static boolean ALL_TELEMETRY = true;
     public static boolean TESTING_OP_MODE = false;
 
     // Drive
