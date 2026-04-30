@@ -46,8 +46,8 @@ import java.util.Arrays;
 @Autonomous(name = "TwentyOneFar", preselectTeleOp = "FullTeleOp", group = "Auto")
 public class TwentyOneFar extends CommandOpMode {
     public ElapsedTime timer;
-
     public ElapsedTime autoTimer;
+
     public static int REPEAT_TIMES = 3;
     public static boolean INTAKE_THIRD_SPIKE = true;
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
@@ -59,11 +59,11 @@ public class TwentyOneFar extends CommandOpMode {
         pathPoses = new ArrayList<>();
         pathPoses.add(new Pose2d(-18.5, -64, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-24.610168067226898, -37.089159663865544, Math.toRadians(0))); // Line 1
-        pathPoses.add(new Pose2d(-61.11436974789911, -37.089159663865544, Math.toRadians(0))); // Line 2
+        pathPoses.add(new Pose2d(-62.72813990461049, -37.201907790143096, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-21.09393700787402, -61.212047244094485, Math.toRadians(0))); // Line 3
-        pathPoses.add(new Pose2d(-60.55220472440944, -61.66559055118111, Math.toRadians(0))); // Line 4
+        pathPoses.add(new Pose2d(-63.85220472440944, -60.78219395866454, Math.toRadians(0))); // Line 4
         pathPoses.add(new Pose2d(-53.749055118110824, -62.345905511811026, Math.toRadians(0))); // Line 5
-        pathPoses.add(new Pose2d(-61.91283464566993, -58.490787401574806, Math.toRadians(0))); // Line 6
+        pathPoses.add(new Pose2d(-63.85220472440944, -60.78219395866454, Math.toRadians(0))); // Line 6
         pathPoses.add(new Pose2d(-19.279763779527567, -58.71755905511811, Math.toRadians(0))); // Line 7
         pathPoses.add(new Pose2d(-58.056872037914694, -50.161137440758296, Math.toRadians(323))); // Line 8
         pathPoses.add(new Pose2d(-58.51125984251968, -27.02307086614173, Math.toRadians(323))); // Line 9
@@ -90,6 +90,7 @@ public class TwentyOneFar extends CommandOpMode {
 
         // Initialize the robot (which also registers subsystems, configures CommandScheduler, etc.)
         robot.init(hardwareMap);
+        autoTimer = new ElapsedTime();
 
         robot.launcher.setHood(MAX_HOOD_ANGLE);
         robot.launcher.setRamp(false);
@@ -138,31 +139,57 @@ public class TwentyOneFar extends CommandOpMode {
 
                         pathShoot(7, 1600),
 
-                        // intake cycles
-                        new RepeatCommand(
+                        new SequentialCommandGroup(
                                 new SequentialCommandGroup(
-                                        new SequentialCommandGroup(
-                                                new SetIntake(Intake.MotorState.FORWARD),
-                                                new DriveTo(pathPoses.get(8), 0.5, 0.8).withTimeout(1200),
-                                                new DriveTo(pathPoses.get(9), 0.3, 0.6).withTimeout(1567)
-                                        ).interruptOn(() -> robot.intake.transferFull()),
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(8), 0.5, 0.8).withTimeout(1200),
+                                        new DriveTo(pathPoses.get(9), 0.3, 0.6).withTimeout(1567)
+                                ).interruptOn(() -> robot.intake.transferFull()),
 
-                                        pathShoot(10, 1550)
-                                ),
-                                REPEAT_TIMES
+                                pathShoot(10, 1550)
                         ),
 
                         new SequentialCommandGroup(
                                 new SetIntake(Intake.MotorState.FORWARD),
-                                new DriveTo(pathPoses.get(4), 1.0).withTimeout(1167)
+                                new DriveTo(pathPoses.get(4), 1.0).withTimeout(1467)
                         ).interruptOn(() -> robot.intake.transferFull()),
 
                         pathShoot(7, 1400),
 
+                        new SequentialCommandGroup(
+                                new SequentialCommandGroup(
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(8), 0.5, 0.8).withTimeout(1200),
+                                        new DriveTo(pathPoses.get(9), 0.3, 0.6).withTimeout(1567)
+                                ).interruptOn(() -> robot.intake.transferFull()),
+
+                                pathShoot(10, 1550)
+                        ),
+
+                        new SequentialCommandGroup(
+                                new SequentialCommandGroup(
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(4), 1.0).withTimeout(1467)
+                                ).interruptOn(() -> robot.intake.transferFull()),
+
+                                pathShoot(7, 1400),
+
+                                new SequentialCommandGroup(
+                                        new SetIntake(Intake.MotorState.FORWARD),
+                                        new DriveTo(pathPoses.get(4), 1.0).withTimeout(1467)
+                                ).interruptOn(() -> robot.intake.transferFull()),
+
+                                pathShoot(7, 1400)
+                        ).interruptOn(() -> autoTimer.seconds() >= 29),
+
                         // park + end
                         new DriveTo(pathPoses.get(pathPoses.size() - 1)).alongWith(
-                                new InstantCommand(() -> robot.turret.setTurretPos(0.5, true)),
-                                new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.STOP))
+                                new InstantCommand(() -> {
+                                    robot.readyToLaunch = false;
+                                    robot.launcher.setActiveControl(false);
+                                    robot.turret.setTurretPos(0.5, true);
+                                    robot.intake.setIntake(Intake.MotorState.STOP);
+                                })
                         )
                 )
         );
@@ -200,6 +227,7 @@ public class TwentyOneFar extends CommandOpMode {
             robot.drive.swerve.stop();
         }
 
+        autoTimer.reset();
         telemetryEx.addData("REPEAT_TIMES", REPEAT_TIMES);
         telemetryEx.addData("INTAKE_THIRD_SPIKE", INTAKE_THIRD_SPIKE);
         telemetryEx.addData("Launcher DISTANCE_OFFSET", Launcher.DISTANCE_OFFSET);
@@ -210,7 +238,7 @@ public class TwentyOneFar extends CommandOpMode {
     public void run() {
         if (timer == null) {
             timer = new ElapsedTime();
-            autoTimer = new ElapsedTime();
+            autoTimer.reset();
         }
 
         // Always log Loop Time

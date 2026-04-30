@@ -67,6 +67,7 @@ public class FullTeleOp extends CommandOpMode {
         robot.init(hardwareMap);
 
         Launcher.DISTANCE_OFFSET = 0;
+        robot.readyToLaunch = true;
 
         driver = new GamepadEx(gamepad1).setJoystickSlewRateLimiters(
                 new SlewRateLimiter(TELEOP_STRAFING_SLEW_RATE_LIMIT),
@@ -89,7 +90,7 @@ public class FullTeleOp extends CommandOpMode {
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
                         new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
-                        new InstantCommand(() -> Drive.ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(0) : 0)
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0)
                 )
         );
 
@@ -104,7 +105,7 @@ public class FullTeleOp extends CommandOpMode {
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 ).andThen(
                         new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
-                        new InstantCommand(() -> Drive.ANGLE_OFFSET = ALLIANCE_COLOR.equals(AllianceColor.RED) ? Math.toRadians(0) : 0)
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0)
                 )
         );
 
