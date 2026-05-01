@@ -52,7 +52,7 @@ public class EighteenPlayoffs extends CommandOpMode {
     public void generatePath() {
         pathPoses = new ArrayList<>();
 
-        pathPoses.add(new Pose2d(-40.42101920131037, 54.2016782054414254, Math.toRadians(0))); // Starting Pose
+        pathPoses.add(new Pose2d(-40.35101920131037, 54.2016782054414254, Math.toRadians(0))); // Starting Pose
         pathPoses.add(new Pose2d(-16.90512605092437, 11.252016806134446, Math.toRadians(5))); // Line 1
         pathPoses.add(new Pose2d(-59.0090756307563, 11.453697478403353, Math.toRadians(0))); // Line 2
         pathPoses.add(new Pose2d(-39.70710940350711, -0.6466988170694802, Math.toRadians(0))); // Line 3

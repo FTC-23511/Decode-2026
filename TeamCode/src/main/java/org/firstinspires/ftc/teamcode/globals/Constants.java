@@ -185,6 +185,6 @@ public class Constants {
     @Config
     public static class AutoConstants {
         public static DashPose2d GATE_FIRST_POSE = new DashPose2d(-51.27488151658768, -14.46303317535545, -26.7); // Line 9
-        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-60.01210084084033, -10.726618805590548, -26.7); // Line 10
+        public static DashPose2d GATE_SECOND_POSE = new DashPose2d(-60.51210084084033, -10.726618805590548, -26.7); // Line 10
     }
 }
