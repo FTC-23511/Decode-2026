@@ -216,6 +216,16 @@ public class FullTeleOp extends CommandOpMode {
             Launcher.DISTANCE_OFFSET -= 0.1;
         }
 
+        if (gamepad2.leftStickButtonWasPressed()) {
+            robot.turret.setTurret(Turret.TurretState.ANGLE_CONTROL, 0);
+            robot.turret.setTurret(Turret.TurretState.OFF, 0);
+            Turret.turretState = Turret.TurretState.OFF;
+        }
+
+        if (gamepad2.rightStickButtonWasPressed()) {
+            robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
+        }
+
         robot.profiler.start("Swerve Drive");
         if (CommandScheduler.getInstance().isAvailable(robot.drive)) {
             // Drive the robot

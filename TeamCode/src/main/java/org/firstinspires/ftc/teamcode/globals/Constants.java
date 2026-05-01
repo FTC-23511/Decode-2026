@@ -60,14 +60,14 @@ public class Constants {
     public static double AUTO_MIN_POWER = 0.25; // power
     public static double AUTO_POWER_SCALAR = 6.7; // power
 
-    public static double TELEOP_STRAFING_SLEW_RATE_LIMIT = 5.67; // Joystick/second
-    public static double TELEOP_TURNING_SLEW_RATE_LIMIT = 8.67; // Joystick/second
+    public static double TELEOP_STRAFING_SLEW_RATE_LIMIT = 5.2; // Joystick/second
+    public static double TELEOP_TURNING_SLEW_RATE_LIMIT = 8.2; // Joystick/second
     public static double JOYSTICK_DEAD_ZONE = 0.02; // Joystick
     public static double MAX_TELEOP_HEADING_CORRECTION_VEL = 0.67; // Radians/second
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 4.04; // Radians
-    public static double FL_ENCODER_OFFSET = 3.78; // Radians
+    public static double FL_ENCODER_OFFSET = 2.45; // Radians
     public static double BL_ENCODER_OFFSET = 2.44; // Radians
     public static double BR_ENCODER_OFFSET = 1.03; // Radians
 
