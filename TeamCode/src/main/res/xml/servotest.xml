@@ -1,0 +1,22 @@
+<Robot type="FirstInspires-FTC">
+    <!-- Config for 2026 robot -->
+<!--    <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.31" port="0" ipAddress="172.29.0.1" />-->
+
+    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Control Hub" port="173">
+
+<!--            <Servo name="servo" port="5"/>-->
+            <ContinuousRotationServo name="FL" port="5"/>
+
+            <AnalogInput name="encoder" port="2"/>
+
+        </LynxModule>
+    </LynxUsbDevice>
+
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2F3UGC" parentModuleAddress="2">
+        <LynxModule name="Expansion Hub 2" port="2">
+            <AnalogInput name="turretEncoder" port="3"/>
+
+        </LynxModule>
+    </LynxUsbDevice>
+</Robot>

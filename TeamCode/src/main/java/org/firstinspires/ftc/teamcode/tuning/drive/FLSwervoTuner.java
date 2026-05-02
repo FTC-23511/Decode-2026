@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.tuning.drive;
 
-import static org.firstinspires.ftc.teamcode.globals.Constants.TESTING_OP_MODE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -13,6 +12,8 @@ import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
+import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
+import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -27,11 +28,13 @@ public class FLSwervoTuner extends CommandOpMode {
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
-    private com.qualcomm.robotcore.hardware.CRServo crServo;
+    private CRServoEx crServo;
+    private AbsoluteAnalogEncoder encoder;
 
     @Override
     public void initialize() {
-        crServo = hardwareMap.get(com.qualcomm.robotcore.hardware.CRServo.class, "FL");
+        crServo = new CRServoEx(hardwareMap, "FL");
+        encoder = new AbsoluteAnalogEncoder(hardwareMap, "encoder");
     }
 
     @Override
@@ -42,13 +45,14 @@ public class FLSwervoTuner extends CommandOpMode {
             timer = new ElapsedTime();
         }
 
-        SERVO_POWER = Range.clip(SERVO_POWER, 0.0, 1.0);
-        crServo.setPower(SERVO_POWER);
+        SERVO_POWER = Range.clip(SERVO_POWER, -1.0, 1.0);
+        crServo.set(SERVO_POWER);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
+        telemetryEx.addData("Position", encoder.getCurrentPosition());
+        telemetryEx.addData("Voltage", encoder.getVoltage());
+        telemetryEx.addData("Raw Voltage", encoder.getEncoder().getVoltage());
+        telemetryEx.update();
         timer.reset();
-
-
-        // DO NOT REMOVE ANY LINES BELOW! Runs the command scheduler and updates telemetry
     }
 }
