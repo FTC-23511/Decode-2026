@@ -5,9 +5,8 @@
     <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
         <LynxModule name="Control Hub" port="173">
 
-<!--            <Servo name="servo" port="5"/>-->
+            <Servo name="FR" port="4"/>
             <ContinuousRotationServo name="FL" port="5"/>
-
             <AnalogInput name="encoder" port="2"/>
 
         </LynxModule>

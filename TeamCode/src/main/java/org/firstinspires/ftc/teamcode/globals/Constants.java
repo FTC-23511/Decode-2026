@@ -67,10 +67,9 @@ public class Constants {
 
     public static PIDFCoefficients SWERVO_PIDF_COEFFICIENTS = new PIDFCoefficients(0.5, 0, 0.2, 0);
     public static double FR_ENCODER_OFFSET = 4.04; // Radians
-    public static double FL_ENCODER_OFFSET = 2.45; // Radians
+    public static double FL_ENCODER_OFFSET = 2.53; // Radians
     public static double BL_ENCODER_OFFSET = 2.44; // Radians
     public static double BR_ENCODER_OFFSET = 1.03; // Radians
-
     public static PIDFCoefficients XY_COEFFICIENTS = new PIDFCoefficients(4.5, 0, 0.4, 0); // Coefficients for inches
     public static PIDFCoefficients AUTO_HEADING_COEFFICIENTS = new PIDFCoefficients(8.1, 0, 0.3, 0); // Coefficients for radians
     public static PIDFCoefficients TELEOP_HEADING_COEFFICIENTS = new PIDFCoefficients(6.7, 0, 0.25, 0); // Coefficients for radians

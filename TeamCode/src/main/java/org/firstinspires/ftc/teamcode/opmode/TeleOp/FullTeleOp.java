@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmode.TeleOp;
 
-import static com.qualcomm.robotcore.hardware.Gamepad.LED_DURATION_CONTINUOUS;
-import static com.qualcomm.robotcore.hardware.Gamepad.RUMBLE_DURATION_CONTINUOUS;
 import static org.firstinspires.ftc.teamcode.globals.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
@@ -16,7 +13,6 @@ import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.UninterruptibleCommand;
-import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.gamepad.SlewRateLimiter;
@@ -79,12 +75,27 @@ public class FullTeleOp extends CommandOpMode {
 
         // Driver controls
         // Reset heading
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+        driver.getGamepadButton(GamepadKeys.Button.OPTIONS).whenPressed(
                 new ConditionalCommand(
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 55.25, Math.PI))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 55.25, 0))),
                         new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
                         new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
+                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
+                ).andThen(
+                        new InstantCommand(() -> Launcher.DISTANCE_OFFSET = 0),
+                        new InstantCommand(() -> Drive.ANGLE_OFFSET = 0)
+                )
+        );
+
+        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new ConditionalCommand(
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.25, 55.25, Math.PI))),
+//                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.25, 55.25, 0))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-7.87, 63.86, Math.PI / 2))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(7.87, 63.86, Math.PI / 2))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-58.1, 7.25, Math.PI/2))),
 //                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(58.1, 7.25, Math.PI/2))),
                         () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)

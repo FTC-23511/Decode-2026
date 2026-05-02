@@ -14,6 +14,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
+import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.util.TelemetryEx;
 
 import org.firstinspires.ftc.teamcode.globals.Constants;
@@ -25,15 +26,18 @@ public class FLSwervoTuner extends CommandOpMode {
     public ElapsedTime timer;
 
     public static double SERVO_POWER = 0.0;
+    public static double SERVO_POS = 0.0;
 
     TelemetryEx telemetryEx = new TelemetryEx(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
 
     private CRServoEx crServo;
+    private ServoEx servo;
     private AbsoluteAnalogEncoder encoder;
 
     @Override
     public void initialize() {
         crServo = new CRServoEx(hardwareMap, "FL");
+        servo = new ServoEx(hardwareMap, "FR");
         encoder = new AbsoluteAnalogEncoder(hardwareMap, "encoder");
     }
 
@@ -46,7 +50,10 @@ public class FLSwervoTuner extends CommandOpMode {
         }
 
         SERVO_POWER = Range.clip(SERVO_POWER, -1.0, 1.0);
+        SERVO_POS = Range.clip(SERVO_POS, 0, 1.0);
+
         crServo.set(SERVO_POWER);
+        servo.set(SERVO_POS);
 
         telemetryEx.addData("Loop Time", timer.milliseconds());
         telemetryEx.addData("Position", encoder.getCurrentPosition());
