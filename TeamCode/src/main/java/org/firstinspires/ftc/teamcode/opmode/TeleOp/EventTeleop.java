@@ -31,7 +31,6 @@ import org.firstinspires.ftc.teamcode.commandbase.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.globals.Constants;
 import org.firstinspires.ftc.teamcode.globals.Robot;
 
-@Disabled
 @TeleOp(name = "AAAEventTeleOp")
 public class EventTeleop extends CommandOpMode {
     public GamepadEx driver;
@@ -43,13 +42,16 @@ public class EventTeleop extends CommandOpMode {
 
     private final Robot robot = Robot.getInstance();
 
-    public static double MAX_OUTPUT = 0.5;
+    public static double MAX_OUTPUT = 0.75;
 
     @Override
     public void initialize() {
         // Must have for all opModes
         OP_MODE_TYPE = OpModeType.TELEOP;
         TESTING_OP_MODE = false;
+
+        // Enable auto-aim/auto-power everywhere for outreach
+        Constants.ZONE_TOLERANCE = 1000.0;
 
         // Resets the command scheduler
         super.reset();
@@ -65,28 +67,9 @@ public class EventTeleop extends CommandOpMode {
         );
         operator = new GamepadEx(gamepad2);
 
-        // Driver controls
-        // Reset heading
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new ConditionalCommand(
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, Math.PI))),
-                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(0, 0, 0))),
-                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
-                )
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0))
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
-        );
-
-        driver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(0, false))
-        );
-
+        // --- Driver Controls (Gamepad 1) ---
+        
+        // Intake Controls
         driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.launcher.setRamp(false)),
@@ -109,33 +92,47 @@ public class EventTeleop extends CommandOpMode {
                 new InstantCommand(() -> robot.intake.setIntake(Intake.MotorState.FORWARD))
         );
 
+        // Rapid Fire Shot
         driver.getGamepadButton(GamepadKeys.Button.CROSS).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> robot.readyToLaunch = true),
                         new InstantCommand(() -> robot.launcher.setActiveControl(true)),
                         new InstantCommand(() -> robot.launcher.setRamp(true)),
-
-                        new ConditionalCommand(
-                            new ClearLaunch(false),
-                            new ClearLaunch(true),
-                            () -> gamepad1.left_trigger > 0.5
-                        )
+                        new ClearLaunch(false)
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_CLOSE_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MIN_HOOD_ANGLE))
+        // --- Operator Controls (Gamepad 2) - Manual Overrides & Maintenance ---
+
+        // Reset heading and position to 2ft from corner
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new ConditionalCommand(
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(-48, 48, Math.PI))),
+                        new InstantCommand(() -> robot.drive.setPose(new Pose2d(48, 48, 0))),
+                        () -> ALLIANCE_COLOR.equals(AllianceColor.BLUE)
                 )
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> robot.launcher.setFlywheel(LAUNCHER_FAR_VELOCITY, false)).alongWith(
-                        new InstantCommand(() -> robot.launcher.setHood(MAX_HOOD_ANGLE))
-                )
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> {
+                    Constants.ENABLE_ZONE_CONTROL = true;
+                    robot.turret.setTurret(Turret.TurretState.GOAL_LOCK_CONTROL, 0);
+                })
         );
 
-        driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> robot.turret.setTurret(Turret.TurretState.OFF, 0))
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> {
+                    Constants.ENABLE_ZONE_CONTROL = false;
+                    robot.launcher.setFlywheel(0, false);
+                    robot.launcher.setTransfer(false);
+                })
+        );
+
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                 new UninterruptibleCommand(new CancelCommand())
         );
 

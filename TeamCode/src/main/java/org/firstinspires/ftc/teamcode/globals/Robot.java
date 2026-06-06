@@ -146,7 +146,7 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
         launchMotors.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
 
         launchEncoder = new Motor(hwMap, "FL").encoder
-                .setDirection(Motor.Direction.FORWARD)
+                .setDirection(Motor.Direction.REVERSE)
                 .setVelocityLimit(5000);
 
         transferMotor = new MotorEx(hwMap, "transferMotor")
