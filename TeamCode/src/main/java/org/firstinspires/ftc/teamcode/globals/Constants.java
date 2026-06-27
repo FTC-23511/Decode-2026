@@ -50,8 +50,8 @@ public class Constants {
     public static double WHEEL_BASE = 11.50976; // Inches
     public static double MAX_DRIVE_VELOCITY = 7.75 * 12; // Inches/second
     public static double MAX_ANGULAR_VELOCITY = MAX_DRIVE_VELOCITY / Math.hypot(TRACK_WIDTH / 2, WHEEL_BASE / 2);
-    public static double PINPOINT_TELEOP_POLLING_RATE = 100; // Hertz
-    public static double PINPOINT_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
+    public static double OCTOQUAD_TELEOP_POLLING_RATE = 100; // Hertz
+    public static double OCTOQUAD_AUTO_POLLING_RATE = 100; // Hertz // TODO: needs to be tuned
     public static double DRIVE_VEL_PREDICT_ALPHA = 0.2; // Tune between 0 and 1
     public static double DRIVE_POS_PREDICT_INTEGRATION_SCALAR = 0.35; // Tune between 0 and 1
 
