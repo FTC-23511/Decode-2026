@@ -146,6 +146,7 @@ public class Camera extends SubsystemBase {
     }
 
     public void addPose(double timestamp, Pose2d pose) {
+        if (!enabled) return;
         pinpointHistory.put(timestamp, pose);
         while (!pinpointHistory.isEmpty() && pinpointHistory.firstKey() < timestamp - HISTORY_LIFESPAN_SECONDS) {
             pinpointHistory.pollFirstEntry();
@@ -153,10 +154,12 @@ public class Camera extends SubsystemBase {
     }
 
     public void updateFilter(double cameraTimestamp, Pose2d cameraPose) {
+        if (!enabled) return;
         updateFilter(cameraTimestamp, cameraPose, KALMAN_GAIN_POS, KALMAN_GAIN_HEADING);
     }
 
     public void updateFilter(double cameraTimestamp, Pose2d cameraPose, double gainPos, double gainHeading) {
+        if (!enabled) return;
         Map.Entry<Double, Pose2d> historicalPinpointEntry = pinpointHistory.floorEntry(cameraTimestamp);
 
         if (historicalPinpointEntry == null) {
@@ -192,6 +195,7 @@ public class Camera extends SubsystemBase {
     }
 
     public void undoRelocalization() {
+        if (!enabled || relocalizationChange == null) return;
         robot.drive.setPose(robot.drive.getPose().plus(relocalizationChange));
     }
 
@@ -282,7 +286,7 @@ public class Camera extends SubsystemBase {
     }
 
     public void updateROI(Pose2d robotPose) {
-        if (robotPose == null) return;
+        if (!enabled || robotPose == null) return;
         double distance;
         if (TESTING_OP_MODE) {
             distance = TEST_DISTANCE;
@@ -307,6 +311,7 @@ public class Camera extends SubsystemBase {
     }
 
     public void updateDecimation(double distance) {
+        if (!enabled) return;
         if (distance < DECIMATION_THRESHOLD && !USE_CLOSE_DECIMATION) {
             aprilTagProcessor.setDecimation(CAMERA_CLOSE_DECIMATION);
             USE_CLOSE_DECIMATION = true;
