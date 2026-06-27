@@ -216,7 +216,7 @@ public class Drive extends SubsystemBase {
     @Override
     public void periodic() {
         robot.profiler.start("Drive Update");
-        if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? PINPOINT_AUTO_POLLING_RATE : PINPOINT_TELEOP_POLLING_RATE))) {
+        if (timer.milliseconds() > (1000 / (OP_MODE_TYPE.equals(OpModeType.AUTO) ? OCTOQUAD_AUTO_POLLING_RATE : OCTOQUAD_TELEOP_POLLING_RATE))) {
 
             robot.octoQuad.readLocalizerData(robot.localizer);
             if (robot.localizer.crcOk) {
